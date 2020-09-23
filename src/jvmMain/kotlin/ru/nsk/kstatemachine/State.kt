@@ -41,7 +41,10 @@ fun State.onExit(block: (TransitionParams<*>) -> Unit) {
     })
 }
 
-inline fun <reified E : Event> State.transition(name: String? = null, noinline block: (Transition<E>.() -> Unit)? = null): Transition<E> {
+inline fun <reified E : Event> State.transition(
+    name: String? = null,
+    noinline block: (Transition<E>.() -> Unit)? = null
+): Transition<E> {
     val transition = Transition(E::class.java, this, name)
     if (block != null) transition.block()
     return addTransition(transition)

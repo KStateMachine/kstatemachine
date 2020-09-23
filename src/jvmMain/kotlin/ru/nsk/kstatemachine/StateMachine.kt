@@ -5,7 +5,6 @@ package ru.nsk.kstatemachine
  */
 class StateMachine(val name: String?, private val logger: Logger?) {
     private val states = mutableSetOf<State>()
-    private lateinit var initialState: State
     private lateinit var currentState: State
 
     fun addState(state: State): State {
@@ -18,8 +17,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
      */
     fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        initialState = state
-        currentState = initialState
+        currentState = state.also { it.addTransition(StartTransition) }
     }
 
     fun log(message: String) = logger?.log(message)
@@ -29,20 +27,31 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         val transition = fromState.findTransition(event)
 
         if (transition != null) {
+            val transitionParams = TransitionParams(transition, event, argument)
+
             log("$this triggering $transition from $fromState")
-            transition.listeners.forEach { it.onTriggered(TransitionParams(transition, event, argument)) }
+            transition.listeners.forEach { it.onTriggered(transitionParams) }
+
+            if (event is StartEvent) {
+                log("$this entering $fromState")
+                fromState.listeners.forEach { it.onEntry(transitionParams) }
+            }
 
             transition.targetState?.let { targetState ->
                 log("$this exiting $fromState")
-                fromState.listeners.forEach { it.onExit(TransitionParams(transition, event, argument)) }
+                fromState.listeners.forEach { it.onExit(transitionParams) }
 
                 currentState = targetState
                 log("$this entering $targetState")
-                targetState.listeners.forEach { it.onEntry(TransitionParams(transition, event, argument)) }
+                targetState.listeners.forEach { it.onEntry(transitionParams) }
             }
         } else {
             log("$this skipping $event as transition from $fromState, was not found")
         }
+    }
+
+    fun start() {
+        postEvent(StartEvent)
     }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
@@ -56,6 +65,10 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     fun interface Logger {
         fun log(message: String)
     }
+
+    private object StartEvent : Event
+    private object StartTransition : Transition<StartEvent>(StartEvent::class.java, StartState, "Starting")
+    private object StartState : State("Start")
 }
 
 fun StateMachine.state(name: String, init: (State.() -> Unit)? = null): State {
@@ -68,7 +81,10 @@ fun createStateMachine(
     name: String? = null,
     logger: StateMachine.Logger? = null,
     init: StateMachine.() -> Unit
-) = StateMachine(name, logger).apply(init)
+) = StateMachine(name, logger).apply {
+    init()
+    start()
+}
 
 data class TransitionParams<E : Event>(
     val transition: Transition<E>,

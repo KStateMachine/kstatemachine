@@ -5,44 +5,59 @@ This library uses nice Kotlin DSL syntax, and supports conditions for transition
 
 
 ```kotlin
-class SwitchOnEvent : Event
+class SwitchGreenEvent : Event
+class SwitchYellowEvent : Event
 // events often hold some useful data
-class SwitchOffEvent(val reason: String) : Event
+class SwitchRedEvent(val data: String) : Event
 
 fun main() {
-    val switcherStateMachine = createStateMachine("Light switcher") {
+    val stateMachine = createStateMachine(
+        "Traffic lights",
+        // { message -> println(message) } // enable logging
+    ) {
         // setup states
-        val offState = state("Off")
+        val greenState = state("Green")
+        val yellowState = state("Yellow")
+        val redState = state("Red")
+        setInitialState(greenState)
 
-        val onState = state("On") {
-            // setup listeners, which are fired on entering or exiting from the state
-            onEntry { println("Enter $this") }
-            onExit { println("Exit $this") }
-
-            // set transition which is triggered on SwitchOffEvent
-            transition<SwitchOffEvent> {
-                targetState = offState
-                onTriggered { println("Switching off, reason: ${it.event.reason}") }
+        greenState.apply {
+            // add listeners, which are signaled on entering or exiting from the state
+            onEntry { println("Green light is switched on") }
+            onExit { println("Green light will be switched off") }
+            // setup transition which is triggered on SwitchYellowEvent
+            transition<SwitchYellowEvent> {
+                targetState = yellowState
+                // add listener which is signaled when transition is triggered
+                onTriggered { println("Switching to $targetState") }
             }
         }
 
-        setInitialState(offState)
+        yellowState.apply {
+            transition<SwitchRedEvent> {
+                targetState = redState
+                onTriggered { println("Switching to $targetState, data: ${it.event.data}") }
+            }
+        }
 
-        offState.apply {
-            onEntry { println("Enter $this") }
-            onExit { println("Exit $this") }
-
-            transition<SwitchOnEvent> {
-                targetState = onState
-                onTriggered { println("Switching on, argument is ${it.argument}") }
+        redState.apply {
+            transition<SwitchGreenEvent> {
+                targetState = greenState
+                onTriggered { println("Switching to $targetState, argument: ${it.argument}") }
+            }
+            transition<SwitchGreenEvent> {
+                targetState = greenState
+                // condition helps to control when transition should be triggered
+                condition = { false }
+                onTriggered { println("Never get here") }
             }
         }
     }
 
     // post events
-    switcherStateMachine.postEvent(SwitchOnEvent())
-    switcherStateMachine.postEvent(SwitchOffEvent("No more lights!"))
-    // post event specifying argument, instead of adding nullable property to SwitchOnEvent
-    switcherStateMachine.postEvent(SwitchOnEvent(), 42)
+    stateMachine.postEvent(SwitchYellowEvent())
+    stateMachine.postEvent(SwitchRedEvent("Stop!"))
+    // post event and pass argument, instead of adding nullable property to event class
+    stateMachine.postEvent(SwitchGreenEvent(), "Go!")
 }
 ```
