@@ -2,8 +2,14 @@ package ru.nsk.kstatemachine
 
 import java.util.concurrent.CopyOnWriteArraySet
 
+/**
+ * Base interface for events which may trigger transitions of [StateMachine]
+ */
 interface Event
 
+/**
+ * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
+ */
 open class Transition<E : Event>(private val eventClass: Class<E>, val sourceState: State, val name: String?) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     val listeners: Set<Listener> = _listeners
@@ -13,6 +19,10 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
      * when such [Transition] is triggered
      */
     var targetState: State? = null
+        set(state) {
+            require(sourceState !== targetState)
+            field = state
+        }
 
     /**
      * Condition predicate.

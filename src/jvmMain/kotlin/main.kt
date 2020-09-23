@@ -1,35 +1,42 @@
 import ru.nsk.kstatemachine.*
 
-fun main(args: Array<String>) {
-    class FirstEvent: Event
-    class SecondEvent: Event
+class SwitchOnEvent : Event
+// events often hold some useful data
+class SwitchOffEvent(val reason: String) : Event
 
-    val stateMachine = createStateMachine("Using States!") {
-        val state1 = state("state1")
+fun main() {
+    val switcherStateMachine = createStateMachine("Light switcher") {
+        // setup states
+        val offState = state("Off")
 
-        val state2 = state("state2") {
-            onEntry { println("exit state $name") }
-            onEntry { println("exit state $name") }
+        val onState = state("On") {
+            // setup listeners, which are fired on entering or exiting from the state
+            onEntry { println("Enter $this") }
+            onExit { println("Exit $this") }
 
-            transition<FirstEvent> {
-                targetState = state1
-                onTriggered { println("triggered transition $this") }
+            // set transition which is triggered on SwitchOffEvent
+            transition<SwitchOffEvent> {
+                targetState = offState
+                onTriggered { println("Switching off, reason: ${it.event.reason}") }
             }
         }
 
-        state1.apply {
-            onEntry { println("enter state $name") }
-            onExit { println("exit state $name") }
+        setInitialState(offState)
 
-            transition<FirstEvent> {
-                targetState = state2
-                onTriggered { println("triggered transition $this") }
+        offState.apply {
+            onEntry { println("Enter $this") }
+            onExit { println("Exit $this") }
+
+            transition<SwitchOnEvent> {
+                targetState = onState
+                onTriggered { println("Switching on, argument is ${it.argument}") }
             }
         }
-
-        setInitialState(state1)
     }
 
-    stateMachine.postEvent(FirstEvent())
-    stateMachine.postEvent(SecondEvent())
+    // post events
+    switcherStateMachine.postEvent(SwitchOnEvent())
+    switcherStateMachine.postEvent(SwitchOffEvent("No more lights!"))
+    // post event specifying argument, instead of adding nullable property to SwitchOnEvent
+    switcherStateMachine.postEvent(SwitchOnEvent(), 42)
 }
