@@ -1,7 +1,7 @@
 import ru.nsk.kstatemachine.*
 
-class SwitchGreenEvent : Event
-class SwitchYellowEvent : Event
+object SwitchGreenEvent : Event
+object SwitchYellowEvent : Event
 // events often hold some useful data
 class SwitchRedEvent(val data: String) : Event
 
@@ -49,9 +49,9 @@ fun main() {
         }
     }
 
-    // post events
-    stateMachine.postEvent(SwitchYellowEvent())
-    stateMachine.postEvent(SwitchRedEvent("Stop!"))
-    // post event and pass argument, instead of adding nullable property to event class
-    stateMachine.postEvent(SwitchGreenEvent(), "Go!")
+    // process events
+    stateMachine.processEvent(SwitchYellowEvent)
+    stateMachine.processEvent(SwitchRedEvent("Stop!"))
+    // process event and pass argument, instead of adding nullable property to event class
+    stateMachine.processEvent(SwitchGreenEvent, "Go!")
 }

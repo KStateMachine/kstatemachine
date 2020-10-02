@@ -22,7 +22,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
 
     fun log(message: String) = logger?.log(message)
 
-    fun postEvent(event: Event, argument: Any? = null) {
+    fun processEvent(event: Event, argument: Any? = null) {
         val fromState = currentState
         val transition = fromState.findTransition(event)
 
@@ -51,7 +51,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     }
 
     fun start() {
-        postEvent(StartEvent)
+        processEvent(StartEvent)
     }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
@@ -62,7 +62,11 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         return triggeringTransitions.firstOrNull() as Transition<E>?
     }
 
-    fun interface Logger {
+    /**
+     * State machine uses this interface to support logging on different platforms
+     */
+    fun
+    interface Logger {
         fun log(message: String)
     }
 
@@ -77,6 +81,10 @@ fun StateMachine.state(name: String, init: (State.() -> Unit)? = null): State {
     return addState(state)
 }
 
+/**
+ * Factory method for creating [StateMachine]
+ * @param logger state machine will use this function to log its internal state. It may be used in debugging purpose.
+ */
 fun createStateMachine(
     name: String? = null,
     logger: StateMachine.Logger? = null,

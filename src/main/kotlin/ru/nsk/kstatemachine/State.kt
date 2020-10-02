@@ -29,6 +29,8 @@ open class State(val name: String) {
     }
 }
 
+operator fun State.invoke(block: State.() -> Unit) = block()
+
 fun State.onEntry(block: (TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
         override fun onEntry(transitionParams: TransitionParams<*>) = block(transitionParams)
