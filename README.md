@@ -1,4 +1,7 @@
 # KStateMachine
+
+![Build with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20with%20Gradle/badge.svg)
+
 State machine (FSM) implementation in Kotlin.
 
 This library uses nice Kotlin DSL syntax, and supports conditions for transitions.
