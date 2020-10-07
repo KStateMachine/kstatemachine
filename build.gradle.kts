@@ -5,7 +5,7 @@ plugins {
     application
 }
 group = "ru.nsk"
-version = "0.1"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
