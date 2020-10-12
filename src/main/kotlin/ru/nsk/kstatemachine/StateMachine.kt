@@ -1,15 +1,26 @@
 package ru.nsk.kstatemachine
 
+import java.util.concurrent.CopyOnWriteArraySet
+
 /**
  * Simple finite state machine (FSM) implementation.
  */
 class StateMachine(val name: String?, private val logger: Logger?) {
     private val states = mutableSetOf<State>()
     private lateinit var currentState: State
+    private val listeners = CopyOnWriteArraySet<Listener>()
 
     fun addState(state: State): State {
         states += state
         return state
+    }
+
+    fun addListener(listener: Listener) {
+        listeners.add(listener)
+    }
+
+    fun removeListener(listener: Listener) {
+        listeners.remove(listener)
     }
 
     /**
@@ -30,20 +41,23 @@ class StateMachine(val name: String?, private val logger: Logger?) {
             val transitionParams = TransitionParams(transition, event, argument)
 
             log("$this triggering $transition from $fromState")
-            transition.listeners.forEach { it.onTriggered(transitionParams) }
+            transition.notify { onTriggered(transitionParams) }
+
+            val targetState = transition.produceTargetState()
+            notify { onTransition(transition.sourceState, targetState, event, argument) }
 
             if (event is StartEvent) {
                 log("$this entering $fromState")
-                fromState.listeners.forEach { it.onEntry(transitionParams) }
+                fromState.notify { onEntry(transitionParams) }
             }
 
-            transition.targetState?.let { targetState ->
+            targetState?.let { _ ->
                 log("$this exiting $fromState")
-                fromState.listeners.forEach { it.onExit(transitionParams) }
+                fromState.notify { onExit(transitionParams) }
 
                 currentState = targetState
                 log("$this entering $targetState")
-                targetState.listeners.forEach { it.onEntry(transitionParams) }
+                targetState.notify { onEntry(transitionParams) }
             }
         } else {
             log("$this skipping $event as transition from $fromState, was not found")
@@ -62,17 +76,35 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         return triggeringTransitions.firstOrNull() as Transition<E>?
     }
 
+    private fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+
     /**
      * State machine uses this interface to support logging on different platforms
      */
-    fun
-    interface Logger {
+    fun interface Logger {
         fun log(message: String)
+    }
+
+    interface Listener {
+        /**
+         * This method is called when transition is performed.
+         * There might be may transitions from one state to another,
+         * this method might be used to listen to all transitions in one place
+         * instead of listening for each transition separately.
+         */
+        fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
     }
 
     private object StartEvent : Event
     private object StartTransition : Transition<StartEvent>(StartEvent::class.java, StartState, "Starting")
     private object StartState : State("Start")
+}
+
+fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
+    addListener(object : StateMachine.Listener {
+        override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
+            block(sourceState, targetState, event, argument)
+    })
 }
 
 fun StateMachine.state(name: String, init: (State.() -> Unit)? = null): State {

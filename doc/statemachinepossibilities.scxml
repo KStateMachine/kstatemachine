@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="statemachinepossibilities" qt:editorversion="4.12.4" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" initial="State loading">
+    <state id="State loading">
+        <qt:editorinfo scenegeometry="73.51;92.91;13.51;42.91;120;100" geometry="73.51;92.91;-60;-50;120;100"/>
+        <transition type="external" event="Transition on event 1 with some data" target="finished">
+            <qt:editorinfo localGeometry="163.36;-42.95" endTargetFactors="16.97;40.32" movePoint="53.09;-21.44"/>
+        </transition>
+        <transition type="external" event="Transition on event 2 with other data" target="finished">
+            <qt:editorinfo localGeometry="164.36;40.84" endTargetFactors="23.73;71.12" movePoint="42.88;61.26"/>
+        </transition>
+    </state>
+    <state id="finished">
+        <qt:editorinfo scenegeometry="418.61;92.91;358.61;42.91;120;100" geometry="418.61;92.91;-60;-50;120;100"/>
+    </state>
+    <state id="not loaded">
+        <qt:editorinfo scenegeometry="74.53;312.42;14.53;262.42;120;100" geometry="74.53;312.42;-60;-50;120;100"/>
+        <transition type="external" event="transition on event 1" target="loaded">
+            <qt:editorinfo movePoint="-49.01;-3.06"/>
+        </transition>
+        <transition type="external" event="transition on event 2" target="Error">
+            <qt:editorinfo movePoint="-62.28;59.23"/>
+        </transition>
+    </state>
+    <state id="loaded">
+        <qt:editorinfo scenegeometry="419.63;249.12;359.63;199.12;120;100" geometry="419.63;249.12;-60;-50;120;100"/>
+    </state>
+    <state id="Error">
+        <qt:editorinfo scenegeometry="419.63;376.75;359.63;326.75;120;100" geometry="419.63;376.75;-60;-50;120;100"/>
+    </state>
+    <state id="State_6">
+        <qt:editorinfo scenegeometry="74.53;580.94;14.53;530.94;120;100" geometry="74.53;580.94;-60;-50;120;100"/>
+        <transition type="external" event="Transition on event 1 and condition 1" target="State_7">
+            <qt:editorinfo endTargetFactors="23.73;47.36" movePoint="-5.10;-15.32"/>
+        </transition>
+        <transition type="external" event="Transition on event 1 and condition 2" target="State_8">
+            <qt:editorinfo endTargetFactors="19.24;56.99" movePoint="-13.27;68.41"/>
+        </transition>
+    </state>
+    <state id="State_7">
+        <qt:editorinfo scenegeometry="419.63;527.85;359.63;477.85;120;100" geometry="419.63;527.85;-60;-50;120;100"/>
+    </state>
+    <state id="State_8">
+        <qt:editorinfo scenegeometry="419.63;656.50;359.63;606.50;120;100" geometry="419.63;656.50;-60;-50;120;100"/>
+    </state>
+    <state id="State_9">
+        <qt:editorinfo scenegeometry="74.53;778.01;14.53;728.01;120;100" geometry="74.53;778.01;-60;-50;120;100"/>
+        <transition type="external" event="Transition on event 1 and condition 1" target="State_11"/>
+    </state>
+    <state id="State_11">
+        <qt:editorinfo scenegeometry="419.63;778.01;359.63;728.01;120;100" geometry="419.63;778.01;-60;-50;120;100"/>
+    </state>
+    <state id="State_12">
+        <qt:editorinfo scenegeometry="608.52;92.91;517.29;28.01;340.35;279.31" geometry="608.52;92.91;-91.23;-64.90;340.35;279.31"/>
+        <state id="State_13">
+            <qt:editorinfo scenegeometry="597.29;134.77;537.29;84.77;120;100" geometry="-11.23;41.86;-60;-50;120;100"/>
+            <transition type="external" event="Transition_9" target="State_14">
+                <qt:editorinfo endTargetFactors="28.23;42.96"/>
+            </transition>
+        </state>
+        <state id="State_14">
+            <qt:editorinfo scenegeometry="752.48;216.45;692.48;166.45;120;100" geometry="143.96;123.54;-60;-50;120;100"/>
+        </state>
+        <transition type="external" event="Transition for all inner states" target="State_15">
+            <qt:editorinfo movePoint="-2.04;-7.15"/>
+        </transition>
+    </state>
+    <state id="State_15">
+        <qt:editorinfo scenegeometry="1085.32;167.66;1025.32;117.66;120;100" geometry="1085.32;167.66;-60;-50;120;100"/>
+    </state>
+    <state id="State_16">
+        <qt:editorinfo scenegeometry="576.87;412.48;516.87;362.48;120;100" geometry="576.87;412.48;-60;-50;120;100"/>
+        <transition type="external" event="Transition without target"/>
+    </state>
+</scxml>

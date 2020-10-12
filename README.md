@@ -23,7 +23,7 @@ fun main() {
         val redState = state("Red")
         setInitialState(greenState)
 
-        greenState.apply {
+        greenState {
             // add listeners, which are signaled on entering or exiting from the state
             onEntry { println("Green light is switched on") }
             onExit { println("Green light will be switched off") }
@@ -35,24 +35,29 @@ fun main() {
             }
         }
 
-        yellowState.apply {
+        yellowState {
             transition<SwitchRedEvent> {
                 targetState = redState
                 onTriggered { println("Switching to $targetState, data: ${it.event.data}") }
             }
         }
 
-        redState.apply {
-            transition<SwitchGreenEvent> {
-                targetState = greenState
-                onTriggered { println("Switching to $targetState, argument: ${it.argument}") }
+        redState {
+            // a conditional transition helps to control when a transition should be triggered and determine its target state
+            transitionConditionally<SwitchGreenEvent> {
+                direction = {
+                    val someCondition = true
+                    if (someCondition)
+                        targetState(greenState)
+                    else
+                        noTransition()
+                }
+                onTriggered { println("Switching to conditional state, argument: ${it.argument}") }
             }
-            transition<SwitchGreenEvent> {
-                targetState = greenState
-                // condition helps to control when transition should be triggered
-                condition = { false }
-                onTriggered { println("Never get here") }
-            }
+        }
+
+        onTransition { sourceState, targetState, event, argument ->
+            // it is possible to listen all transitions in one place instead of listening each transition separately
         }
     }
 

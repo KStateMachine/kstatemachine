@@ -12,23 +12,41 @@ interface Event
  */
 open class Transition<E : Event>(private val eventClass: Class<E>, val sourceState: State, val name: String?) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
-    val listeners: Set<Listener> = _listeners
+    private val listeners: Set<Listener> = _listeners
 
-    /**
-     * If [Transition] does not have [targetState] then [StateMachine] keeps current [State]
-     * when such [Transition] is triggered
-     */
-    var targetState: State? = null
-        set(state) {
-            require(sourceState !== targetState)
-            field = state
+    constructor(eventClass: Class<E>, sourceState: State, targetState: State?, name: String?) :
+            this(eventClass, sourceState, name) {
+        targetStateDirectionProducer = if (targetState == null) {
+            { stay() }
+        } else {
+            { targetState(targetState) }
         }
+    }
+
+    constructor(
+        eventClass: Class<E>,
+        sourceState: State,
+        targetStateDirectionProducer: () -> TransitionDirection,
+        name: String?
+    ) : this(eventClass, sourceState, name) {
+        this.targetStateDirectionProducer = targetStateDirectionProducer
+    }
 
     /**
-     * Condition predicate.
-     * [Transition] may be triggered only if predicate returns true
+     * Function that is called during event processing,
+     * not during state machine configuration. So it is possible to check some outer (business logic) state in it.
+     * If [Transition] does not have target state then [StateMachine] keeps current state
+     * when such [Transition] is triggered.
      */
-    var condition: (Event) -> Boolean = { true }
+    private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
+
+    fun produceTargetState(): State? {
+        val direction = targetStateDirectionProducer()
+        return if (direction is TARGETSTATE)
+            direction.targetState
+        else
+            null
+    }
 
     fun addListener(listener: Listener) {
         _listeners.add(listener)
@@ -40,10 +58,13 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
 
     /**
      * Check if event can trigger this [Transition]
+     * TODO add possibility to check concrete class or base class of hierarchy (current behaviour)
      */
     open fun isTriggeringEvent(event: Event): Boolean {
-        return eventClass.isInstance(event) && condition(event)
+        return eventClass.isInstance(event)
     }
+
+    fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 

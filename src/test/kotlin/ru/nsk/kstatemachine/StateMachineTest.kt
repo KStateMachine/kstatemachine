@@ -6,6 +6,8 @@ import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
+object SomeEvent : Event
+
 object OnEvent : Event
 object OffEvent : Event
 
@@ -75,5 +77,44 @@ class StateMachineTest {
 
         stateMachine.processEvent(OnEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun conditionalTransition() {
+        val callbacks = mock<Callbacks>()
+
+        val stateMachine = createStateMachine {
+            val first = state("first") {
+                transitionConditionally<SomeEvent> {
+                    direction = { stay() }
+                    onTriggered {
+                        callbacks.onTriggeringEvent(it.event)
+                    }
+                }
+            }
+            setInitialState(first)
+        }
+
+        stateMachine.processEvent(SomeEvent)
+        then(callbacks).should().onTriggeringEvent(SomeEvent)
+    }
+
+    @Test
+    fun genericOnTransitionNotification() {
+        val callbacks = mock<Callbacks>()
+
+        val stateMachine = createStateMachine {
+            val first = state("first") {
+                transition<SomeEvent>()
+            }
+            setInitialState(first)
+
+            onTransition {_, _, event, _ ->
+                callbacks.onTriggeringEvent(event)
+            }
+        }
+
+        stateMachine.processEvent(SomeEvent)
+        then(callbacks).should().onTriggeringEvent(SomeEvent)
     }
 }
