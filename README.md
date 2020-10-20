@@ -8,10 +8,12 @@ This is a lightweight library using Kotlin DSL syntax for defining state machine
 It supports conditional transitions, when target state is dynamic 
 and is calculated in a moment of event processing depending on application business logic.
 
-Building blocks of this library:
-* `StateMachine` is a collection of states and transitions between them, processes events when started.
-* `State` 
-* `Event` is a base class for events or other words actions which are processed by state machine and may trigger transitions.
+The library is currently in development phase. Your are welcome to propose useful features.
+
+Building blocks (main classes) of this library:
+* `StateMachine` is a collection of states and transitions between them, processes events when started;
+* `State` states where state machine can go to;
+* `Event` is a base class for events or other words actions which are processed by state machine and may trigger transitions;
 * `Transition` is an operation of moving from one state to another.
 
 Working with state machine consists of two steps:
