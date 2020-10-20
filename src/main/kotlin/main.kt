@@ -41,11 +41,15 @@ fun main() {
             // a conditional transition helps to control when a transition should be triggered and determine its target state
             transitionConditionally<SwitchGreenEvent> {
                 direction = {
-                    val someCondition = true
-                    if (someCondition)
-                        targetState(greenState)
-                    else
-                        noTransition()
+                    // suppose you have a function returning some business logic state which may differ
+                    fun getCondition() = 0
+
+                    when(getCondition()) {
+                        0 -> targetState(greenState)
+                        1 -> targetState(yellowState)
+                        2 -> stay()
+                        else -> noTransition()
+                    }
                 }
                 onTriggered { log("Switching to conditional state, argument: ${it.argument}") }
             }

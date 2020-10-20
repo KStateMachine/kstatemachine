@@ -15,8 +15,9 @@ Building blocks of this library:
 * `Transition` is an operation of moving from one state to another.
 
 Working with state machine consists of two steps:
-* creation and initial setup;
-* processing events.
+* creation and initial setup, here you may set custom actions (side effects) via listeners
+ to be performed on entering/exiting states and transitions between them;
+* processing events, on which state machine can switch its states and notify about changes.
 ```kotlin
 val stateMachine = createStateMachine {
     // setup is made in this block ...
@@ -97,6 +98,54 @@ createStateMachine {
 }
 ``` 
 
+## Conditional transitions
+State machine becomes more powerful tool when you can choose target state depending on your business logic (some external state).
+
+There are three options in choosing direction of next state:
+* stay - in this case transition is triggered but state is not changed
+* targetState - transition is triggered and state machine goes to a specified state
+* noTransition - transition is not triggered
+
+To use conditional transitions you pass a lambda into `transitionConditionally()` function which makes desired decision: 
+```kotlin
+redState {
+    // a conditional transition helps to control when a transition should be triggered and determine its target state
+    transitionConditionally<SwitchGreenEvent> {
+        direction = {
+            // suppose you have a function returning some business logic state which may differ
+            fun getCondition() = 0 
+            
+            when(getCondition()) {
+                0 -> targetState(greenState)
+                1 -> targetState(yellowState)
+                2 -> stay()
+                else -> noTransition()
+            }
+        }
+    }
+    // same as before you can listen when conditional transition is triggered
+    onTriggered { log("Conditional transition is triggered") }
+}
+```
+
+## Do not
+State machine is a powerful tool to control state so let it do its job, 
+do not select target state by sending different event types depending on business logic state, 
+let the state machine to make decision for you.
+
+Wrong:
+```kotin
+if (something)
+    stateMachine.processEvent(FirstEvent)
+else 
+    stateMachine.processEvent(SecondEvent)
+```
+Correct, let the state machine to make decisions on events:
+```kotin
+stateMachine.processEvent(SomethingHappenedEvent)
+```
+    
+
 ## Full sample code
 ```kotlin
 // define your events
@@ -140,11 +189,15 @@ fun main() {
             // a conditional transition helps to control when a transition should be triggered and determine its target state
             transitionConditionally<SwitchGreenEvent> {
                 direction = {
-                    val someCondition = true
-                    if (someCondition)
-                        targetState(greenState)
-                    else
-                        noTransition()
+                    // suppose you have a function returning some business logic state which may differ
+                    fun getCondition() = 0 
+                    
+                    when(getCondition()) {
+                        0 -> targetState(greenState)
+                        1 -> targetState(yellowState)
+                        2 -> stay()
+                        else -> noTransition()
+                    }
                 }
                 onTriggered { log("Switching to conditional state, argument: ${it.argument}") }
             }
