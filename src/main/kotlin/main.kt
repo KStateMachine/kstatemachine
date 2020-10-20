@@ -1,5 +1,6 @@
 import ru.nsk.kstatemachine.*
 
+// define your events
 object SwitchGreenEvent : Event
 object SwitchYellowEvent : Event
 // events often hold some useful data
@@ -8,7 +9,7 @@ class SwitchRedEvent(val data: String) : Event
 fun main() {
     val stateMachine = createStateMachine(
         "Traffic lights",
-        // { message -> println(message) } // enable logging
+        { message -> println(message) } // enable logging optionally
     ) {
         // setup states
         val greenState = state("Green")
