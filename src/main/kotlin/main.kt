@@ -1,6 +1,6 @@
 import ru.nsk.kstatemachine.*
 
-// define your events
+// define our events
 object SwitchGreenEvent : Event
 object SwitchYellowEvent : Event
 // events often hold some useful data
@@ -29,6 +29,13 @@ fun main() {
             }
         }
 
+        // we can use explicit syntax for adding listeners
+        greenState.addListener(object: State.Listener {
+            override fun onEntry(transitionParams: TransitionParams<*>) {}
+            override fun onExit(transitionParams: TransitionParams<*>) {}
+        })
+
+
         yellowState {
             val transition = transition<SwitchRedEvent> {
                 targetState = redState
@@ -38,10 +45,12 @@ fun main() {
         }
 
         redState {
-            // a conditional transition helps to control when a transition should be triggered and determine its target state
+            // a conditional transition helps to control when
+            // a transition should be triggered and determine its target state
             transitionConditionally<SwitchGreenEvent> {
                 direction = {
-                    // suppose you have a function returning some business logic state which may differ
+                    // suppose you have a function returning some
+                    // business logic value which may differ
                     fun getCondition() = 0
 
                     when(getCondition()) {
@@ -56,7 +65,8 @@ fun main() {
         }
 
         onTransition { sourceState, targetState, event, argument ->
-            // it is possible to listen all transitions in one place instead of listening each transition separately
+            // it is possible to listen all transitions in one place
+            // instead of listening each transition separately
         }
     }
 
