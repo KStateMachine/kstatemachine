@@ -10,7 +10,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
 
-    fun addState(state: State): State {
+    fun <S: State> addState(state: S): S {
         states += state
         return state
     }

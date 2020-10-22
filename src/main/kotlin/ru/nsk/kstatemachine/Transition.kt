@@ -34,7 +34,7 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
 
     /**
      * Function that is called during event processing,
-     * not during state machine configuration. So it is possible to check some outer (business logic) state in it.
+     * not during state machine configuration. So it is possible to check some outer (business logic) values in it.
      * If [Transition] does not have target state then [StateMachine] keeps current state
      * when such [Transition] is triggered.
      */

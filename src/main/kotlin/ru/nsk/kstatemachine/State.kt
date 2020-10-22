@@ -2,6 +2,9 @@ package ru.nsk.kstatemachine
 
 import java.util.concurrent.CopyOnWriteArraySet
 
+@DslMarker
+annotation class StateTagMarker
+
 open class State(val name: String) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
@@ -31,15 +34,15 @@ open class State(val name: String) {
     }
 }
 
-operator fun State.invoke(block: State.() -> Unit) = block()
+operator fun <S: State> S.invoke(block: S.() -> Unit) = block()
 
-fun State.onEntry(block: (TransitionParams<*>) -> Unit) {
+fun <S: State> S.onEntry(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
         override fun onEntry(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
 }
 
-fun State.onExit(block: (TransitionParams<*>) -> Unit) {
+fun <S: State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
         override fun onExit(transitionParams: TransitionParams<*>) = block(transitionParams)
     })

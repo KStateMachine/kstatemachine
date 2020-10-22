@@ -1,20 +1,27 @@
+package ru.nsk.sample
+
 import ru.nsk.kstatemachine.*
 
-// define our events
-object SwitchGreenEvent : Event
-object SwitchYellowEvent : Event
+// define your events
+private object SwitchGreenEvent : Event
+private object SwitchYellowEvent : Event
+
 // events often hold some useful data
-class SwitchRedEvent(val data: String) : Event
+private class SwitchRedEvent(val data: String) : Event
+
+// you can subclass State if you need
+private class RedState(val data: Int) : State("Red")
 
 fun main() {
     val stateMachine = createStateMachine(
-        "Traffic lights",
+        "Traffic lights", // optional name
         { message -> println(message) } // enable logging optionally
     ) {
-        // setup states
+        // setup simple states
         val greenState = state("Green")
         val yellowState = state("Yellow")
-        val redState = state("Red")
+        // or add state subclass
+        val redState = addState(RedState(42))
         setInitialState(greenState)
 
         greenState {
@@ -29,38 +36,43 @@ fun main() {
             }
         }
 
-        // we can use explicit syntax for adding listeners
-        greenState.addListener(object: State.Listener {
+        // you can use explicit syntax for adding listeners
+        greenState.addListener(object : State.Listener {
             override fun onEntry(transitionParams: TransitionParams<*>) {}
             override fun onExit(transitionParams: TransitionParams<*>) {}
         })
 
-
         yellowState {
             val transition = transition<SwitchRedEvent> {
                 targetState = redState
+                // you can access data from events
                 onTriggered { log("Switching to $targetState, data: ${it.event.data}") }
             }
-            transition.onTriggered { /* just another way for adding listeners*/ }
+            transition.onTriggered { /* just another way for adding listeners */ }
         }
+        yellowState.onEntry { /* just another way for adding listeners*/ }
 
         redState {
-            // a conditional transition helps to control when
-            // a transition should be triggered and determine its target state
+            // a conditional transition helps to control when a transition
+            // should be triggered and determine its target state
             transitionConditionally<SwitchGreenEvent> {
                 direction = {
-                    // suppose you have a function returning some
-                    // business logic value which may differ
+                    // suppose you have a function
+                    // returning some business logic value which may differ
                     fun getCondition() = 0
 
-                    when(getCondition()) {
+                    when (getCondition()) {
                         0 -> targetState(greenState)
                         1 -> targetState(yellowState)
                         2 -> stay()
                         else -> noTransition()
                     }
                 }
-                onTriggered { log("Switching to conditional state, argument: ${it.argument}") }
+                // you can access argument passed to processEvent() function
+                // and data from state subclass
+                onTriggered {
+                    log("Switching state with argument: ${it.argument}, and data: $data")
+                }
             }
         }
 
@@ -68,6 +80,9 @@ fun main() {
             // it is possible to listen all transitions in one place
             // instead of listening each transition separately
         }
+    }
+    stateMachine.onTransition { _, _, _, _ ->
+        /* or add listener after state machine setup */
     }
 
     // process events

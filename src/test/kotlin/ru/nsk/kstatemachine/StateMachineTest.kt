@@ -6,16 +6,10 @@ import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-object SomeEvent : Event
+private object SomeEvent : Event
 
-object OnEvent : Event
-object OffEvent : Event
-
-interface Callbacks {
-    fun onTriggeringEvent(event: Event)
-    fun onEntryState(state: State)
-    fun onExitState(state: State)
-}
+private object OnEvent : Event
+private object OffEvent : Event
 
 class StateMachineTest {
     @Test
