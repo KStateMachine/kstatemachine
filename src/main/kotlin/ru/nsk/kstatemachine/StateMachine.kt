@@ -10,7 +10,8 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
 
-    fun <S: State> addState(state: S): S {
+    fun <S: State> addState(state: S, init: (State.() -> Unit)? = null): S {
+        if (init != null) state.init()
         states += state
         return state
     }
@@ -107,11 +108,7 @@ fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, e
     })
 }
 
-fun StateMachine.state(name: String, init: (State.() -> Unit)? = null): State {
-    val state = State(name)
-    if (init != null) state.init()
-    return addState(state)
-}
+fun StateMachine.state(name: String, init: (State.() -> Unit)? = null) = addState(State(name), init)
 
 /**
  * Factory method for creating [StateMachine]

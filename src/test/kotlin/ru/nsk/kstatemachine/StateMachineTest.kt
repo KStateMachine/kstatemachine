@@ -6,8 +6,6 @@ import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-private object SomeEvent : Event
-
 private object OnEvent : Event
 private object OffEvent : Event
 
@@ -15,10 +13,7 @@ class StateMachineTest {
     @Test
     fun noInitialState() {
         shouldThrow<Exception> {
-            val stateMachine = createStateMachine {
-                state("test")
-            }
-            stateMachine.processEvent(OnEvent)
+            createStateMachine {}
         }
     }
 
@@ -74,32 +69,12 @@ class StateMachineTest {
     }
 
     @Test
-    fun conditionalTransition() {
-        val callbacks = mock<Callbacks>()
-
-        val stateMachine = createStateMachine {
-            val first = state("first") {
-                transitionConditionally<SomeEvent> {
-                    direction = { stay() }
-                    onTriggered {
-                        callbacks.onTriggeringEvent(it.event)
-                    }
-                }
-            }
-            setInitialState(first)
-        }
-
-        stateMachine.processEvent(SomeEvent)
-        then(callbacks).should().onTriggeringEvent(SomeEvent)
-    }
-
-    @Test
     fun genericOnTransitionNotification() {
         val callbacks = mock<Callbacks>()
 
         val stateMachine = createStateMachine {
             val first = state("first") {
-                transition<SomeEvent>()
+                transition<SwitchEvent>()
             }
             setInitialState(first)
 
@@ -108,7 +83,7 @@ class StateMachineTest {
             }
         }
 
-        stateMachine.processEvent(SomeEvent)
-        then(callbacks).should().onTriggeringEvent(SomeEvent)
+        stateMachine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeringEvent(SwitchEvent)
     }
 }
