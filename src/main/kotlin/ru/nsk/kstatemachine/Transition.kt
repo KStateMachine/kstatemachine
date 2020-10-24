@@ -40,13 +40,7 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
      */
     private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
 
-    fun produceTargetState(): State? {
-        val direction = targetStateDirectionProducer()
-        return if (direction is TARGETSTATE)
-            direction.targetState
-        else
-            null
-    }
+    internal fun produceTargetStateDirection() = targetStateDirectionProducer()
 
     fun addListener(listener: Listener) {
         _listeners.add(listener)
@@ -64,7 +58,7 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
         return eventClass.isInstance(event)
     }
 
-    fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    internal fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 

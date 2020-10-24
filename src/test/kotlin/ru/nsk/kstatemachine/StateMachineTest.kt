@@ -78,7 +78,7 @@ class StateMachineTest {
             }
             setInitialState(first)
 
-            onTransition {_, _, event, _ ->
+            onTransition { _, _, event, _ ->
                 callbacks.onTriggeringEvent(event)
             }
         }

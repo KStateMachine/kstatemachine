@@ -44,6 +44,9 @@ class ConditionalTransitionTest {
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
+            onTransition { _, _, event, _ ->
+                callbacks.onTriggeringEvent(event)
+            }
             setInitialState(first)
         }
 
@@ -57,8 +60,8 @@ class ConditionalTransitionTest {
     fun conditionalTransitionTargetState() {
         val callbacks = mock<Callbacks>()
 
-        val first = object: State("first") {}
-        val second = object: State("second") {}
+        val first = object : State("first") {}
+        val second = object : State("second") {}
 
         val stateMachine = createStateMachine {
             addState(first) {
@@ -92,8 +95,8 @@ class ConditionalTransitionTest {
     fun conditionalTransition() {
         val callbacks = mock<Callbacks>()
 
-        val first = object: State("first") {}
-        val second = object: State("second") {}
+        val first = object : State("first") {}
+        val second = object : State("second") {}
 
         val stateMachine = createStateMachine {
             addState(first) {
@@ -120,5 +123,4 @@ class ConditionalTransitionTest {
         then(callbacks).should().onEntryState(second)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
-
 }

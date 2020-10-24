@@ -9,7 +9,7 @@ open class State(val name: String) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
     private val _transitions = mutableSetOf<Transition<*>>()
-    val transitions: Set<Transition<*>> = _transitions
+    internal val transitions: Set<Transition<*>> = _transitions
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
@@ -24,7 +24,7 @@ open class State(val name: String) {
         _listeners.remove(listener)
     }
 
-    fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    internal fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 
@@ -34,15 +34,15 @@ open class State(val name: String) {
     }
 }
 
-operator fun <S: State> S.invoke(block: S.() -> Unit) = block()
+operator fun <S : State> S.invoke(block: S.() -> Unit) = block()
 
-fun <S: State> S.onEntry(block: S.(TransitionParams<*>) -> Unit) {
+fun <S : State> S.onEntry(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
         override fun onEntry(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
 }
 
-fun <S: State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
+fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
         override fun onExit(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
@@ -106,17 +106,20 @@ sealed class TransitionDirection
 /**
  * Transition is triggered, but state is not changed
  */
-object STAY : TransitionDirection()
+internal object Stay : TransitionDirection()
 
-fun stay() = STAY
+fun stay(): TransitionDirection = Stay
 
 /**
  * Transition should not be triggered
  */
-object NOTRANSITION : TransitionDirection()
+internal object NoTransition : TransitionDirection()
 
-fun noTransition() = NOTRANSITION
+fun noTransition(): TransitionDirection = NoTransition
 
-class TARGETSTATE(val targetState: State) : TransitionDirection()
+/**
+ * Transition is triggered with a [targetState]
+ */
+internal class TargetState(val targetState: State) : TransitionDirection()
 
-fun targetState(targetState: State) = TARGETSTATE(targetState)
+fun targetState(targetState: State): TransitionDirection = TargetState(targetState)

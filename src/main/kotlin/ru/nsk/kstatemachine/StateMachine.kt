@@ -10,7 +10,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
 
-    fun <S: State> addState(state: S, init: (State.() -> Unit)? = null): S {
+    fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
         if (init != null) state.init()
         states += state
         return state
@@ -29,7 +29,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
      */
     fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        currentState = state.also { it.addTransition(StartTransition) }
+        currentState = state
     }
 
     fun log(message: String) = logger?.log(message)
@@ -41,33 +41,37 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         if (transition != null) {
             val transitionParams = TransitionParams(transition, event, argument)
 
-            log("$this triggering $transition from $fromState")
-            transition.notify { onTriggered(transitionParams) }
+            val direction = transition.produceTargetStateDirection()
+            val targetState = if (direction is TargetState) direction.targetState else null
 
-            val targetState = transition.produceTargetState()
-            notify { onTransition(transition.sourceState, targetState, event, argument) }
+            if (direction !is NoTransition) {
+                log("$this triggering $transition from $fromState")
+                transition.notify { onTriggered(transitionParams) }
 
-            if (event is StartEvent) {
-                log("$this entering $fromState")
-                fromState.notify { onEntry(transitionParams) }
+                notify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
             targetState?.let { _ ->
                 log("$this exiting $fromState")
                 fromState.notify { onExit(transitionParams) }
 
-                currentState = targetState
-                log("$this entering $targetState")
-                targetState.notify { onEntry(transitionParams) }
+                setCurrentState(targetState, transitionParams)
             }
         } else {
             log("$this skipping $event as transition from $fromState, was not found")
         }
     }
 
-    fun start() {
-        processEvent(StartEvent)
+    private fun setCurrentState(state: State, transitionParams: TransitionParams<*>) {
+        currentState = state
+        log("$this entering $state")
+        state.notify { onEntry(transitionParams) }
     }
+
+    internal fun start() = setCurrentState(
+        currentState,
+        TransitionParams(Transition(StartEvent.javaClass, currentState, currentState, "Starting"), StartEvent)
+    )
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 
@@ -96,9 +100,10 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
     }
 
-    private object StartEvent : Event
-    private object StartTransition : Transition<StartEvent>(StartEvent::class.java, StartState, "Starting")
-    private object StartState : State("Start")
+    /**
+     * Initial event which is processed on state machine start
+     */
+    object StartEvent : Event
 }
 
 fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
