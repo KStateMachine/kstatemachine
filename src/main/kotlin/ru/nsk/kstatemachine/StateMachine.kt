@@ -9,6 +9,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private val states = mutableSetOf<State>()
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
+    var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
 
     fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
         if (init != null) state.init()
@@ -58,7 +59,8 @@ class StateMachine(val name: String?, private val logger: Logger?) {
                 setCurrentState(targetState, transitionParams)
             }
         } else {
-            log("$this skipping $event as transition from $fromState, was not found")
+            log("$this ignored $event as transition from $fromState, was not found")
+            ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
         }
     }
 
@@ -98,6 +100,10 @@ class StateMachine(val name: String?, private val logger: Logger?) {
          * instead of listening for each transition separately.
          */
         fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
+    }
+
+    fun interface IgnoredEventHandler {
+        fun onIgnoredEvent(currentState: State, event: Event, argument: Any?)
     }
 
     /**

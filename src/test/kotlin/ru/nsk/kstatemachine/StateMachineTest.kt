@@ -86,4 +86,37 @@ class StateMachineTest {
         stateMachine.processEvent(SwitchEvent)
         then(callbacks).should().onTriggeringEvent(SwitchEvent)
     }
+
+    @Test
+    fun ignoredEventHandler() {
+        val callbacks = mock<Callbacks>()
+
+        val stateMachine = createStateMachine {
+            val first = state("first")
+            setInitialState(first)
+
+            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
+                callbacks.onIgnoredEvent(SwitchEvent)
+            }
+        }
+
+        stateMachine.processEvent(SwitchEvent)
+        then(callbacks).should().onIgnoredEvent(SwitchEvent)
+    }
+
+    @Test
+    fun exceptionalIgnoredEventHandler() {
+        val stateMachine = createStateMachine {
+            val first = state("first")
+            setInitialState(first)
+
+            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+                error("unexpected $event")
+            }
+        }
+
+        shouldThrow<IllegalStateException> {
+            stateMachine.processEvent(SwitchEvent)
+        }
+    }
 }

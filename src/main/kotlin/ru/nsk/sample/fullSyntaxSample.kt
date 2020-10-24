@@ -80,6 +80,12 @@ fun main() {
             // it is possible to listen all transitions in one place
             // instead of listening each transition separately
         }
+
+        ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
+            // it is possible to set custom ignored event handler
+            // for event that does not match any transition,
+            // for example to throw exceptions on ignored events
+        }
     }
     stateMachine.onTransition { _, _, _, _ ->
         /* or add listener after state machine setup */

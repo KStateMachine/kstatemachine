@@ -100,8 +100,15 @@ greenState {
 _Note: only one transition is possible per event type. 
 This means you cannot have multiple transitions parametrized with same Event subclass._
 
-Events that does not match any defined transition are simply ignored by state machine.
-But you can see them if logging is enabled.
+State machine simply ignores events that does not match any defined transition are by default.
+But you can see them if logging is enabled, or use custom IgnoredEventHandler:
+```kotlin
+createStateMachine {
+    ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+        error("unexpected $event")
+    }
+}
+```
 
 Transition may have no target state (targetState is null) which means that state machine stays 
 in current state when such transition triggers:
@@ -287,6 +294,13 @@ fun main() {
             // it is possible to listen all transitions in one place
             // instead of listening each transition separately
         }
+
+        ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
+            // it is possible to set custom ignored event handler
+            // for event that does not match any transition,
+            // for example to throw exceptions on ignored events
+        }
+
     }
     stateMachine.onTransition { _, _, _, _ ->
         /* or add listener after state machine setup */
