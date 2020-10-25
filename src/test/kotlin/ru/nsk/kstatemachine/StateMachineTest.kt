@@ -145,6 +145,28 @@ class StateMachineTest {
     }
 
     @Test
+    fun pendingEventHandler() {
+        val stateMachine = createStateMachine {
+            val second = state("second")
+            val first = state("first") {
+                transition<SwitchEvent> {
+                    targetState = second
+                    onTriggered {
+                        shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
+                    }
+                }
+            }
+            setInitialState(first)
+
+            pendingEventHandler = StateMachine.PendingEventHandler { _, _ ->
+                error("Already processing")
+            }
+        }
+
+        stateMachine.processEvent(SwitchEvent)
+    }
+
+    @Test
     fun exceptionalIgnoredEventHandler() {
         val stateMachine = createStateMachine {
             val first = state("first")

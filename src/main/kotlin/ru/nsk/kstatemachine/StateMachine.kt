@@ -3,14 +3,18 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.StateMachine.IgnoredEventHandler
 import java.util.concurrent.CopyOnWriteArraySet
 
-/**
- * Simple finite state machine (FSM) implementation.
- */
 class StateMachine(val name: String?, private val logger: Logger?) {
     private val states = mutableSetOf<State>()
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
     var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
+    var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
+        error("$this can not process pending $pendingEvent as event prcessing is aready running. " +
+                "Do not call processEvent() from notification listeners.")
+    }
+
+    /** Help to check that [processEvent] is not called from state machine notification method*/
+    private var isProcessingEvent = false
 
     fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
         if (init != null) state.init()
@@ -38,31 +42,38 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     fun log(message: String) = logger?.log(message)
 
     fun processEvent(event: Event, argument: Any? = null) {
-        val fromState = currentState
-        val transition = fromState.findTransition(event)
+        if (isProcessingEvent)
+            pendingEventHandler.onPendingEvent(event, argument)
+        isProcessingEvent = true
+        try {
+            val fromState = currentState
+            val transition = fromState.findTransition(event)
 
-        if (transition != null) {
-            val transitionParams = TransitionParams(transition, event, argument)
+            if (transition != null) {
+                val transitionParams = TransitionParams(transition, event, argument)
 
-            val direction = transition.produceTargetStateDirection()
-            val targetState = if (direction is TargetState) direction.targetState else null
+                val direction = transition.produceTargetStateDirection()
+                val targetState = if (direction is TargetState) direction.targetState else null
 
-            if (direction !is NoTransition) {
-                log("$this triggering $transition from $fromState")
-                transition.notify { onTriggered(transitionParams) }
+                if (direction !is NoTransition) {
+                    log("$this triggering $transition from $fromState")
+                    transition.notify { onTriggered(transitionParams) }
 
-                notify { onTransition(transition.sourceState, targetState, event, argument) }
+                    notify { onTransition(transition.sourceState, targetState, event, argument) }
+                }
+
+                targetState?.let { _ ->
+                    log("$this exiting $fromState")
+                    fromState.notify { onExit(transitionParams) }
+
+                    setCurrentState(targetState, transitionParams)
+                }
+            } else {
+                log("$this ignored $event as transition from $fromState, was not found")
+                ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
             }
-
-            targetState?.let { _ ->
-                log("$this exiting $fromState")
-                fromState.notify { onExit(transitionParams) }
-
-                setCurrentState(targetState, transitionParams)
-            }
-        } else {
-            log("$this ignored $event as transition from $fromState, was not found")
-            ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
+        } finally {
+            isProcessingEvent = false
         }
     }
 
@@ -106,6 +117,10 @@ class StateMachine(val name: String?, private val logger: Logger?) {
 
     fun interface IgnoredEventHandler {
         fun onIgnoredEvent(currentState: State, event: Event, argument: Any?)
+    }
+
+    fun interface PendingEventHandler {
+        fun onPendingEvent(pendingEvent: Event, argument: Any?)
     }
 
     /**
