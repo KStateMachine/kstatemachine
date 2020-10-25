@@ -16,8 +16,9 @@ open class State(val name: String) {
         return transition
     }
 
-    fun addListener(listener: Listener) {
-        _listeners.add(listener)
+    fun <L : Listener> addListener(listener: L): L {
+        require(_listeners.add(listener)) { "$listener is aready added" }
+        return listener
     }
 
     fun removeListener(listener: Listener) {

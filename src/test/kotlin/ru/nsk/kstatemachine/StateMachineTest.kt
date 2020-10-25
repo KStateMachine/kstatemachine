@@ -88,6 +88,46 @@ class StateMachineTest {
     }
 
     @Test
+    fun addSameStateListener() {
+        val stateMachine = createStateMachine {
+            val first = state("first") {
+                transition<SwitchEvent>()
+                val listener = object : State.Listener {}
+                addListener(listener)
+                shouldThrow<IllegalArgumentException> { addListener(listener) }
+            }
+            setInitialState(first)
+        }
+    }
+
+    @Test
+    fun addSameStateMachineListener() {
+        val stateMachine = createStateMachine {
+            val first = state("first") {
+                transition<SwitchEvent>()
+            }
+            setInitialState(first)
+
+            val listener = object : StateMachine.Listener {}
+            addListener(listener)
+            shouldThrow<IllegalArgumentException> { addListener(listener) }
+        }
+    }
+
+    @Test
+    fun addSameTransitionListener() {
+        val stateMachine = createStateMachine {
+            val first = state("first") {
+                val transition = transition<SwitchEvent>()
+                val listener = object : Transition.Listener {}
+                transition.addListener(listener)
+                shouldThrow<IllegalArgumentException> { transition.addListener(listener) }
+            }
+            setInitialState(first)
+        }
+    }
+
+    @Test
     fun ignoredEventHandler() {
         val callbacks = mock<Callbacks>()
 

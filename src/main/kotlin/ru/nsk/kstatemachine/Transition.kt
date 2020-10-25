@@ -42,8 +42,9 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
 
     internal fun produceTargetStateDirection() = targetStateDirectionProducer()
 
-    fun addListener(listener: Listener) {
-        _listeners.add(listener)
+    fun <L : Listener> addListener(listener: L): L {
+        require(_listeners.add(listener)) { "$listener is aready added" }
+        return listener
     }
 
     fun removeListener(listener: Listener) {

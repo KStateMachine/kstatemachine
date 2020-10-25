@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.StateMachine.IgnoredEventHandler
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -17,8 +18,9 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         return state
     }
 
-    fun addListener(listener: Listener) {
-        listeners.add(listener)
+    fun <L : Listener> addListener(listener: L): L {
+        require(listeners.add(listener)) { "$listener is aready added" }
+        return listener
     }
 
     fun removeListener(listener: Listener) {
