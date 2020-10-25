@@ -61,6 +61,7 @@ object SomeState : State("Some state")
 
 createStateMachine {
     val someState = addState(SomeState())
+    //...
 }
 ```
 
@@ -74,7 +75,7 @@ state("Green") {
 
 Or even shorter: 
 ```kotlin
-state("Green").onEntry { /**/ }
+state("Green").onEntry { /*...*/ }
 ```
 
 Or the same with explicit syntax:
@@ -100,16 +101,6 @@ greenState {
 _Note: only one transition is possible per event type. 
 This means you cannot have multiple transitions parametrized with same Event subclass._
 
-State machine simply ignores events that does not match any defined transition are by default.
-But you can see them if logging is enabled, or use custom IgnoredEventHandler:
-```kotlin
-createStateMachine {
-    ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
-        error("unexpected $event")
-    }
-}
-```
-
 Transition may have no target state (targetState is null) which means that state machine stays 
 in current state when such transition triggers:
 ```kotlin
@@ -130,6 +121,7 @@ There might be many transitions from one state to another.
 It is possible to listen to all of them in state machine setup block:
 ```kotlin
 createStateMachine {
+    //...
     onTransition { sourceState, targetState, event, argument ->
         // listen to every performed transition here
     }
@@ -184,6 +176,31 @@ else
 Correct - let the state machine to make decisions on event:
 ```kotin
 stateMachine.processEvent(SomethingHappenedEvent)
+```
+
+## Error handling
+By default state machine simply ignores events that does not match any defined transition are by default.
+You can see them if logging is enabled or use custom IgnoredEventHandler:
+```kotlin
+createStateMachine {
+    //...
+    ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+        error("unexpected $event")
+    }
+}
+```
+
+It is not allowed to call processEvent() while state machine is already processing event.
+For example from notification listener. By default state machine will throw exception in this case.
+But you can set custom PendingEventHandler:
+```kotlin
+createStateMachine {
+    //...
+    pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
+        error("$this can not process pending $pendingEvent as event processing is already running. " +
+                "Do not call processEvent() from notification listeners.")
+    }
+}
 ```
 
 ## Minimal syntax sample code
@@ -267,11 +284,11 @@ fun main() {
         yellowState.onEntry { /* just another way for adding listeners*/ }
 
         redState {
-            // a conditional transition helps to control when a transition 
+            // a conditional transition helps to control when a transition
             // should be triggered and determine its target state
             transitionConditionally<SwitchGreenEvent> {
                 direction = {
-                    // suppose you have a function 
+                    // suppose you have a function
                     // returning some business logic value which may differ
                     fun getCondition() = 0
 
@@ -284,7 +301,7 @@ fun main() {
                 }
                 // you can access argument passed to processEvent() function
                 // and data from state subclass
-                onTriggered { 
+                onTriggered {
                     log("Switching state with argument: ${it.argument}, and data: $data")
                 }
             }
@@ -301,6 +318,12 @@ fun main() {
             // for example to throw exceptions on ignored events
         }
 
+        pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
+            // you can set custom pending event handler which is triggered 
+            // if processEvent() is called while previous processEvent() is not complete
+            error("$this can not process pending $pendingEvent as event processing is already running. " +
+                    "Do not call processEvent() from notification listeners.")
+        }
     }
     stateMachine.onTransition { _, _, _, _ ->
         /* or add listener after state machine setup */

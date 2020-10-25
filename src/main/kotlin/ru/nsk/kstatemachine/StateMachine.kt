@@ -9,7 +9,7 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private val listeners = CopyOnWriteArraySet<Listener>()
     var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
     var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
-        error("$this can not process pending $pendingEvent as event prcessing is aready running. " +
+        error("$this can not process pending $pendingEvent as event processing is already running. " +
                 "Do not call processEvent() from notification listeners.")
     }
 
