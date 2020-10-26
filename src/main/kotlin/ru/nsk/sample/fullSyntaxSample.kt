@@ -90,8 +90,11 @@ fun main() {
         pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
             // you can set custom pending event handler which is triggered
             // if processEvent() is called while previous processEvent() is not complete
-            error("$this can not process pending $pendingEvent as event processing is already running. " +
-                    "Do not call processEvent() from notification listeners.")
+            error(
+                "$this can not process pending $pendingEvent " +
+                        "as event processing is already running. " +
+                        "Do not call processEvent() from notification listeners."
+            )
         }
     }
     stateMachine.onTransition { _, _, _, _ ->

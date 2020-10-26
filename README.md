@@ -179,8 +179,8 @@ stateMachine.processEvent(SomethingHappenedEvent)
 ```
 
 ## Error handling
-By default state machine simply ignores events that does not match any defined transition are by default.
-You can see them if logging is enabled or use custom IgnoredEventHandler:
+By default state machine simply ignores events that does not match any defined transition.
+You can see those events if logging is enabled or use custom IgnoredEventHandler:
 ```kotlin
 createStateMachine {
     //...
@@ -197,8 +197,11 @@ But you can set custom PendingEventHandler:
 createStateMachine {
     //...
     pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-        error("$this can not process pending $pendingEvent as event processing is already running. " +
-                "Do not call processEvent() from notification listeners.")
+        error(
+            "$this can not process pending $pendingEvent " +
+                    "as event processing is already running. " +
+                    "Do not call processEvent() from notification listeners."
+        )
     }
 }
 ```
@@ -321,8 +324,11 @@ fun main() {
         pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
             // you can set custom pending event handler which is triggered 
             // if processEvent() is called while previous processEvent() is not complete
-            error("$this can not process pending $pendingEvent as event processing is already running. " +
-                    "Do not call processEvent() from notification listeners.")
+            error(
+                "$this can not process pending $pendingEvent " +
+                        "as event processing is already running. " +
+                        "Do not call processEvent() from notification listeners."
+            )
         }
     }
     stateMachine.onTransition { _, _, _, _ ->
