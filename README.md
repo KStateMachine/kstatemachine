@@ -206,6 +206,47 @@ createStateMachine {
 }
 ```
 
+## Arguments
+_Note: Type of arguments is `Any?`, so it is not type safe ot use them._
+
+### Event argument
+Usually if event may hold some data we define Event subclass, it is type safe. 
+But sometimes if data is optional it may be simpler to use event argument. 
+You can specify arbitrary argument with event in `processEvent()` function.
+Then you can get this argument in state and transition listeners. 
+```kotlin
+val stateMachine = createStateMachine {
+    state("offState").onEntry {
+        log("Event ${it.event} argument: ${it.argument}")
+    }
+    //...
+}
+// pass argument with event
+stateMachine.processEvent(TurnOn, 42)
+```
+
+### Transition argument
+If transition listener produce some data, you can pass it to target state as a transition argument:
+```kotlin
+val second = state("second").onEntry {
+    log("Transition argument: ${it.transition.argument}")
+}
+state("first") {
+    transition<SwitchEvent> {
+        targetState = second
+        onTriggered { it.transition.argument = 42 }
+    }
+}
+```
+_Note: it is up to user to control that argument field is set from one listener.
+You can use some mutable data structure and fill it from multiple listeners._
+
+
+## Multi threading
+State machine is designed to work in single thread.
+So if you need to process events from different threads you can post them to some thread safe queue
+and start single thread which will pull events from that queue in a loop and call `processEvent()` function.
+
 ## Minimal syntax sample code
 ```kotlin
 // define your events

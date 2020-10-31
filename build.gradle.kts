@@ -24,6 +24,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     testImplementation("io.kotest:kotest-assertions-core:4.2.5")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
+    testImplementation("org.hamcrest:hamcrest:2.2")
 }
 
 application {
