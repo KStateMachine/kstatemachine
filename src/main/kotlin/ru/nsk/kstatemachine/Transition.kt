@@ -10,9 +10,26 @@ interface Event
 /**
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
-open class Transition<E : Event>(private val eventClass: Class<E>, val sourceState: State, val name: String?) {
+open class Transition<E : Event>(
+    private val eventClass: Class<E>,
+    val sourceState: State,
+    val name: String?
+) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
+    /**
+     * Function that is called during event processing,
+     * not during state machine configuration. So it is possible to check some outer (business logic) values in it.
+     * If [Transition] does not have target state then [StateMachine] keeps current state
+     * when such [Transition] is triggered.
+     */
+    private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
+
+    /**
+     * This parameter may be used to pass arbitrary data with a transition to targetState.
+     * This argument must be set from transition listener. Such transition must have only one listener setting argument.
+     */
+    var argument: Any? = null
 
     constructor(eventClass: Class<E>, sourceState: State, targetState: State?, name: String?) :
             this(eventClass, sourceState, name) {
@@ -31,14 +48,6 @@ open class Transition<E : Event>(private val eventClass: Class<E>, val sourceSta
     ) : this(eventClass, sourceState, name) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
-
-    /**
-     * Function that is called during event processing,
-     * not during state machine configuration. So it is possible to check some outer (business logic) values in it.
-     * If [Transition] does not have target state then [StateMachine] keeps current state
-     * when such [Transition] is triggered.
-     */
-    private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
 
     internal fun produceTargetStateDirection() = targetStateDirectionProducer()
 

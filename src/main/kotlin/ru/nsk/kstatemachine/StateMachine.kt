@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.StateMachine.IgnoredEventHandler
+import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
 import java.util.concurrent.CopyOnWriteArraySet
 
 class StateMachine(val name: String?, private val logger: Logger?) {
@@ -9,8 +10,10 @@ class StateMachine(val name: String?, private val logger: Logger?) {
     private val listeners = CopyOnWriteArraySet<Listener>()
     var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
     var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
-        error("$this can not process pending $pendingEvent as event processing is already running. " +
-                "Do not call processEvent() from notification listeners.")
+        error(
+            "$this can not process pending $pendingEvent as event processing is already running. " +
+                    "Do not call processEvent() from notification listeners."
+        )
     }
 
     /** Help to check that [processEvent] is not called from state machine notification method*/
@@ -159,5 +162,5 @@ data class TransitionParams<E : Event>(
      * so there is no need to define [Event] subclasses every time.
      * Subclassing should be preferred if the event always contains data of some type.
      */
-    val argument: Any? = null
+    val argument: Any? = null,
 )
