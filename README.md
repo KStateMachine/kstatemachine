@@ -30,6 +30,8 @@ stateMachine.processEvent(SwitchGreenEvent)
 stateMachine.processEvent(SwitchYellowEvent)
 ```
 
+![Traffic light diagram](./doc/images/trafficlight.png)
+
 ## Create state machine
 First of all we create a state machine with `createStateMachine()` function:
 ```kotlin

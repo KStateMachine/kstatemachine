@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="traficlight" qt:editorversion="4.13.2" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" initial="GreenState">
+    <qt:editorinfo initialGeometry="54.15;161.43;-20;-20;40;40"/>
+    <state id="GreenState">
+        <qt:editorinfo scenegeometry="161.43;161.43;101.43;111.43;120;100" geometry="161.43;161.43;-60;-50;120;100"/>
+        <transition type="external" event="SwitchYellowEvent" target="YellowState">
+            <qt:editorinfo movePoint="8.17;0"/>
+        </transition>
+    </state>
+    <state id="YellowState">
+        <qt:editorinfo scenegeometry="398.48;161.43;338.32;111.43;120.16;100" geometry="398.48;161.43;-60.16;-50;120.16;100"/>
+        <transition type="external" target="RedState" event="SwitchRedEvent">
+            <qt:editorinfo movePoint="8.17;-0"/>
+        </transition>
+    </state>
+    <state id="RedState">
+        <qt:editorinfo scenegeometry="634.50;161.43;574.50;111.43;120;100" geometry="634.50;161.43;-60;-50;120;100"/>
+        <transition type="external" event="SwitchGreenEvent" target="GreenState">
+            <qt:editorinfo localGeometry="-125.69;68.43;-351.50;68.43" movePoint="13.28;8.18" endTargetFactors="87.60;74.64"/>
+        </transition>
+    </state>
+</scxml>
