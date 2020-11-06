@@ -2,10 +2,8 @@ package ru.nsk.kstatemachine
 
 import java.util.concurrent.CopyOnWriteArraySet
 
-@DslMarker
-annotation class StateTagMarker
-
-open class State(val name: String) {
+@StateMachineDslMarker
+open class State(val name: String? = null) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
     private val _transitions = mutableSetOf<Transition<*>>()
@@ -66,10 +64,6 @@ inline fun <reified E : Event> State.transition(
 inline fun <reified E : Event> State.transition(name: String? = null): Transition<E> =
     addTransition(Transition(E::class.java, this, name))
 
-class TransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
-    var targetState: State? = null
-}
-
 /**
  * This method may be used if transition should be performed only if some condition is met,
  * or target state may vary depending on a condition.
@@ -85,12 +79,17 @@ inline fun <reified E : Event> State.transitionConditionally(
     return addTransition(transition)
 }
 
-class ConditionalTransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
-    lateinit var direction: () -> TransitionDirection
-}
-
+@StateMachineDslMarker
 open class BaseTransitionBuilder<E : Event> {
     var listener: Transition.Listener? = null
+}
+
+class TransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
+    var targetState: State? = null
+}
+
+class ConditionalTransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
+    lateinit var direction: () -> TransitionDirection
 }
 
 inline fun <reified E : Event> BaseTransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {

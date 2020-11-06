@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 import org.junit.jupiter.api.Test
 
-class SubclassState : State("subclass") {
+class SubclassState : State() {
     val dataField = 0
 }
 
@@ -13,7 +13,7 @@ class StateSubclassTest {
             // simple but little bit explicit, easy to forget addState() call
             val subclassState = addState(SubclassState())
 
-            val simpleState = state("first") {
+            val simpleState = state {
                 transition<SwitchEvent> {
                     targetState = subclassState
                     onTriggered { }
@@ -34,32 +34,34 @@ class StateSubclassTest {
         stateMachine.processEvent(SwitchEvent)
     }
 
-
+    /**
+     * This test should not compile
+     */
     @Test
-    fun FIXME() {
-        createStateMachine {
-            val subclassState = addState(SubclassState())
-
-            subclassState {
-                transition<SwitchEvent> {
-                    //TODO forbid this
-                    onEntry {
-                        if (dataField == 0)
-                            log("we can read data from state")
-                        //TODO forbid this
-                        onEntry {
-                            if (dataField == 0)
-                                log("we can read data from state")
-                        }
-                    }
-                    onExit {
-                        if (dataField == 0)
-                            log("we can read data from state")
-                    }
-                }
-            }
-            setInitialState(subclassState)
-        }
-
+    fun dslMarker() {
+//        createStateMachine {
+//            val subclassState = addState(SubclassState())
+//
+//            subclassState {
+//                // forbidden
+//                addState(SubclassState())
+//                transition<SwitchEvent> {
+//                    // forbidden
+//                    onEntry {
+//                        if (dataField == 0)
+//                            println("we can read data from state")
+//                    }
+//                    onTriggered {}
+//                    // forbidden
+//                    transition<SwitchEvent> {}
+//                }
+//                // forbidden
+//                setInitialState(subclassState)
+//                // forbidden
+//                onTransition { _, _, _, _ -> }
+//            }
+//            onTransition { _, _, _, _ -> }
+//            setInitialState(subclassState)
+//        }
     }
 }

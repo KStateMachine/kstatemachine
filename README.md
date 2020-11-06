@@ -36,11 +36,7 @@ stateMachine.processEvent(SwitchYellowEvent)
 First of all we create a state machine with `createStateMachine()` function:
 ```kotlin
 val stateMachine = createStateMachine(
-    // name is convenient for debugging, and may be omitted
-    "Traffic lights",
-    // you can implement Logger functional interface 
-    // to enable state machine logging on your platform
-    { message -> println(message) } 
+    "Traffic lights" // name is convenient for debugging, and may be omitted
 ) {
     // set up state machine ...
 }
@@ -49,17 +45,19 @@ val stateMachine = createStateMachine(
 ## Setup states
 In state machine setup block we define states with `state()` function and set initial one with `setInitialState()`:
 ```kotlin
-// state() function used to create State and add it to StateMachine
-val greenState = state("Green")
-val yellowState = state("Yellow")
-
-// state machine enters this state after setup is complete
-setInitialState(greenState)
+createStateMachine {
+    // use state() function to create State and add it to StateMachine
+    val greenState = state()
+    val yellowState = state("Yellow") // state name is optional and is useful for debugging
+    
+    // state machine enters this state after setup is complete
+    setInitialState(greenState)
+}
 ```
 
 You can use State subclasses with `addState()` function:
 ```kotlin
-object SomeState : State("Some state")
+object SomeState : State()
 
 createStateMachine {
     val someState = addState(SomeState())
@@ -69,20 +67,20 @@ createStateMachine {
 
 In state setup blocks we can add listeners for states:
 ```kotlin
-state("Green") {
-    onEntry { log("Green light is switched on") }
-    onExit { log("Green light will be switched off") }
+state {
+    onEntry { println("Green light is switched on") }
+    onExit { println("Green light will be switched off") }
 }
 ```
 
 Or even shorter: 
 ```kotlin
-state("Green").onEntry { /*...*/ }
+state().onEntry { /*...*/ }
 ```
 
 Or the same with explicit syntax:
 ```kotlin
-val greenState = state("Green")
+val greenState = state()
 greenState.addListener(object: State.Listener {
     override fun onEntry(transitionParams: TransitionParams<*>) {}
     override fun onExit(transitionParams: TransitionParams<*>) {}
@@ -115,7 +113,7 @@ Same as for states we can listen to transition triggering:
 ```kotlin
 transition<SwitchYellowEvent> {
     targetState = yellowState
-    onTriggered { log("Transition to $targetState is triggered by ${it.event}") }
+    onTriggered { println("Transition to $targetState is triggered by ${it.event}") }
 }
 ```
 
@@ -159,27 +157,19 @@ redState {
         }
     }
     // same as before you can listen when conditional transition is triggered
-    onTriggered { log("Conditional transition is triggered") }
+    onTriggered { println("Conditional transition is triggered") }
 }
 ```
-
-## Do not
-State machine is a powerful tool to control states so let it do its job, 
-do not select target state by sending different event types depending on business logic state, 
-let the state machine to make decision for you.
-
-Wrong:
-```kotin
-if (somethingHappend)
-    stateMachine.processEvent(FirstEvent)
-else 
-    stateMachine.processEvent(SecondEvent)
+## Logging
+You can enable internal state machine logging on your platform:
+```kotlin
+createStateMachine {
+    //...
+    logger = StateMachine.Logger {
+        println(it)
+    }
+}
 ```
-Correct - let the state machine to make decisions on event:
-```kotin
-stateMachine.processEvent(SomethingHappenedEvent)
-```
-
 ## Error handling
 By default state machine simply ignores events that does not match any defined transition.
 You can see those events if logging is enabled or use custom IgnoredEventHandler:
@@ -219,7 +209,7 @@ Then you can get this argument in state and transition listeners.
 ```kotlin
 val stateMachine = createStateMachine {
     state("offState").onEntry {
-        log("Event ${it.event} argument: ${it.argument}")
+        println("Event ${it.event} argument: ${it.argument}")
     }
     //...
 }
@@ -231,7 +221,7 @@ stateMachine.processEvent(TurnOn, 42)
 If transition listener produce some data, you can pass it to target state as a transition argument:
 ```kotlin
 val second = state("second").onEntry {
-    log("Transition argument: ${it.transition.argument}")
+    println("Transition argument: ${it.transition.argument}")
 }
 state("first") {
     transition<SwitchEvent> {
@@ -243,11 +233,27 @@ state("first") {
 _Note: it is up to user to control that argument field is set from one listener.
 You can use some mutable data structure and fill it from multiple listeners._
 
-
 ## Multi threading
 State machine is designed to work in single thread.
 So if you need to process events from different threads you can post them to some thread safe queue
 and start single thread which will pull events from that queue in a loop and call `processEvent()` function.
+
+## Do not
+State machine is a powerful tool to control states so let it do its job, 
+do not select target state by sending different event types depending on business logic state, 
+let the state machine to make decision for you.
+
+Wrong:
+```kotin
+if (somethingHappend)
+    stateMachine.processEvent(FirstEvent)
+else 
+    stateMachine.processEvent(SecondEvent)
+```
+Correct - let the state machine to make decisions on event:
+```kotin
+stateMachine.processEvent(SomethingHappenedEvent)
+```
 
 ## Minimal syntax sample code
 ```kotlin
@@ -291,11 +297,10 @@ private class RedState(val data: Int) : State("Red")
 
 fun main() {
     val stateMachine = createStateMachine(
-        "Traffic lights", // optional name
-        { message -> println(message) } // enable logging optionally
+        "Traffic lights" // optional name
     ) {
         // setup simple states
-        val greenState = state("Green")
+        val greenState = state("Green") // state name is optional
         val yellowState = state("Yellow")
         // or add state subclass
         val redState = addState(RedState(42))
@@ -303,13 +308,13 @@ fun main() {
 
         greenState {
             // add listeners, which are signaled on entering or exiting from the state
-            onEntry { log("Green light is switched on") }
-            onExit { log("Green light will be switched off") }
+            onEntry { println("Green light is switched on") }
+            onExit { println("Green light will be switched off") }
             // setup transition which is triggered on SwitchYellowEvent
             transition<SwitchYellowEvent> {
                 targetState = yellowState
                 // add listener which is signaled when transition is triggered
-                onTriggered { log("Switching to $targetState") }
+                onTriggered { println("Switching to $targetState") }
             }
         }
 
@@ -323,7 +328,7 @@ fun main() {
             val transition = transition<SwitchRedEvent> {
                 targetState = redState
                 // you can access data from events
-                onTriggered { log("Switching to $targetState, data: ${it.event.data}") }
+                onTriggered { println("Switching to $targetState, data: ${it.event.data}") }
             }
             transition.onTriggered { /* just another way for adding listeners */ }
         }
@@ -348,7 +353,7 @@ fun main() {
                 // you can access argument passed to processEvent() function
                 // and data from state subclass
                 onTriggered {
-                    log("Switching state with argument: ${it.argument}, and data: $data")
+                    println("Switching state with argument: ${it.argument}, and data: ${this@redState.data}")
                 }
             }
         }
@@ -358,15 +363,20 @@ fun main() {
             // instead of listening each transition separately
         }
 
+        // set logger to enable internal state machine logging on your platform
+        logger = StateMachine.Logger { println(it) }
+
+        // it is possible to set custom ignored event handler
+        // for event that does not match any transition,
+        // for example to throw exceptions on ignored events
         ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
-            // it is possible to set custom ignored event handler
-            // for event that does not match any transition,
-            // for example to throw exceptions on ignored events
+
         }
 
+        // you can set custom pending event handler which is triggered
+        // if processEvent() is called while previous processEvent() is not complete
         pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-            // you can set custom pending event handler which is triggered 
-            // if processEvent() is called while previous processEvent() is not complete
+
             error(
                 "$this can not process pending $pendingEvent " +
                         "as event processing is already running. " +
@@ -375,7 +385,7 @@ fun main() {
         }
     }
     stateMachine.onTransition { _, _, _, _ ->
-        /* or add listener after state machine setup */
+        // or add listener after state machine setup
     }
 
     // process events

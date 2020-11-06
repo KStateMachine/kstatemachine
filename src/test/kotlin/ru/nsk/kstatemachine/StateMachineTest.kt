@@ -152,7 +152,7 @@ class StateMachineTest {
                 transition<SwitchEvent> {
                     targetState = second
                     onTriggered {
-                        shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
+                        shouldThrow<IllegalStateException> { this@createStateMachine.processEvent(SwitchEvent) }
                     }
                 }
             }

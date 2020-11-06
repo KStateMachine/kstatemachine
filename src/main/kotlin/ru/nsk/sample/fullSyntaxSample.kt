@@ -14,11 +14,10 @@ private class RedState(val data: Int) : State("Red")
 
 fun main() {
     val stateMachine = createStateMachine(
-        "Traffic lights", // optional name
-        { message -> println(message) } // enable logging optionally
+        "Traffic lights" // optional name
     ) {
         // setup simple states
-        val greenState = state("Green")
+        val greenState = state("Green") // state name is optional
         val yellowState = state("Yellow")
         // or add state subclass
         val redState = addState(RedState(42))
@@ -26,13 +25,13 @@ fun main() {
 
         greenState {
             // add listeners, which are signaled on entering or exiting from the state
-            onEntry { log("Green light is switched on") }
-            onExit { log("Green light will be switched off") }
+            onEntry { println("Green light is switched on") }
+            onExit { println("Green light will be switched off") }
             // setup transition which is triggered on SwitchYellowEvent
             transition<SwitchYellowEvent> {
                 targetState = yellowState
                 // add listener which is signaled when transition is triggered
-                onTriggered { log("Switching to $targetState") }
+                onTriggered { println("Switching to $targetState") }
             }
         }
 
@@ -46,7 +45,7 @@ fun main() {
             val transition = transition<SwitchRedEvent> {
                 targetState = redState
                 // you can access data from events
-                onTriggered { log("Switching to $targetState, data: ${it.event.data}") }
+                onTriggered { println("Switching to $targetState, data: ${it.event.data}") }
             }
             transition.onTriggered { /* just another way for adding listeners */ }
         }
@@ -71,7 +70,7 @@ fun main() {
                 // you can access argument passed to processEvent() function
                 // and data from state subclass
                 onTriggered {
-                    log("Switching state with argument: ${it.argument}, and data: $data")
+                    println("Switching state with argument: ${it.argument}, and data: ${this@redState.data}")
                 }
             }
         }
@@ -81,15 +80,20 @@ fun main() {
             // instead of listening each transition separately
         }
 
+        // set logger to enable internal state machine logging on your platform
+        logger = StateMachine.Logger { println(it) }
+
+        // it is possible to set custom ignored event handler
+        // for event that does not match any transition,
+        // for example to throw exceptions on ignored events
         ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
-            // it is possible to set custom ignored event handler
-            // for event that does not match any transition,
-            // for example to throw exceptions on ignored events
+
         }
 
+        // you can set custom pending event handler which is triggered
+        // if processEvent() is called while previous processEvent() is not complete
         pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-            // you can set custom pending event handler which is triggered
-            // if processEvent() is called while previous processEvent() is not complete
+
             error(
                 "$this can not process pending $pendingEvent " +
                         "as event processing is already running. " +
@@ -98,7 +102,7 @@ fun main() {
         }
     }
     stateMachine.onTransition { _, _, _, _ ->
-        /* or add listener after state machine setup */
+        // or add listener after state machine setup
     }
 
     // process events

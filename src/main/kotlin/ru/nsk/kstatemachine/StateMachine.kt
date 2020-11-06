@@ -4,10 +4,15 @@ import ru.nsk.kstatemachine.StateMachine.IgnoredEventHandler
 import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
 import java.util.concurrent.CopyOnWriteArraySet
 
-class StateMachine(val name: String?, private val logger: Logger?) {
+@DslMarker
+annotation class StateMachineDslMarker
+
+@StateMachineDslMarker
+class StateMachine(val name: String?) {
     private val states = mutableSetOf<State>()
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
+    var logger = Logger {}
     var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
     var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
         error(
@@ -41,8 +46,6 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         currentState = state
     }
-
-    fun log(message: String) = logger?.log(message)
 
     fun processEvent(event: Event, argument: Any? = null) {
         if (isProcessingEvent)
@@ -80,6 +83,8 @@ class StateMachine(val name: String?, private val logger: Logger?) {
         }
     }
 
+    private fun log(message: String) = logger.log(message)
+
     private fun setCurrentState(state: State, transitionParams: TransitionParams<*>) {
         currentState = state
         log("$this entering $state")
@@ -101,13 +106,6 @@ class StateMachine(val name: String?, private val logger: Logger?) {
 
     private fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
-    /**
-     * State machine uses this interface to support logging on different platforms
-     */
-    fun interface Logger {
-        fun log(message: String)
-    }
-
     interface Listener {
         /**
          * This method is called when transition is performed.
@@ -116,6 +114,13 @@ class StateMachine(val name: String?, private val logger: Logger?) {
          * instead of listening for each transition separately.
          */
         fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
+    }
+
+    /**
+     * State machine uses this interface to support internal logging on different platforms
+     */
+    fun interface Logger {
+        fun log(message: String)
     }
 
     fun interface IgnoredEventHandler {
@@ -139,7 +144,7 @@ fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, e
     })
 }
 
-fun StateMachine.state(name: String, init: (State.() -> Unit)? = null) = addState(State(name), init)
+fun StateMachine.state(name: String? = null, init: (State.() -> Unit)? = null) = addState(State(name), init)
 
 /**
  * Factory method for creating [StateMachine]
@@ -147,13 +152,13 @@ fun StateMachine.state(name: String, init: (State.() -> Unit)? = null) = addStat
  */
 fun createStateMachine(
     name: String? = null,
-    logger: StateMachine.Logger? = null,
     init: StateMachine.() -> Unit
-) = StateMachine(name, logger).apply {
+) = StateMachine(name).apply {
     init()
     start()
 }
 
+@StateMachineDslMarker
 data class TransitionParams<E : Event>(
     val transition: Transition<E>,
     val event: E,
