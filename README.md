@@ -265,8 +265,8 @@ fun main() {
     // setup state machine
     val stateMachine = createStateMachine {
         // setup states and transitions
-        val offState = state("Off")
-        val onState = state("On") {
+        val offState = state()
+        val onState = state {
             transition<TurnOff> { targetState = offState }
         }
         setInitialState(offState)
