@@ -2,13 +2,16 @@
 
 ![Build with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20with%20Gradle/badge.svg)
 
-State machine (FSM) implementation in Kotlin.
+## Overview
+Final State machine (FSM) library written in Kotlin.
 
-This is a lightweight library using Kotlin DSL syntax for defining state machine structure.
-It supports conditional transitions, when target state is dynamic 
-and is calculated in a moment of event processing depending on application business logic.
+Main features are:
+* Kotlin DSL syntax for defining state machine structure;
+* conditional transitions, when target state is dynamic 
+and is calculated in a moment of event processing depending on application business logic;
+* argument passing for events and transitions.
 
-The library is currently in development phase. Your are welcome to propose useful features.
+_The library is currently in a development phase. Your are welcome to propose useful features._
 
 Building blocks (main classes) of this library:
 * `StateMachine` is a collection of states and transitions between them, processes events when started;
@@ -30,6 +33,7 @@ stateMachine.processEvent(SwitchGreenEvent)
 stateMachine.processEvent(SwitchYellowEvent)
 ```
 
+## Sample state machine diagram
 ![Traffic light diagram](./doc/images/trafficlight.png)
 
 ## Create state machine
