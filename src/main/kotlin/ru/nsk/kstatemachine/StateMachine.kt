@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.StateMachine.IgnoredEventHandler
-import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
+import ru.nsk.kstatemachine.StateMachine.*
 import java.util.concurrent.CopyOnWriteArraySet
 
 @DslMarker
@@ -25,7 +24,7 @@ class StateMachine(val name: String?) {
     private var isProcessingEvent = false
 
     fun <L : Listener> addListener(listener: L): L {
-        require(listeners.add(listener)) { "$listener is aready added" }
+        require(listeners.add(listener)) { "$listener is already added" }
         return listener
     }
 
@@ -35,7 +34,7 @@ class StateMachine(val name: String?) {
 
     fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
         if (state.name != null)
-        require( findState(state.name) == null) { "State with name ${state.name} already exists" }
+        require(findState(state.name) == null) { "State with name ${state.name} already exists" }
 
         if (init != null) state.init()
         states += state
@@ -102,16 +101,17 @@ class StateMachine(val name: String?) {
 
     internal fun start() = setCurrentState(
         currentState,
-        TransitionParams(Transition(StartEvent.javaClass, currentState, currentState, "Starting"), StartEvent)
+        TransitionParams(
+            Transition(
+                EventMatcher.isInstanceOf<StartEvent>(),
+                currentState,
+                currentState,
+                "Starting"
+            ), StartEvent
+        )
     )
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
-
-    private fun <E : Event> State.findTransition(event: E): Transition<E>? {
-        val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
-        check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
-        return triggeringTransitions.firstOrNull() as Transition<E>?
-    }
 
     private fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
@@ -147,7 +147,7 @@ class StateMachine(val name: String?) {
 }
 
 fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
-    addListener(object : StateMachine.Listener {
+    addListener(object : Listener {
         override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
             block(sourceState, targetState, event, argument)
     })

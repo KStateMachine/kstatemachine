@@ -93,7 +93,6 @@ fun main() {
         // you can set custom pending event handler which is triggered
         // if processEvent() is called while previous processEvent() is not complete
         pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-
             error(
                 "$this can not process pending $pendingEvent " +
                         "as event processing is already running. " +

@@ -7,7 +7,7 @@ open class State(val name: String? = null) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
     private val _transitions = mutableSetOf<Transition<*>>()
-    internal val transitions: Set<Transition<*>> = _transitions
+    private val transitions: Set<Transition<*>> = _transitions
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
@@ -15,7 +15,7 @@ open class State(val name: String? = null) {
     }
 
     fun <L : Listener> addListener(listener: L): L {
-        require(_listeners.add(listener)) { "$listener is aready added" }
+        require(_listeners.add(listener)) { "$listener is already added" }
         return listener
     }
 
@@ -24,6 +24,12 @@ open class State(val name: String? = null) {
     }
 
     internal fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+
+    internal fun <E : Event> findTransition(event: E): Transition<E>? {
+        val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
+        check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
+        return triggeringTransitions.firstOrNull() as Transition<E>?
+    }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 
@@ -49,11 +55,14 @@ fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
 
 inline fun <reified E : Event> State.transition(
     name: String? = null,
-    block: (TransitionBuilder<E>.() -> Unit)
+    block: (SimpleTransitionBuilder<E>.() -> Unit),
 ): Transition<E> {
-    val builder = TransitionBuilder<E>().apply(block)
+    val builder = SimpleTransitionBuilder<E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
 
-    val transition = Transition(E::class.java, this, builder.targetState, name)
+    val transition = Transition<E>(builder.eventMatcher, this, builder.targetState, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
@@ -61,8 +70,10 @@ inline fun <reified E : Event> State.transition(
 /**
  * Overload for transition without any parameters
  */
-inline fun <reified E : Event> State.transition(name: String? = null): Transition<E> =
-    addTransition(Transition(E::class.java, this, name))
+inline fun <reified E : Event> State.transition(
+    name: String? = null,
+): Transition<E> =
+    addTransition(Transition(EventMatcher.isInstanceOf<E>(), this, name))
 
 /**
  * This method may be used if transition should be performed only if some condition is met,
@@ -70,33 +81,14 @@ inline fun <reified E : Event> State.transition(name: String? = null): Transitio
  */
 inline fun <reified E : Event> State.transitionConditionally(
     name: String? = null,
-    block: ConditionalTransitionBuilder<E>.() -> Unit
+    block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = ConditionalTransitionBuilder<E>().apply(block)
+    val builder = ConditionalTransitionBuilder<E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
 
-    val transition = Transition(E::class.java, this, builder.direction, name)
+    val transition = Transition<E>(builder.eventMatcher, this, builder.direction, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
-}
-
-@StateMachineDslMarker
-open class BaseTransitionBuilder<E : Event> {
-    var listener: Transition.Listener? = null
-}
-
-class TransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
-    var targetState: State? = null
-}
-
-class ConditionalTransitionBuilder<E : Event> : BaseTransitionBuilder<E>() {
-    lateinit var direction: () -> TransitionDirection
-}
-
-inline fun <reified E : Event> BaseTransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
-    require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
-
-    listener = object : Transition.Listener {
-        override fun onTriggered(transitionParams: TransitionParams<*>) =
-            block(transitionParams as TransitionParams<E>)
-    }
 }
