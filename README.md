@@ -52,7 +52,9 @@ In state machine setup block we define states with `state()` function and set in
 createStateMachine {
     // use state() function to create State and add it to StateMachine
     val greenState = state()
-    val yellowState = state("Yellow") // state name is optional and is useful for debugging
+    // state name is optional and is useful to getting state instance
+    // after state machine setup and for debugging
+    val yellowState = state("Yellow") 
     
     // state machine enters this state after setup is complete
     setInitialState(greenState)
@@ -389,7 +391,10 @@ fun main() {
         }
     }
     stateMachine.onTransition { _, _, _, _ ->
-        // or add listener after state machine setup
+        // add listener after state machine setup
+    }
+    stateMachine.requireState("Green").onEntry {
+        // add state listener after state machine setup
     }
 
     // process events

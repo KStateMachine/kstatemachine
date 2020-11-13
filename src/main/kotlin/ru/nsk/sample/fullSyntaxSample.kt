@@ -102,7 +102,10 @@ fun main() {
         }
     }
     stateMachine.onTransition { _, _, _, _ ->
-        // or add listener after state machine setup
+        // add listener after state machine setup
+    }
+    stateMachine.requireState("Green").onEntry {
+        // add state listener after state machine setup
     }
 
     // process events

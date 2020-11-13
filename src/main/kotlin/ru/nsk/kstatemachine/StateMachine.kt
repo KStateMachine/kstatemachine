@@ -21,14 +21,8 @@ class StateMachine(val name: String?) {
         )
     }
 
-    /** Help to check that [processEvent] is not called from state machine notification method*/
+    /** Help to check that [processEvent] is not called from state machine notification method */
     private var isProcessingEvent = false
-
-    fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
-        if (init != null) state.init()
-        states += state
-        return state
-    }
 
     fun <L : Listener> addListener(listener: L): L {
         require(listeners.add(listener)) { "$listener is aready added" }
@@ -39,8 +33,23 @@ class StateMachine(val name: String?) {
         listeners.remove(listener)
     }
 
+    fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
+        if (state.name != null)
+        require( findState(state.name) == null) { "State with name ${state.name} already exists" }
+
+        if (init != null) state.init()
+        states += state
+        return state
+    }
+
     /**
-     * Now initial state is mandatory, but if we add parallel states it will not be mandatory
+     * Get state by name. This might be used to start listening to state after state machine setup.
+     */
+    fun findState(name: String) = states.find { it.name == name }
+    fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
+
+    /**
+     * Now initial state is mandatory, but if we add parallel states it will not be mandatory.
      */
     fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
@@ -144,11 +153,14 @@ fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, e
     })
 }
 
+/**
+ * @param name is optional and is useful for getting state instance after state machine setup
+ * with [StateMachine.findState] and for debugging.
+ */
 fun StateMachine.state(name: String? = null, init: (State.() -> Unit)? = null) = addState(State(name), init)
 
 /**
  * Factory method for creating [StateMachine]
- * @param logger state machine will use this function to log its internal state. It may be used in debugging purpose.
  */
 fun createStateMachine(
     name: String? = null,
