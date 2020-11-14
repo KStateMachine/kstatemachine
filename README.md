@@ -36,6 +36,46 @@ stateMachine.processEvent(SwitchYellowEvent)
 ## Sample state machine diagram
 ![Traffic light diagram](./doc/images/trafficlight.png)
 
+## Minimal syntax sample code
+```kotlin
+// define your events
+object SwitchGreenEvent1 : Event
+object SwitchYellowEvent1 : Event
+object SwitchRedEvent1 : Event
+
+fun main() {
+    // setup state machine
+    val stateMachine = createStateMachine {
+        // setup states and transitions
+        val greenState = state("Green")
+        val yellowState = state()
+        val redState = state {
+            transition<SwitchGreenEvent1> { targetState = greenState }
+        }
+
+        // configure states
+        greenState {
+            onEntry { println("Enter $name state") }
+            onExit { println("Exit $name state") }
+            transition<SwitchYellowEvent1> { targetState = yellowState }
+        }
+
+        yellowState {
+            transition<SwitchRedEvent1> {
+                targetState = redState
+                onTriggered { println("Transition on ${it.event}") }
+            }
+        }
+        setInitialState(greenState)
+    }
+
+    // process events
+    stateMachine.processEvent(SwitchYellowEvent1)
+    stateMachine.processEvent(SwitchRedEvent1)
+    stateMachine.processEvent(SwitchGreenEvent1)
+}
+```
+
 ## Create state machine
 First of all we create a state machine with `createStateMachine()` function:
 ```kotlin
@@ -259,33 +299,6 @@ else
 Correct - let the state machine to make decisions on event:
 ```kotin
 stateMachine.processEvent(SomethingHappenedEvent)
-```
-
-## Minimal syntax sample code
-```kotlin
-// define your events
-object TurnOn : Event
-object TurnOff : Event
-
-fun main() {
-    // setup state machine
-    val stateMachine = createStateMachine {
-        // setup states and transitions
-        val offState = state()
-        val onState = state {
-            transition<TurnOff> { targetState = offState }
-        }
-        setInitialState(offState)
-
-        offState {
-            transition<TurnOn> { targetState = onState }
-        }
-    }
-
-    // process events
-    stateMachine.processEvent(TurnOn)
-    stateMachine.processEvent(TurnOff)
-}
 ```
 
 ## Full syntax sample code
