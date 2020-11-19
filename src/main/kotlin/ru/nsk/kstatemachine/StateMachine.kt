@@ -8,7 +8,9 @@ annotation class StateMachineDslMarker
 
 @StateMachineDslMarker
 class StateMachine(val name: String?) {
-    private val states = mutableSetOf<State>()
+    private val _states = mutableSetOf<State>()
+    private val states: Set<State> = _states
+
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
     var logger = Logger {}
@@ -37,21 +39,21 @@ class StateMachine(val name: String?) {
         require(findState(state.name) == null) { "State with name ${state.name} already exists" }
 
         if (init != null) state.init()
-        states += state
+        _states += state
         return state
     }
 
     /**
      * Get state by name. This might be used to start listening to state after state machine setup.
      */
-    fun findState(name: String) = states.find { it.name == name }
+    fun findState(name: String) = _states.find { it.name == name }
     fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
 
     /**
      * Now initial state is mandatory, but if we add parallel states it will not be mandatory.
      */
     fun setInitialState(state: State) {
-        require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
+        require(_states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         currentState = state
     }
 
