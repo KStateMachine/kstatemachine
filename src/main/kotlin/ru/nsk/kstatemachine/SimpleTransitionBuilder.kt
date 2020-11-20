@@ -1,9 +1,11 @@
 package ru.nsk.kstatemachine
 
+import kotlin.reflect.KClass
+
 @StateMachineDslMarker
-open class TransitionBuilder<out E : Event> {
+open class TransitionBuilder<E : Event> {
     var listener: Transition.Listener? = null
-    lateinit var eventMatcher: EventMatcher
+    lateinit var eventMatcher: EventMatcher<E>
 }
 
 class SimpleTransitionBuilder<E : Event> :
@@ -28,14 +30,18 @@ inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline bloc
 /**
  * Adds an ability to select who [Transition] matches [Event] subclass
  */
-fun interface EventMatcher {
-    fun match(value: Event): Boolean
+abstract class EventMatcher<E : Event>(val eventClass: KClass<E>) {
+    abstract fun match(value: Event): Boolean
 
     companion object {
         /** This matcher is used by default, allowing [Event] subclasses */
-        inline fun <reified E : Event> isInstanceOf() = EventMatcher { it is E }
+        inline fun <reified E : Event> isInstanceOf() = object : EventMatcher<E>(E::class) {
+            override fun match(value: Event) = value is E
+        }
     }
 }
 
 inline fun <reified E : Event> TransitionBuilder<E>.isInstanceOf() = EventMatcher.isInstanceOf<E>()
-inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = EventMatcher { it.javaClass.kotlin == E::class }
+inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = object : EventMatcher<E>(E::class) {
+    override fun match(value: Event) = value.javaClass.kotlin === E::class
+}

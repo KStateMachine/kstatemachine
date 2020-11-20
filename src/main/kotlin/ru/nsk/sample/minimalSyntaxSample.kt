@@ -11,7 +11,7 @@ fun main() {
     // setup state machine
     val stateMachine = createStateMachine {
         // setup states and transitions
-        val greenState = state("Green")
+        val greenState = initialState("Green")
         val yellowState = state()
         val redState = state {
             transition<SwitchGreenEvent1> { targetState = greenState }
@@ -30,7 +30,6 @@ fun main() {
                 onTriggered { println("Transition on ${it.event}") }
             }
         }
-        setInitialState(greenState)
     }
 
     // process events

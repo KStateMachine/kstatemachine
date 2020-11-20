@@ -9,7 +9,7 @@ annotation class StateMachineDslMarker
 @StateMachineDslMarker
 class StateMachine(val name: String?) {
     private val _states = mutableSetOf<State>()
-    private val states: Set<State> = _states
+    val states: Set<State> = _states
 
     private lateinit var currentState: State
     private val listeners = CopyOnWriteArraySet<Listener>()
@@ -34,7 +34,7 @@ class StateMachine(val name: String?) {
         listeners.remove(listener)
     }
 
-    fun <S : State> addState(state: S, init: (State.() -> Unit)? = null): S {
+    fun <S : State> addState(state: S, init: StateBlock? = null): S {
         if (state.name != null)
         require(findState(state.name) == null) { "State with name ${state.name} already exists" }
 
@@ -44,16 +44,25 @@ class StateMachine(val name: String?) {
     }
 
     /**
+     * A shortcut for [addState] and [setInitialState] calls
+     */
+    fun <S : State> addInitialState(state: S, init: StateBlock? = null): S {
+        addState(state, init)
+        setInitialState(state)
+        return state
+    }
+
+    /**
      * Get state by name. This might be used to start listening to state after state machine setup.
      */
-    fun findState(name: String) = _states.find { it.name == name }
+    fun findState(name: String) = states.find { it.name == name }
     fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
 
     /**
      * Now initial state is mandatory, but if we add parallel states it will not be mandatory.
      */
     fun setInitialState(state: State) {
-        require(_states.contains(state)) { "$state is not part of $this machine, use addState() first" }
+        require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         currentState = state
     }
 
@@ -63,7 +72,7 @@ class StateMachine(val name: String?) {
         isProcessingEvent = true
         try {
             val fromState = currentState
-            val transition = fromState.findTransition(event)
+            val transition = fromState.findTransitionByEvent(event)
 
             if (transition != null) {
                 val transitionParams = TransitionParams(transition, event, argument)
@@ -105,7 +114,7 @@ class StateMachine(val name: String?) {
         currentState,
         TransitionParams(
             Transition(
-                EventMatcher.isInstanceOf<StartEvent>(),
+                EventMatcher.isInstanceOf(),
                 currentState,
                 currentState,
                 "Starting"
@@ -148,6 +157,9 @@ class StateMachine(val name: String?) {
     object StartEvent : Event
 }
 
+typealias StateBlock = State.() -> Unit
+typealias StateMachineBlock = StateMachine.() -> Unit
+
 fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
     addListener(object : Listener {
         override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
@@ -159,14 +171,23 @@ fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, e
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [StateMachine.findState] and for debugging.
  */
-fun StateMachine.state(name: String? = null, init: (State.() -> Unit)? = null) = addState(State(name), init)
+fun StateMachine.state(name: String? = null, init: StateBlock? = null) = addState(State(name), init)
+
+/**
+ * A shortcut for [state] and [StateMachine.setInitialState] calls
+ */
+fun StateMachine.initialState(name: String? = null, init: StateBlock? = null): State {
+    val state = addState(State(name), init)
+    setInitialState(state)
+    return state
+}
 
 /**
  * Factory method for creating [StateMachine]
  */
 fun createStateMachine(
     name: String? = null,
-    init: StateMachine.() -> Unit
+    init: StateMachineBlock
 ) = StateMachine(name).apply {
     init()
     start()

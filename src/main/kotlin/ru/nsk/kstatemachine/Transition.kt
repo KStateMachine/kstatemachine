@@ -11,7 +11,7 @@ interface Event
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
 open class Transition<E : Event>(
-    private val eventMatcher: EventMatcher,
+    val eventMatcher: EventMatcher<E>,
     val sourceState: State,
     val name: String?
 ) {
@@ -33,7 +33,7 @@ open class Transition<E : Event>(
     var argument: Any? = null
 
     constructor(
-        eventMatcher: EventMatcher,
+        eventMatcher: EventMatcher<E>,
         sourceState: State,
         targetState: State?,
         name: String?
@@ -46,7 +46,7 @@ open class Transition<E : Event>(
     }
 
     constructor(
-        eventMatcher: EventMatcher,
+        eventMatcher: EventMatcher<E>,
         sourceState: State,
         targetStateDirectionProducer: () -> TransitionDirection,
         name: String?

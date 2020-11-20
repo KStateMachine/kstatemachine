@@ -13,7 +13,7 @@ class StateSubclassTest {
             // simple but little bit explicit, easy to forget addState() call
             val subclassState = addState(SubclassState())
 
-            val simpleState = state {
+            val simpleState = initialState {
                 transition<SwitchEvent> {
                     targetState = subclassState
                     onTriggered { }
@@ -26,8 +26,6 @@ class StateSubclassTest {
                     onTriggered { }
                 }
             }
-
-            setInitialState(simpleState)
         }
 
         stateMachine.processEvent(SwitchEvent)

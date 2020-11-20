@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 
 private object OnEvent : Event
@@ -73,10 +75,9 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
 
         val stateMachine = createStateMachine {
-            val first = state("first") {
+            initialState("first") {
                 transition<SwitchEvent>()
             }
-            setInitialState(first)
 
             onTransition { _, _, event, _ ->
                 callbacks.onTriggeringEvent(event)
@@ -89,7 +90,7 @@ class StateMachineTest {
 
     @Test
     fun addSameStateListener() {
-        val stateMachine = createStateMachine {
+        createStateMachine {
             val first = state("first") {
                 transition<SwitchEvent>()
                 val listener = object : State.Listener {}
@@ -102,7 +103,7 @@ class StateMachineTest {
 
     @Test
     fun addSameStateMachineListener() {
-        val stateMachine = createStateMachine {
+        createStateMachine {
             val first = state("first") {
                 transition<SwitchEvent>()
             }
@@ -116,7 +117,7 @@ class StateMachineTest {
 
     @Test
     fun addSameTransitionListener() {
-        val stateMachine = createStateMachine {
+        createStateMachine {
             val first = state("first") {
                 val transition = transition<SwitchEvent>()
                 val listener = object : Transition.Listener {}
@@ -132,8 +133,7 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
 
         val stateMachine = createStateMachine {
-            val first = state("first")
-            setInitialState(first)
+            initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
                 callbacks.onIgnoredEvent(SwitchEvent)
@@ -148,7 +148,7 @@ class StateMachineTest {
     fun pendingEventHandler() {
         val stateMachine = createStateMachine {
             val second = state("second")
-            val first = state("first") {
+            initialState("first") {
                 transition<SwitchEvent> {
                     targetState = second
                     onTriggered {
@@ -156,7 +156,6 @@ class StateMachineTest {
                     }
                 }
             }
-            setInitialState(first)
 
             pendingEventHandler = StateMachine.PendingEventHandler { _, _ ->
                 error("Already processing")
@@ -169,8 +168,7 @@ class StateMachineTest {
     @Test
     fun exceptionalIgnoredEventHandler() {
         val stateMachine = createStateMachine {
-            val first = state("first")
-            setInitialState(first)
+            initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
                 error("unexpected $event")
@@ -180,5 +178,19 @@ class StateMachineTest {
         shouldThrow<IllegalStateException> {
             stateMachine.processEvent(SwitchEvent)
         }
+    }
+
+    @Test
+    fun requireState() {
+        lateinit var first: State
+        lateinit var second: State
+        val stateMachine = createStateMachine {
+            first = initialState("first")
+            second = state("second")
+        }
+
+        assertThat(stateMachine.requireState("first"), sameInstance(first))
+        assertThat(stateMachine.requireState("second"), sameInstance(second))
+        shouldThrow<IllegalArgumentException> { stateMachine.requireState("third") }
     }
 }

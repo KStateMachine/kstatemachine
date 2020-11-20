@@ -2,6 +2,8 @@ package ru.nsk.kstatemachine
 
 
 object SwitchEvent : Event
+object FirstEvent : Event
+object SecondEvent : Event
 
 interface Callbacks {
     fun onIgnoredEvent(event: Event)

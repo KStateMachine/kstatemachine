@@ -14,10 +14,10 @@ and is calculated in a moment of event processing depending on application busin
 _The library is currently in a development phase. Your are welcome to propose useful features._
 
 Building blocks (main classes) of this library:
-* `StateMachine` is a collection of states and transitions between them, processes events when started;
-* `State` states where state machine can go to;
-* `Event` is a base class for events or other words actions which are processed by state machine and may trigger transitions;
-* `Transition` is an operation of moving from one state to another.
+* `StateMachine` - is a collection of states and transitions between them, processes events when started;
+* `State` - states where state machine can go to;
+* `Event` - is a base class for events or other words actions which are processed by state machine and may trigger transitions;
+* `Transition` - is an operation of moving from one state to another.
 
 Working with state machine consists of two steps:
 * creation and initial setup, here you may set custom actions (side effects) via listeners
@@ -47,7 +47,7 @@ fun main() {
     // setup state machine
     val stateMachine = createStateMachine {
         // setup states and transitions
-        val greenState = state("Green")
+        val greenState = initialState("Green")
         val yellowState = state()
         val redState = state {
             transition<SwitchGreenEvent1> { targetState = greenState }
@@ -66,7 +66,6 @@ fun main() {
                 onTriggered { println("Transition on ${it.event}") }
             }
         }
-        setInitialState(greenState)
     }
 
     // process events
@@ -101,7 +100,15 @@ createStateMachine {
 }
 ```
 
-You can use State subclasses with `addState()` function:
+You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set initial state:
+```kotlin
+createStateMachine {
+    initialState("green")
+    //...
+}
+```
+
+You can use `State` subclasses with `addState()` function:
 ```kotlin
 object SomeState : State()
 
@@ -145,9 +152,9 @@ greenState {
 }
 ```
 _Note: only one transition is possible per event type. 
-This means you cannot have multiple transitions parametrized with same Event subclass._
+This means you cannot have multiple transitions parametrized with same `Event` subclass._
 
-Transition may have no target state (targetState is null) which means that state machine stays 
+Transition may have no target state (`targetState` is null) which means that state machine stays 
 in current state when such transition triggers:
 ```kotlin
 greenState {
@@ -179,9 +186,9 @@ State machine becomes more powerful tool when you can choose target state
 depending on your business logic (some external state).
 
 There are three options in choosing direction of next state:
-* stay - in this case transition is triggered but state is not changed;
-* targetState - transition is triggered and state machine goes to a specified state;
-* noTransition - transition is not triggered.
+* `stay` - in this case transition is triggered but state is not changed;
+* `targetState` - transition is triggered and state machine goes to a specified state;
+* `noTransition` - transition is not triggered.
 
 To use conditional transitions you pass a lambda into `transitionConditionally()` function which makes desired decision: 
 ```kotlin
@@ -218,7 +225,7 @@ createStateMachine {
 ```
 ## Error handling
 By default state machine simply ignores events that does not match any defined transition.
-You can see those events if logging is enabled or use custom IgnoredEventHandler:
+You can see those events if logging is enabled or use custom `IgnoredEventHandler`:
 ```kotlin
 createStateMachine {
     //...
@@ -228,9 +235,9 @@ createStateMachine {
 }
 ```
 
-It is not allowed to call processEvent() while state machine is already processing event.
+It is not allowed to call `processEvent()` while state machine is already processing event.
 For example from notification listener. By default state machine will throw exception in this case.
-But you can set custom PendingEventHandler:
+But you can set custom `PendingEventHandler`:
 ```kotlin
 createStateMachine {
     //...
@@ -305,14 +312,14 @@ stateMachine.processEvent(SomethingHappenedEvent)
 This sample shows different syntax variants and library possibilities in one place, so it looks messy.
 ```kotlin
 // define your events
-private object SwitchGreenEvent : Event
-private object SwitchYellowEvent : Event
+object SwitchGreenEvent : Event
+object SwitchYellowEvent : Event
 
 // events often hold some useful data
-private class SwitchRedEvent(val data: String) : Event
+class SwitchRedEvent(val data: String) : Event
 
 // you can subclass State if you need
-private class RedState(val data: Int) : State("Red")
+class RedState(val data: Int) : State("Red")
 
 fun main() {
     val stateMachine = createStateMachine(

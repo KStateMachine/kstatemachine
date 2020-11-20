@@ -7,7 +7,7 @@ open class State(val name: String? = null) {
     private val _listeners = CopyOnWriteArraySet<Listener>()
     private val listeners: Set<Listener> = _listeners
     private val _transitions = mutableSetOf<Transition<*>>()
-    private val transitions: Set<Transition<*>> = _transitions
+    val transitions: Set<Transition<*>> = _transitions
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
@@ -23,9 +23,23 @@ open class State(val name: String? = null) {
         _listeners.remove(listener)
     }
 
+    /**
+     * Get transition by name. This might be used to start listening to transition after state machine setup.
+     */
+    fun findTransition(name: String) = transitions.find { it.name == name }
+    fun requireTransition(name: String) =
+        findTransition(name) ?: throw IllegalArgumentException("Transition $name not found")
+
+    /**
+     * Get transition by Event class. This might be used to start listening to transition after state machine setup.
+     */
+    inline fun <reified E : Event> findTransition() = transitions.find { it.eventMatcher.eventClass === E::class }
+    inline fun <reified E : Event> requireTransition() =
+        findTransition<E>() ?: throw IllegalArgumentException("Transition for ${E::class} not found")
+
     internal fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
-    internal fun <E : Event> findTransition(event: E): Transition<E>? {
+    internal fun <E : Event> findTransitionByEvent(event: E): Transition<E>? {
         val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
         check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
         return triggeringTransitions.firstOrNull() as Transition<E>?
@@ -62,7 +76,7 @@ inline fun <reified E : Event> State.transition(
         block()
     }
 
-    val transition = Transition<E>(builder.eventMatcher, this, builder.targetState, name)
+    val transition = Transition(builder.eventMatcher, this, builder.targetState, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
@@ -73,7 +87,7 @@ inline fun <reified E : Event> State.transition(
 inline fun <reified E : Event> State.transition(
     name: String? = null,
 ): Transition<E> =
-    addTransition(Transition(EventMatcher.isInstanceOf<E>(), this, name))
+    addTransition(Transition(EventMatcher.isInstanceOf(), this, name))
 
 /**
  * This method may be used if transition should be performed only if some condition is met,
@@ -88,7 +102,7 @@ inline fun <reified E : Event> State.transitionConditionally(
         block()
     }
 
-    val transition = Transition<E>(builder.eventMatcher, this, builder.direction, name)
+    val transition = Transition(builder.eventMatcher, this, builder.direction, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }

@@ -3,14 +3,14 @@ package ru.nsk.sample
 import ru.nsk.kstatemachine.*
 
 // define your events
-private object SwitchGreenEvent : Event
-private object SwitchYellowEvent : Event
+object SwitchGreenEvent : Event
+object SwitchYellowEvent : Event
 
 // events often hold some useful data
-private class SwitchRedEvent(val data: String) : Event
+class SwitchRedEvent(val data: String) : Event
 
 // you can subclass State if you need
-private class RedState(val data: Int) : State("Red")
+class RedState(val data: Int) : State("Red")
 
 fun main() {
     val stateMachine = createStateMachine(
