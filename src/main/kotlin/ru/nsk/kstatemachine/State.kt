@@ -33,7 +33,10 @@ open class State(val name: String? = null) {
     /**
      * Get transition by Event class. This might be used to start listening to transition after state machine setup.
      */
-    inline fun <reified E : Event> findTransition() = transitions.find { it.eventMatcher.eventClass === E::class }
+    inline fun <reified E : Event> findTransition(): Transition<E>? {
+        return transitions.find { it.eventMatcher.eventClass === E::class } as Transition<E>?
+    }
+
     inline fun <reified E : Event> requireTransition() =
         findTransition<E>() ?: throw IllegalArgumentException("Transition for ${E::class} not found")
 

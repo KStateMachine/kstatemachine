@@ -100,12 +100,21 @@ fun main() {
             )
         }
     }
-    stateMachine.onTransition { _, _, _, _ ->
-        // add listener after state machine setup
+    // add listener after state machine setup
+    stateMachine.onTransition { sourceState, targetState, event, argument ->
+        println("Transition from $sourceState to $targetState on $event with $argument")
     }
-    stateMachine.requireState("Green").onEntry {
-        // add state listener after state machine setup
+    // watch for state changes
+    stateMachine.onStateChanged { state ->
+        println("State changed to $state")
     }
+    // get state after state machine setup
+    val greenState = stateMachine.requireState("Green")
+    greenState.onEntry { /* add state listener */ }
+
+    // get transition after state machine setup
+    val transitionToYellow = greenState.requireTransition<SwitchYellowEvent>()
+    transitionToYellow.onTriggered { /* add transition listener */ }
 
     // process events
     stateMachine.processEvent(SwitchYellowEvent)

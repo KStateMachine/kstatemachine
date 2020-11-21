@@ -36,7 +36,7 @@ class StateMachine(val name: String?) {
 
     fun <S : State> addState(state: S, init: StateBlock? = null): S {
         if (state.name != null)
-        require(findState(state.name) == null) { "State with name ${state.name} already exists" }
+            require(findState(state.name) == null) { "State with name ${state.name} already exists" }
 
         if (init != null) state.init()
         _states += state
@@ -108,6 +108,7 @@ class StateMachine(val name: String?) {
         currentState = state
         log("$this entering $state")
         state.notify { onEntry(transitionParams) }
+        listeners.forEach { it.onStateChanged(state) }
     }
 
     internal fun start() = setCurrentState(
@@ -134,6 +135,8 @@ class StateMachine(val name: String?) {
          * instead of listening for each transition separately.
          */
         fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
+
+        fun onStateChanged(newState: State) {}
     }
 
     /**
@@ -164,6 +167,12 @@ fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, e
     addListener(object : Listener {
         override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
             block(sourceState, targetState, event, argument)
+    })
+}
+
+fun StateMachine.onStateChanged(block: (newState: State) -> Unit) {
+    addListener(object : Listener {
+        override fun onStateChanged(newState: State) = block(newState)
     })
 }
 
