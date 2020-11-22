@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.StateMachine.*
-import java.util.concurrent.CopyOnWriteArraySet
 
 @DslMarker
 annotation class StateMachineDslMarker
@@ -11,8 +10,14 @@ class StateMachine(val name: String?) {
     private val _states = mutableSetOf<State>()
     val states: Set<State> = _states
 
-    private lateinit var currentState: State
-    private val listeners = CopyOnWriteArraySet<Listener>()
+    /**
+     * Might be null only before [setInitialState] call.
+     * Access to this field must be thread safe.
+     */
+    private var currentState: State? = null
+
+    /** Access to this field must be thread safe. */
+    private val listeners = mutableSetOf<Listener>()
     var logger = Logger {}
     var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
     var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
@@ -22,14 +27,23 @@ class StateMachine(val name: String?) {
         )
     }
 
-    /** Help to check that [processEvent] is not called from state machine notification method */
+    /**
+     * Help to check that [processEvent] is not called from state machine notification method.
+     * Access to this field must be thread safe.
+     */
     private var isProcessingEvent = false
 
+    @Synchronized
     fun <L : Listener> addListener(listener: L): L {
         require(listeners.add(listener)) { "$listener is already added" }
+
+        val currentState = currentState
+        if (currentState != null)
+            listener.onStateChanged(currentState)
         return listener
     }
 
+    @Synchronized
     fun removeListener(listener: Listener) {
         listeners.remove(listener)
     }
@@ -66,12 +80,13 @@ class StateMachine(val name: String?) {
         currentState = state
     }
 
+    @Synchronized
     fun processEvent(event: Event, argument: Any? = null) {
         if (isProcessingEvent)
             pendingEventHandler.onPendingEvent(event, argument)
         isProcessingEvent = true
         try {
-            val fromState = currentState
+            val fromState = currentState!!
             val transition = fromState.findTransitionByEvent(event)
 
             if (transition != null) {
@@ -106,22 +121,27 @@ class StateMachine(val name: String?) {
 
     private fun setCurrentState(state: State, transitionParams: TransitionParams<*>) {
         currentState = state
+
         log("$this entering $state")
         state.notify { onEntry(transitionParams) }
-        listeners.forEach { it.onStateChanged(state) }
+        notify { onStateChanged(state) }
     }
 
-    internal fun start() = setCurrentState(
-        currentState,
-        TransitionParams(
-            Transition(
-                EventMatcher.isInstanceOf(),
-                currentState,
-                currentState,
-                "Starting"
-            ), StartEvent
+    internal fun start() {
+        val currentState = currentState!!
+
+        setCurrentState(
+            currentState,
+            TransitionParams(
+                Transition(
+                    EventMatcher.isInstanceOf(),
+                    currentState,
+                    currentState,
+                    "Starting"
+                ), StartEvent
+            )
         )
-    )
+    }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
 
@@ -136,6 +156,10 @@ class StateMachine(val name: String?) {
          */
         fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
 
+        /**
+         * Notifies about state changes.
+         * This method will also be triggered on adding listener with a current state of a state machine.
+         */
         fun onStateChanged(newState: State) {}
     }
 
