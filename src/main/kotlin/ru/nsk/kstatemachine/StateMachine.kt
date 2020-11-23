@@ -1,151 +1,38 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.StateMachine.*
-
 @DslMarker
 annotation class StateMachineDslMarker
 
 @StateMachineDslMarker
-class StateMachine(val name: String?) {
-    private val _states = mutableSetOf<State>()
-    val states: Set<State> = _states
+interface StateMachine {
+    val name: String?
+    val states: Set<State>
+    var logger: Logger
+    var ignoredEventHandler: IgnoredEventHandler
+    var pendingEventHandler: PendingEventHandler
 
-    /**
-     * Might be null only before [setInitialState] call.
-     * Access to this field must be thread safe.
-     */
-    private var currentState: State? = null
+    fun <L : Listener> addListener(listener: L): L
+    fun removeListener(listener: Listener)
 
-    /** Access to this field must be thread safe. */
-    private val listeners = mutableSetOf<Listener>()
-    var logger = Logger {}
-    var ignoredEventHandler = IgnoredEventHandler { _, _, _ -> }
-    var pendingEventHandler = PendingEventHandler { pendingEvent, _ ->
-        error(
-            "$this can not process pending $pendingEvent as event processing is already running. " +
-                    "Do not call processEvent() from notification listeners."
-        )
-    }
-
-    /**
-     * Help to check that [processEvent] is not called from state machine notification method.
-     * Access to this field must be thread safe.
-     */
-    private var isProcessingEvent = false
-
-    @Synchronized
-    fun <L : Listener> addListener(listener: L): L {
-        require(listeners.add(listener)) { "$listener is already added" }
-
-        val currentState = currentState
-        if (currentState != null)
-            listener.onStateChanged(currentState)
-        return listener
-    }
-
-    @Synchronized
-    fun removeListener(listener: Listener) {
-        listeners.remove(listener)
-    }
-
-    fun <S : State> addState(state: S, init: StateBlock? = null): S {
-        if (state.name != null)
-            require(findState(state.name) == null) { "State with name ${state.name} already exists" }
-
-        if (init != null) state.init()
-        _states += state
-        return state
-    }
+    fun <S : State> addState(state: S, init: StateBlock? = null): S
 
     /**
      * A shortcut for [addState] and [setInitialState] calls
      */
-    fun <S : State> addInitialState(state: S, init: StateBlock? = null): S {
-        addState(state, init)
-        setInitialState(state)
-        return state
-    }
+    fun <S : State> addInitialState(state: S, init: StateBlock? = null): S
+
+    /**
+     * Currently initial state is mandatory, but if we add parallel states it might change.
+     */
+    fun setInitialState(state: State)
 
     /**
      * Get state by name. This might be used to start listening to state after state machine setup.
      */
-    fun findState(name: String) = states.find { it.name == name }
-    fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
+    fun findState(name: String): State?
+    fun requireState(name: String): State
 
-    /**
-     * Now initial state is mandatory, but if we add parallel states it will not be mandatory.
-     */
-    fun setInitialState(state: State) {
-        require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        currentState = state
-    }
-
-    @Synchronized
-    fun processEvent(event: Event, argument: Any? = null) {
-        if (isProcessingEvent)
-            pendingEventHandler.onPendingEvent(event, argument)
-        isProcessingEvent = true
-        try {
-            val fromState = currentState!!
-            val transition = fromState.findTransitionByEvent(event)
-
-            if (transition != null) {
-                val transitionParams = TransitionParams(transition, event, argument)
-
-                val direction = transition.produceTargetStateDirection()
-                val targetState = if (direction is TargetState) direction.targetState else null
-
-                if (direction !is NoTransition) {
-                    log("$this triggering $transition from $fromState")
-                    transition.notify { onTriggered(transitionParams) }
-
-                    notify { onTransition(transition.sourceState, targetState, event, argument) }
-                }
-
-                targetState?.let { _ ->
-                    log("$this exiting $fromState")
-                    fromState.notify { onExit(transitionParams) }
-
-                    setCurrentState(targetState, transitionParams)
-                }
-            } else {
-                log("$this ignored $event as transition from $fromState, was not found")
-                ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
-            }
-        } finally {
-            isProcessingEvent = false
-        }
-    }
-
-    private fun log(message: String) = logger.log(message)
-
-    private fun setCurrentState(state: State, transitionParams: TransitionParams<*>) {
-        currentState = state
-
-        log("$this entering $state")
-        state.notify { onEntry(transitionParams) }
-        notify { onStateChanged(state) }
-    }
-
-    internal fun start() {
-        val currentState = currentState!!
-
-        setCurrentState(
-            currentState,
-            TransitionParams(
-                Transition(
-                    EventMatcher.isInstanceOf(),
-                    currentState,
-                    currentState,
-                    "Starting"
-                ), StartEvent
-            )
-        )
-    }
-
-    override fun toString() = "${javaClass.simpleName}(name=$name)"
-
-    private fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    fun processEvent(event: Event, argument: Any? = null)
 
     interface Listener {
         /**
@@ -177,25 +64,21 @@ class StateMachine(val name: String?) {
     fun interface PendingEventHandler {
         fun onPendingEvent(pendingEvent: Event, argument: Any?)
     }
-
-    /**
-     * Initial event which is processed on state machine start
-     */
-    object StartEvent : Event
 }
+
 
 typealias StateBlock = State.() -> Unit
 typealias StateMachineBlock = StateMachine.() -> Unit
 
 fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
-    addListener(object : Listener {
+    addListener(object : StateMachine.Listener {
         override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
             block(sourceState, targetState, event, argument)
     })
 }
 
 fun StateMachine.onStateChanged(block: (newState: State) -> Unit) {
-    addListener(object : Listener {
+    addListener(object : StateMachine.Listener {
         override fun onStateChanged(newState: State) = block(newState)
     })
 }
@@ -221,7 +104,7 @@ fun StateMachine.initialState(name: String? = null, init: StateBlock? = null): S
 fun createStateMachine(
     name: String? = null,
     init: StateMachineBlock
-) = StateMachine(name).apply {
+): StateMachine = StateMachineImpl(name).apply {
     init()
     start()
 }
