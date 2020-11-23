@@ -121,7 +121,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         setCurrentState(
             currentState,
             TransitionParams(
-                Transition(
+                DefaultTransition(
                     EventMatcher.isInstanceOf(),
                     currentState,
                     currentState,

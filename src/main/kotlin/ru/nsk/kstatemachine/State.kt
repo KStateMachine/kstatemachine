@@ -42,10 +42,10 @@ open class State(val name: String? = null) {
 
     internal fun notify(block: Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
-    internal fun <E : Event> findTransitionByEvent(event: E): Transition<E>? {
+    internal fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>? {
         val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
         check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
-        return triggeringTransitions.firstOrNull() as Transition<E>?
+        return triggeringTransitions.firstOrNull() as InternalTransition<E>?
     }
 
     override fun toString() = "${javaClass.simpleName}(name=$name)"
@@ -79,7 +79,7 @@ inline fun <reified E : Event> State.transition(
         block()
     }
 
-    val transition = Transition(builder.eventMatcher, this, builder.targetState, name)
+    val transition = DefaultTransition(builder.eventMatcher, this, builder.targetState, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
@@ -90,7 +90,7 @@ inline fun <reified E : Event> State.transition(
 inline fun <reified E : Event> State.transition(
     name: String? = null,
 ): Transition<E> =
-    addTransition(Transition(EventMatcher.isInstanceOf(), this, name))
+    addTransition(DefaultTransition(EventMatcher.isInstanceOf(), this, name))
 
 /**
  * This method may be used if transition should be performed only if some condition is met,
@@ -105,7 +105,7 @@ inline fun <reified E : Event> State.transitionConditionally(
         block()
     }
 
-    val transition = Transition(builder.eventMatcher, this, builder.direction, name)
+    val transition = DefaultTransition(builder.eventMatcher, this, builder.direction, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
