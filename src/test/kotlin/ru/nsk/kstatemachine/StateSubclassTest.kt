@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 import org.junit.jupiter.api.Test
 
-class SubclassState : State() {
+class SubclassState : DefaultState() {
     val dataField = 0
 }
 

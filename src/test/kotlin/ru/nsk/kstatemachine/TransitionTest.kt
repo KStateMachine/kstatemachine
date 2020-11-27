@@ -15,7 +15,7 @@ class TransitionArgumentTest {
     fun transitionArgument() {
         val callbacks = mock<Callbacks>()
 
-        val second = object : State("second") {}
+        val second = object : DefaultState("second") {}
 
         val stateMachine = createStateMachine {
             addState(second) {
@@ -40,7 +40,7 @@ class TransitionArgumentTest {
 
     @Test
     fun requireTransition() {
-        val state = object : State() {}
+        val state = object : DefaultState() {}
 
         lateinit var firstTransition: Transition<*>
         lateinit var secondTransition: Transition<*>

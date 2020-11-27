@@ -8,7 +8,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
      * Might be null only before [setInitialState] call.
      * Access to this field must be thread safe.
      */
-    private var currentState: State? = null
+    private var currentState: InternalState? = null
 
     /** Access to this field must be thread safe. */
     private val listeners = mutableSetOf<StateMachine.Listener>()
@@ -43,8 +43,9 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
     }
 
     override fun <S : State> addState(state: S, init: StateBlock?): S {
-        if (state.name != null)
-            require(findState(state.name) == null) { "State with name ${state.name} already exists" }
+        val name = state.name
+        if (name != null)
+            require(findState(name) == null) { "State with name $name already exists" }
 
         if (init != null) state.init()
         _states += state
@@ -65,7 +66,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
      */
     override fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        currentState = state
+        currentState = state as InternalState
     }
 
     @Synchronized
@@ -81,7 +82,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
                 val transitionParams = TransitionParams(transition, event, argument)
 
                 val direction = transition.produceTargetStateDirection()
-                val targetState = if (direction is TargetState) direction.targetState else null
+                val targetState = if (direction is TargetState) direction.targetState as InternalState else null
 
                 if (direction !is NoTransition) {
                     log("$this triggering $transition from $fromState")
@@ -107,7 +108,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
 
     private fun log(message: String) = logger.log(message)
 
-    private fun setCurrentState(state: State, transitionParams: TransitionParams<*>) {
+    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         currentState = state
 
         log("$this entering $state")

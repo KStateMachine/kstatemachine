@@ -87,13 +87,13 @@ fun StateMachine.onStateChanged(block: (newState: State) -> Unit) {
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [StateMachine.findState] and for debugging.
  */
-fun StateMachine.state(name: String? = null, init: StateBlock? = null) = addState(State(name), init)
+fun StateMachine.state(name: String? = null, init: StateBlock? = null) = addState(DefaultState(name), init)
 
 /**
  * A shortcut for [state] and [StateMachine.setInitialState] calls
  */
 fun StateMachine.initialState(name: String? = null, init: StateBlock? = null): State {
-    val state = addState(State(name), init)
+    val state = addState(DefaultState(name), init)
     setInitialState(state)
     return state
 }

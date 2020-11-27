@@ -2,22 +2,23 @@ package ru.nsk.sample
 
 import ru.nsk.kstatemachine.*
 
-// define your events
+// Define events
 object SwitchGreenEvent1 : Event
 object SwitchYellowEvent1 : Event
 object SwitchRedEvent1 : Event
 
 fun main() {
-    // setup state machine
+    // Setup state machine
     val stateMachine = createStateMachine {
-        // setup states and transitions
+        // Setup states
         val greenState = initialState("Green")
         val yellowState = state()
         val redState = state {
+            // Setup transitions
             transition<SwitchGreenEvent1> { targetState = greenState }
         }
 
-        // configure states
+        // Configure states
         greenState {
             onEntry { println("Enter $name state") }
             onExit { println("Exit $name state") }
@@ -32,7 +33,7 @@ fun main() {
         }
     }
 
-    // process events
+    // Process events
     stateMachine.processEvent(SwitchYellowEvent1)
     stateMachine.processEvent(SwitchRedEvent1)
     stateMachine.processEvent(SwitchGreenEvent1)
