@@ -1,4 +1,4 @@
-package ru.nsk.sample
+package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 

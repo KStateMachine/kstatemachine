@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.4.10"
-    application
+    `java-library`
 }
 group = "ru.nsk"
 version = "0.3.0"
@@ -15,7 +15,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
-tasks.withType<Test> {
+tasks.test {
     useJUnitPlatform()
 }
 
@@ -25,8 +25,4 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:4.2.5")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
-}
-
-application {
-    mainClassName = "MainKt"
 }
