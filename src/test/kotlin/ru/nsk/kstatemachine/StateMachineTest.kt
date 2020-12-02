@@ -7,6 +7,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
+import kotlin.concurrent.fixedRateTimer
 
 private object OnEvent : Event
 private object OffEvent : Event
@@ -86,6 +87,19 @@ class StateMachineTest {
 
         stateMachine.processEvent(SwitchEvent)
         then(callbacks).should().onTriggeringEvent(SwitchEvent)
+    }
+
+    @Test
+    fun currentStateNotification() {
+        val callbacks = mock<Callbacks>()
+        lateinit var first: State
+
+        val stateMachine = createStateMachine {
+            first = initialState("first")
+        }
+        stateMachine.onStateChanged { callbacks.onStateChanged(it) }
+
+        then(callbacks).should().onStateChanged(first)
     }
 
     @Test
