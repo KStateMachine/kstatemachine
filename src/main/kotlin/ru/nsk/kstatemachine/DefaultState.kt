@@ -37,5 +37,5 @@ open class DefaultState(override val name: String? = null) : InternalState {
         return triggeringTransitions.firstOrNull() as InternalTransition<E>?
     }
 
-    override fun toString() = "${javaClass.simpleName}(name=$name)"
+    override fun toString() = "${this::class.simpleName}(name=$name)"
 }

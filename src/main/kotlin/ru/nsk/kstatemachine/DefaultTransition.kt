@@ -59,5 +59,5 @@ open class DefaultTransition<E : Event>(
 
     override fun notify(block: Transition.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
-    override fun toString() = "${javaClass.simpleName}(name=$name)"
+    override fun toString() = "${this::class.simpleName}(name=$name)"
 }

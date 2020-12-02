@@ -78,11 +78,6 @@ fun main() {
             }
         }
 
-        onTransition { sourceState, targetState, event, argument ->
-            // It is possible to listen to all transitions in one place
-            // instead of listening to each transition separately
-        }
-
         // Set Logger to enable internal state machine logging on your platform
         logger = StateMachine.Logger { println(it) }
 
@@ -103,14 +98,19 @@ fun main() {
             )
         }
     }
-    // Add listener after state machine setup
+
+    // Listen to transition changes during or after state machine setup
     stateMachine.onTransition { sourceState, targetState, event, argument ->
+        // It is possible to listen to all transitions in one place
+        // instead of listening to each transition separately
         println("Transition from $sourceState to $targetState on $event with $argument")
     }
-    // Listen to state changes
+
+    // Listen to state changes during or after state machine setup
     stateMachine.onStateChanged { state ->
         println("State changed to $state")
     }
+
     // Access state after state machine setup
     val greenState = stateMachine.requireState("Green")
     greenState.onEntry { /* add state listener */ }

@@ -44,5 +44,5 @@ abstract class EventMatcher<E : Event>(val eventClass: KClass<E>) {
 
 inline fun <reified E : Event> TransitionBuilder<E>.isInstanceOf() = EventMatcher.isInstanceOf<E>()
 inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = object : EventMatcher<E>(E::class) {
-    override fun match(value: Event) = value.javaClass.kotlin === E::class
+    override fun match(value: Event) = value::class == E::class
 }

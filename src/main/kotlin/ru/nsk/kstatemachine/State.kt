@@ -38,7 +38,7 @@ operator fun <S : State> S.invoke(block: S.() -> Unit) = block()
  */
 inline fun <reified E : Event> State.findTransition(): Transition<E>? {
     @Suppress("UNCHECKED_CAST")
-    return transitions.find { it.eventMatcher.eventClass === E::class } as Transition<E>?
+    return transitions.find { it.eventMatcher.eventClass == E::class } as Transition<E>?
 }
 
 inline fun <reified E : Event> State.requireTransition() =

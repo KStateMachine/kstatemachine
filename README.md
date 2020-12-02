@@ -3,26 +3,33 @@
 ![Build with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20with%20Gradle/badge.svg)
 
 ## Overview
+
 Final State machine (FSM) library written in Kotlin.
 
 Main features are:
+
 * Kotlin DSL syntax for defining state machine structure;
-* conditional transitions, when target state is dynamic 
-and is calculated in a moment of event processing depending on application business logic;
+* conditional transitions, when target state is dynamic and is calculated in a moment of event
+  processing depending on application business logic;
 * argument passing for events and transitions.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
 Building blocks (main classes) of this library:
-* `StateMachine` - is a collection of states and transitions between them, processes events when started;
+
+* `StateMachine` - is a collection of states and transitions between them, processes events when
+  started;
 * `State` - states where state machine can go to;
-* `Event` - is a base class for events or other words actions which are processed by state machine and may trigger transitions;
+* `Event` - is a base class for events or other words actions which are processed by state machine
+  and may trigger transitions;
 * `Transition` - is an operation of moving from one state to another.
 
 Working with state machine consists of two steps:
-* creation and initial setup, here you may set custom actions (side effects) via listeners
- to be performed on entering/exiting states and transitions between them;
+
+* creation and initial setup, here you may set custom actions (side effects) via listeners to be
+  performed on entering/exiting states and transitions between them;
 * processing events, on which state machine can switch its states and notify about changes.
+
 ```kotlin
 val stateMachine = createStateMachine {
     // Setup is made in this block ...
@@ -34,9 +41,11 @@ stateMachine.processEvent(SwitchYellowEvent)
 ```
 
 ## Sample state machine diagram
+
 ![Traffic light diagram](./doc/images/trafficlight.png)
 
 ## Minimal syntax sample code
+
 ```kotlin
 // Define events
 object SwitchGreenEvent1 : Event
@@ -77,7 +86,9 @@ fun main() {
 ```
 
 ## Create state machine
+
 First we create a state machine with `createStateMachine()` function:
+
 ```kotlin
 val stateMachine = createStateMachine(
     "Traffic lights" // Name is convenient for debugging, and may be omitted
@@ -87,21 +98,26 @@ val stateMachine = createStateMachine(
 ```
 
 ## Setup states
-In state machine setup block we define states with `state()` function and set initial one with `setInitialState()`:
+
+In state machine setup block we define states with `state()` function and set initial one
+with `setInitialState()`:
+
 ```kotlin
 createStateMachine {
     // Use state() function to create State and add it to StateMachine
     val greenState = state()
     // State name is optional and is useful to getting state instance
     // after state machine setup and for debugging
-    val yellowState = state("Yellow") 
-    
+    val yellowState = state("Yellow")
+
     // State machine enters this state after setup is complete
     setInitialState(greenState)
 }
 ```
 
-You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set initial state:
+You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set
+initial state:
+
 ```kotlin
 createStateMachine {
     initialState("green")
@@ -110,6 +126,7 @@ createStateMachine {
 ```
 
 You can use `State` subclasses with `addState()` function:
+
 ```kotlin
 object SomeState : DefaultState()
 
@@ -120,6 +137,7 @@ createStateMachine {
 ```
 
 In state setup blocks we can add listeners for states:
+
 ```kotlin
 state {
     onEntry { println("Green light is switched on") }
@@ -127,22 +145,27 @@ state {
 }
 ```
 
-Or even shorter: 
+Or even shorter:
+
 ```kotlin
 state().onEntry { /*...*/ }
 ```
 
 Or the same with explicit syntax:
+
 ```kotlin
 val greenState = state()
-greenState.addListener(object: State.Listener {
+greenState.addListener(object : State.Listener {
     override fun onEntry(transitionParams: TransitionParams<*>) {}
     override fun onExit(transitionParams: TransitionParams<*>) {}
 })
 ```
 
 ## Setup transitions
-When we have multiple states we should say for each one, which events will trigger transitions to another states:
+
+When we have multiple states we should say for each one, which events will trigger transitions to
+another states:
+
 ```kotlin
 greenState {
     // Setup transition which is triggered on SwitchYellowEvent
@@ -152,11 +175,13 @@ greenState {
     }
 }
 ```
-_Note: only one transition is possible per event type. 
-This means you cannot have multiple transitions parametrized with same `Event` subclass._
 
-Transition may have no target state (`targetState` is null) which means that state machine stays 
-in current state when such transition triggers:
+_Note: only one transition is possible per event type. This means you cannot have multiple
+transitions parametrized with same `Event` subclass._
+
+Transition may have no target state (`targetState` is null) which means that state machine stays in
+current state when such transition triggers:
+
 ```kotlin
 greenState {
     transition<SwitchYellowEvent>()
@@ -164,6 +189,7 @@ greenState {
 ```
 
 Same as for states we can listen to transition triggering:
+
 ```kotlin
 transition<SwitchYellowEvent> {
     targetState = yellowState
@@ -171,8 +197,9 @@ transition<SwitchYellowEvent> {
 }
 ```
 
-There might be many transitions from one state to another. 
-It is possible to listen to all of them in state machine setup block:
+There might be many transitions from one state to another. It is possible to listen to all of them
+in state machine setup block:
+
 ```kotlin
 createStateMachine {
     //...
@@ -183,15 +210,19 @@ createStateMachine {
 ``` 
 
 ## Conditional transitions
-State machine becomes more powerful tool when you can choose target state 
-depending on your business logic (some external state).
+
+State machine becomes more powerful tool when you can choose target state depending on your business
+logic (some external state).
 
 There are three options in choosing direction of next state:
+
 * `stay` - in this case transition is triggered but state is not changed;
 * `targetState` - transition is triggered and state machine goes to a specified state;
 * `noTransition` - transition is not triggered.
 
-To use conditional transitions you pass a lambda into `transitionConditionally()` function which makes desired decision: 
+To use conditional transitions you pass a lambda into `transitionConditionally()` function which
+makes desired decision:
+
 ```kotlin
 redState {
     // A conditional transition helps to control when it 
@@ -200,9 +231,9 @@ redState {
         direction = {
             // Suppose you have a function returning some 
             // business logic value which may differ
-            fun getCondition() = 0 
-            
-            when(getCondition()) {
+            fun getCondition() = 0
+
+            when (getCondition()) {
                 0 -> targetState(greenState)
                 1 -> targetState(yellowState)
                 2 -> stay()
@@ -216,7 +247,9 @@ redState {
 ```
 
 ## Logging
+
 You can enable internal state machine logging on your platform:
+
 ```kotlin
 createStateMachine {
     //...
@@ -227,8 +260,10 @@ createStateMachine {
 ```
 
 ## Error handling
-By default, state machine simply ignores events that does not match any defined transition.
-You can see those events if logging is enabled or use custom `IgnoredEventHandler`:
+
+By default, state machine simply ignores events that does not match any defined transition. You can
+see those events if logging is enabled or use custom `IgnoredEventHandler`:
+
 ```kotlin
 createStateMachine {
     //...
@@ -238,9 +273,10 @@ createStateMachine {
 }
 ```
 
-It is not allowed to call `processEvent()` while state machine is already processing event.
-For example from notification listener. By default, state machine will throw exception in this case, 
-but you can set custom `PendingEventHandler`:
+It is not allowed to call `processEvent()` while state machine is already processing event. For
+example from notification listener. By default, state machine will throw exception in this case, but
+you can set custom `PendingEventHandler`:
+
 ```kotlin
 createStateMachine {
     //...
@@ -255,13 +291,15 @@ createStateMachine {
 ```
 
 ## Arguments
+
 _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
 
 ### Event argument
-Usually if event may hold some data we define Event subclass, it is type safe. 
-Sometimes if data is optional it may be simpler to use event argument. 
-You can specify arbitrary argument with an event in `processEvent()` function.
-Then you can get this argument in state and transition listeners. 
+
+Usually if event may hold some data we define Event subclass, it is type safe. Sometimes if data is
+optional it may be simpler to use event argument. You can specify arbitrary argument with an event
+in `processEvent()` function. Then you can get this argument in state and transition listeners.
+
 ```kotlin
 val stateMachine = createStateMachine {
     state("offState").onEntry {
@@ -274,7 +312,9 @@ stateMachine.processEvent(TurnOn, 42)
 ```
 
 ### Transition argument
+
 If transition listener produce some data, you can pass it to target state as a transition argument:
+
 ```kotlin
 val second = state("second").onEntry {
     println("Transition argument: ${it.transition.argument}")
@@ -286,33 +326,42 @@ state("first") {
     }
 }
 ```
-_Note: it is up to user to control that argument field is set from one listener.
-You can use some mutable data structure and fill it from multiple listeners._
+
+_Note: it is up to user to control that argument field is set from one listener. You can use some
+mutable data structure and fill it from multiple listeners._
 
 ## Multi threading
-State machine is designed to work in single thread.
-So if you need to process events from different threads you can post them to some thread safe queue
-and start single thread which will pull events from that queue in a loop and call `processEvent()` function.
+
+State machine is designed to work in single thread. So if you need to process events from different
+threads you can post them to some thread safe queue and start single thread which will pull events
+from that queue in a loop and call `processEvent()` function.
 
 ## Do not
-State machine is a powerful tool to control states so let it do its job, 
-do not select target state by sending different event types depending on business logic state, 
-let the state machine to make decision for you.
+
+State machine is a powerful tool to control states so let it do its job, do not select target state
+by sending different event types depending on business logic state, let the state machine to make
+decision for you.
 
 Wrong:
+
 ```kotin
 if (somethingHappend)
     stateMachine.processEvent(FirstEvent)
 else 
     stateMachine.processEvent(SecondEvent)
 ```
+
 Correct - let the state machine to make decisions on an event:
+
 ```kotin
 stateMachine.processEvent(SomethingHappenedEvent)
 ```
 
 ## Full syntax sample code
-This sample shows different syntax variants and library possibilities in one place, so it looks messy.
+
+This sample shows different syntax variants and library possibilities in one place, so it looks
+messy.
+
 ```kotlin
 // Define events
 object SwitchGreenEvent : Event
@@ -383,16 +432,11 @@ fun main() {
                 // and data from state subclass
                 onTriggered {
                     println(
-                     "Switching state with argument: ${it.argument}, " +
-                             "and data: ${this@redState.data}"
+                        "Switching state with argument: ${it.argument}, " +
+                                "and data: ${this@redState.data}"
                     )
                 }
             }
-        }
-
-        onTransition { sourceState, targetState, event, argument ->
-            // It is possible to listen to all transitions in one place
-            // instead of listening to each transition separately
         }
 
         // Set Logger to enable internal state machine logging on your platform
@@ -415,14 +459,19 @@ fun main() {
             )
         }
     }
-    // Add listener after state machine setup
+
+    // Listen to transition changes during or after state machine setup
     stateMachine.onTransition { sourceState, targetState, event, argument ->
+        // It is possible to listen to all transitions in one place
+        // instead of listening to each transition separately
         println("Transition from $sourceState to $targetState on $event with $argument")
     }
-    // Listen to state changes
+
+    // Listen to state changes during or after state machine setup
     stateMachine.onStateChanged { state ->
         println("State changed to $state")
     }
+
     // Access state after state machine setup
     val greenState = stateMachine.requireState("Green")
     greenState.onEntry { /* add state listener */ }

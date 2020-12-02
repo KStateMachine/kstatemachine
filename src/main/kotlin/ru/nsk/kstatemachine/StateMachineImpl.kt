@@ -132,7 +132,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         )
     }
 
-    override fun toString() = "${javaClass.simpleName}(name=$name)"
+    override fun toString() = "${this::class.simpleName}(name=$name)"
 
     private fun notify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
