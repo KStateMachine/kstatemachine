@@ -15,7 +15,7 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    implementation(project(":library"))
+    implementation(project(":kstatemachine"))
 }
 
 application {

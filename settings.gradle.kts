@@ -1,4 +1,4 @@
 
 rootProject.name = "KStateMachine"
 
-include("library", "samples")
+include("kstatemachine", "samples")
