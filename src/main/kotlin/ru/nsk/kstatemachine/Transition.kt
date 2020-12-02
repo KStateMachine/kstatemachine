@@ -42,6 +42,7 @@ interface InternalTransition<E : Event> : Transition<E> {
 
 inline fun <reified E : Event> Transition<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
     addListener(object : Transition.Listener {
+        @Suppress("UNCHECKED_CAST")
         override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
     })
 }

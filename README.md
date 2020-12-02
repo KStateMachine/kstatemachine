@@ -11,7 +11,7 @@ Main features are:
 and is calculated in a moment of event processing depending on application business logic;
 * argument passing for events and transitions.
 
-_The library is currently in a development phase. Your are welcome to propose useful features._
+_The library is currently in a development phase. You are welcome to propose useful features._
 
 Building blocks (main classes) of this library:
 * `StateMachine` - is a collection of states and transitions between them, processes events when started;
@@ -77,7 +77,7 @@ fun main() {
 ```
 
 ## Create state machine
-First of all we create a state machine with `createStateMachine()` function:
+First we create a state machine with `createStateMachine()` function:
 ```kotlin
 val stateMachine = createStateMachine(
     "Traffic lights" // Name is convenient for debugging, and may be omitted
@@ -227,7 +227,7 @@ createStateMachine {
 ```
 
 ## Error handling
-By default state machine simply ignores events that does not match any defined transition.
+By default, state machine simply ignores events that does not match any defined transition.
 You can see those events if logging is enabled or use custom `IgnoredEventHandler`:
 ```kotlin
 createStateMachine {
@@ -239,8 +239,8 @@ createStateMachine {
 ```
 
 It is not allowed to call `processEvent()` while state machine is already processing event.
-For example from notification listener. By default state machine will throw exception in this case.
-But you can set custom `PendingEventHandler`:
+For example from notification listener. By default, state machine will throw exception in this case, 
+but you can set custom `PendingEventHandler`:
 ```kotlin
 createStateMachine {
     //...
@@ -259,8 +259,8 @@ _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
 
 ### Event argument
 Usually if event may hold some data we define Event subclass, it is type safe. 
-But sometimes if data is optional it may be simpler to use event argument. 
-You can specify arbitrary argument with event in `processEvent()` function.
+Sometimes if data is optional it may be simpler to use event argument. 
+You can specify arbitrary argument with an event in `processEvent()` function.
 Then you can get this argument in state and transition listeners. 
 ```kotlin
 val stateMachine = createStateMachine {
@@ -306,7 +306,7 @@ if (somethingHappend)
 else 
     stateMachine.processEvent(SecondEvent)
 ```
-Correct - let the state machine to make decisions on event:
+Correct - let the state machine to make decisions on an event:
 ```kotin
 stateMachine.processEvent(SomethingHappenedEvent)
 ```
@@ -382,7 +382,10 @@ fun main() {
                 // It is possible to access argument passed to processEvent() function
                 // and data from state subclass
                 onTriggered {
-                    println("Switching state with argument: ${it.argument}, and data: ${this@redState.data}")
+                    println(
+                     "Switching state with argument: ${it.argument}, " +
+                             "and data: ${this@redState.data}"
+                    )
                 }
             }
         }

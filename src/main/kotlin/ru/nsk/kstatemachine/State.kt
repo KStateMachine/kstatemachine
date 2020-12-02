@@ -37,6 +37,7 @@ operator fun <S : State> S.invoke(block: S.() -> Unit) = block()
  * Get transition by Event class. This might be used to start listening to transition after state machine setup.
  */
 inline fun <reified E : Event> State.findTransition(): Transition<E>? {
+    @Suppress("UNCHECKED_CAST")
     return transitions.find { it.eventMatcher.eventClass === E::class } as Transition<E>?
 }
 

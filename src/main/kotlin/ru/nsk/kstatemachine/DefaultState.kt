@@ -33,6 +33,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>? {
         val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
         check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
+        @Suppress("UNCHECKED_CAST")
         return triggeringTransitions.firstOrNull() as InternalTransition<E>?
     }
 

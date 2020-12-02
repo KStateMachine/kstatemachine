@@ -70,7 +70,10 @@ fun main() {
                 // It is possible to access argument passed to processEvent() function
                 // and data from state subclass
                 onTriggered {
-                    println("Switching state with argument: ${it.argument}, and data: ${this@redState.data}")
+                    println(
+                        "Switching state with argument: ${it.argument}, " +
+                                "and data: ${this@redState.data}"
+                    )
                 }
             }
         }

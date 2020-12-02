@@ -22,6 +22,7 @@ inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline bloc
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
 
     listener = object : Transition.Listener {
+        @Suppress("UNCHECKED_CAST")
         override fun onTriggered(transitionParams: TransitionParams<*>) =
             block(transitionParams as TransitionParams<E>)
     }
