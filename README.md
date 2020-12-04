@@ -309,7 +309,7 @@ Some of state machines are infinite, but other ones may finish.
 State machine that was finished stops to process incoming events.
 To make state machine finishing, add `FinalState` to it with `finalState()` function 
 or add any subclass of `FinalState` with `addState()` function.
-When state machine is finished it notifies its listeners with `onFinished()` callback.
+State machine finishes when enters `FinalState` and notifies its listeners with `onFinished()` callback.
 
 ```kotlin
 createStateMachine {
