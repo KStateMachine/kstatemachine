@@ -26,6 +26,8 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
      * Access to this field must be thread safe.
      */
     private var isProcessingEvent = false
+    private var isStarted = false
+    private var isFinished = false
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
@@ -71,9 +73,13 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
 
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
+        check(isStarted) { "$this is not started, call start() first" }
+        if (isFinished) log("$this is finished, ignoring event $event, with argument $argument")
+
         if (isProcessingEvent)
             pendingEventHandler.onPendingEvent(event, argument)
         isProcessingEvent = true
+
         try {
             val fromState = currentState!!
             val transition = fromState.findTransitionByEvent(event)
@@ -111,13 +117,24 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         currentState = state
 
+        val finish = state is FinalState
+        if (finish) isFinished = true
+
         log("$this entering $state")
-        state.notify { onEntry(transitionParams) }
-        notify { onStateChanged(state) }
+
+        state.notify {
+            onEntry(transitionParams)
+            if (finish) onExit(transitionParams)
+        }
+
+        notify {
+            onStateChanged(state)
+            if (finish) onFinished()
+        }
     }
 
     internal fun start() {
-        val currentState = currentState!!
+        val currentState = checkNotNull(currentState) { "Initial state is not set, call setInitialState() first" }
 
         setCurrentState(
             currentState,
@@ -130,6 +147,8 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
                 ), StartEvent
             )
         )
+
+        isStarted = true
     }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"

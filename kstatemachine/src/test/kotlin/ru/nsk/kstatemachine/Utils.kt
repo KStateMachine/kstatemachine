@@ -7,6 +7,7 @@ object SecondEvent : Event
 
 interface Callbacks {
     fun onStateChanged(state: State)
+    fun onFinished()
     fun onIgnoredEvent(event: Event)
     fun onTriggeringEvent(event: Event)
     fun onEntryState(state: State)

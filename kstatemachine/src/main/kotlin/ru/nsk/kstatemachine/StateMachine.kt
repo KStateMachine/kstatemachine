@@ -48,6 +48,11 @@ interface StateMachine {
          * This method will also be triggered on adding listener with a current state of a state machine.
          */
         fun onStateChanged(newState: State) {}
+
+        /**
+         * Notifies that state machine finished (entered [FinalState]) and will not accept events any more.
+         */
+        fun onFinished() {}
     }
 
     /**
@@ -83,6 +88,12 @@ fun StateMachine.onStateChanged(block: (newState: State) -> Unit) {
     })
 }
 
+fun StateMachine.onFinished(block: () -> Unit) {
+    addListener(object : StateMachine.Listener {
+        override fun onFinished() = block()
+    })
+}
+
 /**
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [StateMachine.findState] and for debugging.
@@ -97,6 +108,8 @@ fun StateMachine.initialState(name: String? = null, init: StateBlock? = null): S
     setInitialState(state)
     return state
 }
+
+fun StateMachine.finalState(name: String? = null, init: StateBlock? = null) = addState(DefaultFinalState(name), init)
 
 /**
  * Factory method for creating [StateMachine]

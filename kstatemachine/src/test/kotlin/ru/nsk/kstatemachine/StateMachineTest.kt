@@ -14,7 +14,7 @@ private object OffEvent : Event
 class StateMachineTest {
     @Test
     fun noInitialState() {
-        shouldThrow<Exception> {
+        shouldThrow<IllegalStateException> {
             createStateMachine {}
         }
     }
@@ -205,5 +205,33 @@ class StateMachineTest {
         assertThat(stateMachine.requireState("first"), sameInstance(first))
         assertThat(stateMachine.requireState("second"), sameInstance(second))
         shouldThrow<IllegalArgumentException> { stateMachine.requireState("third") }
+    }
+
+    @Test
+    fun processEventBeforeStarted() {
+        createStateMachine {
+            initialState("first")
+            shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
+        }
+    }
+
+    @Test
+    fun finishingStateMachine() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var final: State
+        createStateMachine {
+            final = finalState("final") {
+                onEntry { callbacks.onEntryState(this) }
+                onExit { callbacks.onExitState(this) }
+            }
+            setInitialState(final)
+
+            onFinished { callbacks.onFinished() }
+        }
+
+        then(callbacks).should().onEntryState(final)
+        then(callbacks).should().onExitState(final)
+        then(callbacks).should().onFinished()
     }
 }

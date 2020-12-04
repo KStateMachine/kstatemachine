@@ -39,3 +39,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }
+
+class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
+    override fun <E : Event> addTransition(transition: Transition<E>) =
+        throw UnsupportedOperationException("FinalState can not have transitions")
+}

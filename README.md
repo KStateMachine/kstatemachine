@@ -303,6 +303,25 @@ createStateMachine {
 }
 ```
 
+## Finishing state machine
+
+Some of state machines are infinite, but other ones may finish.
+State machine that was finished stops to process incoming events.
+To make state machine finishing, add `FinalState` to it with `finalState()` function 
+or add any subclass of `FinalState` with `addState()` function.
+When state machine is finished it notifies its listeners with `onFinished()` callback.
+
+```kotlin
+createStateMachine {
+    final = finalState("final")
+    setInitialState(final)
+
+    onFinished { println("State machine is finished") }
+}
+```
+
+_Note: `FinalState` can not have transitions._
+
 ## Arguments
 
 _Note: Type of arguments is `Any?`, so it is not type safe ot use them._

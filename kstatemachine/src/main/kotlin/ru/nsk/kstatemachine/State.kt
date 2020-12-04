@@ -24,6 +24,11 @@ interface State {
 }
 
 /**
+ * When [StateMachine] enters this state it finishes and does not accept events any more.
+ */
+interface FinalState : InternalState
+
+/**
  * Defines state API for internal library usage. All states must implement this interface.
  */
 interface InternalState : State {
