@@ -53,48 +53,42 @@ stateMachine.processEvent(SwitchGreenEvent)
 stateMachine.processEvent(SwitchYellowEvent)
 ```
 
-## Sample state machine diagram
+## Finishing traffic light sample
 
 ![Traffic light diagram](./doc/images/trafficlight.png)
 
-## Minimal syntax sample code
-
 ```kotlin
 // Define events
-object SwitchGreenEvent1 : Event
-object SwitchYellowEvent1 : Event
-object SwitchRedEvent1 : Event
+object YellowEvent : Event
+object RedEvent : Event
 
 fun main() {
     // Setup state machine
     val stateMachine = createStateMachine {
-        // Setup states
-        val greenState = initialState("Green")
-        val yellowState = state()
-        val redState = state {
-            // Setup transitions
-            transition<SwitchGreenEvent1> { targetState = greenState }
-        }
+        // Create and configure states
+        val redState = finalState()
 
-        // Configure states
-        greenState {
-            onEntry { println("Enter $name state") }
-            onExit { println("Exit $name state") }
-            transition<SwitchYellowEvent1> { targetState = yellowState }
-        }
-
-        yellowState {
-            transition<SwitchRedEvent1> {
+        val yellowState = state {
+            // Setup transition on RedEvent
+            transition<RedEvent> {
                 targetState = redState
+                // Add transition listener
                 onTriggered { println("Transition on ${it.event}") }
             }
+        }
+
+        initialState("Green") {
+            // Add state listeners
+            onEntry { println("Enter $name state") }
+            onExit { println("Exit $name state") }
+
+            transition<YellowEvent> { targetState = yellowState }
         }
     }
 
     // Process events
-    stateMachine.processEvent(SwitchYellowEvent1)
-    stateMachine.processEvent(SwitchRedEvent1)
-    stateMachine.processEvent(SwitchGreenEvent1)
+    stateMachine.processEvent(YellowEvent)
+    stateMachine.processEvent(RedEvent)
 }
 ```
 
