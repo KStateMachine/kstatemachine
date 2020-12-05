@@ -1,6 +1,7 @@
 # KStateMachine
 
 ![Build with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20with%20Gradle/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 
 KStateMachine is a Kotlin DSL library for creating finite state
 machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and listen to its states and
