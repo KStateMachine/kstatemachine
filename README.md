@@ -128,7 +128,7 @@ initial state:
 
 ```kotlin
 createStateMachine {
-    initialState("green")
+    val greenState = initialState("Green")
     //...
 }
 ```
@@ -157,16 +157,6 @@ Or even shorter:
 
 ```kotlin
 state().onEntry { /*...*/ }
-```
-
-Or the same with explicit syntax:
-
-```kotlin
-val greenState = state()
-greenState.addListener(object : State.Listener {
-    override fun onEntry(transitionParams: TransitionParams<*>) {}
-    override fun onExit(transitionParams: TransitionParams<*>) {}
-})
 ```
 
 ## Setup transitions

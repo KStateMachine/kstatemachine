@@ -28,7 +28,7 @@ interface Transition<E : Event> {
     fun isTriggeringEvent(event: Event): Boolean
 
     interface Listener {
-        fun onTriggered(transitionParams: TransitionParams<*>) {}
+        fun onTriggered(transitionParams: TransitionParams<*>) = Unit
     }
 }
 

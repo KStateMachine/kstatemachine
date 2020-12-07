@@ -41,18 +41,18 @@ interface StateMachine {
          * this method might be used to listen to all transitions in one place
          * instead of listening for each transition separately.
          */
-        fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) {}
+        fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) = Unit
 
         /**
          * Notifies about state changes.
          * This method will also be triggered on adding listener with a current state of a state machine.
          */
-        fun onStateChanged(newState: State) {}
+        fun onStateChanged(newState: State) = Unit
 
         /**
          * Notifies that state machine finished (entered [FinalState]) and will not accept events any more.
          */
-        fun onFinished() {}
+        fun onFinished() = Unit
     }
 
     /**
@@ -75,20 +75,27 @@ interface StateMachine {
 typealias StateBlock = State.() -> Unit
 typealias StateMachineBlock = StateMachine.() -> Unit
 
-fun StateMachine.onTransition(block: (sourceState: State, targetState: State?, event: Event, argument: Any?) -> Unit) {
+fun StateMachine.onTransition(
+    block: StateMachine.(
+        sourceState: State,
+        targetState: State?,
+        event: Event,
+        argument: Any?
+    ) -> Unit
+) {
     addListener(object : StateMachine.Listener {
         override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
             block(sourceState, targetState, event, argument)
     })
 }
 
-fun StateMachine.onStateChanged(block: (newState: State) -> Unit) {
+fun StateMachine.onStateChanged(block: StateMachine.(newState: State) -> Unit) {
     addListener(object : StateMachine.Listener {
         override fun onStateChanged(newState: State) = block(newState)
     })
 }
 
-fun StateMachine.onFinished(block: () -> Unit) {
+fun StateMachine.onFinished(block: StateMachine.() -> Unit) {
     addListener(object : StateMachine.Listener {
         override fun onFinished() = block()
     })

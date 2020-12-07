@@ -3,78 +3,55 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 
 // Define events
-object SwitchGreenEvent : Event
 object SwitchYellowEvent : Event
 
 // Events often hold some useful data
 class SwitchRedEvent(val data: String) : Event
 
 // You can subclass State if you need
-class RedState(val data: Int) : DefaultState("Red")
+class YellowState(val data: Int) : DefaultState("Yellow")
 
 fun main() {
     val stateMachine = createStateMachine(
         "Traffic lights" // StateMachine name is optional
     ) {
         // Setup simple states
-        val greenState = state("Green") // State name is optional
-        val yellowState = state("Yellow")
+        val greenState = initialState("Green") // State name is optional
         // You can use state subclasses
-        val redState = addState(RedState(42))
-        setInitialState(greenState)
+        val yellowState = addState(YellowState(42))
+        // State machine finishes when enters final state
+        val redState = finalState("Red")
 
         greenState {
-            // Add listeners which are notified on entering or exiting from the state
-            onEntry { println("Green light is switched on") }
-            onExit { println("Green light will be switched off") }
-            // Add transition which is triggered on SwitchYellowEvent
+            // Add state listeners
+            onEntry { println("Enter $name state") }
+            onExit { println("Exit $name state") }
+            // Setup transition on SwitchYellowEvent
             transition<SwitchYellowEvent> {
                 targetState = yellowState
-                // Add listener which is notified when transition is triggered
-                onTriggered { println("Switching to $targetState") }
+                // Add transition listener and access argument passed to processEvent() function
+                onTriggered { println("Switching to $targetState, with argument: ${it.argument}") }
             }
         }
-
-        // Explicit syntax for adding listeners
-        greenState.addListener(object : State.Listener {
-            override fun onEntry(transitionParams: TransitionParams<*>) {}
-            override fun onExit(transitionParams: TransitionParams<*>) {}
-        })
 
         yellowState {
-            val transition = transition<SwitchRedEvent> {
-                targetState = redState
-                // It is possible to access data from events
-                onTriggered { println("Switching to $targetState, data: ${it.event.data}") }
-            }
-            transition.onTriggered { /* Just another way for adding listeners */ }
-        }
-        yellowState.onEntry { /* Just another way for adding listeners*/ }
-
-        redState {
             // A conditional transition helps to control when it
             // should be triggered and determine its target state
-            transitionConditionally<SwitchGreenEvent> {
+            transitionConditionally<SwitchRedEvent> {
                 direction = {
                     // Suppose you have a function
                     // returning some business logic value which may differ
                     fun getCondition() = 0
 
                     when (getCondition()) {
-                        0 -> targetState(greenState)
-                        1 -> targetState(yellowState)
+                        0 -> targetState(redState)
+                        1 -> targetState(greenState)
                         2 -> stay()
                         else -> noTransition()
                     }
                 }
-                // It is possible to access argument passed to processEvent() function
-                // and data from state subclass
-                onTriggered {
-                    println(
-                        "Switching state with argument: ${it.argument}, " +
-                                "and data: ${this@redState.data}"
-                    )
-                }
+                // Access data from a State subclass
+                onTriggered { println("Switching state with data: ${this@yellowState.data}") }
             }
         }
 
@@ -85,7 +62,7 @@ fun main() {
         // for event that does not match any transition,
         // for example to throw exceptions on ignored events
         ignoredEventHandler = StateMachine.IgnoredEventHandler { currentState, event, argument ->
-            error("$currentState does not have transition for $event with $argument")
+            error("$currentState does not have transition for $event, argument: $argument")
         }
 
         // Set custom PendingEventHandler which is triggered
@@ -99,29 +76,32 @@ fun main() {
         }
     }
 
-    // Listen to transition changes during or after state machine setup
+    // Listen to transition changes in or after state machine setup block
     stateMachine.onTransition { sourceState, targetState, event, argument ->
         // It is possible to listen to all transitions in one place
         // instead of listening to each transition separately
-        println("Transition from $sourceState to $targetState on $event with $argument")
+        println("Transition from $sourceState to $targetState on $event with argument: $argument")
     }
 
-    // Listen to state changes during or after state machine setup
+    // Listen to state changes in or after state machine setup block
     stateMachine.onStateChanged { state ->
         println("State changed to $state")
     }
 
+    // Listen to state changes in or after state machine setup block
+    stateMachine.onFinished {
+        println("$name finished")
+    }
+
     // Access state after state machine setup
     val greenState = stateMachine.requireState("Green")
-    greenState.onEntry { /* add state listener */ }
+    greenState.onEntry { /* Add state listener */ }
 
-    // Access transition after state machine setup
+    // Access state transition after state machine setup
     val transitionToYellow = greenState.requireTransition<SwitchYellowEvent>()
     transitionToYellow.onTriggered { /* Add transition listener */ }
 
-    // Process events
-    stateMachine.processEvent(SwitchYellowEvent)
+    // Process events passing arguments optionally
+    stateMachine.processEvent(SwitchYellowEvent, "Get ready!")
     stateMachine.processEvent(SwitchRedEvent("Stop!"))
-    // Process event and pass argument, instead of adding nullable property to event class
-    stateMachine.processEvent(SwitchGreenEvent, "Go!")
 }

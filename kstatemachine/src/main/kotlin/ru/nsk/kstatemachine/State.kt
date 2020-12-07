@@ -18,8 +18,8 @@ interface State {
         findTransition(name) ?: throw IllegalArgumentException("Transition $name not found")
 
     interface Listener {
-        fun onEntry(transitionParams: TransitionParams<*>) {}
-        fun onExit(transitionParams: TransitionParams<*>) {}
+        fun onEntry(transitionParams: TransitionParams<*>) = Unit
+        fun onExit(transitionParams: TransitionParams<*>) = Unit
     }
 }
 
