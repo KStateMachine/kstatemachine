@@ -7,9 +7,9 @@ object YellowEvent : Event
 object RedEvent : Event
 
 fun main() {
-    // Setup state machine
+    // Create state machine and configure its states in a setup block
     val stateMachine = createStateMachine {
-        // Create and configure states
+        // State machine finishes when enters final state
         val redState = finalState()
 
         val yellowState = state {

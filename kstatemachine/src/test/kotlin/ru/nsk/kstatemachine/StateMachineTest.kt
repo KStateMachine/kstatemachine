@@ -216,6 +216,22 @@ class StateMachineTest {
     }
 
     @Test
+    fun onStartedListener() {
+        val callbacks = mock<Callbacks>()
+        val inOrder = inOrder(callbacks)
+
+        lateinit var first: State
+        createStateMachine {
+            first = initialState {
+                onEntry { callbacks.onEntryState(this) }
+            }
+            onStarted { callbacks.onStarted() }
+        }
+        then(callbacks).should(inOrder).onStarted()
+        then(callbacks).should(inOrder).onEntryState(first)
+    }
+
+    @Test
     fun finishingStateMachine() {
         val callbacks = mock<Callbacks>()
 

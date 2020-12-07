@@ -36,6 +36,11 @@ interface StateMachine {
 
     interface Listener {
         /**
+         * Notifies that state machine started (entered initial state).
+         */
+        fun onStarted() = Unit
+
+        /**
          * This method is called when transition is performed.
          * There might be may transitions from one state to another,
          * this method might be used to listen to all transitions in one place
@@ -74,6 +79,12 @@ interface StateMachine {
 
 typealias StateBlock = State.() -> Unit
 typealias StateMachineBlock = StateMachine.() -> Unit
+
+fun StateMachine.onStarted(block: StateMachine.() -> Unit) {
+    addListener(object : StateMachine.Listener {
+        override fun onStarted() = block()
+    })
+}
 
 fun StateMachine.onTransition(
     block: StateMachine.(

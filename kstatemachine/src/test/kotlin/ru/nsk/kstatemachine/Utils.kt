@@ -6,6 +6,7 @@ object FirstEvent : Event
 object SecondEvent : Event
 
 interface Callbacks {
+    fun onStarted()
     fun onStateChanged(state: State)
     fun onFinished()
     fun onIgnoredEvent(event: Event)

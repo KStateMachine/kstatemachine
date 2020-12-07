@@ -64,9 +64,9 @@ object YellowEvent : Event
 object RedEvent : Event
 
 fun main() {
-    // Setup state machine
+    // Create state machine and configure its states in a setup block
     val stateMachine = createStateMachine {
-        // Create and configure states
+        // State machine finishes when enters final state
         val redState = finalState()
 
         val yellowState = state {
@@ -290,11 +290,10 @@ createStateMachine {
 
 ## Finishing state machine
 
-Some of state machines are infinite, but other ones may finish.
-State machine that was finished stops to process incoming events.
-To make state machine finishing, add `FinalState` to it with `finalState()` function 
-or add any subclass of `FinalState` with `addState()` function.
-State machine finishes when enters `FinalState` and notifies its listeners with `onFinished()` callback.
+Some of state machines are infinite, but other ones may finish. State machine that was finished
+stops to process incoming events. To make state machine finishing, add `FinalState` to it
+with `finalState()` function or add any subclass of `FinalState` with `addState()` function. State
+machine finishes when enters `FinalState` and notifies its listeners with `onFinished()` callback.
 
 ```kotlin
 createStateMachine {

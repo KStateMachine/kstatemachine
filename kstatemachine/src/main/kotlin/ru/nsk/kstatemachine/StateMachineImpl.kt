@@ -136,6 +136,9 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
     internal fun start() {
         val currentState = checkNotNull(currentState) { "Initial state is not set, call setInitialState() first" }
 
+        isStarted = true
+        notify { onStarted() }
+
         setCurrentState(
             currentState,
             TransitionParams(
@@ -147,8 +150,6 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
                 ), StartEvent
             )
         )
-
-        isStarted = true
     }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"

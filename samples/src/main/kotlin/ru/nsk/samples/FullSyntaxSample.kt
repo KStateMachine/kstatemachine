@@ -74,23 +74,26 @@ fun main() {
                         "Do not call processEvent() from notification listeners."
             )
         }
+
+        // Listen to state machine start
+        onStarted {
+            println("$name started")
+        }
     }
 
-    // Listen to transition changes in or after state machine setup block
-    stateMachine.onTransition { sourceState, targetState, event, argument ->
-        // It is possible to listen to all transitions in one place
-        // instead of listening to each transition separately
-        println("Transition from $sourceState to $targetState on $event with argument: $argument")
-    }
-
-    // Listen to state changes in or after state machine setup block
-    stateMachine.onStateChanged { state ->
-        println("State changed to $state")
-    }
-
-    // Listen to state changes in or after state machine setup block
-    stateMachine.onFinished {
-        println("$name finished")
+    // Listeners might be added in or after setup block
+    with(stateMachine) {
+        onTransition { sourceState, targetState, event, argument ->
+            // It is possible to listen to all transitions in one place
+            // instead of listening to each transition separately
+            println("Transition from $sourceState to $targetState on $event with argument: $argument")
+        }
+        onStateChanged { state ->
+            println("State changed to $state")
+        }
+        onFinished {
+            println("$name finished")
+        }
     }
 
     // Access state after state machine setup
@@ -101,7 +104,7 @@ fun main() {
     val transitionToYellow = greenState.requireTransition<SwitchYellowEvent>()
     transitionToYellow.onTriggered { /* Add transition listener */ }
 
-    // Process events passing arguments optionally
+    // Process events, passing arguments optionally
     stateMachine.processEvent(SwitchYellowEvent, "Get ready!")
     stateMachine.processEvent(SwitchRedEvent("Stop!"))
 }
