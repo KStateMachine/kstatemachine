@@ -4,7 +4,7 @@ package ru.nsk.kstatemachine
 annotation class StateMachineDslMarker
 
 @StateMachineDslMarker
-interface StateMachine {
+interface StateMachine : VisitorAcceptor {
     val name: String?
     val states: Set<State>
     var logger: Logger
@@ -33,6 +33,10 @@ interface StateMachine {
     fun requireState(name: String): State
 
     fun processEvent(event: Event, argument: Any? = null)
+
+    override fun accept(visitor: Visitor) {
+        visitor.visit(this)
+    }
 
     interface Listener {
         /**

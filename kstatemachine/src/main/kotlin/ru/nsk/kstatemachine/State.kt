@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
 @StateMachineDslMarker
-interface State {
+interface State : VisitorAcceptor {
     val name: String?
     val transitions: Set<Transition<*>>
 
@@ -16,6 +16,10 @@ interface State {
     fun findTransition(name: String) = transitions.find { it.name == name }
     fun requireTransition(name: String) =
         findTransition(name) ?: throw IllegalArgumentException("Transition $name not found")
+
+    override fun accept(visitor: Visitor) {
+        visitor.visit(this)
+    }
 
     interface Listener {
         fun onEntry(transitionParams: TransitionParams<*>) = Unit

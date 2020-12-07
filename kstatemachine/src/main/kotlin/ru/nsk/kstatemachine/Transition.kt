@@ -8,7 +8,7 @@ interface Event
 /**
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
-interface Transition<E : Event> {
+interface Transition<E : Event> : VisitorAcceptor {
     val eventMatcher: EventMatcher<E>
     val sourceState: State
     val name: String?
@@ -26,6 +26,10 @@ interface Transition<E : Event> {
      * Check if event can trigger this [Transition]
      */
     fun isTriggeringEvent(event: Event): Boolean
+
+    override fun accept(visitor: Visitor) {
+        visitor.visit(this)
+    }
 
     interface Listener {
         fun onTriggered(transitionParams: TransitionParams<*>) = Unit
