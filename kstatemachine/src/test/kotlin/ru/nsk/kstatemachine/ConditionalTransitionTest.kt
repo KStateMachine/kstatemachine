@@ -12,7 +12,7 @@ class ConditionalTransitionTest {
         val first = object : DefaultState("first") {}
 
         val stateMachine = createStateMachine {
-            addState(first) {
+            addInitialState(first) {
                 transitionConditionally<SwitchEvent> {
                     direction = { stay() }
                     onTriggered { callbacks.onTriggeringEvent(it.event) }
@@ -20,7 +20,6 @@ class ConditionalTransitionTest {
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
-            setInitialState(first)
         }
 
         stateMachine.processEvent(SwitchEvent)

@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowUnit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
@@ -28,7 +29,7 @@ class StateMachineTest {
         lateinit var off: State
 
         val stateMachine = createStateMachine {
-            on = state("on") {
+            on = initialState("on") {
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
@@ -42,7 +43,6 @@ class StateMachineTest {
                     }
                 }
             }
-            setInitialState(on)
 
             on {
                 transition<OffEvent> {
@@ -104,23 +104,21 @@ class StateMachineTest {
     @Test
     fun addSameStateListener() {
         createStateMachine {
-            val first = state("first") {
+            initialState("first") {
                 transition<SwitchEvent>()
                 val listener = object : State.Listener {}
                 addListener(listener)
                 shouldThrow<IllegalArgumentException> { addListener(listener) }
             }
-            setInitialState(first)
         }
     }
 
     @Test
     fun addSameStateMachineListener() {
         createStateMachine {
-            val first = state("first") {
+            initialState("first") {
                 transition<SwitchEvent>()
             }
-            setInitialState(first)
 
             val listener = object : StateMachine.Listener {}
             addListener(listener)
@@ -131,14 +129,31 @@ class StateMachineTest {
     @Test
     fun addSameTransitionListener() {
         createStateMachine {
-            val first = state("first") {
+            initialState("first") {
                 val transition = transition<SwitchEvent>()
                 val listener = object : Transition.Listener {}
                 transition.addListener(listener)
                 shouldThrow<IllegalArgumentException> { transition.addListener(listener) }
             }
-            setInitialState(first)
         }
+    }
+
+    @Test
+    fun addStateAfterStart() {
+        val stateMachine = createStateMachine {
+            initialState("first")
+        }
+        shouldThrow<IllegalStateException> { stateMachine.state() }
+    }
+
+    @Test
+    fun setInitialStateAfterStart() {
+        lateinit var first: State
+        val stateMachine = createStateMachine {
+            first = initialState("first")
+        }
+
+        shouldThrowUnit<IllegalStateException> { stateMachine.setInitialState(first) }
     }
 
     @Test

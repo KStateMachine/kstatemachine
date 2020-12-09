@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine
 internal class StateMachineImpl(override val name: String?) : StateMachine {
     private val _states = mutableSetOf<State>()
     override val states: Set<State> = _states
+    override val initialState: State? = null
 
     /**
      * Might be null only before [setInitialState] call.
@@ -45,6 +46,8 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
     }
 
     override fun <S : State> addState(state: S, init: StateBlock?): S {
+        check(!isStarted) { "Can not add state after state machine started" }
+
         val name = state.name
         if (name != null)
             require(findState(name) == null) { "State with name $name already exists" }
@@ -63,11 +66,10 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
     override fun findState(name: String) = states.find { it.name == name }
     override fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
 
-    /**
-     * Now initial state is mandatory, but if we add parallel states it will not be mandatory.
-     */
     override fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
+        check(!isStarted) { "Can not change initial state after state machine started" }
+
         currentState = state as InternalState
     }
 

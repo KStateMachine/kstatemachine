@@ -7,6 +7,7 @@ annotation class StateMachineDslMarker
 interface StateMachine : VisitorAcceptor {
     val name: String?
     val states: Set<State>
+    val initialState: State?
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
@@ -120,18 +121,17 @@ fun StateMachine.onFinished(block: StateMachine.() -> Unit) {
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [StateMachine.findState] and for debugging.
  */
-fun StateMachine.state(name: String? = null, init: StateBlock? = null) = addState(DefaultState(name), init)
+fun StateMachine.state(name: String? = null, init: StateBlock? = null) =
+    addState(DefaultState(name), init)
 
 /**
  * A shortcut for [state] and [StateMachine.setInitialState] calls
  */
-fun StateMachine.initialState(name: String? = null, init: StateBlock? = null): State {
-    val state = addState(DefaultState(name), init)
-    setInitialState(state)
-    return state
-}
+fun StateMachine.initialState(name: String? = null, init: StateBlock? = null) =
+    addInitialState(DefaultState(name), init)
 
-fun StateMachine.finalState(name: String? = null, init: StateBlock? = null) = addState(DefaultFinalState(name), init)
+fun StateMachine.finalState(name: String? = null, init: StateBlock? = null) =
+    addState(DefaultFinalState(name), init)
 
 /**
  * Factory method for creating [StateMachine]
