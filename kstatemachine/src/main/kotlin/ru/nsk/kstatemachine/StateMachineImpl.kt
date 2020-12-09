@@ -3,7 +3,9 @@ package ru.nsk.kstatemachine
 internal class StateMachineImpl(override val name: String?) : StateMachine {
     private val _states = mutableSetOf<State>()
     override val states: Set<State> = _states
-    override val initialState: State? = null
+    private var _initialState: State? = null
+    override val initialState
+        get() = _initialState
 
     /**
      * Might be null only before [setInitialState] call.
@@ -64,6 +66,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         check(!isStarted) { "Can not change initial state after state machine started" }
 
+        _initialState = state
         currentState = state as InternalState
     }
 

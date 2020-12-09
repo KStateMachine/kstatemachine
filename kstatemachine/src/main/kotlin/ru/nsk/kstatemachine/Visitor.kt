@@ -31,20 +31,25 @@ class ExportDotVisitor : Visitor {
         // add states
         stateMachine.states.forEach { visit(it) }
 
-        // add transitions
+        // add initial transition
         builder.appendLine()
+        val initialState = stateMachine.initialState
+        if (initialState != null) builder.appendLine("    $INITIAL -> ${initialState.graphName()};")
+
+        // add transitions
         stateMachine.states.forEach { it.transitions.forEach { transition -> visit(transition) } }
 
         // add finish transitions
-
         val finalStates = stateMachine.states.filterIsInstance<FinalState>()
         finalStates.forEach {
             builder.appendLine("    ${it.graphName()} -> $FINISH;")
         }
 
+        // add initial and finish nodes
         builder.appendLine()
-        builder.appendLine("    $INITIAL [ shape = point ]")
-        if (finalStates.isNotEmpty()) builder.appendLine("    $FINISH [ shape = point ]")
+        if (initialState != null) builder.appendLine("    $INITIAL [ shape = point ];")
+        if (finalStates.isNotEmpty()) builder.appendLine("    $FINISH [ shape = point ];")
+
         builder.appendLine("}")
     }
 
