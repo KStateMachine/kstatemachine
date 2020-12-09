@@ -23,9 +23,10 @@ at `<project_root>/kstatemachine/build/libs/`
 Main features are:
 
 * Kotlin DSL syntax for defining state machine structure;
-* conditional transitions, when target state is dynamic and is calculated in a moment of event
+* Conditional transitions, when target state is dynamic and is calculated in a moment of event
   processing depending on application business logic;
-* argument passing for events and transitions.
+* Argument passing for events and transitions;
+* Export state machine structure to [Graphviz](https://graphviz.org/).
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
@@ -40,9 +41,9 @@ Building blocks (main classes) of this library:
 
 Working with state machine consists of two steps:
 
-* creation and initial setup, here you may set custom actions (side effects) via listeners to be
+* Creation and initial setup, here you may set custom actions (side effects) via listeners to be
   performed on entering/exiting states and transitions between them;
-* processing events, on which state machine can switch its states and notify about changes.
+* Processing events, on which state machine can switch its states and notify about changes.
 
 ```kotlin
 val stateMachine = createStateMachine {
@@ -148,8 +149,8 @@ In state setup blocks we can add listeners for states:
 
 ```kotlin
 state {
-    onEntry { println("Green light is switched on") }
-    onExit { println("Green light will be switched off") }
+    onEntry { println("Enter $name state") }
+    onExit { println("Exit $name state") }
 }
 ```
 
@@ -351,6 +352,26 @@ mutable data structure and fill it from multiple listeners._
 State machine is designed to work in single thread. So if you need to process events from different
 threads you can post them to some thread safe queue and start single thread which will pull events
 from that queue in a loop and call `processEvent()` function.
+
+## Export to Graphviz
+
+Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs.
+Use `exportToDot()` extension function to export state machine to DOT language.
+
+```kotlin
+val stateMachine = createStateMachine {
+    // ...
+}
+
+val dot = stateMachine.exportToDot()
+println(dot)
+```
+
+Copy/paste resulting output to any tool supporting DOT language, for example:
+* https://dreampuf.github.io/GraphvizOnline/
+* http://magjac.com/graphviz-visual-editor/
+
+_Note: conditional transitions depending on external data might not work._
 
 ## Do not
 
