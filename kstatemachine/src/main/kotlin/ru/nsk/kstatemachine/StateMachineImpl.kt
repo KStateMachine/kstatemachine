@@ -57,12 +57,6 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         return state
     }
 
-    override fun <S : State> addInitialState(state: S, init: StateBlock?): S {
-        addState(state, init)
-        setInitialState(state)
-        return state
-    }
-
     override fun findState(name: String) = states.find { it.name == name }
     override fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
 

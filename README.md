@@ -78,7 +78,7 @@ fun main() {
             }
         }
 
-        initialState("Green") {
+        initialState {
             // Add state listeners
             onEntry { println("Enter $name state") }
             onExit { println("Exit $name state") }
@@ -99,7 +99,7 @@ First we create a state machine with `createStateMachine()` function:
 
 ```kotlin
 val stateMachine = createStateMachine(
-    "Traffic lights" // Name is convenient for debugging, and may be omitted
+    "Traffic lights" // Optional name is convenient for logging debugging and export
 ) {
     // Set up state machine ...
 }
@@ -133,7 +133,7 @@ createStateMachine {
 }
 ```
 
-You can use `State` subclasses with `addState()` function:
+You can use `State` subclasses with `addState()` and `addInitialState()` functions:
 
 ```kotlin
 object SomeState : DefaultState()

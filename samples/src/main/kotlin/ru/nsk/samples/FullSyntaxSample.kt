@@ -8,16 +8,16 @@ object SwitchYellowEvent : Event
 // Events often hold some useful data
 class SwitchRedEvent(val data: String) : Event
 
-// You can subclass State if you need
+// Subclass DefaultState if you need
 class YellowState(val data: Int) : DefaultState("Yellow")
 
 fun main() {
     val stateMachine = createStateMachine(
         "Traffic lights" // StateMachine name is optional
     ) {
-        // Setup simple states
+        // Setup states
         val greenState = initialState("Green") // State name is optional
-        // You can use state subclasses
+        // Use state subclasses
         val yellowState = addState(YellowState(42))
         // State machine finishes when enters final state
         val redState = finalState("Red")
@@ -84,7 +84,7 @@ fun main() {
     // Listeners might be added in or after setup block
     with(stateMachine) {
         onTransition { sourceState, targetState, event, argument ->
-            // It is possible to listen to all transitions in one place
+            // Listen to all transitions in one place
             // instead of listening to each transition separately
             println("Transition from $sourceState to $targetState on $event with argument: $argument")
         }

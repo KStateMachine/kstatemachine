@@ -18,11 +18,6 @@ interface StateMachine : VisitorAcceptor {
     fun <S : State> addState(state: S, init: StateBlock? = null): S
 
     /**
-     * A shortcut for [addState] and [setInitialState] calls
-     */
-    fun <S : State> addInitialState(state: S, init: StateBlock? = null): S
-
-    /**
      * Currently initial state is mandatory, but if we add parallel states it might change.
      */
     fun setInitialState(state: State)
@@ -129,6 +124,15 @@ fun StateMachine.state(name: String? = null, init: StateBlock? = null) =
  */
 fun StateMachine.initialState(name: String? = null, init: StateBlock? = null) =
     addInitialState(DefaultState(name), init)
+
+/**
+ * A shortcut for [StateMachine.addState] and [StateMachine.setInitialState] calls
+ */
+fun <S : State> StateMachine.addInitialState(state: S, init: StateBlock? = null): S {
+    addState(state, init)
+    setInitialState(state)
+    return state
+}
 
 fun StateMachine.finalState(name: String? = null, init: StateBlock? = null) =
     addState(DefaultFinalState(name), init)

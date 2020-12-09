@@ -21,7 +21,7 @@ fun main() {
             }
         }
 
-        initialState("Green") {
+        initialState {
             // Add state listeners
             onEntry { println("Enter $name state") }
             onExit { println("Exit $name state") }
