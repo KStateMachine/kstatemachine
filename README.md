@@ -23,10 +23,11 @@ at `<project_root>/kstatemachine/build/libs/`
 Main features are:
 
 * Kotlin DSL syntax for defining state machine structure;
-* Conditional transitions, when target state is dynamic and is calculated in a moment of event
-  processing depending on application business logic;
-* Argument passing for events and transitions;
-* Export state machine structure to [Graphviz](https://graphviz.org/).
+* [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with
+  dynamic target state which is calculated in a moment of event processing depending on application
+  business logic;
+* [Argument](#arguments) passing for events and transitions;
+* [Export state machine](#export-to-graphviz) structure to [Graphviz](https://graphviz.org/).
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
@@ -130,7 +131,7 @@ initial state:
 ```kotlin
 createStateMachine {
     val greenState = initialState("Green")
-    //...
+    // ...
 }
 ```
 
@@ -141,7 +142,7 @@ object SomeState : DefaultState()
 
 createStateMachine {
     val someState = addState(SomeState())
-    //...
+    // ...
 }
 ```
 
@@ -201,26 +202,42 @@ in state machine setup block:
 
 ```kotlin
 createStateMachine {
-    //...
+    // ...
     onTransition { sourceState, targetState, event, argument ->
         // Listen to every performed transition here
     }
 }
-``` 
+```
 
-## Conditional transitions
+### Guarded transitions
+
+Guarded transition is triggered only if specified guard function returns true. Guarded transition is
+a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
+Use `transitionGuarded()` function to create guarded transition:
+
+```kotlin
+initialState {
+    transitionGuarded<SwitchEvent> {
+        guard = { someValue == "myValue" }
+        targetState = second
+        // ...
+    }
+}
+```
+
+### Conditional transitions
 
 State machine becomes more powerful tool when you can choose target state depending on your business
 logic (some external state).
 
-There are three options in choosing direction of next state:
+There are three options to choose transition direction:
 
-* `stay` - in this case transition is triggered but state is not changed;
-* `targetState` - transition is triggered and state machine goes to a specified state;
-* `noTransition` - transition is not triggered.
+* `stay()` - transition is triggered but state is not changed;
+* `targetState(nextState)` - transition is triggered and state machine goes to a specified state;
+* `noTransition()` - transition is not triggered.
 
-To use conditional transitions you pass a lambda into `transitionConditionally()` function which
-makes desired decision:
+Use `transitionConditionally()` function to create conditional transition and specify a function
+which makes desired decision:
 
 ```kotlin
 redState {
@@ -251,7 +268,7 @@ You can enable internal state machine logging on your platform:
 
 ```kotlin
 createStateMachine {
-    //...
+    // ...
     logger = StateMachine.Logger {
         println(it)
     }
@@ -265,7 +282,7 @@ see those events if logging is enabled or use custom `IgnoredEventHandler`:
 
 ```kotlin
 createStateMachine {
-    //...
+    // ...
     ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
         error("unexpected $event")
     }
@@ -278,7 +295,7 @@ you can set custom `PendingEventHandler`:
 
 ```kotlin
 createStateMachine {
-    //...
+    // ...
     pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
         error(
             "$this can not process pending $pendingEvent " +
@@ -322,7 +339,7 @@ val stateMachine = createStateMachine {
     state("offState").onEntry {
         println("Event ${it.event} argument: ${it.argument}")
     }
-    //...
+    // ...
 }
 // Pass argument with event
 stateMachine.processEvent(TurnOn, 42)
@@ -347,7 +364,7 @@ state("first") {
 _Note: it is up to user to control that argument field is set from one listener. You can use some
 mutable data structure and fill it from multiple listeners._
 
-## Multi threading
+## Multithreading
 
 State machine is designed to work in single thread. So if you need to process events from different
 threads you can post them to some thread safe queue and start single thread which will pull events
@@ -359,15 +376,14 @@ Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visuali
 Use `exportToDot()` extension function to export state machine to DOT language.
 
 ```kotlin
-val stateMachine = createStateMachine {
-    // ...
-}
+val stateMachine = createStateMachine { /*...*/ }
 
 val dot = stateMachine.exportToDot()
 println(dot)
 ```
 
 Copy/paste resulting output to any tool supporting DOT language, for example:
+
 * https://dreampuf.github.io/GraphvizOnline/
 * http://magjac.com/graphviz-visual-editor/
 
@@ -396,11 +412,10 @@ stateMachine.processEvent(SomethingHappenedEvent)
 
 ## Samples
 
-This sample shows different syntax variants and library possibilities in one place, so it looks
-messy.
-
-[Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
-[Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
+* [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
+  shows different syntax variants and library possibilities in one place, so it looks messy;
+* [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt);
+* [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt).
 
 ## License
 

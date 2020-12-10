@@ -66,7 +66,7 @@ fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
 }
 
 /**
- * Creates transition
+ * Creates simple transition.
  */
 inline fun <reified E : Event> State.transition(
     name: String? = null,
@@ -83,7 +83,7 @@ inline fun <reified E : Event> State.transition(
 }
 
 /**
- * Overload for transition without any parameters
+ * Overload for transition without any parameters.
  */
 inline fun <reified E : Event> State.transition(
     name: String? = null,
@@ -92,7 +92,7 @@ inline fun <reified E : Event> State.transition(
 
 /**
  * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
- * For example target state may vary depending on some condition.
+ * For example target state may be different depending on some condition.
  */
 inline fun <reified E : Event> State.transitionConditionally(
     name: String? = null,
@@ -110,7 +110,7 @@ inline fun <reified E : Event> State.transitionConditionally(
 
 /**
  * Creates guarded transition. Such transition is triggered only when guard function returns true.
- * Same behaviour might be achieved with conditional transition but this is a  way.
+ * Same behaviour might be achieved with conditional transition but guarded transition has simpler syntax.
  */
 inline fun <reified E : Event> State.transitionGuarded(
     name: String? = null,

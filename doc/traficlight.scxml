@@ -3,21 +3,21 @@
     <qt:editorinfo initialGeometry="54.15;161.43;-20;-20;40;40"/>
     <state id="GreenState">
         <qt:editorinfo geometry="161.43;161.43;-60;-50;120;100" scenegeometry="161.43;161.43;101.43;111.43;120;100"/>
-        <transition type="external" event="SwitchYellowEvent" target="YellowState">
+        <transition type="external" event="YellowEvent" target="YellowState">
             <qt:editorinfo movePoint="8.17;0"/>
         </transition>
     </state>
     <state id="YellowState">
-        <qt:editorinfo geometry="398.48;161.43;-60.16;-50;120;100" scenegeometry="398.48;161.43;338.32;111.43;120;100"/>
-        <transition type="external" target="RedState" event="SwitchRedEvent">
+        <qt:editorinfo geometry="360.72;161.43;-60.16;-50;120;100" scenegeometry="360.72;161.43;300.56;111.43;120;100"/>
+        <transition type="external" target="RedState" event="RedEvent">
             <qt:editorinfo movePoint="8.17;0"/>
         </transition>
     </state>
     <state id="RedState">
-        <qt:editorinfo geometry="634.50;161.43;-60;-50;120;100" scenegeometry="634.50;161.43;574.50;111.43;120;100"/>
+        <qt:editorinfo geometry="555.92;161.43;-60;-50;120;100" scenegeometry="555.92;161.43;495.92;111.43;120;100"/>
         <transition type="external" target="Final_1"/>
     </state>
     <final id="Final_1">
-        <qt:editorinfo geometry="745.01;161.43;-20;-20;40;40" scenegeometry="745.01;161.43;725.01;141.43;40;40"/>
+        <qt:editorinfo geometry="676.63;161.43;-20;-20;40;40" scenegeometry="676.63;161.43;656.63;141.43;40;40"/>
     </final>
 </scxml>

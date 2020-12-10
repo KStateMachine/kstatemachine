@@ -26,11 +26,18 @@ fun main() {
             // Add state listeners
             onEntry { println("Enter $name state") }
             onExit { println("Exit $name state") }
+
             // Setup transition on SwitchYellowEvent
             transition<SwitchYellowEvent> {
                 targetState = yellowState
                 // Add transition listener and access argument passed to processEvent() function
                 onTriggered { println("Switching to $targetState, with argument: ${it.argument}") }
+            }
+
+            // Setup guarded transition
+            transitionGuarded<SwitchRedEvent> {
+                guard = { false } // Never trigger this transition
+                targetState = redState
             }
         }
 
