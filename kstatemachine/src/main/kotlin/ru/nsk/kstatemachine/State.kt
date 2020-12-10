@@ -65,6 +65,9 @@ fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
     })
 }
 
+/**
+ * Creates transition
+ */
 inline fun <reified E : Event> State.transition(
     name: String? = null,
     block: (SimpleTransitionBuilder<E>.() -> Unit),
@@ -88,8 +91,8 @@ inline fun <reified E : Event> State.transition(
     addTransition(DefaultTransition(EventMatcher.isInstanceOf(), this, name))
 
 /**
- * This method may be used if transition should be performed only if some condition is met,
- * or target state may vary depending on a condition.
+ * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
+ * For example target state may vary depending on some condition.
  */
 inline fun <reified E : Event> State.transitionConditionally(
     name: String? = null,
@@ -101,6 +104,33 @@ inline fun <reified E : Event> State.transitionConditionally(
     }
 
     val transition = DefaultTransition(builder.eventMatcher, this, builder.direction, name)
+    builder.listener?.let { transition.addListener(it) }
+    return addTransition(transition)
+}
+
+/**
+ * Creates guarded transition. Such transition is triggered only when guard function returns true.
+ * Same behaviour might be achieved with conditional transition but this is a  way.
+ */
+inline fun <reified E : Event> State.transitionGuarded(
+    name: String? = null,
+    block: GuardedTransitionBuilder<E>.() -> Unit,
+): Transition<E> {
+    val builder = GuardedTransitionBuilder<E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+
+    val direction = {
+        if (builder.guard()) {
+            val target = builder.targetState
+            if (target == null) stay() else targetState(target)
+        } else {
+            noTransition()
+        }
+    }
+
+    val transition = DefaultTransition(builder.eventMatcher, this, direction, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }

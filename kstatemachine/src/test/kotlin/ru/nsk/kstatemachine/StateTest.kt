@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
@@ -7,7 +9,7 @@ class SubclassState : DefaultState() {
     val dataField = 0
 }
 
-class StateSubclassTest {
+class StateTest {
     @Test
     fun stateSubclass() {
         val stateMachine = createStateMachine {
@@ -24,13 +26,40 @@ class StateSubclassTest {
             subclassState {
                 transition<SwitchEvent> {
                     targetState = simpleState
-                    onTriggered { }
+                    onTriggered { println("Data ${this@subclassState.dataField}")}
                 }
             }
         }
 
         stateMachine.processEvent(SwitchEvent)
         stateMachine.processEvent(SwitchEvent)
+    }
+
+    @Test
+    fun guardedTransition() {
+        val callbacks = mock<Callbacks>()
+
+        var value = "value1";
+
+        val stateMachine = createStateMachine {
+            val second = state("second")
+
+            initialState("first") {
+                transitionGuarded<SwitchEvent> {
+                    guard = { value == "value2" }
+                    targetState = second
+                    onTriggered {
+                        callbacks.onTriggeringEvent(it.event)
+                    }
+                }
+            }
+        }
+
+        stateMachine.processEvent(SwitchEvent)
+        then(callbacks).shouldHaveZeroInteractions()
+        value = "value2"
+        stateMachine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeringEvent(SwitchEvent)
     }
 
     @Test
