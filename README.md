@@ -400,6 +400,7 @@ This sample shows different syntax variants and library possibilities in one pla
 messy.
 
 [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
+[Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
 
 ## License
 
