@@ -1,12 +1,6 @@
 package ru.nsk.kstatemachine
 
-internal class StateMachineImpl(override val name: String?) : StateMachine {
-    private val _states = mutableSetOf<State>()
-    override val states: Set<State> = _states
-    private var _initialState: State? = null
-    override val initialState
-        get() = _initialState
-
+internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name) {
     /**
      * Might be null only before [setInitialState] call.
      * Access to this field must be thread safe.
@@ -47,29 +41,6 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         listeners.remove(listener)
     }
 
-    override fun <S : State> addState(state: S, init: StateBlock?): S {
-        check(!isStarted) { "Can not add state after state machine started" }
-
-        val name = state.name
-        if (name != null)
-            require(findState(name) == null) { "State with name $name already exists" }
-
-        if (init != null) state.init()
-        _states += state
-        return state
-    }
-
-    override fun findState(name: String) = states.find { it.name == name }
-    override fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
-
-    override fun setInitialState(state: State) {
-        require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        check(!isStarted) { "Can not change initial state after state machine started" }
-
-        _initialState = state
-        currentState = state as InternalState
-    }
-
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
         check(isStarted) { "$this is not started, call start() first" }
@@ -93,7 +64,7 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
                     log("$this triggering $transition from $fromState")
                     transition.notify { onTriggered(transitionParams) }
 
-                    notify { onTransition(transition.sourceState, targetState, event, argument) }
+                    stateMachineNotify { onTransition(transition.sourceState, targetState, event, argument) }
                 }
 
                 targetState?.let { _ ->
@@ -126,17 +97,18 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
             if (finish) onExit(transitionParams)
         }
 
-        notify {
+        stateMachineNotify {
             onStateChanged(state)
             if (finish) onFinished()
         }
     }
 
-    internal fun start() {
-        val currentState = checkNotNull(currentState) { "Initial state is not set, call setInitialState() first" }
+    override fun start() {
+        val currentState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+        this.currentState = currentState
 
         isStarted = true
-        notify { onStarted() }
+        stateMachineNotify { onStarted() }
 
         setCurrentState(
             currentState,
@@ -151,9 +123,14 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         )
     }
 
+    override fun stop() {
+        isStarted = false
+        stateMachineNotify { onStopped() }
+    }
+
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
-    private fun notify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    private fun stateMachineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     /**
      * Initial event which is processed on state machine start

@@ -3,12 +3,27 @@ package ru.nsk.kstatemachine
 @StateMachineDslMarker
 interface State : VisitorAcceptor {
     val name: String?
+    val states: Set<State>
+    val initialState: State?
     val transitions: Set<Transition<*>>
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E>
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
+
+    fun <S : State> addState(state: S, init: StateBlock? = null): S
+
+    /**
+     * Currently initial state is mandatory, but if we add parallel states it might change.
+     */
+    fun setInitialState(state: State)
+
+    /**
+     * Get state by name. This might be used to start listening to state after state machine setup.
+     */
+    fun findState(name: String): State?
+    fun requireState(name: String): State
 
     /**
      * Get transition by name. This might be used to start listening to transition after state machine setup.
@@ -24,6 +39,10 @@ interface State : VisitorAcceptor {
     interface Listener {
         fun onEntry(transitionParams: TransitionParams<*>) = Unit
         fun onExit(transitionParams: TransitionParams<*>) = Unit
+        /**
+         * Notifies that child [FinalState] is entered.
+         */
+        fun onFinished() = Unit
     }
 }
 
@@ -64,6 +83,37 @@ fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
         override fun onExit(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
 }
+
+fun <S : State> S.onFinished(block: S.() -> Unit) {
+    addListener(object : State.Listener {
+        override fun onFinished() = block()
+    })
+}
+
+/**
+ * @param name is optional and is useful for getting state instance after state machine setup
+ * with [State.findState] and for debugging.
+ */
+fun State.state(name: String? = null, init: StateBlock? = null) =
+    addState(DefaultState(name), init)
+
+/**
+ * A shortcut for [state] and [State.setInitialState] calls
+ */
+fun State.initialState(name: String? = null, init: StateBlock? = null) =
+    addInitialState(DefaultState(name), init)
+
+/**
+ * A shortcut for [State.addState] and [State.setInitialState] calls
+ */
+fun <S : State> State.addInitialState(state: S, init: StateBlock? = null): S {
+    addState(state, init)
+    setInitialState(state)
+    return state
+}
+
+fun State.finalState(name: String? = null, init: StateBlock? = null) =
+    addState(DefaultFinalState(name), init)
 
 /**
  * Creates simple transition.

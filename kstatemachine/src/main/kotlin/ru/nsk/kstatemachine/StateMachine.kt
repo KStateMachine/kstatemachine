@@ -4,10 +4,7 @@ package ru.nsk.kstatemachine
 annotation class StateMachineDslMarker
 
 @StateMachineDslMarker
-interface StateMachine : VisitorAcceptor {
-    val name: String?
-    val states: Set<State>
-    val initialState: State?
+interface StateMachine : InternalState {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
@@ -15,18 +12,15 @@ interface StateMachine : VisitorAcceptor {
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
-    fun <S : State> addState(state: S, init: StateBlock? = null): S
+    /**
+     * Starts state machine
+     */
+    fun start()
 
     /**
-     * Currently initial state is mandatory, but if we add parallel states it might change.
+     * Forces state machine to stop
      */
-    fun setInitialState(state: State)
-
-    /**
-     * Get state by name. This might be used to start listening to state after state machine setup.
-     */
-    fun findState(name: String): State?
-    fun requireState(name: String): State
+    fun stop()
 
     fun processEvent(event: Event, argument: Any? = null)
 
@@ -55,9 +49,9 @@ interface StateMachine : VisitorAcceptor {
         fun onStateChanged(newState: State) = Unit
 
         /**
-         * Notifies that state machine finished (entered [FinalState]) and will not accept events any more.
+         * Notifies that state machine has stopped.
          */
-        fun onFinished() = Unit
+        fun onStopped() = Unit
     }
 
     /**
@@ -106,46 +100,16 @@ fun StateMachine.onStateChanged(block: StateMachine.(newState: State) -> Unit) {
     })
 }
 
-fun StateMachine.onFinished(block: StateMachine.() -> Unit) {
-    addListener(object : StateMachine.Listener {
-        override fun onFinished() = block()
-    })
-}
-
-/**
- * @param name is optional and is useful for getting state instance after state machine setup
- * with [StateMachine.findState] and for debugging.
- */
-fun StateMachine.state(name: String? = null, init: StateBlock? = null) =
-    addState(DefaultState(name), init)
-
-/**
- * A shortcut for [state] and [StateMachine.setInitialState] calls
- */
-fun StateMachine.initialState(name: String? = null, init: StateBlock? = null) =
-    addInitialState(DefaultState(name), init)
-
-/**
- * A shortcut for [StateMachine.addState] and [StateMachine.setInitialState] calls
- */
-fun <S : State> StateMachine.addInitialState(state: S, init: StateBlock? = null): S {
-    addState(state, init)
-    setInitialState(state)
-    return state
-}
-
-fun StateMachine.finalState(name: String? = null, init: StateBlock? = null) =
-    addState(DefaultFinalState(name), init)
-
 /**
  * Factory method for creating [StateMachine]
  */
 fun createStateMachine(
     name: String? = null,
+    start: Boolean = true,
     init: StateMachineBlock
 ): StateMachine = StateMachineImpl(name).apply {
     init()
-    start()
+    if (start) start()
 }
 
 @StateMachineDslMarker
