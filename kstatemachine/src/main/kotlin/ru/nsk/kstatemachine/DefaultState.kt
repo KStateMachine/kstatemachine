@@ -97,7 +97,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun asState() = this
 
     override fun doProcessEvent(event: Event, argument: Any?) {
-        val machine = machine
+        val machine = machine as InternalStateMachine
 
         val fromState = currentState!!
         val transition = fromState.findTransitionByEvent(event)
@@ -106,13 +106,13 @@ open class DefaultState(override val name: String? = null) : InternalState {
             val transitionParams = TransitionParams(transition, event, argument)
 
             val direction = transition.produceTargetStateDirection()
-            val targetState = if (direction is TargetState) direction.targetState else null
+            val targetState = if (direction is TargetState) direction.targetState as InternalState else null
 
             if (direction !is NoTransition) {
                 machine.log("$this triggering $transition from $fromState")
                 transition.notify { onTriggered(transitionParams) }
 
-                machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+                machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
             targetState?.let { _ ->
@@ -128,7 +128,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 
     override fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
-        val machine = machine
+        val machine = machine as InternalStateMachine
 
         currentState = state
 
@@ -143,7 +143,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
         if (finish) notify { onFinished() }
 
-        machineNotify {
+        machine.machineNotify {
             onStateChanged(state)
         }
     }

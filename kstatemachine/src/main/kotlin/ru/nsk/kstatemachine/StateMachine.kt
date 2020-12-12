@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 @DslMarker
 annotation class StateMachineDslMarker
 
-interface StateMachine : InternalStateMachine {
+interface StateMachine : InternalState {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
@@ -72,7 +72,10 @@ interface StateMachine : InternalStateMachine {
     }
 }
 
-interface InternalStateMachine : InternalState {
+/**
+ * Defines state machine API for internal library usage.
+ */
+interface InternalStateMachine : StateMachine {
     fun machineNotify(block: StateMachine.Listener.() -> Unit)
 }
 

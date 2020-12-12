@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name) {
+internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
     /** Access to this field must be thread safe. */
     private val listeners = mutableSetOf<StateMachine.Listener>()
     override var logger = StateMachine.Logger {}
