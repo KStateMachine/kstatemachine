@@ -7,6 +7,7 @@ interface StateMachine : InternalState {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
+    val isRunning: Boolean
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -26,6 +27,8 @@ interface StateMachine : InternalState {
     override fun accept(visitor: Visitor) {
         visitor.visit(this)
     }
+
+    fun log(message: String) = logger.log(message)
 
     interface Listener {
         /**

@@ -41,6 +41,7 @@ interface State : VisitorAcceptor {
     interface Listener {
         fun onEntry(transitionParams: TransitionParams<*>) = Unit
         fun onExit(transitionParams: TransitionParams<*>) = Unit
+
         /**
          * Notifies that child [FinalState] is entered.
          */
@@ -60,6 +61,8 @@ interface InternalState : State {
     fun setParent(parent: State)
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
+    fun doProcessEvent(event: Event, argument: Any?)
+    fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>)
 }
 
 operator fun <S : State> S.invoke(block: S.() -> Unit) = block()

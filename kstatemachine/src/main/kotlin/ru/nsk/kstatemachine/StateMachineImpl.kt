@@ -1,12 +1,6 @@
 package ru.nsk.kstatemachine
 
 internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name) {
-    /**
-     * Might be null only before [setInitialState] call.
-     * Access to this field must be thread safe.
-     */
-    private var currentState: InternalState? = null
-
     /** Access to this field must be thread safe. */
     private val listeners = mutableSetOf<StateMachine.Listener>()
     override var logger = StateMachine.Logger {}
@@ -23,8 +17,10 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
      * Access to this field must be thread safe.
      */
     private var isProcessingEvent = false
-    private var isStarted = false
-    private var isFinished = false
+
+    private var _isRunning = false
+    override val isRunning
+        get() = _isRunning
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
@@ -43,7 +39,7 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
 
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
-        check(isStarted) { "$this is not started, call start() first" }
+        check(isRunning) { "$this is not started, call start() first" }
         if (isFinished) log("$this is finished, ignoring event $event, with argument $argument")
 
         if (isProcessingEvent)
@@ -51,63 +47,17 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
         isProcessingEvent = true
 
         try {
-            val fromState = currentState!!
-            val transition = fromState.findTransitionByEvent(event)
-
-            if (transition != null) {
-                val transitionParams = TransitionParams(transition, event, argument)
-
-                val direction = transition.produceTargetStateDirection()
-                val targetState = if (direction is TargetState) direction.targetState as InternalState else null
-
-                if (direction !is NoTransition) {
-                    log("$this triggering $transition from $fromState")
-                    transition.notify { onTriggered(transitionParams) }
-
-                    stateMachineNotify { onTransition(transition.sourceState, targetState, event, argument) }
-                }
-
-                targetState?.let { _ ->
-                    log("$this exiting $fromState")
-                    fromState.notify { onExit(transitionParams) }
-
-                    setCurrentState(targetState, transitionParams)
-                }
-            } else {
-                log("$this ignored $event as transition from $fromState, was not found")
-                ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
-            }
+            doProcessEvent(event, argument)
         } finally {
             isProcessingEvent = false
         }
     }
 
-    private fun log(message: String) = logger.log(message)
-
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
-        currentState = state
-
-        val finish = state is FinalState
-        if (finish) isFinished = true
-
-        log("$this entering $state")
-
-        state.notify {
-            onEntry(transitionParams)
-            if (finish) onExit(transitionParams)
-        }
-        if (finish) notify { onFinished() }
-
-        stateMachineNotify {
-            onStateChanged(state)
-        }
-    }
-
     override fun start() {
-        check(!isStarted) { "$this is already started" }
+        check(!isRunning) { "$this is already started" }
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
-        isStarted = true
+        _isRunning = true
         stateMachineNotify { onStarted() }
 
         setCurrentState(
@@ -124,7 +74,7 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
     }
 
     override fun stop() {
-        isStarted = false
+        _isRunning = false
         stateMachineNotify { onStopped() }
     }
 

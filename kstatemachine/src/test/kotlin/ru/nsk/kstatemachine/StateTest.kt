@@ -26,7 +26,7 @@ class StateTest {
             subclassState {
                 transition<SwitchEvent> {
                     targetState = simpleState
-                    onTriggered { println("Data ${this@subclassState.dataField}")}
+                    onTriggered { println("Data ${this@subclassState.dataField}") }
                 }
             }
         }

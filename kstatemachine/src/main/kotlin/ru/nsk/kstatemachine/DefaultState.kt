@@ -8,6 +8,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
     private val _states = mutableSetOf<State>()
     override val states: Set<State> = _states
 
+    /**
+     * Might be null only before [setInitialState] call.
+     */
+    protected var currentState: InternalState? = null
+
     private var _initialState: InternalState? = null
     override val initialState
         get() = _initialState
@@ -21,6 +26,9 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     private val _transitions = mutableSetOf<Transition<*>>()
     override val transitions: Set<Transition<*>> = _transitions
+
+
+    protected var isFinished = false
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
@@ -37,8 +45,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 
     override fun <S : State> addState(state: S, init: StateBlock?): S {
-        check(!isStarted) { "Can not add state after state machine started" }
-
+        check(!machine.isRunning) { "Can not add state after state machine started" }
 
         require(!_states.contains(state)) { "$state already added" }
         val name = state.name
@@ -56,7 +63,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        check(!isStarted) { "Can not change initial state after state machine started" }
+        check(!machine.isRunning) { "Can not change initial state after state machine started" }
 
         _initialState = state as InternalState
     }
@@ -86,6 +93,58 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
+
+    override fun doProcessEvent(event: Event, argument: Any?) {
+        val machine = machine
+
+        val fromState = currentState!!
+        val transition = fromState.findTransitionByEvent(event)
+
+        if (transition != null) {
+            val transitionParams = TransitionParams(transition, event, argument)
+
+            val direction = transition.produceTargetStateDirection()
+            val targetState = if (direction is TargetState) direction.targetState else null
+
+            if (direction !is NoTransition) {
+                machine.log("$this triggering $transition from $fromState")
+                transition.notify { onTriggered(transitionParams) }
+
+                stateMachineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+            }
+
+            targetState?.let { _ ->
+                machine.log("$this exiting $fromState")
+                fromState.notify { onExit(transitionParams) }
+
+                setCurrentState(targetState, transitionParams)
+            }
+        } else {
+            machine.log("$this ignored $event as transition from $fromState, was not found")
+            machine.ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
+        }
+    }
+
+    override fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+        val machine = machine
+
+        currentState = state
+
+        val finish = state is FinalState
+        if (finish) isFinished = true
+
+        machine.log("$this entering $state")
+
+        state.notify {
+            onEntry(transitionParams)
+            if (finish) onExit(transitionParams)
+        }
+        if (finish) notify { onFinished() }
+
+        stateMachineNotify {
+            onStateChanged(state)
+        }
+    }
 }
 
 class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
