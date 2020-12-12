@@ -12,6 +12,13 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override val initialState
         get() = _initialState
 
+    private var _parent: State? = null
+    override val parent: State
+        get() = requireNotNull(_parent) { "Parent state not set, call setParent() first" }
+
+    override val machine: StateMachine
+        get() = if (this is StateMachine) this else parent.machine
+
     private val _transitions = mutableSetOf<Transition<*>>()
     override val transitions: Set<Transition<*>> = _transitions
 
@@ -32,6 +39,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun <S : State> addState(state: S, init: StateBlock?): S {
         check(!isStarted) { "Can not add state after state machine started" }
 
+
         require(!_states.contains(state)) { "$state already added" }
         val name = state.name
         if (name != null)
@@ -39,6 +47,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
         if (init != null) state.init()
         _states += state
+        (state as InternalState).setParent(this)
         return state
     }
 
@@ -51,6 +60,14 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
         _initialState = state as InternalState
     }
+
+    override fun setParent(parent: State) {
+        _parent = parent
+    }
+
+    /**
+     * Get transition by name. This might be used to start listening to transition after state machine setup.
+     */
 
     /**
      * Get transition by name. This might be used to start listening to transition after state machine setup.

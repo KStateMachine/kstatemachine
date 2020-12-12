@@ -5,6 +5,8 @@ interface State : VisitorAcceptor {
     val name: String?
     val states: Set<State>
     val initialState: State?
+    val parent: State
+    val machine: StateMachine
     val transitions: Set<Transition<*>>
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E>
@@ -55,6 +57,7 @@ interface FinalState : InternalState
  * Defines state API for internal library usage. All states must implement this interface.
  */
 interface InternalState : State {
+    fun setParent(parent: State)
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
 }

@@ -3,7 +3,6 @@ package ru.nsk.kstatemachine
 @DslMarker
 annotation class StateMachineDslMarker
 
-@StateMachineDslMarker
 interface StateMachine : InternalState {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler

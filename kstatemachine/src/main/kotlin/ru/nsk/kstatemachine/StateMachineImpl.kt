@@ -96,27 +96,27 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
             onEntry(transitionParams)
             if (finish) onExit(transitionParams)
         }
+        if (finish) notify { onFinished() }
 
         stateMachineNotify {
             onStateChanged(state)
-            if (finish) onFinished()
         }
     }
 
     override fun start() {
-        val currentState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
-        this.currentState = currentState
+        check(!isStarted) { "$this is already started" }
+        val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         isStarted = true
         stateMachineNotify { onStarted() }
 
         setCurrentState(
-            currentState,
+            initialState,
             TransitionParams(
                 DefaultTransition(
                     EventMatcher.isInstanceOf(),
-                    currentState,
-                    currentState,
+                    initialState,
+                    initialState,
                     "Starting"
                 ), StartEvent
             )
