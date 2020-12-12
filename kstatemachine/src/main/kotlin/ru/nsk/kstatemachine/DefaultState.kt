@@ -94,6 +94,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
+    override fun asState() = this
+
     override fun doProcessEvent(event: Event, argument: Any?) {
         val machine = machine
 
@@ -110,7 +112,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 machine.log("$this triggering $transition from $fromState")
                 transition.notify { onTriggered(transitionParams) }
 
-                stateMachineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+                machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
             targetState?.let { _ ->
@@ -141,7 +143,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
         if (finish) notify { onFinished() }
 
-        stateMachineNotify {
+        machineNotify {
             onStateChanged(state)
         }
     }

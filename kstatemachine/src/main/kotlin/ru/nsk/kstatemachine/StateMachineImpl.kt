@@ -58,7 +58,7 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         _isRunning = true
-        stateMachineNotify { onStarted() }
+        machineNotify { onStarted() }
 
         setCurrentState(
             initialState,
@@ -75,12 +75,12 @@ internal class StateMachineImpl(name: String?) : StateMachine, DefaultState(name
 
     override fun stop() {
         _isRunning = false
-        stateMachineNotify { onStopped() }
+        machineNotify { onStopped() }
     }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
-    private fun stateMachineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    override fun machineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     /**
      * Initial event which is processed on state machine start
