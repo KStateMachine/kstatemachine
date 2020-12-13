@@ -11,20 +11,20 @@ class ConditionalTransitionTest {
 
         val first = object : DefaultState("first") {}
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             addInitialState(first) {
                 transitionConditionally<SwitchEvent> {
                     direction = { stay() }
-                    onTriggered { callbacks.onTriggeringEvent(it.event) }
+                    onTriggered { callbacks.onTriggeredTransition(it.event) }
                 }
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
         then(callbacks).should().onEntryState(first)
-        then(callbacks).should().onTriggeringEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
 
@@ -34,23 +34,23 @@ class ConditionalTransitionTest {
 
         val first = object : DefaultState("first") {}
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             addInitialState(first) {
                 transitionConditionally<SwitchEvent> {
                     direction = { noTransition() }
-                    onTriggered { callbacks.onTriggeringEvent(it.event) }
+                    onTriggered { callbacks.onTriggeredTransition(it.event) }
                 }
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
             onTransition { _, _, event, _ ->
-                callbacks.onTriggeringEvent(event)
+                callbacks.onTriggeredTransition(event)
             }
         }
 
         then(callbacks).should().onEntryState(first)
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
 
@@ -61,12 +61,12 @@ class ConditionalTransitionTest {
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             addInitialState(first) {
                 transitionConditionally<SwitchEvent> {
                     direction = { targetState(second) }
                     onTriggered {
-                        callbacks.onTriggeringEvent(it.event)
+                        callbacks.onTriggeredTransition(it.event)
                     }
                 }
                 onEntry { callbacks.onEntryState(this) }
@@ -80,8 +80,8 @@ class ConditionalTransitionTest {
 
         then(callbacks).should().onEntryState(first)
 
-        stateMachine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeringEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).should().onExitState(first)
         then(callbacks).should().onEntryState(second)
         then(callbacks).shouldHaveNoMoreInteractions()
@@ -94,11 +94,11 @@ class ConditionalTransitionTest {
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             addInitialState(first) {
                 transitionConditionally<SwitchEvent> {
                     direction = { targetState(second) }
-                    onTriggered { callbacks.onTriggeringEvent(it.event) }
+                    onTriggered { callbacks.onTriggeredTransition(it.event) }
                 }
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
@@ -111,8 +111,8 @@ class ConditionalTransitionTest {
 
         then(callbacks).should().onEntryState(first)
 
-        stateMachine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeringEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).should().onExitState(first)
         then(callbacks).should().onEntryState(second)
         then(callbacks).shouldHaveNoMoreInteractions()

@@ -4,7 +4,7 @@ package ru.nsk.kstatemachine
  * Interface for visiting state machine components
  */
 interface Visitor {
-    fun visit(stateMachine: StateMachine)
+    fun visit(machine: StateMachine)
     fun visit(state: State)
     fun visit(transition: Transition<*>)
 }
@@ -24,23 +24,23 @@ class ExportDotVisitor : Visitor {
 
     fun export() = builder.toString()
 
-    override fun visit(stateMachine: StateMachine) {
+    override fun visit(machine: StateMachine) {
         builder.appendLine("digraph state_machine {")
-        stateMachine.name?.let { builder.appendLine("    label=\"$it\";") }
+        machine.name?.let { builder.appendLine("    label=\"$it\";") }
 
         // add states
-        stateMachine.states.forEach { visit(it) }
+        machine.states.forEach { visit(it) }
 
         // add initial transition
         builder.appendLine()
-        val initialState = stateMachine.initialState
+        val initialState = machine.initialState
         if (initialState != null) builder.appendLine("    $INITIAL -> ${initialState.graphName()};")
 
         // add transitions
-        stateMachine.states.forEach { it.transitions.forEach { transition -> visit(transition) } }
+        machine.states.forEach { it.transitions.forEach { transition -> visit(transition) } }
 
         // add finish transitions
-        val finalStates = stateMachine.states.filterIsInstance<FinalState>()
+        val finalStates = machine.states.filterIsInstance<FinalState>()
         finalStates.forEach {
             builder.appendLine("    ${it.graphName()} -> $FINISH;")
         }

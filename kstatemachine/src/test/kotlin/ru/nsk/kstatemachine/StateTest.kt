@@ -12,7 +12,7 @@ class SubclassState : DefaultState() {
 class StateTest {
     @Test
     fun stateSubclass() {
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             // simple but little bit explicit, easy to forget addState() call
             val subclassState = addState(SubclassState())
 
@@ -31,8 +31,8 @@ class StateTest {
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
     }
 
     @Test
@@ -41,7 +41,7 @@ class StateTest {
 
         var value = "value1";
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             val second = state("second")
 
             initialState("first") {
@@ -49,17 +49,17 @@ class StateTest {
                     guard = { value == "value2" }
                     targetState = second
                     onTriggered {
-                        callbacks.onTriggeringEvent(it.event)
+                        callbacks.onTriggeredTransition(it.event)
                     }
                 }
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
         then(callbacks).shouldHaveZeroInteractions()
         value = "value2"
-        stateMachine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeringEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
     }
 
     @Test

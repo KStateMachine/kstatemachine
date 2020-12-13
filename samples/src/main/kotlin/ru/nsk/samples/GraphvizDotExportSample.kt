@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.*
 object SwitchEvent : Event
 
 fun main() {
-    val stateMachine = createStateMachine("Traffic lights") {
+    val machine = createStateMachine("Traffic lights") {
         val greenState = initialState("Green")
         val redState = finalState("Red")
 
@@ -21,6 +21,6 @@ fun main() {
         }
     }
 
-    val dot = stateMachine.exportToDot()
+    val dot = machine.exportToDot()
     println(dot)
 }

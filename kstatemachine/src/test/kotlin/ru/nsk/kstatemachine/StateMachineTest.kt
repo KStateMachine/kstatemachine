@@ -28,7 +28,7 @@ class StateMachineTest {
         lateinit var on: State
         lateinit var off: State
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             on = initialState("on") {
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
@@ -39,7 +39,7 @@ class StateMachineTest {
                 transition<OnEvent> {
                     targetState = on
                     onTriggered {
-                        callbacks.onTriggeringEvent(it.event)
+                        callbacks.onTriggeredTransition(it.event)
                     }
                 }
             }
@@ -48,7 +48,7 @@ class StateMachineTest {
                 transition<OffEvent> {
                     targetState = off
                     onTriggered {
-                        callbacks.onTriggeringEvent(it.event)
+                        callbacks.onTriggeredTransition(it.event)
                     }
                 }
             }
@@ -56,17 +56,17 @@ class StateMachineTest {
 
         then(callbacks).should(inOrder).onEntryState(on)
 
-        stateMachine.processEvent(OffEvent)
-        then(callbacks).should(inOrder).onTriggeringEvent(OffEvent)
+        machine.processEvent(OffEvent)
+        then(callbacks).should(inOrder).onTriggeredTransition(OffEvent)
         then(callbacks).should(inOrder).onExitState(on)
         then(callbacks).should(inOrder).onEntryState(off)
 
-        stateMachine.processEvent(OnEvent)
-        then(callbacks).should(inOrder).onTriggeringEvent(OnEvent)
+        machine.processEvent(OnEvent)
+        then(callbacks).should(inOrder).onTriggeredTransition(OnEvent)
         then(callbacks).should(inOrder).onExitState(off)
         then(callbacks).should(inOrder).onEntryState(on)
 
-        stateMachine.processEvent(OnEvent)
+        machine.processEvent(OnEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
 
@@ -74,18 +74,18 @@ class StateMachineTest {
     fun genericOnTransitionNotification() {
         val callbacks = mock<Callbacks>()
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
             }
 
             onTransition { _, _, event, _ ->
-                callbacks.onTriggeringEvent(event)
+                callbacks.onTriggeredTransition(event)
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeringEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
     }
 
     @Test
@@ -93,10 +93,10 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
         lateinit var first: State
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             first = initialState("first")
         }
-        stateMachine.onStateChanged { callbacks.onStateChanged(it) }
+        machine.onStateChanged { callbacks.onStateChanged(it) }
 
         then(callbacks).should().onStateChanged(first)
     }
@@ -140,27 +140,27 @@ class StateMachineTest {
 
     @Test
     fun addStateAfterStart() {
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             initialState("first")
         }
-        shouldThrow<IllegalStateException> { stateMachine.state() }
+        shouldThrow<IllegalStateException> { machine.state() }
     }
 
     @Test
     fun setInitialStateAfterStart() {
         lateinit var first: State
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             first = initialState("first")
         }
 
-        shouldThrowUnit<IllegalStateException> { stateMachine.setInitialState(first) }
+        shouldThrowUnit<IllegalStateException> { machine.setInitialState(first) }
     }
 
     @Test
     fun ignoredEventHandler() {
         val callbacks = mock<Callbacks>()
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
@@ -168,13 +168,13 @@ class StateMachineTest {
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
         then(callbacks).should().onIgnoredEvent(SwitchEvent)
     }
 
     @Test
     fun pendingEventHandler() {
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             val second = state("second")
             initialState("first") {
                 transition<SwitchEvent> {
@@ -190,12 +190,12 @@ class StateMachineTest {
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
     }
 
     @Test
     fun exceptionalIgnoredEventHandler() {
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
@@ -204,7 +204,7 @@ class StateMachineTest {
         }
 
         shouldThrow<IllegalStateException> {
-            stateMachine.processEvent(SwitchEvent)
+            machine.processEvent(SwitchEvent)
         }
     }
 
@@ -212,14 +212,14 @@ class StateMachineTest {
     fun requireState() {
         lateinit var first: State
         lateinit var second: State
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             first = initialState("first")
             second = state("second")
         }
 
-        assertThat(stateMachine.requireState("first"), sameInstance(first))
-        assertThat(stateMachine.requireState("second"), sameInstance(second))
-        shouldThrow<IllegalArgumentException> { stateMachine.requireState("third") }
+        assertThat(machine.requireState("first"), sameInstance(first))
+        assertThat(machine.requireState("second"), sameInstance(second))
+        shouldThrow<IllegalArgumentException> { machine.requireState("third") }
     }
 
     @Test
@@ -251,19 +251,19 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
 
         lateinit var final: State
-        createStateMachine {
+        val machine = createStateMachine {
             final = finalState("final") {
                 onEntry { callbacks.onEntryState(this) }
                 onExit { callbacks.onExitState(this) }
             }
             setInitialState(final)
 
-            onFinished { callbacks.onFinished() }
+            onFinished { callbacks.onFinished(this) }
         }
 
         then(callbacks).should().onEntryState(final)
         then(callbacks).should().onExitState(final)
-        then(callbacks).should().onFinished()
+        then(callbacks).should().onFinished(machine)
     }
 
     @Test
@@ -276,14 +276,14 @@ class StateMachineTest {
             }
             setInitialState(final)
 
-            onFinished { callbacks.onFinished() }
+            onFinished { callbacks.onFinished(this) }
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
                 callbacks.onIgnoredEvent(event)
             }
         }
 
-        then(callbacks).should().onFinished()
+        then(callbacks).should().onFinished(machine)
 
         machine.processEvent(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()

@@ -37,6 +37,61 @@ class NestedStateTest {
     }
 
     @Test
+    fun nestedStateFinishL2() {
+        val callbacks = mock<Callbacks>()
+        val inOrder = inOrder(callbacks)
+
+        lateinit var firstL1: State
+        lateinit var finalL1: State
+        lateinit var firstL2: State
+        lateinit var finalL2: State
+
+        val machine = createStateMachine {
+            finalL1 = finalState("finalL1") {
+                onEntry { callbacks.onEntryState(this) }
+                onExit { callbacks.onEntryState(this) }
+            }
+
+            firstL1 = initialState("firstL1") {
+                onEntry { callbacks.onEntryState(this) }
+                onExit { callbacks.onExitState(this) }
+                onFinished { callbacks.onFinished(this) }
+                transition<SwitchEventL1> { targetState = finalL1 }
+
+                finalL2 = finalState("finalL2") {
+                    onEntry { callbacks.onEntryState(this) }
+                    onExit { callbacks.onEntryState(this) }
+                }
+
+                firstL2 = initialState("firstL2") {
+                    onEntry { callbacks.onEntryState(this) }
+                    onExit { callbacks.onEntryState(this) }
+                    transition<SwitchEventL2> {
+                        targetState = finalL2
+                        onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    }
+                }
+            }
+
+            onFinished { callbacks.onFinished(this) }
+        }
+
+        then(callbacks).should(inOrder).onEntryState(firstL1)
+        then(callbacks).should(inOrder).onEntryState(firstL2)
+        then(callbacks).shouldHaveNoMoreInteractions()
+
+        machine.processEvent(SwitchEventL2)
+
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL2)
+        then(callbacks).should(inOrder).onExitState(firstL2)
+        then(callbacks).should(inOrder).onEntryState(finalL2)
+        then(callbacks).should(inOrder).onFinished(firstL1)
+        then(callbacks).shouldHaveNoMoreInteractions()
+
+        machine.processEvent(SwitchEventL1)
+    }
+
+    @Test
     fun nestedNoInitialState() {
         val machine = createStateMachine(start = false) {
             initialState("firstL1") {

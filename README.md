@@ -47,13 +47,13 @@ Working with state machine consists of two steps:
 * Processing events, on which state machine can switch its states and notify about changes.
 
 ```kotlin
-val stateMachine = createStateMachine {
+val machine = createStateMachine {
     // Setup is made in this block ...
 }
 // After setup it is ready to process events
-stateMachine.processEvent(SwitchGreenEvent)
+machine.processEvent(SwitchGreenEvent)
 // ...
-stateMachine.processEvent(SwitchYellowEvent)
+machine.processEvent(SwitchYellowEvent)
 ```
 
 ## Finishing traffic light sample
@@ -67,7 +67,7 @@ object RedEvent : Event
 
 fun main() {
     // Create state machine and configure its states in a setup block
-    val stateMachine = createStateMachine {
+    val machine = createStateMachine {
         // State machine finishes when enters final state
         val redState = finalState()
 
@@ -90,8 +90,8 @@ fun main() {
     }
 
     // Process events
-    stateMachine.processEvent(YellowEvent)
-    stateMachine.processEvent(RedEvent)
+    machine.processEvent(YellowEvent)
+    machine.processEvent(RedEvent)
 }
 ```
 
@@ -100,7 +100,7 @@ fun main() {
 First we create a state machine with `createStateMachine()` function:
 
 ```kotlin
-val stateMachine = createStateMachine(
+val machine = createStateMachine(
     "Traffic lights" // Optional name is convenient for logging debugging and export
 ) {
     // Set up state machine ...
@@ -335,14 +335,14 @@ optional it may be simpler to use event argument. You can specify arbitrary argu
 in `processEvent()` function. Then you can get this argument in state and transition listeners.
 
 ```kotlin
-val stateMachine = createStateMachine {
+val machine = createStateMachine {
     state("offState").onEntry {
         println("Event ${it.event} argument: ${it.argument}")
     }
     // ...
 }
 // Pass argument with event
-stateMachine.processEvent(TurnOn, 42)
+machine.processEvent(TurnOn, 42)
 ```
 
 ### Transition argument
@@ -376,9 +376,9 @@ Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visuali
 Use `exportToDot()` extension function to export state machine to DOT language.
 
 ```kotlin
-val stateMachine = createStateMachine { /*...*/ }
+val machine = createStateMachine { /*...*/ }
 
-val dot = stateMachine.exportToDot()
+val dot = machine.exportToDot()
 println(dot)
 ```
 
@@ -399,15 +399,15 @@ Wrong:
 
 ```kotin
 if (somethingHappend)
-    stateMachine.processEvent(FirstEvent)
+    machine.processEvent(FirstEvent)
 else 
-    stateMachine.processEvent(SecondEvent)
+    machine.processEvent(SecondEvent)
 ```
 
 Correct - let the state machine to make decisions on an event:
 
 ```kotin
-stateMachine.processEvent(SomethingHappenedEvent)
+machine.processEvent(SomethingHappenedEvent)
 ```
 
 ## Samples
