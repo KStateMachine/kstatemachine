@@ -265,4 +265,27 @@ class StateMachineTest {
         then(callbacks).should().onExitState(final)
         then(callbacks).should().onFinished()
     }
+
+    @Test
+    fun processEventOnFinishedStateMachine() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var final: State
+        val machine = createStateMachine {
+            final = finalState("final") {
+            }
+            setInitialState(final)
+
+            onFinished { callbacks.onFinished() }
+
+            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+                callbacks.onIgnoredEvent(event)
+            }
+        }
+
+        then(callbacks).should().onFinished()
+
+        machine.processEvent(SwitchEvent)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
 }

@@ -47,14 +47,13 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun <S : State> addState(state: S, init: StateBlock?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
 
-        require(!_states.contains(state)) { "$state already added" }
-        val name = state.name
-        if (name != null)
-            require(findState(name) == null) { "State with name $name already exists" }
+        state.name?.let {
+            require(findState(it) == null) { "State with name $it already exists" }
+        }
 
-        if (init != null) state.init()
-        _states += state
+        require(_states.add(state)) { "$state already added" }
         (state as InternalState).setParent(this)
+        if (init != null) state.init()
         return state
     }
 
@@ -96,8 +95,33 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun asState() = this
 
+    override fun doStart() {
+        if (states.isEmpty()) return
+
+        val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+
+        setCurrentState(
+            initialState,
+            TransitionParams(
+                DefaultTransition(
+                    EventMatcher.isInstanceOf(),
+                    initialState,
+                    initialState,
+                    "Starting"
+                ), StartEvent
+            )
+        )
+
+        initialState.doStart()
+    }
+
     override fun doProcessEvent(event: Event, argument: Any?) {
         val machine = machine as InternalStateMachine
+
+        if (isFinished) {
+            machine.log("$this is finished, skipping event $event, with argument $argument")
+            return
+        }
 
         val fromState = currentState!!
         val transition = fromState.findTransitionByEvent(event)
@@ -147,6 +171,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
             onStateChanged(state)
         }
     }
+
+    /**
+     * Initial event which is processed on state machine start
+     */
+    private object StartEvent : Event
 }
 
 class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {

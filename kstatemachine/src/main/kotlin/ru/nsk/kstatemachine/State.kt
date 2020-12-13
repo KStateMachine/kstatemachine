@@ -52,6 +52,7 @@ interface InternalState : State {
     fun setParent(parent: State)
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
+    fun doStart()
     fun doProcessEvent(event: Event, argument: Any?)
     fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>)
 }

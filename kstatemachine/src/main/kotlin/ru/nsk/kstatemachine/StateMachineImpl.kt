@@ -40,7 +40,6 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
         check(isRunning) { "$this is not started, call start() first" }
-        if (isFinished) log("$this is finished, ignoring event $event, with argument $argument")
 
         if (isProcessingEvent)
             pendingEventHandler.onPendingEvent(event, argument)
@@ -55,22 +54,12 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
 
     override fun start() {
         check(!isRunning) { "$this is already started" }
-        val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+        checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         _isRunning = true
         machineNotify { onStarted() }
 
-        setCurrentState(
-            initialState,
-            TransitionParams(
-                DefaultTransition(
-                    EventMatcher.isInstanceOf(),
-                    initialState,
-                    initialState,
-                    "Starting"
-                ), StartEvent
-            )
-        )
+        doStart()
     }
 
     override fun stop() {
@@ -81,9 +70,4 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
     override fun machineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
-
-    /**
-     * Initial event which is processed on state machine start
-     */
-    private object StartEvent : Event
 }

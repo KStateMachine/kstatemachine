@@ -18,7 +18,7 @@ interface TransitionsStateHelper {
     /**
      * For internal use only
      */
-    fun asState() : State
+    fun asState(): State
 }
 
 /**
