@@ -283,7 +283,7 @@ see those events if logging is enabled or use custom `IgnoredEventHandler`:
 ```kotlin
 createStateMachine {
     // ...
-    ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+    ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
         error("unexpected $event")
     }
 }

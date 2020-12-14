@@ -4,7 +4,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     /** Access to this field must be thread safe. */
     private val listeners = mutableSetOf<StateMachine.Listener>()
     override var logger = StateMachine.Logger {}
-    override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ -> }
+    override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
     override var pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
         error(
             "$this can not process pending $pendingEvent as event processing is already running. " +
@@ -46,7 +46,10 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         isProcessingEvent = true
 
         try {
-            doProcessEvent(event, argument)
+            if (!doProcessEvent(event, argument)) {
+                log("$this ignored $event")
+                ignoredEventHandler.onIgnoredEvent(event, argument)
+            }
         } finally {
             isProcessingEvent = false
         }

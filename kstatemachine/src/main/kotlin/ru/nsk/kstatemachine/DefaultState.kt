@@ -115,15 +115,15 @@ open class DefaultState(override val name: String? = null) : InternalState {
         initialState.doStart()
     }
 
-    override fun doProcessEvent(event: Event, argument: Any?) {
+    override fun doProcessEvent(event: Event, argument: Any?): Boolean {
         val machine = machine as InternalStateMachine
 
         if (isFinished) {
             machine.log("$this is finished, skipping event $event, with argument $argument")
-            return
+            return false//FIXME need this, final state may be nested?
         }
 
-        val fromState = currentState!!
+        val fromState = if (currentState != null) currentState!! else return false
         val transition = fromState.findTransitionByEvent(event)
 
         if (transition != null) {
@@ -145,9 +145,9 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
                 setCurrentState(targetState, transitionParams)
             }
+            return true
         } else {
-            machine.log("$this ignored $event as transition from $fromState, was not found")
-            machine.ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
+            return fromState.doProcessEvent(event, argument)
         }
     }
 

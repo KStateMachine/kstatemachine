@@ -64,7 +64,7 @@ interface StateMachine : InternalState {
     }
 
     fun interface IgnoredEventHandler {
-        fun onIgnoredEvent(currentState: State, event: Event, argument: Any?)
+        fun onIgnoredEvent(event: Event, argument: Any?)
     }
 
     fun interface PendingEventHandler {

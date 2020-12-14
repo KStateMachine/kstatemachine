@@ -157,22 +157,6 @@ class StateMachineTest {
     }
 
     @Test
-    fun ignoredEventHandler() {
-        val callbacks = mock<Callbacks>()
-
-        val machine = createStateMachine {
-            initialState("first")
-
-            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ ->
-                callbacks.onIgnoredEvent(SwitchEvent)
-            }
-        }
-
-        machine.processEvent(SwitchEvent)
-        then(callbacks).should().onIgnoredEvent(SwitchEvent)
-    }
-
-    @Test
     fun pendingEventHandler() {
         val machine = createStateMachine {
             val second = state("second")
@@ -191,21 +175,6 @@ class StateMachineTest {
         }
 
         machine.processEvent(SwitchEvent)
-    }
-
-    @Test
-    fun exceptionalIgnoredEventHandler() {
-        val machine = createStateMachine {
-            initialState("first")
-
-            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
-                error("unexpected $event")
-            }
-        }
-
-        shouldThrow<IllegalStateException> {
-            machine.processEvent(SwitchEvent)
-        }
     }
 
     @Test
@@ -264,28 +233,5 @@ class StateMachineTest {
         then(callbacks).should().onEntryState(final)
         then(callbacks).should().onExitState(final)
         then(callbacks).should().onFinished(machine)
-    }
-
-    @Test
-    fun processEventOnFinishedStateMachine() {
-        val callbacks = mock<Callbacks>()
-
-        lateinit var final: State
-        val machine = createStateMachine {
-            final = finalState("final") {
-            }
-            setInitialState(final)
-
-            onFinished { callbacks.onFinished(this) }
-
-            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
-                callbacks.onIgnoredEvent(event)
-            }
-        }
-
-        then(callbacks).should().onFinished(machine)
-
-        machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
     }
 }

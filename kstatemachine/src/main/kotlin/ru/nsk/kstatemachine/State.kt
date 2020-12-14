@@ -53,7 +53,9 @@ interface InternalState : State {
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
     fun doStart()
-    fun doProcessEvent(event: Event, argument: Any?)
+
+    /** @return true if event was processed */
+    fun doProcessEvent(event: Event, argument: Any?): Boolean
     fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>)
 }
 

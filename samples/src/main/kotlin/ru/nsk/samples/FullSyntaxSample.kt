@@ -68,8 +68,8 @@ fun main() {
         // Set custom IgnoredEventHandler
         // for event that does not match any transition,
         // for example to throw exceptions on ignored events
-        ignoredEventHandler = StateMachine.IgnoredEventHandler { currentState, event, argument ->
-            error("$currentState does not have transition for $event, argument: $argument")
+        ignoredEventHandler = StateMachine.IgnoredEventHandler { event, argument ->
+            error("Ignored $event, argument: $argument")
         }
 
         // Set custom PendingEventHandler which is triggered

@@ -89,6 +89,12 @@ class NestedStateTest {
         then(callbacks).shouldHaveNoMoreInteractions()
 
         machine.processEvent(SwitchEventL1)
+
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
+        then(callbacks).should(inOrder).onExitState(firstL1)
+        then(callbacks).should(inOrder).onEntryState(finalL1)
+        then(callbacks).should(inOrder).onFinished(machine)
+        then(callbacks).shouldHaveNoMoreInteractions()
     }
 
     @Test
