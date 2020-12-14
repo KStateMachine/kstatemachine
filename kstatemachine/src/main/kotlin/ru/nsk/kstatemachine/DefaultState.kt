@@ -118,10 +118,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun doProcessEvent(event: Event, argument: Any?): Boolean {
         val machine = machine as InternalStateMachine
 
-        if (isFinished) {
+        if (isFinished)
             machine.log("$this is finished, skipping event $event, with argument $argument")
-            return false//FIXME need this, final state may be nested?
-        }
 
         val fromState = if (currentState != null) currentState!! else return false
         val transition = fromState.findTransitionByEvent(event)
@@ -139,8 +137,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
-            targetState?.let { _ ->
-                machine.log("$this exiting $fromState")
+            targetState?.let {
+                machine.log("Parent $this exiting child $fromState")
                 fromState.notify { onExit(transitionParams) }
 
                 setCurrentState(targetState, transitionParams)
@@ -159,13 +157,14 @@ open class DefaultState(override val name: String? = null) : InternalState {
         val finish = state is FinalState
         if (finish) isFinished = true
 
-        machine.log("$this entering $state")
+        machine.log("Parent $this entering child $state")
 
-        state.notify {
-            onEntry(transitionParams)
-            if (finish) onExit(transitionParams)
+        state.notify { onEntry(transitionParams) }
+
+        if (finish) {
+            machine.log("Parent $this finish")
+            notify { onFinished() }
         }
-        if (finish) notify { onFinished() }
 
         machine.machineNotify {
             onStateChanged(state)
