@@ -52,11 +52,11 @@ interface InternalState : State {
     fun setParent(parent: State)
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
-    fun doStart()
+    fun doEnter()
+    fun doExit(transitionParams: TransitionParams<*>)
 
     /** @return true if event was processed */
     fun doProcessEvent(event: Event, argument: Any?): Boolean
-    fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>)
 }
 
 operator fun <S : State> S.invoke(block: S.() -> Unit) = block()

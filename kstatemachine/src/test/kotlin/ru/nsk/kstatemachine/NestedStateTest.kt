@@ -10,7 +10,7 @@ import java.lang.IllegalStateException
 // FIXME add cross level transition test
 class NestedStateTest {
     @Test
-    fun enterNestedState() {
+    fun startNestedStatesBranch() {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
@@ -35,6 +35,56 @@ class NestedStateTest {
         then(callbacks).should(inOrder).onEntryState(firstL1)
         then(callbacks).should(inOrder).onEntryState(firstL2)
         then(callbacks).should(inOrder).onEntryState(firstL3)
+    }
+
+    @Test
+    fun exitEnterNestedStatesBranch() {
+        val callbacks = mock<Callbacks>()
+        val inOrder = inOrder(callbacks)
+
+        lateinit var firstL1: State
+        lateinit var secondL1: State
+        lateinit var firstL2: State
+        lateinit var secondL2: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            secondL1 = state("secondL1") {
+                onEntry { callbacks.onEntryState(this) }
+                onExit { callbacks.onExitState(this) }
+
+                secondL2 = initialState("secondL2") {
+                    onEntry { callbacks.onEntryState(this) }
+                    onExit { callbacks.onExitState(this) }
+                }
+            }
+
+            firstL1 = initialState("firstL1") {
+                onEntry { callbacks.onEntryState(this) }
+                onExit { callbacks.onExitState(this) }
+                transition<SwitchEventL1> {
+                    targetState = secondL1
+                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                }
+
+                firstL2 = initialState("firstL2") {
+                    onEntry { callbacks.onEntryState(this) }
+                    onExit { callbacks.onExitState(this) }
+                }
+            }
+        }
+
+        then(callbacks).should(inOrder).onEntryState(firstL1)
+        then(callbacks).should(inOrder).onEntryState(firstL2)
+
+        machine.processEvent(SwitchEventL1)
+
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
+        then(callbacks).should(inOrder).onExitState(firstL2)
+        then(callbacks).should(inOrder).onExitState(firstL1)
+        then(callbacks).should(inOrder).onEntryState(secondL1)
+        then(callbacks).should(inOrder).onEntryState(secondL2)
     }
 
     @Test
@@ -98,6 +148,7 @@ class NestedStateTest {
         machine.processEvent(SwitchEventL1)
 
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
+        then(callbacks).should(inOrder).onExitState(finalL2)
         then(callbacks).should(inOrder).onExitState(initialL1)
         then(callbacks).should(inOrder).onEntryState(finalL1)
         then(callbacks).should(inOrder).onFinished(machine)

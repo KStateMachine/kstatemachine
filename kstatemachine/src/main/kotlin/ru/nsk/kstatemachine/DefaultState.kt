@@ -27,8 +27,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     private val _transitions = mutableSetOf<Transition<*>>()
     override val transitions: Set<Transition<*>> = _transitions
 
-
-    protected var isFinished = false
+    private var isFinished = false
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
@@ -95,7 +94,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun asState() = this
 
-    override fun doStart() {
+    override fun doEnter() {
         if (states.isEmpty()) return
 
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
@@ -111,8 +110,16 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 ), StartEvent
             )
         )
+    }
 
-        initialState.doStart()
+    override fun doExit(transitionParams: TransitionParams<*>) {
+        if (states.isNotEmpty()) {
+            val currentState = requireNotNull(currentState) { "currentState is not set" }
+            currentState.doExit(transitionParams)
+        }
+
+        machine.log("Exiting $this")
+        notify { onExit(transitionParams) }
     }
 
     override fun doProcessEvent(event: Event, argument: Any?): Boolean {
@@ -138,9 +145,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
             }
 
             targetState?.let {
-                machine.log("Parent $this exiting child $fromState")
-                fromState.notify { onExit(transitionParams) }
-
+                fromState.doExit(transitionParams)
                 setCurrentState(targetState, transitionParams)
             }
             return true
@@ -149,7 +154,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
     }
 
-    override fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         val machine = machine as InternalStateMachine
 
         currentState = state
@@ -169,6 +174,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
         machine.machineNotify {
             onStateChanged(state)
         }
+
+        state.doEnter()
     }
 
     /**

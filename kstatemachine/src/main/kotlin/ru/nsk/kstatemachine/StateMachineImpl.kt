@@ -62,7 +62,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         _isRunning = true
         machineNotify { onStarted() }
 
-        doStart()
+        doEnter()
     }
 
     override fun stop() {

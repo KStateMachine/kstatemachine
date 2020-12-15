@@ -231,7 +231,7 @@ class StateMachineTest {
         }
 
         then(callbacks).should().onEntryState(final)
-        then(callbacks).should().onExitState(final)
         then(callbacks).should().onFinished(machine)
+        then(callbacks).shouldHaveNoMoreInteractions()
     }
 }
