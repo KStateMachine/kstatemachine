@@ -1,6 +1,7 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.visitors.exportToDot
 
 object SwitchEvent : Event
 

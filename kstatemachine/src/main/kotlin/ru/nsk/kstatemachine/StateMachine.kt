@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.Visitor
+
 @DslMarker
 annotation class StateMachineDslMarker
 

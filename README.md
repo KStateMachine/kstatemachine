@@ -27,7 +27,7 @@ Main features are:
   dynamic target state which is calculated in a moment of event processing depending on application
   business logic;
 * [Argument](#arguments) passing for events and transitions;
-* [Export state machine](#export-to-graphviz) structure to [Graphviz](https://graphviz.org/).
+* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/) and  [Graphviz](https://graphviz.org/).
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
@@ -370,16 +370,30 @@ State machine is designed to work in single thread. So if you need to process ev
 threads you can post them to some thread safe queue and start single thread which will pull events
 from that queue in a loop and call `processEvent()` function.
 
-## Export to Graphviz
+## Export
+
+_Note: conditional transitions depending on external data might not work._
+
+### PlantUML
+
+Use `exportToPlantUml()` extension function to export state machine
+to [PlantUML state diagram](https://plantuml.com/ru/state-diagram).
+
+```kotlin
+val machine = createStateMachine { /*...*/ }
+println(machine.exportToPlantUml())
+```
+
+Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
+
+### Graphviz
 
 Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs.
 Use `exportToDot()` extension function to export state machine to DOT language.
 
 ```kotlin
 val machine = createStateMachine { /*...*/ }
-
-val dot = machine.exportToDot()
-println(dot)
+println(machine.exportToDot())
 ```
 
 Copy/paste resulting output to any tool supporting DOT language, for example:
@@ -387,7 +401,7 @@ Copy/paste resulting output to any tool supporting DOT language, for example:
 * https://dreampuf.github.io/GraphvizOnline/
 * http://magjac.com/graphviz-visual-editor/
 
-_Note: conditional transitions depending on external data might not work._
+_Note: Graphviz export does not support nested states._
 
 ## Do not
 
@@ -414,6 +428,7 @@ machine.processEvent(SomethingHappenedEvent)
 
 * [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
   shows different syntax variants and library possibilities in one place, so it looks messy;
+* [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt);
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt);
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt).
 

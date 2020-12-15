@@ -1,5 +1,8 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.Visitor
+import ru.nsk.kstatemachine.visitors.VisitorAcceptor
+
 @StateMachineDslMarker
 interface State : TransitionsStateHelper, VisitorAcceptor {
     val name: String?
