@@ -17,7 +17,7 @@ class TransitionArgumentTest {
 
         val second = object : DefaultState("second") {}
 
-        val stateMachine = createStateMachine {
+        val machine = createStateMachine {
             addState(second) {
                 onEntry {
                     callbacks.onEntryState(this)
@@ -34,7 +34,7 @@ class TransitionArgumentTest {
             }
         }
 
-        stateMachine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
         then(callbacks).should().onEntryState(second)
     }
 

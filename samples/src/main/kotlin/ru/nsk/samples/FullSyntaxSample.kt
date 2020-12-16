@@ -12,7 +12,7 @@ class SwitchRedEvent(val data: String) : Event
 class YellowState(val data: Int) : DefaultState("Yellow")
 
 fun main() {
-    val stateMachine = createStateMachine(
+    val machine = createStateMachine(
         "Traffic lights" // StateMachine name is optional
     ) {
         // Setup states
@@ -68,8 +68,8 @@ fun main() {
         // Set custom IgnoredEventHandler
         // for event that does not match any transition,
         // for example to throw exceptions on ignored events
-        ignoredEventHandler = StateMachine.IgnoredEventHandler { currentState, event, argument ->
-            error("$currentState does not have transition for $event, argument: $argument")
+        ignoredEventHandler = StateMachine.IgnoredEventHandler { event, argument ->
+            error("Ignored $event, argument: $argument")
         }
 
         // Set custom PendingEventHandler which is triggered
@@ -89,7 +89,7 @@ fun main() {
     }
 
     // Listeners might be added in or after setup block
-    with(stateMachine) {
+    with(machine) {
         onTransition { sourceState, targetState, event, argument ->
             // Listen to all transitions in one place
             // instead of listening to each transition separately
@@ -104,7 +104,7 @@ fun main() {
     }
 
     // Access state after state machine setup
-    val greenState = stateMachine.requireState("Green")
+    val greenState = machine.requireState("Green")
     greenState.onEntry { /* Add state listener */ }
 
     // Access state transition after state machine setup
@@ -112,6 +112,6 @@ fun main() {
     transitionToYellow.onTriggered { /* Add transition listener */ }
 
     // Process events, passing arguments optionally
-    stateMachine.processEvent(SwitchYellowEvent, "Get ready!")
-    stateMachine.processEvent(SwitchRedEvent("Stop!"))
+    machine.processEvent(SwitchYellowEvent, "Get ready!")
+    machine.processEvent(SwitchRedEvent("Stop!"))
 }

@@ -27,7 +27,7 @@ Main features are:
   dynamic target state which is calculated in a moment of event processing depending on application
   business logic;
 * [Argument](#arguments) passing for events and transitions;
-* [Export state machine](#export-to-graphviz) structure to [Graphviz](https://graphviz.org/).
+* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/) and  [Graphviz](https://graphviz.org/).
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
@@ -47,13 +47,13 @@ Working with state machine consists of two steps:
 * Processing events, on which state machine can switch its states and notify about changes.
 
 ```kotlin
-val stateMachine = createStateMachine {
+val machine = createStateMachine {
     // Setup is made in this block ...
 }
 // After setup it is ready to process events
-stateMachine.processEvent(SwitchGreenEvent)
+machine.processEvent(SwitchGreenEvent)
 // ...
-stateMachine.processEvent(SwitchYellowEvent)
+machine.processEvent(SwitchYellowEvent)
 ```
 
 ## Finishing traffic light sample
@@ -67,7 +67,7 @@ object RedEvent : Event
 
 fun main() {
     // Create state machine and configure its states in a setup block
-    val stateMachine = createStateMachine {
+    val machine = createStateMachine {
         // State machine finishes when enters final state
         val redState = finalState()
 
@@ -90,8 +90,8 @@ fun main() {
     }
 
     // Process events
-    stateMachine.processEvent(YellowEvent)
-    stateMachine.processEvent(RedEvent)
+    machine.processEvent(YellowEvent)
+    machine.processEvent(RedEvent)
 }
 ```
 
@@ -100,7 +100,7 @@ fun main() {
 First we create a state machine with `createStateMachine()` function:
 
 ```kotlin
-val stateMachine = createStateMachine(
+val machine = createStateMachine(
     "Traffic lights" // Optional name is convenient for logging debugging and export
 ) {
     // Set up state machine ...
@@ -283,7 +283,7 @@ see those events if logging is enabled or use custom `IgnoredEventHandler`:
 ```kotlin
 createStateMachine {
     // ...
-    ignoredEventHandler = StateMachine.IgnoredEventHandler { _, event, _ ->
+    ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
         error("unexpected $event")
     }
 }
@@ -335,14 +335,14 @@ optional it may be simpler to use event argument. You can specify arbitrary argu
 in `processEvent()` function. Then you can get this argument in state and transition listeners.
 
 ```kotlin
-val stateMachine = createStateMachine {
+val machine = createStateMachine {
     state("offState").onEntry {
         println("Event ${it.event} argument: ${it.argument}")
     }
     // ...
 }
 // Pass argument with event
-stateMachine.processEvent(TurnOn, 42)
+machine.processEvent(TurnOn, 42)
 ```
 
 ### Transition argument
@@ -370,16 +370,30 @@ State machine is designed to work in single thread. So if you need to process ev
 threads you can post them to some thread safe queue and start single thread which will pull events
 from that queue in a loop and call `processEvent()` function.
 
-## Export to Graphviz
+## Export
+
+_Note: conditional transitions depending on external data might not work._
+
+### PlantUML
+
+Use `exportToPlantUml()` extension function to export state machine
+to [PlantUML state diagram](https://plantuml.com/ru/state-diagram).
+
+```kotlin
+val machine = createStateMachine { /*...*/ }
+println(machine.exportToPlantUml())
+```
+
+Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
+
+### Graphviz
 
 Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs.
 Use `exportToDot()` extension function to export state machine to DOT language.
 
 ```kotlin
-val stateMachine = createStateMachine { /*...*/ }
-
-val dot = stateMachine.exportToDot()
-println(dot)
+val machine = createStateMachine { /*...*/ }
+println(machine.exportToDot())
 ```
 
 Copy/paste resulting output to any tool supporting DOT language, for example:
@@ -387,7 +401,7 @@ Copy/paste resulting output to any tool supporting DOT language, for example:
 * https://dreampuf.github.io/GraphvizOnline/
 * http://magjac.com/graphviz-visual-editor/
 
-_Note: conditional transitions depending on external data might not work._
+_Note: Graphviz export does not support nested states._
 
 ## Do not
 
@@ -399,21 +413,22 @@ Wrong:
 
 ```kotin
 if (somethingHappend)
-    stateMachine.processEvent(FirstEvent)
+    machine.processEvent(FirstEvent)
 else 
-    stateMachine.processEvent(SecondEvent)
+    machine.processEvent(SecondEvent)
 ```
 
 Correct - let the state machine to make decisions on an event:
 
 ```kotin
-stateMachine.processEvent(SomethingHappenedEvent)
+machine.processEvent(SomethingHappenedEvent)
 ```
 
 ## Samples
 
 * [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
   shows different syntax variants and library possibilities in one place, so it looks messy;
+* [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt);
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt);
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt).
 

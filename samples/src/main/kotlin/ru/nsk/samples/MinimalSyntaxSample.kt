@@ -8,7 +8,7 @@ object RedEvent : Event
 
 fun main() {
     // Create state machine and configure its states in a setup block
-    val stateMachine = createStateMachine {
+    val machine = createStateMachine {
         // State machine finishes when enters final state
         val redState = finalState()
 
@@ -31,6 +31,6 @@ fun main() {
     }
 
     // Process events
-    stateMachine.processEvent(YellowEvent)
-    stateMachine.processEvent(RedEvent)
+    machine.processEvent(YellowEvent)
+    machine.processEvent(RedEvent)
 }

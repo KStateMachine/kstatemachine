@@ -1,22 +1,10 @@
 package ru.nsk.kstatemachine
 
-internal class StateMachineImpl(override val name: String?) : StateMachine {
-    private val _states = mutableSetOf<State>()
-    override val states: Set<State> = _states
-    private var _initialState: State? = null
-    override val initialState
-        get() = _initialState
-
-    /**
-     * Might be null only before [setInitialState] call.
-     * Access to this field must be thread safe.
-     */
-    private var currentState: InternalState? = null
-
+internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
     /** Access to this field must be thread safe. */
     private val listeners = mutableSetOf<StateMachine.Listener>()
     override var logger = StateMachine.Logger {}
-    override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _, _ -> }
+    override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
     override var pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
         error(
             "$this can not process pending $pendingEvent as event processing is already running. " +
@@ -29,8 +17,10 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
      * Access to this field must be thread safe.
      */
     private var isProcessingEvent = false
-    private var isStarted = false
-    private var isFinished = false
+
+    private var _isRunning = false
+    override val isRunning
+        get() = _isRunning
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
@@ -47,116 +37,40 @@ internal class StateMachineImpl(override val name: String?) : StateMachine {
         listeners.remove(listener)
     }
 
-    override fun <S : State> addState(state: S, init: StateBlock?): S {
-        check(!isStarted) { "Can not add state after state machine started" }
-
-        val name = state.name
-        if (name != null)
-            require(findState(name) == null) { "State with name $name already exists" }
-
-        if (init != null) state.init()
-        _states += state
-        return state
-    }
-
-    override fun findState(name: String) = states.find { it.name == name }
-    override fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
-
-    override fun setInitialState(state: State) {
-        require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        check(!isStarted) { "Can not change initial state after state machine started" }
-
-        _initialState = state
-        currentState = state as InternalState
-    }
-
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
-        check(isStarted) { "$this is not started, call start() first" }
-        if (isFinished) log("$this is finished, ignoring event $event, with argument $argument")
+        check(isRunning) { "$this is not started, call start() first" }
 
         if (isProcessingEvent)
             pendingEventHandler.onPendingEvent(event, argument)
         isProcessingEvent = true
 
         try {
-            val fromState = currentState!!
-            val transition = fromState.findTransitionByEvent(event)
-
-            if (transition != null) {
-                val transitionParams = TransitionParams(transition, event, argument)
-
-                val direction = transition.produceTargetStateDirection()
-                val targetState = if (direction is TargetState) direction.targetState as InternalState else null
-
-                if (direction !is NoTransition) {
-                    log("$this triggering $transition from $fromState")
-                    transition.notify { onTriggered(transitionParams) }
-
-                    notify { onTransition(transition.sourceState, targetState, event, argument) }
-                }
-
-                targetState?.let { _ ->
-                    log("$this exiting $fromState")
-                    fromState.notify { onExit(transitionParams) }
-
-                    setCurrentState(targetState, transitionParams)
-                }
-            } else {
-                log("$this ignored $event as transition from $fromState, was not found")
-                ignoredEventHandler.onIgnoredEvent(fromState, event, argument)
+            if (!doProcessEvent(event, argument)) {
+                log("$this ignored $event")
+                ignoredEventHandler.onIgnoredEvent(event, argument)
             }
         } finally {
             isProcessingEvent = false
         }
     }
 
-    private fun log(message: String) = logger.log(message)
+    override fun start() {
+        check(!isRunning) { "$this is already started" }
+        checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
-        currentState = state
+        _isRunning = true
+        machineNotify { onStarted() }
 
-        val finish = state is FinalState
-        if (finish) isFinished = true
-
-        log("$this entering $state")
-
-        state.notify {
-            onEntry(transitionParams)
-            if (finish) onExit(transitionParams)
-        }
-
-        notify {
-            onStateChanged(state)
-            if (finish) onFinished()
-        }
+        doEnter()
     }
 
-    internal fun start() {
-        val currentState = checkNotNull(currentState) { "Initial state is not set, call setInitialState() first" }
-
-        isStarted = true
-        notify { onStarted() }
-
-        setCurrentState(
-            currentState,
-            TransitionParams(
-                DefaultTransition(
-                    EventMatcher.isInstanceOf(),
-                    currentState,
-                    currentState,
-                    "Starting"
-                ), StartEvent
-            )
-        )
+    override fun stop() {
+        _isRunning = false
+        machineNotify { onStopped() }
     }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
-    private fun notify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
-
-    /**
-     * Initial event which is processed on state machine start
-     */
-    private object StartEvent : Event
+    override fun machineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 }
