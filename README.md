@@ -4,8 +4,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 
 KStateMachine is a Kotlin DSL library for creating finite state
-machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and listen to its states and
-transitions changes to perform side effects.
+machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and hierarchical state machines
+(HSM) and listen to its states and transitions changes to perform side effects.
 
 ## How to build
 
@@ -26,8 +26,10 @@ Main features are:
 * [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with
   dynamic target state which is calculated in a moment of event processing depending on application
   business logic;
+* [Nested states](#nested-states) or
 * [Argument](#arguments) passing for events and transitions;
-* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/) and  [Graphviz](https://graphviz.org/).
+* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
+  and  [Graphviz](https://graphviz.org/).
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
@@ -309,9 +311,10 @@ createStateMachine {
 ## Finishing state machine
 
 Some of state machines are infinite, but other ones may finish. State machine that was finished
-stops to process incoming events. To make state machine finishing, add `FinalState` to it
+stops processing incoming events. To make state machine finishing, add `FinalState` to it
 with `finalState()` function or add any subclass of `FinalState` with `addState()` function. State
-machine finishes when enters `FinalState` and notifies its listeners with `onFinished()` callback.
+machine finishes when enters top-level `FinalState` and notifies its listeners with `onFinished()`
+callback.
 
 ```kotlin
 createStateMachine {
@@ -323,6 +326,34 @@ createStateMachine {
 ```
 
 _Note: `FinalState` can not have transitions._
+
+## Nested states
+
+With nested states you can build hierarchical state machines and share transitions by grouping
+states.
+
+To create nested states simply use same functions (`state()`, `initialState()` etc.) as for state
+machine but in state setup block:
+
+```kotlin
+val machine = createStateMachine {
+    val topLevelState = initialState {
+        // ...
+        val nestedState = initialState {
+            // ...
+            initialState()
+            state()
+            finalState()
+        }
+    }
+}
+```
+
+_Note: cross-level transitions are not supported yet._
+
+### Share transitions by grouping states
+
+![Share transitions diagram](./doc/diagrams/share-transitions.png)
 
 ## Arguments
 
@@ -427,10 +458,11 @@ machine.processEvent(SomethingHappenedEvent)
 ## Samples
 
 * [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
-  shows different syntax variants and library possibilities in one place, so it looks messy;
-* [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt);
-* [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt);
-* [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt).
+  shows different syntax variants and library possibilities in one place, so it looks messy
+* [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
+* [Share transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/ShareTransitionsSample.kt)
+* [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
+* [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
 ## License
 
