@@ -1,6 +1,6 @@
 # KStateMachine
 
-![Build with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20with%20Gradle/badge.svg)
+![Build and test with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 
@@ -40,7 +40,7 @@ Main features are:
 * [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with
   dynamic target state which is calculated in a moment of event processing depending on application
   business logic;
-* [Nested states](#nested-states) or
+* [Nested states](#nested-states) - hierarchical state machines (HSMs);
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
   and  [Graphviz](https://graphviz.org/).
