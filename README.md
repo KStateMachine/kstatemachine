@@ -367,6 +367,12 @@ _Note: cross-level transitions are not supported yet._
 
 ### Inherit transitions by grouping states
 
+Suppose you have three states that all should have a transitions to another state. You can
+explicitly set this transition for each state but with this approach complexity grows and when you
+add fourth state you have to remember to add this specific transition. This problem can be solved with
+adding parent state which defines such transition and groups its child states. Child states
+inherit there parent transitions.
+
 ![Inherit transitions diagram](./doc/diagrams/inherit-transitions.png)
 
 ## Arguments
