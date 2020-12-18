@@ -60,7 +60,7 @@ machine.processEvent(SwitchYellowEvent)
 
 ## Finishing traffic light sample
 
-![Traffic light diagram](./doc/images/trafficlight.png)
+![Traffic light diagram](./doc/diagrams/finishing-traffic-light.png)
 
 ```kotlin
 // Define events
@@ -325,11 +325,11 @@ createStateMachine {
 }
 ```
 
-_Note: `FinalState` can not have transitions._
+_Note: `FinalState` can not have its own transitions._
 
 ## Nested states
 
-With nested states you can build hierarchical state machines and share transitions by grouping
+With nested states you can build hierarchical state machines and inherit transitions by grouping
 states.
 
 To create nested states simply use same functions (`state()`, `initialState()` etc.) as for state
@@ -351,9 +351,9 @@ val machine = createStateMachine {
 
 _Note: cross-level transitions are not supported yet._
 
-### Share transitions by grouping states
+### Inherit transitions by grouping states
 
-![Share transitions diagram](./doc/diagrams/share-transitions.png)
+![Inherit transitions diagram](./doc/diagrams/inherit-transitions.png)
 
 ## Arguments
 
@@ -460,7 +460,7 @@ machine.processEvent(SomethingHappenedEvent)
 * [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
   shows different syntax variants and library possibilities in one place, so it looks messy
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
-* [Share transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/ShareTransitionsSample.kt)
+* [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 

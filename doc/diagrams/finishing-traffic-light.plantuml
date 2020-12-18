@@ -1,0 +1,7 @@
+@startuml
+hide empty description
+[*] -> GreenState
+GreenState -> YellowSate : YellowEvent
+YellowSate -> RedState : RedEvent
+RedState -> [*]
+@enduml 
