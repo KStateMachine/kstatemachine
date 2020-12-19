@@ -33,23 +33,6 @@ inline fun <reified E : Event> TransitionsStateHelper.requireTransition() =
     findTransition<E>() ?: throw IllegalArgumentException("Transition for ${E::class} not found")
 
 /**
- * Creates simple transition.
- */
-inline fun <reified E : Event> TransitionsStateHelper.transition(
-    name: String? = null,
-    block: (SimpleTransitionBuilder<E>.() -> Unit),
-): Transition<E> {
-    val builder = SimpleTransitionBuilder<E>().apply {
-        eventMatcher = isInstanceOf()
-        block()
-    }
-
-    val transition = DefaultTransition(builder.eventMatcher, asState(), builder.targetState, name)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
-}
-
-/**
  * Overload for transition without any parameters.
  */
 inline fun <reified E : Event> TransitionsStateHelper.transition(
@@ -58,30 +41,14 @@ inline fun <reified E : Event> TransitionsStateHelper.transition(
     addTransition(DefaultTransition(EventMatcher.isInstanceOf(), asState(), name))
 
 /**
- * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
- * For example target state may be different depending on some condition.
+ * Creates transition.
+ * You can specify guard function. Such guarded transition is triggered only when guard function returns true.
+ *
+ * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> TransitionsStateHelper.transitionConditionally(
+inline fun <reified E : Event> TransitionsStateHelper.transition(
     name: String? = null,
-    block: ConditionalTransitionBuilder<E>.() -> Unit,
-): Transition<E> {
-    val builder = ConditionalTransitionBuilder<E>().apply {
-        eventMatcher = isInstanceOf()
-        block()
-    }
-
-    val transition = DefaultTransition(builder.eventMatcher, asState(), builder.direction, name)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
-}
-
-/**
- * Creates guarded transition. Such transition is triggered only when guard function returns true.
- * Same behaviour might be achieved with conditional transition but guarded transition has simpler syntax.
- */
-inline fun <reified E : Event> TransitionsStateHelper.transitionGuarded(
-    name: String? = null,
-    block: GuardedTransitionBuilder<E>.() -> Unit,
+    block: (GuardedTransitionBuilder<E>.() -> Unit),
 ): Transition<E> {
     val builder = GuardedTransitionBuilder<E>().apply {
         eventMatcher = isInstanceOf()
@@ -98,6 +65,50 @@ inline fun <reified E : Event> TransitionsStateHelper.transitionGuarded(
     }
 
     val transition = DefaultTransition(builder.eventMatcher, asState(), direction, name)
+    builder.listener?.let { transition.addListener(it) }
+    return addTransition(transition)
+}
+
+/**
+ * This is more powerful version of [transition] function.
+ * Here target state is a lambda which returns desired State.
+ * This allows to use lateinit state variables for recursively depending states and
+ * choose target state depending on application business logic.
+ *
+ * This is a special kind of conditional transition but with simpler syntax and less flexibility.
+ */
+inline fun <reified E : Event> TransitionsStateHelper.transitionTo(
+    name: String? = null,
+    block: (GuardedTransitionToBuilder<E>.() -> Unit),
+): Transition<E> {
+    val builder = GuardedTransitionToBuilder<E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+
+    val direction = {
+        if (builder.guard()) targetState(builder.targetState()) else noTransition()
+    }
+
+    val transition = DefaultTransition(builder.eventMatcher, asState(), direction, name)
+    builder.listener?.let { transition.addListener(it) }
+    return addTransition(transition)
+}
+
+/**
+ * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
+ * For example target state may be different depending on some condition.
+ */
+inline fun <reified E : Event> TransitionsStateHelper.transitionConditionally(
+    name: String? = null,
+    block: ConditionalTransitionBuilder<E>.() -> Unit,
+): Transition<E> {
+    val builder = ConditionalTransitionBuilder<E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+
+    val transition = DefaultTransition(builder.eventMatcher, asState(), builder.direction, name)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }

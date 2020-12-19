@@ -15,7 +15,7 @@ fun main() {
     val machine = createStateMachine(
         "Traffic lights" // StateMachine name is optional
     ) {
-        // Setup states
+        // Create and setup states
         val greenState = initialState("Green") // State name is optional
         // Use state subclasses
         val yellowState = addState(YellowState(42))
@@ -35,9 +35,15 @@ fun main() {
             }
 
             // Setup guarded transition
-            transitionGuarded<SwitchRedEvent> {
+            transition<SwitchRedEvent> {
                 guard = { false } // Never trigger this transition
                 targetState = redState
+            }
+
+            // Setup guarded transition with a lambda calculating targetState
+            transitionTo<SwitchRedEvent> {
+                guard = { false } // Never trigger this transition
+                targetState = { redState }
             }
         }
 

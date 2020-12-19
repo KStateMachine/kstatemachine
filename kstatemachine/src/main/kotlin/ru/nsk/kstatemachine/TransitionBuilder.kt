@@ -8,19 +8,20 @@ open class TransitionBuilder<E : Event> {
     lateinit var eventMatcher: EventMatcher<E>
 }
 
-open class SimpleTransitionBuilder<E : Event> :
-    TransitionBuilder<E>() {
+open class BaseGuardedTransitionBuilder<E : Event> : TransitionBuilder<E>() {
+    var guard: () -> Boolean = { true }
+}
+
+class GuardedTransitionBuilder<E : Event> : BaseGuardedTransitionBuilder<E>() {
     var targetState: State? = null
 }
 
-class ConditionalTransitionBuilder<E : Event> :
-    TransitionBuilder<E>() {
-    lateinit var direction: () -> TransitionDirection
+class GuardedTransitionToBuilder<E : Event> : BaseGuardedTransitionBuilder<E>() {
+    lateinit var targetState: () -> State
 }
 
-class GuardedTransitionBuilder<E : Event> :
-    SimpleTransitionBuilder<E>() {
-    lateinit var guard: () -> Boolean
+class ConditionalTransitionBuilder<E : Event> : TransitionBuilder<E>() {
+    lateinit var direction: () -> TransitionDirection
 }
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {

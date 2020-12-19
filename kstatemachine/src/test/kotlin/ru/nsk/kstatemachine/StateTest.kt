@@ -36,33 +36,6 @@ class StateTest {
     }
 
     @Test
-    fun guardedTransition() {
-        val callbacks = mock<Callbacks>()
-
-        var value = "value1";
-
-        val machine = createStateMachine {
-            val second = state("second")
-
-            initialState("first") {
-                transitionGuarded<SwitchEvent> {
-                    guard = { value == "value2" }
-                    targetState = second
-                    onTriggered {
-                        callbacks.onTriggeredTransition(it.event)
-                    }
-                }
-            }
-        }
-
-        machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveZeroInteractions()
-        value = "value2"
-        machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-    }
-
-    @Test
     fun finalStateTransition() {
         createStateMachine {
             val final = finalState("final") {

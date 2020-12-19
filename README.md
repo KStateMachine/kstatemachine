@@ -179,14 +179,14 @@ state().onEntry { /*...*/ }
 
 ## Setup transitions
 
-When we have multiple states we should say for each one, which events will trigger transitions to
-another states:
+In a state setup block we define which events will trigger transitions to
+another states. Transition is created  with `transition()` function:
 
 ```kotlin
 greenState {
-    // Setup transition which is triggered on SwitchYellowEvent
-    transition<SwitchYellowEvent> {
-        // Set target state where state machine go when this transition if performed
+    // Setup transition which is triggered on YellowEvent
+    transition<YellowEvent> {
+        // Set target state where state machine go when this transition is triggered
         targetState = yellowState
     }
 }
@@ -200,18 +200,41 @@ current state when such transition triggers:
 
 ```kotlin
 greenState {
-    transition<SwitchYellowEvent>()
+    transition<YellowEvent>()
 }
 ```
 
 Same as for states we can listen to transition triggering:
 
 ```kotlin
-transition<SwitchYellowEvent> {
+transition<YellowEvent> {
     targetState = yellowState
     onTriggered { println("Transition to $targetState is triggered by ${it.event}") }
 }
 ```
+
+There is extended version of `transition()` function, it is called `transitionTo()`.
+It works the same way but takes lambda to calculate target state.
+This allows to use `lateinit` state variables and choose target state depending on application business logic 
+like with [conditional transitions](#conditional-transitions) but gives less flexibility:
+
+```kotlin
+createStateMachine {
+    lateinit var yellowState: State
+
+    greenState {
+        transitionTo<YellowEvent> {
+            targetState = { yellowState }
+        }
+    }
+
+    yellowState = state {
+        // ...
+    }
+}
+```
+
+### Listen to all transitions in one place
 
 There might be many transitions from one state to another. It is possible to listen to all of them
 in state machine setup block:
@@ -220,7 +243,7 @@ in state machine setup block:
 createStateMachine {
     // ...
     onTransition { sourceState, targetState, event, argument ->
-        // Listen to every performed transition here
+        // Listen to all triggered transitions here
     }
 }
 ```
@@ -229,11 +252,11 @@ createStateMachine {
 
 Guarded transition is triggered only if specified guard function returns true. Guarded transition is
 a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
-Use `transitionGuarded()` function to create guarded transition:
+Use `transition()` or `transitionTo()` functions to create guarded transition:
 
 ```kotlin
 initialState {
-    transitionGuarded<SwitchEvent> {
+    transition<SwitchEvent> {
         guard = { someValue == "myValue" }
         targetState = second
         // ...
@@ -244,12 +267,14 @@ initialState {
 ### Conditional transitions
 
 State machine becomes more powerful tool when you can choose target state depending on your business
-logic (some external state).
+logic (some external data).
+Conditional transitions give you maximum flexibility on choosing target state
+and conditions when transition is triggered.
 
 There are three options to choose transition direction:
 
 * `stay()` - transition is triggered but state is not changed;
-* `targetState(nextState)` - transition is triggered and state machine goes to a specified state;
+* `targetState(nextState)` - transition is triggered and state machine goes to the specified state;
 * `noTransition()` - transition is not triggered.
 
 Use `transitionConditionally()` function to create conditional transition and specify a function
