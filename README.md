@@ -258,19 +258,23 @@ createStateMachine {
 
 ### Guarded transitions
 
-Guarded transition is triggered only if specified guard function returns true. Guarded transition is
+Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is
 a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
 Use `transition()` or `transitionTo()` functions to create guarded transition:
 
 ```kotlin
-initialState {
+state1 {
     transition<SwitchEvent> {
-        guard = { someValue == "myValue" }
-        targetState = second
+        guard = { value > 10 }
+        targetState = state2
         // ...
     }
 }
 ```
+
+See [guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
+
+![Guarded transition diagram](./doc/diagrams/guarded-transition.png)
 
 ### Conditional transitions
 
@@ -527,6 +531,7 @@ machine.processEvent(SomethingHappenedEvent)
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
+* [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 
 ## License
 
