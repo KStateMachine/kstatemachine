@@ -81,7 +81,7 @@ interface InternalStateMachine : StateMachine, InternalState {
     fun machineNotify(block: StateMachine.Listener.() -> Unit)
 }
 
-typealias StateBlock = State.() -> Unit
+typealias StateBlock<S> = S.() -> Unit
 typealias StateMachineBlock = StateMachine.() -> Unit
 
 fun StateMachine.onStarted(block: StateMachine.() -> Unit) {

@@ -15,7 +15,7 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
-    fun <S : State> addState(state: S, init: StateBlock? = null): S
+    fun <S : State> addState(state: S, init: StateBlock<S>? = null): S
 
     /**
      * Currently initial state is mandatory, but if we add parallel states it might change.
@@ -86,23 +86,29 @@ fun <S : State> S.onFinished(block: S.() -> Unit) {
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [State.findState] and for debugging.
  */
-fun State.state(name: String? = null, init: StateBlock? = null) =
+fun State.state(name: String? = null, init: StateBlock<State>? = null) =
     addState(DefaultState(name), init)
 
 /**
  * A shortcut for [state] and [State.setInitialState] calls
  */
-fun State.initialState(name: String? = null, init: StateBlock? = null) =
+fun State.initialState(name: String? = null, init: StateBlock<State>? = null) =
     addInitialState(DefaultState(name), init)
 
 /**
  * A shortcut for [State.addState] and [State.setInitialState] calls
  */
-fun <S : State> State.addInitialState(state: S, init: StateBlock? = null): S {
+fun <S : State> State.addInitialState(state: S, init: StateBlock<S>? = null): S {
     addState(state, init)
     setInitialState(state)
     return state
 }
 
-fun State.finalState(name: String? = null, init: StateBlock? = null) =
+/**
+ * Helper method for adding final states. This is exactly the same as simply call [State.addState] but makes
+ * code to be more self expressing.
+ */
+fun <S : FinalState> State.addFinalState(state: S, init: StateBlock<S>? = null) = addState(state, init)
+
+fun State.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addState(DefaultFinalState(name), init)

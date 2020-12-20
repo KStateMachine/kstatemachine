@@ -1,7 +1,5 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
@@ -14,7 +12,9 @@ class StateTest {
     fun stateSubclass() {
         val machine = createStateMachine {
             // simple but little bit explicit, easy to forget addState() call
-            val subclassState = addState(SubclassState())
+            val subclassState = addState(SubclassState()) {
+                onEntry { println("Enter state with data: ${this@addState.dataField}") }
+            }
 
             val simpleState = initialState {
                 transition<SwitchEvent> {

@@ -78,36 +78,44 @@ machine.processEvent(SwitchYellowEvent)
 
 ```kotlin
 // Define events
-object YellowEvent : Event
-object RedEvent : Event
+sealed class Events {
+    object YellowEvent : Event
+    object RedEvent : Event
+}
+
+// Define states
+sealed class States {
+    object GreenState : DefaultState("Green")
+    object YellowState : DefaultState("Yellow")
+    object RedState : DefaultFinalState("Red") // State machine finishes when enters final state
+}
 
 fun main() {
     // Create state machine and configure its states in a setup block
     val machine = createStateMachine {
-        // State machine finishes when enters final state
-        val redState = finalState()
+        addInitialState(States.GreenState) {
+            // Add state listeners
+            onEntry { println("Enter $name state") }
+            onExit { println("Exit $name state") }
 
-        val yellowState = state {
-            // Setup transition on RedEvent
-            transition<RedEvent> {
-                targetState = redState
+            // Setup transition on YellowEvent
+            transition<Events.YellowEvent> {
+                targetState = States.YellowState
                 // Add transition listener
                 onTriggered { println("Transition on ${it.event}") }
             }
         }
 
-        initialState {
-            // Add state listeners
-            onEntry { println("Enter $name state") }
-            onExit { println("Exit $name state") }
-
-            transition<YellowEvent> { targetState = yellowState }
+        addState(States.YellowState) {
+            transition<Events.RedEvent> { targetState = States.RedState }
         }
+
+        addFinalState(States.RedState)
     }
 
     // Process events
-    machine.processEvent(YellowEvent)
-    machine.processEvent(RedEvent)
+    machine.processEvent(Events.YellowEvent)
+    machine.processEvent(Events.RedEvent)
 }
 ```
 
@@ -310,9 +318,7 @@ You can enable internal state machine logging on your platform:
 ```kotlin
 createStateMachine {
     // ...
-    logger = StateMachine.Logger {
-        println(it)
-    }
+    logger = StateMachine.Logger { println(it) }
 }
 ```
 
@@ -479,6 +485,18 @@ Copy/paste resulting output to any tool supporting DOT language, for example:
 
 _Note: Graphviz export does not support nested states._
 
+## Consider using Kotlin `sealed` classes
+
+With sealed classes for states and events your state machine structure may look simpler.
+Try to compare this two samples they both are doing the same thing but 
+using of sealed classes makes code self explaining:
+
+[Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt) vs 
+[Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
+
+Also sealed classes eliminate need of using `lateinit` states variables 
+and reordering of states in state machine setup block to have a valid state references for transitions. 
+
 ## Do not
 
 State machine is a powerful tool to control states so let it do its job, do not select target state
@@ -507,6 +525,7 @@ machine.processEvent(SomethingHappenedEvent)
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
+* [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
 ## License

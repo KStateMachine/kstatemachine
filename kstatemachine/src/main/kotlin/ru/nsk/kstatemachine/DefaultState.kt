@@ -43,7 +43,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _listeners.remove(listener)
     }
 
-    override fun <S : State> addState(state: S, init: StateBlock?): S {
+    override fun <S : State> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
 
         state.name?.let {
@@ -184,7 +184,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     private object StartEvent : Event
 }
 
-class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
+open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")
 }
