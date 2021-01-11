@@ -19,13 +19,13 @@ class NestedStateTest {
 
         createStateMachine {
             firstL1 = initialState("firstL1") {
-                onEntry { callbacks.onEntryState(this) }
+                callbacks.listen(this)
 
                 firstL2 = initialState("firstL2") {
-                    onEntry { callbacks.onEntryState(this) }
+                    callbacks.listen(this)
 
                     addInitialState(firstL3) {
-                        onEntry { callbacks.onEntryState(this) }
+                        callbacks.listen(this)
                     }
                 }
             }
@@ -50,26 +50,23 @@ class NestedStateTest {
             logger = StateMachine.Logger { println(it) }
 
             secondL1 = state("secondL1") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
 
                 secondL2 = initialState("secondL2") {
-                    onEntry { callbacks.onEntryState(this) }
-                    onExit { callbacks.onExitState(this) }
+                    callbacks.listen(this)
                 }
             }
 
             firstL1 = initialState("firstL1") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
+
                 transition<SwitchEventL1> {
                     targetState = secondL1
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
 
                 firstL2 = initialState("firstL2") {
-                    onEntry { callbacks.onEntryState(this) }
-                    onExit { callbacks.onExitState(this) }
+                    callbacks.listen(this)
                 }
             }
         }
@@ -100,31 +97,27 @@ class NestedStateTest {
             logger = StateMachine.Logger { println(it) }
 
             finalL1 = finalState("finalL1") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
             }
 
             initialL1 = initialState("initialL1") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
-                onFinished { callbacks.onFinished(this) }
+                callbacks.listen(this)
 
                 transition<SwitchEventL1> {
                     targetState = finalL1
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
 
                 finalL2 = finalState("finalL2") {
-                    onEntry { callbacks.onEntryState(this) }
-                    onExit { callbacks.onExitState(this) }
+                    callbacks.listen(this)
                 }
 
                 initialL2 = initialState("initialL2") {
-                    onEntry { callbacks.onEntryState(this) }
-                    onExit { callbacks.onExitState(this) }
+                    callbacks.listen(this)
+
                     transition<SwitchEventL2> {
                         targetState = finalL2
-                        onTriggered { callbacks.onTriggeredTransition(it.event) }
+                        callbacks.listen(this)
                     }
                 }
             }

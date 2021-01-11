@@ -17,3 +17,13 @@ interface Callbacks {
     fun onEntryState(state: State)
     fun onExitState(state: State)
 }
+
+fun Callbacks.listen(state: State) {
+    state.onEntry { onEntryState(this) }
+    state.onExit { onExitState(this) }
+    state.onFinished { onFinished(this) }
+}
+
+inline fun <reified E : Event> Callbacks.listen(transitionBuilder: TransitionBuilder<E>) {
+    transitionBuilder.onTriggered { onTriggeredTransition(it.event) }
+}

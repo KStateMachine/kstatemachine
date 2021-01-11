@@ -60,6 +60,7 @@ interface InternalState : State {
 
     /** @return true if event was processed */
     fun doProcessEvent(event: Event, argument: Any?): Boolean
+    fun doFindTargetListTo(state: InternalState, list: MutableList<InternalState>)
 }
 
 operator fun <S : State> S.invoke(block: S.() -> Unit) = block()

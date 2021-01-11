@@ -5,7 +5,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 open class DefaultState(override val name: String? = null) : InternalState {
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
 
-    private val _states = mutableSetOf<State>()
+    private val _states = mutableSetOf<InternalState>()
     override val states: Set<State> = _states
 
     /**
@@ -50,7 +50,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
             require(findState(it) == null) { "State with name $it already exists" }
         }
 
-        require(_states.add(state)) { "$state already added" }
+        require(_states.add(state as InternalState)) { "$state already added" }
         (state as InternalState).setParent(this)
         if (init != null) state.init()
         return state
@@ -144,10 +144,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
-            targetState?.let {
-                fromState.doExit(transitionParams)
-                setCurrentState(targetState, transitionParams)
-            }
+            targetState?.let { switchToTargetState(it, fromState, transitionParams) }
             return true
         } else {
             return fromState.doProcessEvent(event, argument)
@@ -156,6 +153,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         val machine = machine as InternalStateMachine
+        require(states.contains(state)) { "$state is not a child of $this" }
 
         currentState = state
 
@@ -171,17 +169,51 @@ open class DefaultState(override val name: String? = null) : InternalState {
             notify { onFinished() }
         }
 
-        machine.machineNotify {
-            onStateChanged(state)
-        }
+        machine.machineNotify { onStateChanged(state) }
 
         state.doEnter()
+    }
+
+    private fun switchToTargetState(
+        targetState: InternalState,
+        fromState: InternalState,
+        transitionParams: TransitionParams<*>
+    ) {
+        val lca = findLowestCommonAncestor(this, targetState)
+
+        fromState.doExit(transitionParams)
+        val list = findTargetListTo(targetState)
+        setCurrentState(targetState, transitionParams)
+    }
+
+
+
+    private fun findTargetListTo(state: InternalState): List<InternalState> {
+        val list = mutableListOf<InternalState>()
+        doFindTargetListTo(state, list)
+        return list
+    }
+
+    override fun doFindTargetListTo(state: InternalState, list: MutableList<InternalState>) {
+        if (states.contains(state)) {
+            list.add(state)
+        } else {
+            _states.forEach {
+                it.doFindTargetListTo(state, list)
+            }
+        }
     }
 
     /**
      * Initial event which is processed on state machine start
      */
     private object StartEvent : Event
+
+    private companion object {
+        private fun findLowestCommonAncestor(first: InternalState, second: InternalState) : InternalState {
+            return first
+        }
+    }
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
