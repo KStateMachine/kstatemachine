@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TreeAlgorithms.findLowestCommonAncestor
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultState(override val name: String? = null) : InternalState {
@@ -17,8 +18,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override val initialState
         get() = _initialState
 
-    private var _parent: State? = null
-    override val parent: State
+    private var _parent: InternalState? = null
+    override val parent: InternalState
         get() = requireNotNull(_parent) { "Parent state not set, call setParent() first" }
 
     override val machine: StateMachine
@@ -50,8 +51,9 @@ open class DefaultState(override val name: String? = null) : InternalState {
             require(findState(it) == null) { "State with name $it already exists" }
         }
 
-        require(_states.add(state as InternalState)) { "$state already added" }
-        (state as InternalState).setParent(this)
+        state as InternalState
+        require(_states.add(state)) { "$state already added" }
+        state.setParent(this)
         if (init != null) state.init()
         return state
     }
@@ -66,7 +68,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _initialState = state as InternalState
     }
 
-    override fun setParent(parent: State) {
+    override fun setParent(parent: InternalState) {
         _parent = parent
     }
 
@@ -179,41 +181,16 @@ open class DefaultState(override val name: String? = null) : InternalState {
         fromState: InternalState,
         transitionParams: TransitionParams<*>
     ) {
-        val lca = findLowestCommonAncestor(this, targetState)
-
+        val (lca, path) = findLowestCommonAncestor(targetState)
+        // TODO activate states in path
         fromState.doExit(transitionParams)
-        val list = findTargetListTo(targetState)
         setCurrentState(targetState, transitionParams)
-    }
-
-
-
-    private fun findTargetListTo(state: InternalState): List<InternalState> {
-        val list = mutableListOf<InternalState>()
-        doFindTargetListTo(state, list)
-        return list
-    }
-
-    override fun doFindTargetListTo(state: InternalState, list: MutableList<InternalState>) {
-        if (states.contains(state)) {
-            list.add(state)
-        } else {
-            _states.forEach {
-                it.doFindTargetListTo(state, list)
-            }
-        }
     }
 
     /**
      * Initial event which is processed on state machine start
      */
     private object StartEvent : Event
-
-    private companion object {
-        private fun findLowestCommonAncestor(first: InternalState, second: InternalState) : InternalState {
-            return first
-        }
-    }
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
