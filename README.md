@@ -187,8 +187,8 @@ state().onEntry { /*...*/ }
 
 ## Setup transitions
 
-In a state setup block we define which events will trigger transitions to
-another states. Transition is created  with `transition()` function:
+In a state setup block we define which events will trigger transitions to another states. Transition
+is created with `transition()` function:
 
 ```kotlin
 greenState {
@@ -221,10 +221,10 @@ transition<YellowEvent> {
 }
 ```
 
-There is extended version of `transition()` function, it is called `transitionTo()`.
-It works the same way but takes lambda to calculate target state.
-This allows to use `lateinit` state variables and choose target state depending on application business logic 
-like with [conditional transitions](#conditional-transitions) but gives less flexibility:
+There is extended version of `transition()` function, it is called `transitionTo()`. It works the
+same way but takes lambda to calculate target state. This allows to use `lateinit` state variables
+and choose target state depending on application business logic like
+with [conditional transitions](#conditional-transitions) but gives less flexibility:
 
 ```kotlin
 createStateMachine {
@@ -258,8 +258,8 @@ createStateMachine {
 
 ### Guarded transitions
 
-Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is
-a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
+Guarded transition is triggered only if specified guard function returns `true`. Guarded transition
+is a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
 Use `transition()` or `transitionTo()` functions to create guarded transition:
 
 ```kotlin
@@ -279,9 +279,8 @@ See [guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/Guarded
 ### Conditional transitions
 
 State machine becomes more powerful tool when you can choose target state depending on your business
-logic (some external data).
-Conditional transitions give you maximum flexibility on choosing target state
-and conditions when transition is triggered.
+logic (some external data). Conditional transitions give you maximum flexibility on choosing target
+state and conditions when transition is triggered.
 
 There are three options to choose transition direction:
 
@@ -326,37 +325,6 @@ createStateMachine {
 }
 ```
 
-## Error handling
-
-By default, state machine simply ignores events that does not match any defined transition. You can
-see those events if logging is enabled or use custom `IgnoredEventHandler`:
-
-```kotlin
-createStateMachine {
-    // ...
-    ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-        error("unexpected $event")
-    }
-}
-```
-
-It is not allowed to call `processEvent()` while state machine is already processing event. For
-example from notification listener. By default, state machine will throw exception in this case, but
-you can set custom `PendingEventHandler`:
-
-```kotlin
-createStateMachine {
-    // ...
-    pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-        error(
-            "$this can not process pending $pendingEvent " +
-                    "as event processing is already running. " +
-                    "Do not call processEvent() from notification listeners."
-        )
-    }
-}
-```
-
 ## Finishing state machine
 
 Some of state machines are infinite, but other ones may finish. State machine that was finished
@@ -398,17 +366,23 @@ val machine = createStateMachine {
 }
 ```
 
-_Note: cross-level transitions are not supported yet._
-
 ### Inherit transitions by grouping states
 
 Suppose you have three states that all should have a transitions to another state. You can
 explicitly set this transition for each state but with this approach complexity grows and when you
-add fourth state you have to remember to add this specific transition. This problem can be solved with
-adding parent state which defines such transition and groups its child states. Child states
+add fourth state you have to remember to add this specific transition. This problem can be solved
+with adding parent state which defines such transition and groups its child states. Child states
 inherit there parent transitions.
 
 ![Inherit transitions diagram](./doc/diagrams/inherit-transitions.png)
+
+### Cross level transitions
+
+_Comming soon..._
+
+## Parallel states
+
+_Comming soon..._
 
 ## Arguments
 
@@ -450,6 +424,37 @@ state("first") {
 _Note: it is up to user to control that argument field is set from one listener. You can use some
 mutable data structure and fill it from multiple listeners._
 
+## Error handling
+
+By default, state machine simply ignores events that does not match any defined transition. You can
+see those events if logging is enabled or use custom `IgnoredEventHandler`:
+
+```kotlin
+createStateMachine {
+    // ...
+    ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
+        error("unexpected $event")
+    }
+}
+```
+
+It is not allowed to call `processEvent()` while state machine is already processing event. For
+example from notification listener. By default, state machine will throw exception in this case, but
+you can set custom `PendingEventHandler`:
+
+```kotlin
+createStateMachine {
+    // ...
+    pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
+        error(
+            "$this can not process pending $pendingEvent " +
+                    "as event processing is already running. " +
+                    "Do not call processEvent() from notification listeners."
+        )
+    }
+}
+```
+
 ## Multithreading
 
 State machine is designed to work in single thread. So if you need to process events from different
@@ -458,7 +463,9 @@ from that queue in a loop and call `processEvent()` function.
 
 ## Export
 
-_Note: conditional transitions depending on external data might not work._
+_Note: conditional or guarded transitions might be exported not completely. Lambdas that are passed
+to calculate next state (`guard` or `direction`) would be called during export process. The export
+result depends on what they will return._
 
 ### PlantUML
 
@@ -491,15 +498,16 @@ _Note: Graphviz export does not support nested states._
 
 ## Consider using Kotlin `sealed` classes
 
-With sealed classes for states and events your state machine structure may look simpler.
-Try to compare this two samples they both are doing the same thing but 
-using of sealed classes makes code self explaining:
+With sealed classes for states and events your state machine structure may look simpler. Try to
+compare this two samples they both are doing the same thing but using of sealed classes makes code
+self explaining:
 
-[Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt) vs 
+[Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
+vs
 [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
-Also sealed classes eliminate need of using `lateinit` states variables 
-and reordering of states in state machine setup block to have a valid state references for transitions. 
+Also sealed classes eliminate need of using `lateinit` states variables and reordering of states in
+state machine setup block to have a valid state references for transitions.
 
 ## Do not
 
