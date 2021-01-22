@@ -56,11 +56,12 @@ interface InternalState : State {
     fun setParent(parent: InternalState)
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
-    fun doEnter()
-    fun doExit(transitionParams: TransitionParams<*>)
+    fun recursiveEnterInitialState()
+    fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
+    fun recursiveExit(transitionParams: TransitionParams<*>)
 
     /** @return true if event was processed */
-    fun doProcessEvent(event: Event, argument: Any?): Boolean
+    fun recursiveProcessEvent(event: Event, argument: Any?): Boolean
 }
 
 operator fun <S : State> S.invoke(block: S.() -> Unit) = block()

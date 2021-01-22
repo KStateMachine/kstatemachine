@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.then
 import org.junit.jupiter.api.Test
 
-class NestedCrossLevelTest {
+class CrossLevelTransitionTest {
     @Test
     fun parentToChild() {
         val callbacks = mock<Callbacks>()

@@ -2,10 +2,9 @@ package ru.nsk.kstatemachine
 
 internal object TreeAlgorithms {
     /**
-     * @return lca and a path from lca to [targetState]
+     * @return Path from [targetState] to lca. This path always contains at lest one element - lca which is last.
      */
-    fun InternalState.findLowestCommonAncestor(targetState: InternalState):
-            Pair<InternalState, MutableList<InternalState>> {
+    fun InternalState.findPathFromTargetToLca(targetState: InternalState): MutableList<InternalState> {
         var thisNode = this
         var targetNode = targetState
         var thisDepth = thisNode.findDepth()
@@ -31,7 +30,8 @@ internal object TreeAlgorithms {
             targetNode = targetNode.parent
         }
 
-        return thisNode to targetPath
+        targetPath.add(thisNode) // add lca
+        return targetPath
     }
 
     private fun State.findDepth(): Int {
