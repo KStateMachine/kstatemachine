@@ -3,24 +3,24 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
-
 object SwitchEvent2 : Event
 
 fun main() {
     val machine = createStateMachine {
         logger = StateMachine.Logger { println(it) }
 
-        lateinit var state22: State
+        lateinit var nested22: State
 
-        initialState("1") {
-            initialState("11") {
-                transitionTo<SwitchEvent2> { targetState = { state22 } }
+        initialState("Top level 1") {
+            initialState("Nested 11") {
+                // Target state is declared in another state
+                transitionTo<SwitchEvent2> { targetState = { nested22 } }
             }
         }
 
-        state("2") {
-            initialState("21")
-            state22 = state("22")
+        state("Top level 2") {
+            initialState("Nested 21")
+            nested22 = state("Nested 22")
         }
     }
 

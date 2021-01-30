@@ -1,0 +1,17 @@
+@startuml
+hide empty description
+state Top_level_1 {
+    state Nested_11
+    
+    [*] --> Nested_11
+}
+state Top_level_2 {
+    state Nested_21
+    state Nested_22
+    
+    [*] --> Nested_21
+}
+
+[*] --> Top_level_1
+Nested_11 -> Nested_22
+@enduml

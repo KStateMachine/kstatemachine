@@ -47,15 +47,14 @@ class ExportDotVisitor : Visitor {
     }
 
     override fun visit(transition: Transition<*>) {
-        val internalTransition = transition as InternalTransition<*>
+        transition as InternalTransition<*>
 
-        val sourceState = internalTransition.sourceState.graphName()
-        val targetState = when (val direction = internalTransition.produceTargetStateDirection()) {
-            Stay -> return
-            NoTransition -> return
+        val sourceState = transition.sourceState.graphName()
+        val targetState = when (val direction = transition.produceTargetStateDirection()) {
+            Stay, NoTransition -> return
             is TargetState -> direction.targetState.graphName()
         }
-        line("    $sourceState -> $targetState${label(internalTransition.name)};")
+        line("    $sourceState -> $targetState${label(transition.name)};")
     }
 
     private fun line(text: String) = builder.appendLine(text)

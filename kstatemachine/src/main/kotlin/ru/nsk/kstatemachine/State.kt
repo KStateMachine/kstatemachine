@@ -54,6 +54,7 @@ interface FinalState : InternalState
 interface InternalState : State {
     override val parent: InternalState
     fun setParent(parent: InternalState)
+    fun isNeighbor(state: State): Boolean
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
     fun recursiveEnterInitialState()

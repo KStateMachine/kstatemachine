@@ -72,9 +72,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _parent = parent
     }
 
-    /**
-     * Get transition by name. This might be used to start listening to transition after state machine setup.
-     */
+    override fun isNeighbor(state: State): Boolean {
+        if (_parent?.states?.contains(state) == true)
+            return true
+        return false
+    }
 
     /**
      * Get transition by name. This might be used to start listening to transition after state machine setup.
