@@ -30,26 +30,21 @@ class StateMachineTest {
 
         val machine = createStateMachine {
             on = initialState("on") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
             }
             off = state("off") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
+
                 transition<OnEvent> {
                     targetState = on
-                    onTriggered {
-                        callbacks.onTriggeredTransition(it.event)
-                    }
+                    callbacks.listen(this)
                 }
             }
 
             on {
                 transition<OffEvent> {
                     targetState = off
-                    onTriggered {
-                        callbacks.onTriggeredTransition(it.event)
-                    }
+                    callbacks.listen(this)
                 }
             }
         }

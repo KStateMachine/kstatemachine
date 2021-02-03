@@ -10,8 +10,8 @@ machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and hierarchi
 
 ## Install
 
-Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it
-in your root `build.gradle` at the end of repositories:
+Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
+root `build.gradle` at the end of repositories:
 
 ```groovy
 allprojects {
@@ -37,10 +37,10 @@ Where `<Tag>` is a library version.
 Main features are:
 
 * Kotlin DSL syntax for defining state machine structure;
-* [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with
-  dynamic target state which is calculated in a moment of event processing depending on application
-  business logic;
-* [Nested states](#nested-states) - hierarchical state machines (HSMs);
+* [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with dynamic target state
+  which is calculated in a moment of event processing depending on application business logic;
+* [Nested states](#nested-states) - hierarchical state machines (HSMs)
+  with [cross level transitions](#cross-level-transitions) support;
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
   and  [Graphviz](https://graphviz.org/).
@@ -49,17 +49,15 @@ _The library is currently in a development phase. You are welcome to propose use
 
 Building blocks (main classes) of this library:
 
-* `StateMachine` - is a collection of states and transitions between them, processes events when
-  started;
+* `StateMachine` - is a collection of states and transitions between them, processes events when started;
 * `State` - states where state machine can go to;
-* `Event` - is a base class for events or other words actions which are processed by state machine
-  and may trigger transitions;
+* `Event` - is a base class for events or other words actions which are processed by state machine and may trigger
+  transitions;
 * `Transition` - is an operation of moving from one state to another.
 
-Working with state machine consists of two steps:
+Working with state machine consists of two major steps:
 
-* Creation and initial setup, here you may set custom actions (side effects) via listeners to be
-  performed on entering/exiting states and transitions between them;
+* Creation and initial setup;
 * Processing events, on which state machine can switch its states and notify about changes.
 
 ```kotlin
@@ -133,8 +131,7 @@ val machine = createStateMachine(
 
 ## Setup states
 
-In state machine setup block we define states with `state()` function and set initial one
-with `setInitialState()`:
+In state machine setup block we define states with `state()` function and set initial one with `setInitialState()`:
 
 ```kotlin
 createStateMachine {
@@ -149,8 +146,7 @@ createStateMachine {
 }
 ```
 
-You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set
-initial state:
+You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set initial state:
 
 ```kotlin
 createStateMachine {
@@ -187,8 +183,8 @@ state().onEntry { /*...*/ }
 
 ## Setup transitions
 
-In a state setup block we define which events will trigger transitions to another states. Transition
-is created with `transition()` function:
+In a state setup block we define which events will trigger transitions to another states. The simplest transition is
+created with `transition()` function:
 
 ```kotlin
 greenState {
@@ -197,18 +193,6 @@ greenState {
         // Set target state where state machine go when this transition is triggered
         targetState = yellowState
     }
-}
-```
-
-_Note: only one transition is possible per event type. This means you cannot have multiple
-transitions parametrized with same `Event` subclass._
-
-Transition may have no target state (`targetState` is null) which means that state machine stays in
-current state when such transition triggers:
-
-```kotlin
-greenState {
-    transition<YellowEvent>()
 }
 ```
 
@@ -221,10 +205,10 @@ transition<YellowEvent> {
 }
 ```
 
-There is extended version of `transition()` function, it is called `transitionTo()`. It works the
-same way but takes lambda to calculate target state. This allows to use `lateinit` state variables
-and choose target state depending on application business logic like
-with [conditional transitions](#conditional-transitions) but gives less flexibility:
+There is an extended version of `transition()` function, it is called `transitionTo()`. It works the same way but takes
+a lambda to calculate target state. This allows to use `lateinit` state variables and to choose target state depending
+on an application business logic like with [conditional transitions](#conditional-transitions) but with shorter syntax
+and less flexibility:
 
 ```kotlin
 createStateMachine {
@@ -242,10 +226,21 @@ createStateMachine {
 }
 ```
 
+### Targetless transitions
+
+Transition may have no target state (`targetState` is null) which means that state machine stays in current state when
+such transition triggers:
+
+```kotlin
+greenState {
+    transition<YellowEvent>()
+}
+```
+
 ### Listen to all transitions in one place
 
-There might be many transitions from one state to another. It is possible to listen to all of them
-in state machine setup block:
+There might be many transitions from one state to another. It is possible to listen to all of them in state machine
+setup block:
 
 ```kotlin
 createStateMachine {
@@ -258,9 +253,9 @@ createStateMachine {
 
 ### Guarded transitions
 
-Guarded transition is triggered only if specified guard function returns `true`. Guarded transition
-is a special kind of [conditional transition](#conditional-transitions) with shorter syntax.
-Use `transition()` or `transitionTo()` functions to create guarded transition:
+Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is a special kind
+of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionTo()`
+functions to create guarded transition:
 
 ```kotlin
 state1 {
@@ -278,9 +273,9 @@ See [guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/Guarded
 
 ### Conditional transitions
 
-State machine becomes more powerful tool when you can choose target state depending on your business
-logic (some external data). Conditional transitions give you maximum flexibility on choosing target
-state and conditions when transition is triggered.
+State machine becomes more powerful tool when you can choose target state depending on your business logic (some
+external data). Conditional transitions give you maximum flexibility on choosing target state and conditions when
+transition is triggered.
 
 There are three options to choose transition direction:
 
@@ -288,8 +283,8 @@ There are three options to choose transition direction:
 * `targetState(nextState)` - transition is triggered and state machine goes to the specified state;
 * `noTransition()` - transition is not triggered.
 
-Use `transitionConditionally()` function to create conditional transition and specify a function
-which makes desired decision:
+Use `transitionConditionally()` function to create conditional transition and specify a function which makes desired
+decision:
 
 ```kotlin
 redState {
@@ -327,10 +322,10 @@ createStateMachine {
 
 ## Finishing state machine
 
-Some of state machines are infinite, but other ones may finish. State machine that was finished
-stops processing incoming events. To make state machine finishing, add `FinalState` to it
-with `finalState()` function or add any subclass of `FinalState` with `addState()` function. State
-machine finishes when enters top-level `FinalState` and notifies its listeners with `onFinished()`
+Some of state machines are infinite, but other ones may finish. State machine that was finished stops processing
+incoming events. To make state machine finishing, add `FinalState` to it with `finalState()` function or add any
+subclass of `FinalState` with `addState()` function. State machine finishes when enters top-level `FinalState` and
+notifies its listeners with `onFinished()`
 callback.
 
 ```kotlin
@@ -346,11 +341,10 @@ _Note: `FinalState` can not have its own transitions._
 
 ## Nested states
 
-With nested states you can build hierarchical state machines and inherit transitions by grouping
-states.
+With nested states you can build hierarchical state machines and inherit transitions by grouping states.
 
-To create nested states simply use same functions (`state()`, `initialState()` etc.) as for state
-machine but in state setup block:
+To create nested states simply use same functions (`state()`, `initialState()` etc.) as for state machine but in state
+setup block:
 
 ```kotlin
 val machine = createStateMachine {
@@ -368,17 +362,19 @@ val machine = createStateMachine {
 
 ### Inherit transitions by grouping states
 
-Suppose you have three states that all should have a transitions to another state. You can
-explicitly set this transition for each state but with this approach complexity grows and when you
-add fourth state you have to remember to add this specific transition. This problem can be solved
-with adding parent state which defines such transition and groups its child states. Child states
-inherit there parent transitions.
+Suppose you have three states that all should have a transitions to another state. You can explicitly set this
+transition for each state but with this approach complexity grows and when you add fourth state you have to remember to
+add this specific transition. This problem can be solved with adding parent state which defines such transition and
+groups its child states. Child states inherit there parent transitions.
 
 ![Inherit transitions diagram](./doc/diagrams/inherit-transitions.png)
 
 ### Cross level transitions
 
-_Comming soon..._
+A transition can have any state as its target. This means that the target state does not have to be on the same level in
+the state hierarchy as the source state.
+
+![Cross level transition diagram](./doc/diagrams/cross-level-transition.png)
 
 ## Parallel states
 
@@ -390,9 +386,9 @@ _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
 
 ### Event argument
 
-Usually if event may hold some data we define Event subclass, it is type safe. Sometimes if data is
-optional it may be simpler to use event argument. You can specify arbitrary argument with an event
-in `processEvent()` function. Then you can get this argument in state and transition listeners.
+Usually if event may hold some data we define Event subclass, it is type safe. Sometimes if data is optional it may be
+simpler to use event argument. You can specify arbitrary argument with an event in `processEvent()` function. Then you
+can get this argument in state and transition listeners.
 
 ```kotlin
 val machine = createStateMachine {
@@ -421,13 +417,13 @@ state("first") {
 }
 ```
 
-_Note: it is up to user to control that argument field is set from one listener. You can use some
-mutable data structure and fill it from multiple listeners._
+_Note: it is up to user to control that argument field is set from one listener. You can use some mutable data structure
+and fill it from multiple listeners._
 
 ## Error handling
 
-By default, state machine simply ignores events that does not match any defined transition. You can
-see those events if logging is enabled or use custom `IgnoredEventHandler`:
+By default, state machine simply ignores events that does not match any defined transition. You can see those events if
+logging is enabled or use custom `IgnoredEventHandler`:
 
 ```kotlin
 createStateMachine {
@@ -438,9 +434,9 @@ createStateMachine {
 }
 ```
 
-It is not allowed to call `processEvent()` while state machine is already processing event. For
-example from notification listener. By default, state machine will throw exception in this case, but
-you can set custom `PendingEventHandler`:
+It is not allowed to call `processEvent()` while state machine is already processing event. For example from
+notification listener. By default, state machine will throw exception in this case, but you can set
+custom `PendingEventHandler`:
 
 ```kotlin
 createStateMachine {
@@ -457,15 +453,15 @@ createStateMachine {
 
 ## Multithreading
 
-State machine is designed to work in single thread. So if you need to process events from different
-threads you can post them to some thread safe queue and start single thread which will pull events
-from that queue in a loop and call `processEvent()` function.
+State machine is designed to work in single thread. So if you need to process events from different threads you can post
+them to some thread safe queue and start single thread which will pull events from that queue in a loop and
+call `processEvent()` function.
 
 ## Export
 
-_Note: conditional or guarded transitions might be exported not completely. Lambdas that are passed
-to calculate next state (`guard` or `direction`) would be called during export process. The export
-result depends on what they will return._
+_Note: conditional or guarded transitions might be exported not completely. Lambdas that are passed to calculate next
+state (`guard` or `direction`) would be called during export process. The export result depends on what they will
+return._
 
 ### PlantUML
 
@@ -481,8 +477,8 @@ Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com
 
 ### Graphviz
 
-Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs.
-Use `exportToDot()` extension function to export state machine to DOT language.
+Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs. Use `exportToDot()` extension
+function to export state machine to DOT language.
 
 ```kotlin
 val machine = createStateMachine { /*...*/ }
@@ -498,22 +494,20 @@ _Note: Graphviz export does not support nested states._
 
 ## Consider using Kotlin `sealed` classes
 
-With sealed classes for states and events your state machine structure may look simpler. Try to
-compare this two samples they both are doing the same thing but using of sealed classes makes code
-self explaining:
+With sealed classes for states and events your state machine structure may look simpler. Try to compare this two samples
+they both are doing the same thing but using of sealed classes makes code self explaining:
 
 [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 vs
 [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
-Also sealed classes eliminate need of using `lateinit` states variables and reordering of states in
-state machine setup block to have a valid state references for transitions.
+Also sealed classes eliminate need of using `lateinit` states variables and reordering of states in state machine setup
+block to have a valid state references for transitions.
 
 ## Do not
 
-State machine is a powerful tool to control states so let it do its job, do not select target state
-by sending different event types depending on business logic state, let the state machine to make
-decision for you.
+State machine is a powerful tool to control states so let it do its job, do not select target state by sending different
+event types depending on business logic state, let the state machine to make decision for you.
 
 Wrong:
 
@@ -540,6 +534,7 @@ machine.processEvent(SomethingHappenedEvent)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
+* [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
 
 ## License
 

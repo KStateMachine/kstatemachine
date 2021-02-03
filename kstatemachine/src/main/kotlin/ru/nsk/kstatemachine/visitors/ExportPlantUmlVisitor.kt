@@ -11,6 +11,7 @@ import ru.nsk.kstatemachine.*
 class ExportPlantUmlVisitor : Visitor {
     private val builder = StringBuilder()
     private var indent = 0
+    private val crossLevelTransitions = mutableListOf<String>()
 
     fun export() = builder.toString()
 
@@ -19,6 +20,7 @@ class ExportPlantUmlVisitor : Visitor {
         line("hide empty description")
 
         processStateBody(machine)
+        crossLevelTransitions.forEach { line(it) }
 
         line("@enduml")
     }
@@ -35,16 +37,27 @@ class ExportPlantUmlVisitor : Visitor {
         }
     }
 
+    /**
+     * PlantUML cannot show correctly cross level transitions to nested states.
+     * It requires to see all states declarations first to provide correct rendering,
+     * so we have to store them to print after state declaration.
+     */
     override fun visit(transition: Transition<*>) {
-        val internalTransition = transition as InternalTransition<*>
+        transition as InternalTransition<*>
 
-        val sourceState = internalTransition.sourceState.graphName()
-        val targetState = when (val direction = internalTransition.produceTargetStateDirection()) {
-            Stay -> return
-            NoTransition -> return
-            is TargetState -> direction.targetState.graphName()
+        val sourceState = transition.sourceState.graphName()
+        val targetState = when (val direction = transition.produceTargetStateDirection()) {
+            Stay, NoTransition  -> return
+            is TargetState -> direction.targetState
         }
-        line("$sourceState --> $targetState${label(internalTransition.name)}")
+
+        val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
+
+        val source = transition.sourceState as InternalState
+        if (source.isNeighbor(targetState))
+            line(transitionString)
+        else
+            crossLevelTransitions.add(transitionString)
     }
 
     private fun processStateBody(state: State) {

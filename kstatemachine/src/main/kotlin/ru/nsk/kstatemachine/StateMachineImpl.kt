@@ -46,7 +46,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         isProcessingEvent = true
 
         try {
-            if (!doProcessEvent(event, argument)) {
+            if (!recursiveProcessEvent(event, argument)) {
                 log("$this ignored $event")
                 ignoredEventHandler.onIgnoredEvent(event, argument)
             }
@@ -62,7 +62,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         _isRunning = true
         machineNotify { onStarted() }
 
-        doEnter()
+        recursiveEnterInitialState()
     }
 
     override fun stop() {

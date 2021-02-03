@@ -17,10 +17,7 @@ class StateTest {
             }
 
             val simpleState = initialState {
-                transition<SwitchEvent> {
-                    targetState = subclassState
-                    onTriggered { }
-                }
+                transition<SwitchEvent> { targetState = subclassState }
             }
 
             subclassState {

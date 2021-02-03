@@ -1,11 +1,12 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultState(override val name: String? = null) : InternalState {
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
 
-    private val _states = mutableSetOf<State>()
+    private val _states = mutableSetOf<InternalState>()
     override val states: Set<State> = _states
 
     /**
@@ -17,8 +18,8 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override val initialState
         get() = _initialState
 
-    private var _parent: State? = null
-    override val parent: State
+    private var _parent: InternalState? = null
+    override val parent: InternalState
         get() = requireNotNull(_parent) { "Parent state not set, call setParent() first" }
 
     override val machine: StateMachine
@@ -50,8 +51,9 @@ open class DefaultState(override val name: String? = null) : InternalState {
             require(findState(it) == null) { "State with name $it already exists" }
         }
 
+        state as InternalState
         require(_states.add(state)) { "$state already added" }
-        (state as InternalState).setParent(this)
+        state.setParent(this)
         if (init != null) state.init()
         return state
     }
@@ -66,13 +68,15 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _initialState = state as InternalState
     }
 
-    override fun setParent(parent: State) {
+    override fun setParent(parent: InternalState) {
         _parent = parent
     }
 
-    /**
-     * Get transition by name. This might be used to start listening to transition after state machine setup.
-     */
+    override fun isNeighbor(state: State): Boolean {
+        if (_parent?.states?.contains(state) == true)
+            return true
+        return false
+    }
 
     /**
      * Get transition by name. This might be used to start listening to transition after state machine setup.
@@ -94,7 +98,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun asState() = this
 
-    override fun doEnter() {
+    override fun recursiveEnterInitialState() {
         if (states.isEmpty()) return
 
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
@@ -110,19 +114,20 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 ), StartEvent
             )
         )
+        initialState.recursiveEnterInitialState()
     }
 
-    override fun doExit(transitionParams: TransitionParams<*>) {
+    override fun recursiveExit(transitionParams: TransitionParams<*>) {
         if (states.isNotEmpty()) {
-            val currentState = requireNotNull(currentState) { "currentState is not set" }
-            currentState.doExit(transitionParams)
+            val currentState = requireCurrentState()
+            currentState.recursiveExit(transitionParams)
         }
 
         machine.log("Exiting $this")
         notify { onExit(transitionParams) }
     }
 
-    override fun doProcessEvent(event: Event, argument: Any?): Boolean {
+    override fun recursiveProcessEvent(event: Event, argument: Any?): Boolean {
         val machine = machine as InternalStateMachine
 
         if (isFinished)
@@ -144,18 +149,21 @@ open class DefaultState(override val name: String? = null) : InternalState {
                 machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
 
-            targetState?.let {
-                fromState.doExit(transitionParams)
-                setCurrentState(targetState, transitionParams)
-            }
+            targetState?.let { switchToTargetState(it, fromState, transitionParams) }
             return true
         } else {
-            return fromState.doProcessEvent(event, argument)
+            return fromState.recursiveProcessEvent(event, argument)
         }
     }
 
+    private fun requireCurrentState() = requireNotNull(currentState) { "currentState is not set" }
+
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+        if (currentState == state) return
+        currentState?.recursiveExit(transitionParams)
+
         val machine = machine as InternalStateMachine
+        require(states.contains(state)) { "$state is not a child of $this" }
 
         currentState = state
 
@@ -171,11 +179,27 @@ open class DefaultState(override val name: String? = null) : InternalState {
             notify { onFinished() }
         }
 
-        machine.machineNotify {
-            onStateChanged(state)
-        }
+        machine.machineNotify { onStateChanged(state) }
+    }
 
-        state.doEnter()
+    override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
+        if (path.isEmpty()) {
+            recursiveEnterInitialState()
+        } else {
+            val state = path.removeLast()
+            setCurrentState(state, transitionParams)
+            state.recursiveEnterStatePath(path, transitionParams)
+        }
+    }
+
+    private fun switchToTargetState(
+        targetState: InternalState,
+        fromState: InternalState,
+        transitionParams: TransitionParams<*>
+    ) {
+        val path = fromState.findPathFromTargetToLca(targetState)
+        val lca = path.removeLast()
+        lca.recursiveEnterStatePath(path, transitionParams)
     }
 
     /**
