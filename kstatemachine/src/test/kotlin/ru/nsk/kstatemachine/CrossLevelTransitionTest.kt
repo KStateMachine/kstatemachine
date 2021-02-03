@@ -6,6 +6,85 @@ import com.nhaarman.mockitokotlin2.then
 import org.junit.jupiter.api.Test
 
 class CrossLevelTransitionTest {
+    /**
+     * Currently transition from self to self is same as targetless transition
+     */
+    @Test
+    fun selfToSelf() {
+        val callbacks = mock<Callbacks>()
+        val inOrder = inOrder(callbacks)
+
+        lateinit var state1: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            state1 = initialState("1") {
+                callbacks.listen(this)
+
+                transitionTo<SwitchEvent> {
+                    targetState = { state1 }
+                    callbacks.listen(this)
+                }
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+
+        then(callbacks).should(inOrder).onEntryState(state1)
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun selfToSelfWithChildren() {
+        val callbacks = mock<Callbacks>()
+        val inOrder = inOrder(callbacks)
+
+        lateinit var state1: State
+        lateinit var state11: State
+        lateinit var state12: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            state1 = initialState("1") {
+                callbacks.listen(this)
+
+                transitionTo<SwitchEventL1> {
+                    targetState = { state1 }
+                    callbacks.listen(this)
+                }
+
+                state11 = initialState("11") {
+                    callbacks.listen(this)
+
+                    transitionTo<SwitchEventL2> {
+                        targetState = { state12 }
+                        callbacks.listen(this)
+                    }
+                }
+
+                state12 = state("12") {
+                    callbacks.listen(this)
+                }
+            }
+        }
+
+        machine.processEvent(SwitchEventL2)
+        machine.processEvent(SwitchEventL1)
+
+        then(callbacks).should(inOrder).onEntryState(state1)
+        then(callbacks).should(inOrder).onEntryState(state11)
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL2)
+        then(callbacks).should(inOrder).onExitState(state11)
+        then(callbacks).should(inOrder).onEntryState(state12)
+        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
+        then(callbacks).should(inOrder).onExitState(state12)
+        then(callbacks).should(inOrder).onEntryState(state11)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
     @Test
     fun parentToChild() {
         val callbacks = mock<Callbacks>()

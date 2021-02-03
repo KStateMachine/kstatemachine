@@ -13,12 +13,12 @@ class ConditionalTransitionTest {
 
         val machine = createStateMachine {
             addInitialState(first) {
+                callbacks.listen(this)
+
                 transitionConditionally<SwitchEvent> {
                     direction = { stay() }
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
             }
         }
 
@@ -36,12 +36,12 @@ class ConditionalTransitionTest {
 
         val machine = createStateMachine {
             addInitialState(first) {
+                callbacks.listen(this)
+
                 transitionConditionally<SwitchEvent> {
                     direction = { noTransition() }
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
             }
             onTransition { _, _, event, _ ->
                 callbacks.onTriggeredTransition(event)
@@ -63,18 +63,15 @@ class ConditionalTransitionTest {
 
         val machine = createStateMachine {
             addInitialState(first) {
+                callbacks.listen(this)
+
                 transitionConditionally<SwitchEvent> {
                     direction = { targetState(second) }
-                    onTriggered {
-                        callbacks.onTriggeredTransition(it.event)
-                    }
+                    callbacks.listen(this)
                 }
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
             }
             addState(second) {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
             }
         }
 
@@ -96,16 +93,15 @@ class ConditionalTransitionTest {
 
         val machine = createStateMachine {
             addInitialState(first) {
+                callbacks.listen(this)
+
                 transitionConditionally<SwitchEvent> {
                     direction = { targetState(second) }
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
             }
             addState(second) {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
+                callbacks.listen(this)
             }
         }
 

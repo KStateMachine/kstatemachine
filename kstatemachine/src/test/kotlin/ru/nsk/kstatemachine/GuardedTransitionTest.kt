@@ -18,7 +18,7 @@ class GuardedTransitionTest {
                 transition<SwitchEvent> {
                     guard = { value == "value2" }
                     targetState = second
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
             }
         }
@@ -43,7 +43,7 @@ class GuardedTransitionTest {
                 transitionTo<SwitchEvent> {
                     guard = { value == "value2" }
                     targetState = { second }
-                    onTriggered { callbacks.onTriggeredTransition(it.event) }
+                    callbacks.listen(this)
                 }
             }
 
