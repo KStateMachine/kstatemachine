@@ -55,10 +55,9 @@ Building blocks (main classes) of this library:
   transitions;
 * `Transition` - is an operation of moving from one state to another.
 
-Working with state machine consists of two steps:
+Working with state machine consists of two major steps:
 
-* Creation and initial setup, here you may set custom actions (side effects) via listeners to be performed on
-  entering/exiting states and transitions between them;
+* Creation and initial setup;
 * Processing events, on which state machine can switch its states and notify about changes.
 
 ```kotlin
@@ -184,8 +183,8 @@ state().onEntry { /*...*/ }
 
 ## Setup transitions
 
-In a state setup block we define which events will trigger transitions to another states. Transition is created
-with `transition()` function:
+In a state setup block we define which events will trigger transitions to another states. The simplest transition is
+created with `transition()` function:
 
 ```kotlin
 greenState {
@@ -194,18 +193,6 @@ greenState {
         // Set target state where state machine go when this transition is triggered
         targetState = yellowState
     }
-}
-```
-
-_Note: only one transition is possible per event type. This means you cannot have multiple transitions parametrized with
-same `Event` subclass._
-
-Transition may have no target state (`targetState` is null) which means that state machine stays in current state when
-such transition triggers:
-
-```kotlin
-greenState {
-    transition<YellowEvent>()
 }
 ```
 
@@ -218,9 +205,10 @@ transition<YellowEvent> {
 }
 ```
 
-There is extended version of `transition()` function, it is called `transitionTo()`. It works the same way but takes
-lambda to calculate target state. This allows to use `lateinit` state variables and choose target state depending on
-application business logic like with [conditional transitions](#conditional-transitions) but gives less flexibility:
+There is an extended version of `transition()` function, it is called `transitionTo()`. It works the same way but takes
+a lambda to calculate target state. This allows to use `lateinit` state variables and to choose target state depending
+on an application business logic like with [conditional transitions](#conditional-transitions) but with shorter syntax
+and less flexibility:
 
 ```kotlin
 createStateMachine {
@@ -235,6 +223,17 @@ createStateMachine {
     yellowState = state {
         // ...
     }
+}
+```
+
+### Targetless transitions
+
+Transition may have no target state (`targetState` is null) which means that state machine stays in current state when
+such transition triggers:
+
+```kotlin
+greenState {
+    transition<YellowEvent>()
 }
 ```
 
