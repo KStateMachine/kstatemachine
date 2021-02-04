@@ -8,30 +8,6 @@ KStateMachine is a Kotlin DSL library for creating finite state
 machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and hierarchical state machines
 (HSM) and listen to its states and transitions changes to perform side effects.
 
-## Install
-
-Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
-root `build.gradle` at the end of repositories:
-
-```groovy
-allprojects {
-    repositories {
-        //  ...
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-Add the dependency:
-
-```groovy
-dependencies {
-    implementation 'com.github.nsk90:kstatemachine:<Tag>'
-}
-```
-
-Where `<Tag>` is a library version.
-
 ## Overview
 
 Main features are:
@@ -70,7 +46,7 @@ machine.processEvent(SwitchGreenEvent)
 machine.processEvent(SwitchYellowEvent)
 ```
 
-## Finishing traffic light sample
+## Quick start sample (finishing traffic light)
 
 ![Traffic light diagram](./doc/diagrams/finishing-traffic-light.png)
 
@@ -535,6 +511,30 @@ machine.processEvent(SomethingHappenedEvent)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
+
+## Install
+
+Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
+root `build.gradle` at the end of repositories:
+
+```groovy
+allprojects {
+    repositories {
+        //  ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Add the dependency:
+
+```groovy
+dependencies {
+    implementation 'com.github.nsk90:kstatemachine:<Tag>'
+}
+```
+
+Where `<Tag>` is a library version.
 
 ## License
 
