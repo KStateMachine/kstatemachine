@@ -29,9 +29,11 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
@@ -71,14 +73,18 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEventL2)
-        machine.processEvent(SwitchEventL1)
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
+
+        machine.processEvent(SwitchEventL2)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL2)
         then(callbacks).should(inOrder).onExitState(state11)
         then(callbacks).should(inOrder).onEntryState(state12)
+
+        machine.processEvent(SwitchEventL1)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
         then(callbacks).should(inOrder).onExitState(state12)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -114,10 +120,12 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state11)
         then(callbacks).should(inOrder).onEntryState(state12)
@@ -151,9 +159,11 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state1)
         then(callbacks).should(inOrder).onEntryState(state2)
@@ -169,7 +179,6 @@ class CrossLevelTransitionTest {
         lateinit var state1: State
         lateinit var state11: State
         lateinit var state2: State
-        lateinit var state21: State
         lateinit var state22: State
 
         val machine = createStateMachine {
@@ -188,7 +197,7 @@ class CrossLevelTransitionTest {
             state2 = state("2") {
                 callbacks.listen(this)
 
-                state21 = initialState("21") {
+                initialState("21") {
                     callbacks.listen(this)
                 }
 
@@ -198,10 +207,12 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state11)
         then(callbacks).should(inOrder).onExitState(state1)
@@ -238,10 +249,12 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state11)
         then(callbacks).should(inOrder).onExitState(state1)
@@ -283,14 +296,17 @@ class CrossLevelTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
-        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
+
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state11)
         then(callbacks).should(inOrder).onEntryState(state12)
+
+        machine.processEvent(SwitchEvent)
 
         then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
         then(callbacks).should(inOrder).onExitState(state12)

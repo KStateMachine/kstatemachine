@@ -12,14 +12,15 @@ interface TransitionsStateHelper {
      * Get transition by name. This might be used to start listening to transition after state machine setup.
      */
     fun findTransition(name: String) = transitions.find { it.name == name }
-    fun requireTransition(name: String) =
-        findTransition(name) ?: throw IllegalArgumentException("Transition $name not found")
 
     /**
      * For internal use only
      */
     fun asState(): State
 }
+
+fun TransitionsStateHelper.requireTransition(name: String) =
+    requireNotNull(findTransition(name)) { "Transition $name not found" }
 
 /**
  * Get transition by Event class. This might be used to start listening to transition after state machine setup.
@@ -30,7 +31,7 @@ inline fun <reified E : Event> TransitionsStateHelper.findTransition(): Transiti
 }
 
 inline fun <reified E : Event> TransitionsStateHelper.requireTransition() =
-    findTransition<E>() ?: throw IllegalArgumentException("Transition for ${E::class} not found")
+    requireNotNull(findTransition<E>()) { "Transition for ${E::class} not found" }
 
 /**
  * Overload for transition without any parameters.
@@ -38,7 +39,7 @@ inline fun <reified E : Event> TransitionsStateHelper.requireTransition() =
 inline fun <reified E : Event> TransitionsStateHelper.transition(
     name: String? = null,
 ): Transition<E> =
-    addTransition(DefaultTransition(EventMatcher.isInstanceOf(), asState(), name))
+    addTransition(DefaultTransition(name, EventMatcher.isInstanceOf(), asState()))
 
 /**
  * Creates transition.
@@ -64,7 +65,7 @@ inline fun <reified E : Event> TransitionsStateHelper.transition(
         }
     }
 
-    val transition = DefaultTransition(builder.eventMatcher, asState(), direction, name)
+    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
@@ -90,7 +91,7 @@ inline fun <reified E : Event> TransitionsStateHelper.transitionTo(
         if (builder.guard()) targetState(builder.targetState()) else noTransition()
     }
 
-    val transition = DefaultTransition(builder.eventMatcher, asState(), direction, name)
+    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }
@@ -108,7 +109,7 @@ inline fun <reified E : Event> TransitionsStateHelper.transitionConditionally(
         block()
     }
 
-    val transition = DefaultTransition(builder.eventMatcher, asState(), builder.direction, name)
+    val transition = DefaultTransition(name, builder.eventMatcher, asState(), builder.direction)
     builder.listener?.let { transition.addListener(it) }
     return addTransition(transition)
 }

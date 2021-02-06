@@ -19,8 +19,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     private var isProcessingEvent = false
 
     private var _isRunning = false
-    override val isRunning
-        get() = _isRunning
+    override val isRunning get() = _isRunning
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
@@ -35,6 +34,22 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     @Synchronized
     override fun removeListener(listener: StateMachine.Listener) {
         listeners.remove(listener)
+    }
+
+    override fun start() {
+        check(!isRunning) { "$this is already started" }
+        checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+
+        _isRunning = true
+        machineNotify { onStarted() }
+        doEnter(makeStartTransitionParams(this))
+
+        recursiveEnterInitialState()
+    }
+
+    override fun stop() {
+        _isRunning = false
+        machineNotify { onStopped() }
     }
 
     @Synchronized
@@ -55,22 +70,13 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         }
     }
 
-    override fun start() {
-        check(!isRunning) { "$this is already started" }
-        checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
-
-        _isRunning = true
-        machineNotify { onStarted() }
-
-        recursiveEnterInitialState()
-    }
-
-    override fun stop() {
-        _isRunning = false
-        machineNotify { onStopped() }
-    }
-
-    override fun toString() = "${this::class.simpleName}(name=$name)"
+    /**
+     *  Starts machine if its inner state machine
+     */
+    override fun doEnter(transitionParams: TransitionParams<*>) =
+        if (!isRunning) start() else super.doEnter(transitionParams)
 
     override fun machineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+
+    override fun toString() = "${this::class.simpleName}(name=$name)"
 }

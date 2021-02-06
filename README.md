@@ -17,6 +17,7 @@ Main features are:
   which is calculated in a moment of event processing depending on application business logic;
 * [Nested states](#nested-states) - hierarchical state machines (HSMs)
   with [cross level transitions](#cross-level-transitions) support;
+* [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
   and  [Graphviz](https://graphviz.org/).
@@ -104,6 +105,8 @@ val machine = createStateMachine(
     // Set up state machine ...
 }
 ```
+
+By default, `createStateMachine()` starts state machine. You can control it using `start` argument.
 
 ## Setup states
 
@@ -351,6 +354,14 @@ A transition can have any state as its target. This means that the target state 
 the state hierarchy as the source state.
 
 ![Cross level transition diagram](./doc/diagrams/cross-level-transition.png)
+
+## Composed (nested) state machines
+
+`StateMachine` is a subclass of `State` this allows to use it as a child of another state machine like simple state. The
+parent state machine treats the child machine as an atomic state. It is not possible to reference states of a child
+machine from parent transitions and vise versa. Child machine is automatically started when parent enters it. Events
+from parent machine are not passed to it child machines. Child machine receives events only from it own `processEvent()`
+calls.
 
 ## Parallel states
 

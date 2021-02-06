@@ -22,8 +22,9 @@ class ConditionalTransitionTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
         then(callbacks).should().onEntryState(first)
+        machine.processEvent(SwitchEvent)
+
         then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }

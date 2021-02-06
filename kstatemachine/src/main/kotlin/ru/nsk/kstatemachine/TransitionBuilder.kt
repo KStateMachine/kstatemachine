@@ -48,7 +48,10 @@ abstract class EventMatcher<E : Event>(val eventClass: KClass<E>) {
     }
 }
 
+@Suppress("UNUSED") // The unused warning is probably a bug
 inline fun <reified E : Event> TransitionBuilder<E>.isInstanceOf() = EventMatcher.isInstanceOf<E>()
+
+@Suppress("UNUSED") // The unused warning is probably a bug
 inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = object : EventMatcher<E>(E::class) {
     override fun match(value: Event) = value::class == E::class
 }

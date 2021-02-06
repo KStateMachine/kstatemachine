@@ -200,13 +200,13 @@ class StateMachineTest {
         val inOrder = inOrder(callbacks)
 
         lateinit var first: State
-        createStateMachine {
+        val machine = createStateMachine {
             first = initialState {
                 onEntry { callbacks.onEntryState(this) }
             }
-            onStarted { callbacks.onStarted() }
+            onStarted { callbacks.onStarted(this) }
         }
-        then(callbacks).should(inOrder).onStarted()
+        then(callbacks).should(inOrder).onStarted(machine)
         then(callbacks).should(inOrder).onEntryState(first)
     }
 
@@ -228,5 +228,23 @@ class StateMachineTest {
         then(callbacks).should().onEntryState(final)
         then(callbacks).should().onFinished(machine)
         then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun stateMachineEntryExit() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var initialState: State
+
+        val machine = createStateMachine {
+            callbacks.listen(this)
+
+            initialState = initialState("initial") {
+                callbacks.listen(this)
+            }
+        }
+
+        then(callbacks).should().onEntryState(machine)
+        then(callbacks).should().onEntryState(initialState)
     }
 }

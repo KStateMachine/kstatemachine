@@ -24,13 +24,14 @@ interface StateMachine : State {
      */
     fun stop()
 
+    /**
+     * Machine must be started to process events
+     */
     fun processEvent(event: Event, argument: Any? = null)
 
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-    }
-
     fun log(message: String) = logger.log(message)
+
+    override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
         /**

@@ -12,9 +12,9 @@ interface Event
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
 interface Transition<E : Event> : VisitorAcceptor {
+    val name: String?
     val eventMatcher: EventMatcher<E>
     val sourceState: State
-    val name: String?
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
@@ -30,9 +30,7 @@ interface Transition<E : Event> : VisitorAcceptor {
      */
     fun isTriggeringEvent(event: Event): Boolean
 
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-    }
+    override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
         fun onTriggered(transitionParams: TransitionParams<*>) = Unit

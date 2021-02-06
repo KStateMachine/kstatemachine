@@ -9,7 +9,7 @@ object FirstEvent : Event
 object SecondEvent : Event
 
 interface Callbacks {
-    fun onStarted()
+    fun onStarted(machine: StateMachine)
     fun onStateChanged(state: State)
     fun onFinished(state: State)
     fun onIgnoredEvent(event: Event)

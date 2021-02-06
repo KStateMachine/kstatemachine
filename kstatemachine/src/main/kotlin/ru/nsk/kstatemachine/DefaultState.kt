@@ -7,7 +7,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
 
     private val _states = mutableSetOf<InternalState>()
-    override val states: Set<State> = _states
+    override val states: Set<State> get() = _states
 
     /**
      * Might be null only before [setInitialState] call.
@@ -15,25 +15,19 @@ open class DefaultState(override val name: String? = null) : InternalState {
     protected var currentState: InternalState? = null
 
     private var _initialState: InternalState? = null
-    override val initialState
-        get() = _initialState
+    override val initialState get() = _initialState
 
-    private var _parent: InternalState? = null
-    override val parent: InternalState
-        get() = requireNotNull(_parent) { "Parent state not set, call setParent() first" }
+    override var parent: InternalState? = null
 
-    override val machine: StateMachine
-        get() = if (this is StateMachine) this else parent.machine
+    override val machine get() = if (this is StateMachine) this else requireParent().machine
 
     private val _transitions = mutableSetOf<Transition<*>>()
-    override val transitions: Set<Transition<*>> = _transitions
+    override val transitions: Set<Transition<*>> get() = _transitions
+
+    private var _isActive = false
+    override val isActive get() = _isActive
 
     private var isFinished = false
-
-    override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
-        _transitions += transition
-        return transition
-    }
 
     override fun <L : State.Listener> addListener(listener: L): L {
         require(_listeners.add(listener)) { "$listener is already added" }
@@ -53,13 +47,12 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
         state as InternalState
         require(_states.add(state)) { "$state already added" }
-        state.setParent(this)
+        state.parent = this
         if (init != null) state.init()
         return state
     }
 
     override fun findState(name: String) = states.find { it.name == name }
-    override fun requireState(name: String) = findState(name) ?: throw IllegalArgumentException("State $name not found")
 
     override fun setInitialState(state: State) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
@@ -68,24 +61,17 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _initialState = state as InternalState
     }
 
-    override fun setParent(parent: InternalState) {
-        _parent = parent
-    }
+    override fun isNeighbor(state: State) = parent?.states?.contains(state) == true
 
-    override fun isNeighbor(state: State): Boolean {
-        if (_parent?.states?.contains(state) == true)
-            return true
-        return false
+    override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
+        _transitions += transition
+        return transition
     }
 
     /**
      * Get transition by name. This might be used to start listening to transition after state machine setup.
      */
     override fun findTransition(name: String) = transitions.find { it.name == name }
-    override fun requireTransition(name: String) =
-        findTransition(name) ?: throw IllegalArgumentException("Transition $name not found")
-
-    override fun notify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
 
     override fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>? {
         val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
@@ -94,41 +80,54 @@ open class DefaultState(override val name: String? = null) : InternalState {
         return triggeringTransitions.firstOrNull() as InternalTransition<E>?
     }
 
+    override fun notify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
+
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
     override fun asState() = this
+
+    override fun doEnter(transitionParams: TransitionParams<*>) {
+        if (!_isActive) {
+            _isActive = true
+            notify { onEntry(transitionParams) }
+        }
+    }
+
+    override fun doExit(transitionParams: TransitionParams<*>) {
+        if (_isActive) {
+            machine.log("Exiting $this")
+            _isActive = false
+            notify { onExit(transitionParams) }
+        }
+    }
 
     override fun recursiveEnterInitialState() {
         if (states.isEmpty()) return
 
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
-        val transition = DefaultTransition(
-            EventMatcher.isInstanceOf(),
-            initialState,
-            initialState,
-            "Starting"
-        )
+        setCurrentState(initialState, makeStartTransitionParams(initialState))
 
-        setCurrentState(
-            initialState,
-            TransitionParams(
-                transition,
-                transition.produceTargetStateDirection(),
-                StartEvent
-            )
-        )
         initialState.recursiveEnterInitialState()
     }
 
-    override fun recursiveExit(transitionParams: TransitionParams<*>) {
-        if (states.isNotEmpty()) {
-            val currentState = requireCurrentState()
-            currentState.recursiveExit(transitionParams)
-        }
+    override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
+        if (path.isEmpty()) {
+            recursiveEnterInitialState()
+        } else {
+            val state = path.removeLast()
+            setCurrentState(state, transitionParams)
 
-        machine.log("Exiting $this")
-        notify { onExit(transitionParams) }
+            if (state !is StateMachine) // inner state machine manages its internal state by its own
+                state.recursiveEnterStatePath(path, transitionParams)
+        }
+    }
+
+    override fun recursiveExit(transitionParams: TransitionParams<*>) {
+        if (states.isNotEmpty())
+            requireCurrentState().recursiveExit(transitionParams)
+
+        doExit(transitionParams)
     }
 
     override fun recursiveProcessEvent(event: Event, argument: Any?): Boolean {
@@ -160,10 +159,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
     }
 
-    private fun requireCurrentState() = requireNotNull(currentState) { "currentState is not set" }
+    private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
 
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         if (currentState == state) return
+
         currentState?.recursiveExit(transitionParams)
 
         val machine = machine as InternalStateMachine
@@ -175,8 +175,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         if (finish) isFinished = true
 
         machine.log("Parent $this entering child $state")
-
-        state.notify { onEntry(transitionParams) }
+        state.doEnter(transitionParams)
 
         if (finish) {
             machine.log("Parent $this finish")
@@ -184,16 +183,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
 
         machine.machineNotify { onStateChanged(state) }
-    }
-
-    override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
-        if (path.isEmpty()) {
-            recursiveEnterInitialState()
-        } else {
-            val state = path.removeLast()
-            setCurrentState(state, transitionParams)
-            state.recursiveEnterStatePath(path, transitionParams)
-        }
     }
 
     private fun switchToTargetState(
@@ -209,7 +198,22 @@ open class DefaultState(override val name: String? = null) : InternalState {
     /**
      * Initial event which is processed on state machine start
      */
-    private object StartEvent : Event
+    internal object StartEvent : Event
+
+    internal fun makeStartTransitionParams(state: State): TransitionParams<*> {
+        val transition = DefaultTransition(
+            "Starting",
+            EventMatcher.isInstanceOf(),
+            state,
+            state,
+        )
+
+        return TransitionParams(
+            transition,
+            transition.produceTargetStateDirection(),
+            StartEvent
+        )
+    }
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {

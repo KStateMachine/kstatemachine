@@ -8,9 +8,9 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
     val name: String?
     val states: Set<State>
     val initialState: State?
-    val parent: State
+    val parent: State?
     val machine: StateMachine
-
+    val isActive: Boolean
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -18,19 +18,16 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
     fun <S : State> addState(state: S, init: StateBlock<S>? = null): S
 
     /**
+     * Get state by name. This might be used to start listening to state after state machine setup.
+     */
+    fun findState(name: String): State?
+
+    /**
      * Currently initial state is mandatory, but if we add parallel states it might change.
      */
     fun setInitialState(state: State)
 
-    /**
-     * Get state by name. This might be used to start listening to state after state machine setup.
-     */
-    fun findState(name: String): State?
-    fun requireState(name: String): State
-
-    override fun accept(visitor: Visitor) {
-        visitor.visit(this)
-    }
+    override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
         fun onEntry(transitionParams: TransitionParams<*>) = Unit
@@ -52,11 +49,15 @@ interface FinalState : InternalState
  * Defines state API for internal library usage. All states must implement this interface.
  */
 interface InternalState : State {
-    override val parent: InternalState
-    fun setParent(parent: InternalState)
+    override var parent: InternalState?
+
     fun isNeighbor(state: State): Boolean
     fun notify(block: State.Listener.() -> Unit)
     fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
+
+    fun doEnter(transitionParams: TransitionParams<*>)
+    fun doExit(transitionParams: TransitionParams<*>)
+
     fun recursiveEnterInitialState()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
@@ -64,6 +65,10 @@ interface InternalState : State {
     /** @return true if event was processed */
     fun recursiveProcessEvent(event: Event, argument: Any?): Boolean
 }
+
+fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
+
+fun State.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
 
 operator fun <S : State> S.invoke(block: S.() -> Unit) = block()
 
@@ -109,7 +114,7 @@ fun <S : State> State.addInitialState(state: S, init: StateBlock<S>? = null): S 
 
 /**
  * Helper method for adding final states. This is exactly the same as simply call [State.addState] but makes
- * code to be more self expressing.
+ * code more self expressive.
  */
 fun <S : FinalState> State.addFinalState(state: S, init: StateBlock<S>? = null) = addState(state, init)
 

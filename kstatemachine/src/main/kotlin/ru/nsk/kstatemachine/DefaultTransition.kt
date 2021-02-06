@@ -3,12 +3,12 @@ package ru.nsk.kstatemachine
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultTransition<E : Event>(
+    override val name: String?,
     override val eventMatcher: EventMatcher<E>,
-    override val sourceState: State,
-    override val name: String?
+    override val sourceState: State
 ) : InternalTransition<E> {
     private val _listeners = CopyOnWriteArraySet<Transition.Listener>()
-    private val listeners: Set<Transition.Listener> = _listeners
+    private val listeners: Set<Transition.Listener> get() = _listeners
 
     /**
      * Function that is called during event processing,
@@ -21,11 +21,11 @@ open class DefaultTransition<E : Event>(
     override var argument: Any? = null
 
     constructor(
+        name: String?,
         eventMatcher: EventMatcher<E>,
         sourceState: State,
-        targetState: State?,
-        name: String?
-    ) : this(eventMatcher, sourceState, name) {
+        targetState: State?
+    ) : this(name, eventMatcher, sourceState) {
         targetStateDirectionProducer = if (targetState == null) {
             { stay() }
         } else {
@@ -34,11 +34,11 @@ open class DefaultTransition<E : Event>(
     }
 
     constructor(
+        name: String?,
         eventMatcher: EventMatcher<E>,
         sourceState: State,
-        targetStateDirectionProducer: () -> TransitionDirection,
-        name: String?
-    ) : this(eventMatcher, sourceState, name) {
+        targetStateDirectionProducer: () -> TransitionDirection
+    ) : this(name, eventMatcher, sourceState) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
 
@@ -51,9 +51,7 @@ open class DefaultTransition<E : Event>(
         _listeners.remove(listener)
     }
 
-    override fun isTriggeringEvent(event: Event): Boolean {
-        return eventMatcher.match(event)
-    }
+    override fun isTriggeringEvent(event: Event) = eventMatcher.match(event)
 
     override fun produceTargetStateDirection() = targetStateDirectionProducer()
 

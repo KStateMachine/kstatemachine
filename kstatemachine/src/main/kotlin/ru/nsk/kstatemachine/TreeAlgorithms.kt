@@ -14,21 +14,21 @@ internal object TreeAlgorithms {
 
         while (thisDepth != targetDepth) {
             if (thisDepth > targetDepth) {
-                thisNode = thisNode.parent
+                thisNode = thisNode.requireParent()
                 thisDepth--
             } else {
                 targetPath.add(targetNode)
 
-                targetNode = targetNode.parent
+                targetNode = targetNode.requireParent()
                 targetDepth--
             }
         }
 
         while (thisNode !== targetNode) {
-            thisNode = thisNode.parent
+            thisNode = thisNode.requireParent()
 
             targetPath.add(targetNode)
-            targetNode = targetNode.parent
+            targetNode = targetNode.requireParent()
         }
 
         targetPath.add(thisNode) // add lca
@@ -36,11 +36,11 @@ internal object TreeAlgorithms {
     }
 
     private fun State.findDepth(): Int {
-        var currentState = this
         var depth = 0
-        while (currentState !is StateMachine) {
+        var parent = this.parent
+        while (parent != null) {
             depth++
-            currentState = currentState.parent
+            parent = parent.parent
         }
         return depth
     }
