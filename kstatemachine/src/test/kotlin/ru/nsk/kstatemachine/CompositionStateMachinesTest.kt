@@ -50,7 +50,7 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
     val machine = createStateMachine {
         callbacks.listen(this)
 
-         addInitialState(outerState1) {
+        addInitialState(outerState1) {
             callbacks.listen(this)
 
             transition<SwitchEvent> {

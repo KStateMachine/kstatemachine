@@ -42,7 +42,7 @@ interface Transition<E : Event> : VisitorAcceptor {
  */
 interface InternalTransition<E : Event> : Transition<E> {
     fun produceTargetStateDirection(): TransitionDirection
-    fun notify(block: Transition.Listener.() -> Unit)
+    fun transitionNotify(block: Transition.Listener.() -> Unit)
 }
 
 inline fun <reified E : Event> Transition<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {

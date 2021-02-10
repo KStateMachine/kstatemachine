@@ -55,7 +55,7 @@ open class DefaultTransition<E : Event>(
 
     override fun produceTargetStateDirection() = targetStateDirectionProducer()
 
-    override fun notify(block: Transition.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+    override fun transitionNotify(block: Transition.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }

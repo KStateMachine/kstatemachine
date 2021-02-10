@@ -61,8 +61,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _initialState = state as InternalState
     }
 
-    override fun isNeighbor(state: State) = parent?.states?.contains(state) == true
-
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
         return transition
@@ -73,13 +71,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
      */
     override fun findTransition(name: String) = transitions.find { it.name == name }
 
-    override fun <E : Event> findTransitionsByEvent(event: E): List<InternalTransition<E>> {
-        val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
-        @Suppress("UNCHECKED_CAST")
-        return triggeringTransitions as List<InternalTransition<E>>
-    }
-
-    override fun notify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
+    override fun stateNotify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
@@ -88,7 +80,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!_isActive) {
             _isActive = true
-            notify { onEntry(transitionParams) }
+            stateNotify { onEntry(transitionParams) }
         }
     }
 
@@ -96,7 +88,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         if (_isActive) {
             machine.log("Exiting $this")
             _isActive = false
-            notify { onExit(transitionParams) }
+            stateNotify { onExit(transitionParams) }
         }
     }
 
@@ -148,7 +140,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
             if (direction !is NoTransition) {
                 machine.log("$this triggering $transition from $fromState")
-                transition.notify { onTriggered(transitionParams) }
+                transition.transitionNotify { onTriggered(transitionParams) }
 
                 machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
             }
@@ -158,15 +150,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
         } else {
             return fromState.recursiveProcessEvent(event, argument)
         }
-    }
-
-    private fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
-            : Pair<InternalTransition<E>, TransitionDirection>? {
-        val transitions = findTransitionsByEvent(event)
-            .map { it to it.produceTargetStateDirection() }
-            .filter { it.second !is NoTransition }
-        check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
-        return transitions.firstOrNull()
     }
 
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
@@ -189,7 +172,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
         if (finish) {
             machine.log("Parent $this finish")
-            notify { onFinished() }
+            stateNotify { onFinished() }
         }
 
         machine.machineNotify { onStateChanged(state) }

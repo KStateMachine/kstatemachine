@@ -43,30 +43,7 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
 /**
  * When [StateMachine] enters this state it finishes and does not accept events any more.
  */
-interface FinalState : InternalState
-
-/**
- * Defines state API for internal library usage. All states must implement this interface.
- */
-interface InternalState : State {
-    override var parent: InternalState?
-
-    fun isNeighbor(state: State): Boolean
-    fun notify(block: State.Listener.() -> Unit)
-    fun <E : Event> findTransitionsByEvent(event: E): List<InternalTransition<E>>
-
-    fun doEnter(transitionParams: TransitionParams<*>)
-    fun doExit(transitionParams: TransitionParams<*>)
-
-    fun recursiveEnterInitialState()
-    fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
-    fun recursiveExit(transitionParams: TransitionParams<*>)
-
-    /** @return true if event was processed */
-    fun recursiveProcessEvent(event: Event, argument: Any?): Boolean
-}
-
-fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
+interface FinalState : State
 
 fun State.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
 
