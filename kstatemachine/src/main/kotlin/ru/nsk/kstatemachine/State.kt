@@ -53,7 +53,7 @@ interface InternalState : State {
 
     fun isNeighbor(state: State): Boolean
     fun notify(block: State.Listener.() -> Unit)
-    fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>?
+    fun <E : Event> findTransitionsByEvent(event: E): List<InternalTransition<E>>
 
     fun doEnter(transitionParams: TransitionParams<*>)
     fun doExit(transitionParams: TransitionParams<*>)

@@ -73,11 +73,10 @@ open class DefaultState(override val name: String? = null) : InternalState {
      */
     override fun findTransition(name: String) = transitions.find { it.name == name }
 
-    override fun <E : Event> findTransitionByEvent(event: E): InternalTransition<E>? {
+    override fun <E : Event> findTransitionsByEvent(event: E): List<InternalTransition<E>> {
         val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
-        check(triggeringTransitions.size <= 1) { "Multiple transitions match $event $triggeringTransitions in $this" }
         @Suppress("UNCHECKED_CAST")
-        return triggeringTransitions.firstOrNull() as InternalTransition<E>?
+        return triggeringTransitions as List<InternalTransition<E>>
     }
 
     override fun notify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
@@ -137,10 +136,12 @@ open class DefaultState(override val name: String? = null) : InternalState {
             machine.log("$this is finished, skipping event $event, with argument $argument")
 
         val fromState = if (currentState != null) currentState!! else return false
-        val transition = fromState.findTransitionByEvent(event)
 
-        if (transition != null) {
-            val direction = transition.produceTargetStateDirection()
+        val transitionWithDirection = fromState.findUniqueTransitionWithDirection(event)
+
+        if (transitionWithDirection != null) {
+            val (transition, direction) = transitionWithDirection
+
             val transitionParams = TransitionParams(transition, direction, event, argument)
 
             val targetState = direction.targetState as? InternalState
@@ -157,6 +158,15 @@ open class DefaultState(override val name: String? = null) : InternalState {
         } else {
             return fromState.recursiveProcessEvent(event, argument)
         }
+    }
+
+    private fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
+            : Pair<InternalTransition<E>, TransitionDirection>? {
+        val transitions = findTransitionsByEvent(event)
+            .map { it to it.produceTargetStateDirection() }
+            .filter { it.second !is NoTransition }
+        check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
+        return transitions.firstOrNull()
     }
 
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
