@@ -46,10 +46,7 @@ class ExportPlantUmlVisitor : Visitor {
         transition as InternalTransition<*>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = when (val direction = transition.produceTargetStateDirection()) {
-            Stay, NoTransition  -> return
-            is TargetState -> direction.targetState
-        }
+        val targetState = transition.produceTargetStateDirection().targetState ?: return
 
         val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
 

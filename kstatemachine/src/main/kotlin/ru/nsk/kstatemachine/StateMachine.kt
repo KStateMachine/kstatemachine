@@ -125,6 +125,7 @@ fun createStateMachine(
 @StateMachineDslMarker
 data class TransitionParams<E : Event>(
     val transition: Transition<E>,
+    val direction: TransitionDirection,
     val event: E,
     /**
      * This parameter may be used to pass arbitrary data with the event,

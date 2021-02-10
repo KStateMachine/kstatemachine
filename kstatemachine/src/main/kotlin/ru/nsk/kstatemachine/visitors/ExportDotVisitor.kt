@@ -50,10 +50,8 @@ class ExportDotVisitor : Visitor {
         transition as InternalTransition<*>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = when (val direction = transition.produceTargetStateDirection()) {
-            Stay, NoTransition -> return
-            is TargetState -> direction.targetState.graphName()
-        }
+        val targetState = transition.produceTargetStateDirection().targetState ?: return
+
         line("    $sourceState -> $targetState${label(transition.name)};")
     }
 

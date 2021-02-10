@@ -7,10 +7,11 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 
 const val ARG = 1
 
-class TransitionArgumentTest {
+class TransitionTest {
     @Test
     fun transitionArgument() {
         val callbacks = mock<Callbacks>()
@@ -56,5 +57,45 @@ class TransitionArgumentTest {
         assertThat(state.requireTransition<SecondEvent>(), sameInstance(secondTransition))
         shouldThrow<IllegalArgumentException> { state.requireTransition("thirdTransition") }
         shouldThrow<IllegalArgumentException> { state.requireTransition<SwitchEvent>() }
+    }
+
+    @Test
+    fun transitionDirection() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine {
+            state1 = initialState("1") {
+                onEntry {
+                    callbacks.onEntryState(this)
+                    assertThat(it.direction.targetState, sameInstance(this))
+                }
+
+                onExit {
+                    if (it.direction.targetState == state2)
+                        callbacks.onExitState(this)
+                    else
+                        fail("incorrect direction ${it.direction}")
+                }
+
+                transitionTo<SwitchEvent> {
+                    targetState = { state2 }
+                    callbacks.listen(this)
+                }
+            }
+
+            state2 = state("2")
+        }
+
+        then(callbacks).should().onEntryState(state1)
+
+        machine.processEvent(SwitchEvent)
+
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
+        then(callbacks).should().onExitState(state1)
+        then(callbacks).should().onEntryState(state1)
+        then(callbacks).shouldHaveNoMoreInteractions()
     }
 }

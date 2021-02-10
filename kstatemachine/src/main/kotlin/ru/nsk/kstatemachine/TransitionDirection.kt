@@ -1,6 +1,8 @@
 package ru.nsk.kstatemachine
 
-sealed class TransitionDirection
+sealed class TransitionDirection {
+    open val targetState: State? = null
+}
 
 /**
  * Transition is triggered, but state is not changed
@@ -19,6 +21,6 @@ fun noTransition(): TransitionDirection = NoTransition
 /**
  * Transition is triggered with a [targetState]
  */
-internal class TargetState(val targetState: State) : TransitionDirection()
+internal class TargetState(override val targetState: State) : TransitionDirection()
 
 fun targetState(targetState: State): TransitionDirection = TargetState(targetState)

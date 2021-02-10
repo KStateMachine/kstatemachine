@@ -103,15 +103,19 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
         val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
+        val transition = DefaultTransition(
+            EventMatcher.isInstanceOf(),
+            initialState,
+            initialState,
+            "Starting"
+        )
+
         setCurrentState(
             initialState,
             TransitionParams(
-                DefaultTransition(
-                    EventMatcher.isInstanceOf(),
-                    initialState,
-                    initialState,
-                    "Starting"
-                ), StartEvent
+                transition,
+                transition.produceTargetStateDirection(),
+                StartEvent
             )
         )
         initialState.recursiveEnterInitialState()
@@ -137,10 +141,10 @@ open class DefaultState(override val name: String? = null) : InternalState {
         val transition = fromState.findTransitionByEvent(event)
 
         if (transition != null) {
-            val transitionParams = TransitionParams(transition, event, argument)
-
             val direction = transition.produceTargetStateDirection()
-            val targetState = if (direction is TargetState) direction.targetState as InternalState else null
+            val transitionParams = TransitionParams(transition, direction, event, argument)
+
+            val targetState = direction.targetState as? InternalState
 
             if (direction !is NoTransition) {
                 machine.log("$this triggering $transition from $fromState")
