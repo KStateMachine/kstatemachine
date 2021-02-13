@@ -6,8 +6,6 @@ package ru.nsk.kstatemachine
 interface InternalState : State {
     override var parent: InternalState?
 
-    fun stateNotify(block: State.Listener.() -> Unit)
-
     fun doEnter(transitionParams: TransitionParams<*>)
     fun doExit(transitionParams: TransitionParams<*>)
 
@@ -23,8 +21,10 @@ internal fun InternalState.isNeighbor(state: State) = parent?.states?.contains(s
 
 internal fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
 
+internal fun InternalState.stateNotify(block: State.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
-    val triggeringTransitions = transitions.filter { it.isTriggeringEvent(event) }
+    val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }
     @Suppress("UNCHECKED_CAST")
     return triggeringTransitions as List<InternalTransition<E>>
 }

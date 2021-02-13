@@ -5,6 +5,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultState(override val name: String? = null) : InternalState {
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
+    override val listeners: Collection<State.Listener> get() = _listeners
 
     private val _states = mutableSetOf<InternalState>()
     override val states: Set<State> get() = _states
@@ -70,8 +71,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
      * Get transition by name. This might be used to start listening to transition after state machine setup.
      */
     override fun findTransition(name: String) = transitions.find { it.name == name }
-
-    override fun stateNotify(block: State.Listener.() -> Unit) = _listeners.forEach { it.apply(block) }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 

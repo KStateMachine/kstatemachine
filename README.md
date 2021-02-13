@@ -288,6 +288,24 @@ redState {
 }
 ```
 
+### Transition event type matching
+By default, event type that triggers transition is matched as instance of specified event class.
+For example `transition<SwitchEvent>()` matches `SwitchEvent` class and its subclasses. 
+If you have event hierarchy it might be necessary to control matching mechanism, 
+it might be done with `eventMatcher` argument of transition builder functions:
+
+```kotlin
+transition<SwitchEvent> {
+    eventMatcher = isEqual()
+}
+```
+
+There are two predefined event matchers:
+* `isInstanceOf()` matches specified class and its subclasses (default);
+* `isEqual()` matches only specified class.
+
+You can define your own matcher by subclassing `EventMatcher` class.
+
 ## Logging
 
 You can enable internal state machine logging on your platform:

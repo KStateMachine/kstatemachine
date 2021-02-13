@@ -10,6 +10,7 @@ interface StateMachine : State {
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
     val isRunning: Boolean
+    val machineListeners: Collection<Listener>
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -75,14 +76,6 @@ interface StateMachine : State {
     }
 }
 
-/**
- * Defines state machine API for internal library usage.
- */
-interface InternalStateMachine : StateMachine, InternalState {
-    fun machineNotify(block: StateMachine.Listener.() -> Unit)
-}
-
-typealias StateBlock<S> = S.() -> Unit
 typealias StateMachineBlock = StateMachine.() -> Unit
 
 fun StateMachine.onStarted(block: StateMachine.() -> Unit) {
@@ -123,15 +116,10 @@ fun createStateMachine(
     if (start) start()
 }
 
-@StateMachineDslMarker
-data class TransitionParams<E : Event>(
-    val transition: Transition<E>,
-    val direction: TransitionDirection,
-    val event: E,
-    /**
-     * This parameter may be used to pass arbitrary data with the event,
-     * so there is no need to define [Event] subclasses every time.
-     * Subclassing should be preferred if the event always contains data of some type.
-     */
-    val argument: Any? = null,
-)
+/**
+ * Defines state machine API for internal library usage.
+ */
+interface InternalStateMachine : StateMachine, InternalState
+
+fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
+    machineListeners.forEach { it.apply(block) }

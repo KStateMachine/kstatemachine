@@ -11,6 +11,7 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
     val parent: State?
     val machine: StateMachine
     val isActive: Boolean
+    val listeners: Collection<Listener>
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -45,9 +46,11 @@ interface State : TransitionsStateHelper, VisitorAcceptor {
  */
 interface FinalState : State
 
+typealias StateBlock<S> = S.() -> Unit
+
 fun State.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
 
-operator fun <S : State> S.invoke(block: S.() -> Unit) = block()
+operator fun <S : State> S.invoke(block: StateBlock<S>) = block()
 
 fun <S : State> S.onEntry(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : State.Listener {
@@ -61,7 +64,7 @@ fun <S : State> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
     })
 }
 
-fun <S : State> S.onFinished(block: S.() -> Unit) {
+fun <S : State> S.onFinished(block: StateBlock<S>) {
     addListener(object : State.Listener {
         override fun onFinished() = block()
     })

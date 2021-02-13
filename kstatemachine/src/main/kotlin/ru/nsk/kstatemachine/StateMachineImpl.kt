@@ -2,7 +2,9 @@ package ru.nsk.kstatemachine
 
 internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
     /** Access to this field must be thread safe. */
-    private val listeners = mutableSetOf<StateMachine.Listener>()
+    private val _machineListeners = mutableSetOf<StateMachine.Listener>()
+    override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
+
     override var logger = StateMachine.Logger {}
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
     override var pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
@@ -23,7 +25,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
-        require(listeners.add(listener)) { "$listener is already added" }
+        require(_machineListeners.add(listener)) { "$listener is already added" }
 
         val currentState = currentState
         if (currentState != null)
@@ -33,7 +35,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
 
     @Synchronized
     override fun removeListener(listener: StateMachine.Listener) {
-        listeners.remove(listener)
+        _machineListeners.remove(listener)
     }
 
     override fun start() {
@@ -75,8 +77,6 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
      */
     override fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
-
-    override fun machineNotify(block: StateMachine.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }

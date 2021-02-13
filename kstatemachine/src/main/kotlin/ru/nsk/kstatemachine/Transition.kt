@@ -21,14 +21,15 @@ interface Transition<E : Event> : VisitorAcceptor {
      * This argument must be set from transition listener. Such transition must have only one listener setting argument.
      */
     var argument: Any?
+    val listeners: Collection<Listener>
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
     /**
-     * Check if event can trigger this [Transition]
+     * Checks if the [event] matches this [Transition]
      */
-    fun isTriggeringEvent(event: Event): Boolean
+    fun isMatchingEvent(event: Event): Boolean
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
@@ -37,17 +38,32 @@ interface Transition<E : Event> : VisitorAcceptor {
     }
 }
 
-/**
- * Defines transition API for internal library usage. All transitions must implement this interface.
- */
-interface InternalTransition<E : Event> : Transition<E> {
-    fun produceTargetStateDirection(): TransitionDirection
-    fun transitionNotify(block: Transition.Listener.() -> Unit)
-}
-
 inline fun <reified E : Event> Transition<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
     addListener(object : Transition.Listener {
         @Suppress("UNCHECKED_CAST")
         override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
     })
 }
+
+@StateMachineDslMarker
+data class TransitionParams<E : Event>(
+    val transition: Transition<E>,
+    val direction: TransitionDirection,
+    val event: E,
+    /**
+     * This parameter may be used to pass arbitrary data with the event,
+     * so there is no need to define [Event] subclasses every time.
+     * Subclassing should be preferred if the event always contains data of some type.
+     */
+    val argument: Any? = null,
+)
+
+/**
+ * Defines transition API for internal library usage. All transitions must implement this interface.
+ */
+interface InternalTransition<E : Event> : Transition<E> {
+    fun produceTargetStateDirection(): TransitionDirection
+}
+
+internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =
+    listeners.forEach { it.apply(block) }

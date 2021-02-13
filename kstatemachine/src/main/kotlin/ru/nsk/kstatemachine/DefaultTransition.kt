@@ -8,7 +8,7 @@ open class DefaultTransition<E : Event>(
     override val sourceState: State
 ) : InternalTransition<E> {
     private val _listeners = CopyOnWriteArraySet<Transition.Listener>()
-    private val listeners: Set<Transition.Listener> get() = _listeners
+    override val listeners: Collection<Transition.Listener> get() = _listeners
 
     /**
      * Function that is called during event processing,
@@ -51,11 +51,9 @@ open class DefaultTransition<E : Event>(
         _listeners.remove(listener)
     }
 
-    override fun isTriggeringEvent(event: Event) = eventMatcher.match(event)
+    override fun isMatchingEvent(event: Event) = eventMatcher.match(event)
 
     override fun produceTargetStateDirection() = targetStateDirectionProducer()
-
-    override fun transitionNotify(block: Transition.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }

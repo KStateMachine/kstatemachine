@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
+
 /**
  * Helper interface for [State] to keep transitions logic separately.
  */
@@ -39,7 +41,7 @@ inline fun <reified E : Event> TransitionsStateHelper.requireTransition() =
 inline fun <reified E : Event> TransitionsStateHelper.transition(
     name: String? = null,
 ): Transition<E> =
-    addTransition(DefaultTransition(name, EventMatcher.isInstanceOf(), asState()))
+    addTransition(DefaultTransition(name, isInstanceOf(), asState()))
 
 /**
  * Creates transition.
