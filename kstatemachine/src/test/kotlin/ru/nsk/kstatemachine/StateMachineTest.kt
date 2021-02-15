@@ -247,4 +247,34 @@ class StateMachineTest {
         then(callbacks).should().onEntryState(machine)
         then(callbacks).should().onEntryState(initialState)
     }
+
+    @Test
+    fun startFrom() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var state2: State
+        lateinit var state22: State
+
+        val machine = createStateMachine(start = false) {
+            callbacks.listen(this)
+
+            initialState("state1") { callbacks.listen(this) }
+            state2 = state("state2") {
+                callbacks.listen(this)
+
+                initialState("state2_1") { callbacks.listen(this) }
+                state22 = state("state2_2") { callbacks.listen(this) }
+            }
+            
+            onStarted { callbacks.onStarted(this) }
+        }
+
+        machine.startFrom(state22)
+
+        then(callbacks).should().onStarted(machine)
+        then(callbacks).should().onEntryState(machine)
+        then(callbacks).should().onEntryState(state2)
+        then(callbacks).should().onEntryState(state22)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
 }

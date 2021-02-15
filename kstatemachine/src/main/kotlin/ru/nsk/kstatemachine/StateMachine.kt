@@ -105,6 +105,11 @@ fun StateMachine.onStateChanged(block: StateMachine.(newState: State) -> Unit) {
 }
 
 /**
+ * Method for testing purpose. It allows to start machine from particular [state]
+ */
+fun StateMachine.startFrom(state: State) = (this as InternalStateMachine).startFrom(state)
+
+/**
  * Factory method for creating [StateMachine]
  */
 fun createStateMachine(
@@ -119,7 +124,9 @@ fun createStateMachine(
 /**
  * Defines state machine API for internal library usage.
  */
-interface InternalStateMachine : StateMachine, InternalState
+interface InternalStateMachine : StateMachine, InternalState {
+    fun startFrom(state: State)
+}
 
 fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
     machineListeners.forEach { it.apply(block) }

@@ -177,7 +177,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
         machine.machineNotify { onStateChanged(state) }
     }
 
-    private fun switchToTargetState(
+    internal fun switchToTargetState(
         targetState: InternalState,
         fromState: InternalState,
         transitionParams: TransitionParams<*>
@@ -192,12 +192,12 @@ open class DefaultState(override val name: String? = null) : InternalState {
      */
     internal object StartEvent : Event
 
-    internal fun makeStartTransitionParams(state: State): TransitionParams<*> {
+    internal fun makeStartTransitionParams(sourceState: State, targetState: State = sourceState): TransitionParams<*> {
         val transition = DefaultTransition(
             "Starting",
             EventMatcher.isInstanceOf(),
-            state,
-            state,
+            sourceState,
+            targetState,
         )
 
         return TransitionParams(

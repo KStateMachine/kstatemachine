@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
+
 internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
@@ -39,14 +41,23 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
     }
 
     override fun start() {
+        run(makeStartTransitionParams(this))
+        recursiveEnterInitialState()
+    }
+
+    override fun startFrom(state: State) {
+        val transitionParams = makeStartTransitionParams(this, state)
+        run(transitionParams)
+        switchToTargetState(state as InternalState, this, transitionParams)
+    }
+
+    private fun run(transitionParams: TransitionParams<*>) {
         check(!isRunning) { "$this is already started" }
         checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         _isRunning = true
         machineNotify { onStarted() }
-        doEnter(makeStartTransitionParams(this))
-
-        recursiveEnterInitialState()
+        doEnter(transitionParams)
     }
 
     override fun stop() {
