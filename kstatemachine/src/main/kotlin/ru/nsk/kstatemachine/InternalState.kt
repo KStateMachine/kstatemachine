@@ -12,6 +12,7 @@ interface InternalState : State {
     fun recursiveEnterInitialState()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
+    fun recursiveStop()
 
     /** @return true if event was processed */
     fun recursiveProcessEvent(event: Event, argument: Any?): Boolean

@@ -84,6 +84,12 @@ fun StateMachine.onStarted(block: StateMachine.() -> Unit) {
     })
 }
 
+fun StateMachine.onStopped(block: StateMachine.() -> Unit) {
+    addListener(object : StateMachine.Listener {
+        override fun onStopped() = block()
+    })
+}
+
 fun StateMachine.onTransition(
     block: StateMachine.(
         sourceState: State,
@@ -103,11 +109,6 @@ fun StateMachine.onStateChanged(block: StateMachine.(newState: State) -> Unit) {
         override fun onStateChanged(newState: State) = block(newState)
     })
 }
-
-/**
- * Method for testing purpose. It allows to start machine from particular [state]
- */
-fun StateMachine.startFrom(state: State) = (this as InternalStateMachine).startFrom(state)
 
 /**
  * Factory method for creating [StateMachine]
@@ -130,3 +131,10 @@ interface InternalStateMachine : StateMachine, InternalState {
 
 fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
     machineListeners.forEach { it.apply(block) }
+
+object Testing {
+    /**
+     * Method for testing purpose. It allows to start machine from particular [state]
+     */
+    fun StateMachine.startFrom(state: State) = (this as InternalStateMachine).startFrom(state)
+}

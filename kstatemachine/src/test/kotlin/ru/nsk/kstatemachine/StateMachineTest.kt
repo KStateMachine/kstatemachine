@@ -3,11 +3,13 @@ package ru.nsk.kstatemachine
 import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.then
+import com.nhaarman.mockitokotlin2.times
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
+import ru.nsk.kstatemachine.Testing.startFrom
 
 private object OnEvent : Event
 private object OffEvent : Event
@@ -275,6 +277,42 @@ class StateMachineTest {
         then(callbacks).should().onEntryState(machine)
         then(callbacks).should().onEntryState(state2)
         then(callbacks).should().onEntryState(state22)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun restartMachine() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine(start = false) {
+            logger = StateMachine.Logger { println(it) }
+            callbacks.listen(this)
+
+            state1 = initialState("state1") { callbacks.listen(this) }
+            state2 = state("state2") { callbacks.listen(this) }
+
+            onStarted { callbacks.onStarted(this) }
+            onStopped { callbacks.onStopped(this) }
+        }
+
+        machine.startFrom(state2)
+
+        then(callbacks).should().onStarted(machine)
+        then(callbacks).should().onStarted(machine)
+        then(callbacks).should().onEntryState(machine)
+        then(callbacks).should().onEntryState(state2)
+
+        machine.stop()
+        then(callbacks).should().onStopped(machine)
+        then(callbacks).shouldHaveNoMoreInteractions()
+
+        machine.start()
+        then(callbacks).should(times(2)).onStarted(machine)
+        then(callbacks).should(times(2)).onEntryState(machine)
+        then(callbacks).should().onEntryState(state1)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
 }

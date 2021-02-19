@@ -78,6 +78,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!_isActive) {
+            machine.log("Parent $parent entering child $this")
             _isActive = true
             stateNotify { onEntry(transitionParams) }
         }
@@ -118,6 +119,13 @@ open class DefaultState(override val name: String? = null) : InternalState {
             requireCurrentState().recursiveExit(transitionParams)
 
         doExit(transitionParams)
+    }
+
+    override fun recursiveStop() {
+        currentState = null
+        _isActive = false
+        isFinished = false
+        _states.forEach { it.recursiveStop() }
     }
 
     override fun recursiveProcessEvent(event: Event, argument: Any?): Boolean {
@@ -166,7 +174,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
         val finish = state is FinalState
         if (finish) isFinished = true
 
-        machine.log("Parent $this entering child $state")
         state.doEnter(transitionParams)
 
         if (finish) {
