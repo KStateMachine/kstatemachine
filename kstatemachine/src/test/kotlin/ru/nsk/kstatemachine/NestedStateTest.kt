@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-// TODO add cross level transition functionality and tests
 class NestedStateTest {
     @Test
     fun startNestedStatesBranch() {

@@ -10,11 +10,7 @@ private class CustomEvent(val value: Int) : Event
 class CustomTransition(name: String, sourceState: State, targetState: State):
     DefaultTransition<Event>(name, isInstanceOf(), sourceState, targetState) {
     override fun isMatchingEvent(event: Event): Boolean {
-        if (super.isMatchingEvent(event))
-            if (event is CustomEvent)
-                if (event.value == 42)
-                    return true
-        return false
+        return super.isMatchingEvent(event) && event is CustomEvent && event.value == 42
     }
 }
 
