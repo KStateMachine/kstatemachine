@@ -542,6 +542,10 @@ Correct - let the state machine to make decisions on an event:
 machine.processEvent(SomethingHappenedEvent)
 ```
 
+Keep in mind that currently states are mutable and defining them as `object` requires usage in a single instance of
+state machine. If you are using multiple instances of machines then separate state instances must be created for each
+machine.
+
 ## Samples
 
 * [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
