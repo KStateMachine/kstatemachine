@@ -522,6 +522,23 @@ vs
 Also sealed classes eliminate need of using `lateinit` states variables and reordering of states in state machine setup
 block to have a valid state references for transitions.
 
+## Testing
+
+For testing, it might be useful to check how state machine reacts on events from particular state. There
+is `Testing.startFrom()` function which allows starting the machine from a specified state:
+
+```kotlin
+lateinit var state2: State
+
+val machine = createStateMachine(start = false) {
+    initialState("state1")
+    state2 = state("state2")
+    // ...
+}
+
+machine.startFrom(state2)
+```
+
 ## Do not
 
 State machine is a powerful tool to control states so let it do its job, do not select target state by sending different
