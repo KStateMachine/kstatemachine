@@ -75,7 +75,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         isProcessingEvent = true
 
         try {
-            if (!recursiveProcessEvent(event, argument)) {
+            if (!doProcessEvent(event, argument)) {
                 log("$this ignored $event")
                 ignoredEventHandler.onIgnoredEvent(event, argument)
             }

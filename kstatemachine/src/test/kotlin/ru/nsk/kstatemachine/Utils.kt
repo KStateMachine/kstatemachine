@@ -15,6 +15,7 @@ interface Callbacks {
     fun onFinished(state: State)
     fun onIgnoredEvent(event: Event)
     fun onTriggeredTransition(event: Event)
+    fun onTriggeredTransition(event: Event, index: Int)
     fun onEntryState(state: State)
     fun onExitState(state: State)
 }

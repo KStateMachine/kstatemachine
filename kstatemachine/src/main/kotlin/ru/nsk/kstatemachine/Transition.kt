@@ -62,6 +62,7 @@ data class TransitionParams<E : Event>(
  * Defines transition API for internal library usage. All transitions must implement this interface.
  */
 interface InternalTransition<E : Event> : Transition<E> {
+    override val sourceState: InternalState
     fun produceTargetStateDirection(): TransitionDirection
 }
 

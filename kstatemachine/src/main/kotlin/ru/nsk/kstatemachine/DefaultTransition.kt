@@ -5,10 +5,11 @@ import java.util.concurrent.CopyOnWriteArraySet
 open class DefaultTransition<E : Event>(
     override val name: String?,
     override val eventMatcher: EventMatcher<E>,
-    override val sourceState: State
+    sourceState: State
 ) : InternalTransition<E> {
     private val _listeners = CopyOnWriteArraySet<Transition.Listener>()
     override val listeners: Collection<Transition.Listener> get() = _listeners
+    override val sourceState = sourceState as InternalState
 
     /**
      * Function that is called during event processing,

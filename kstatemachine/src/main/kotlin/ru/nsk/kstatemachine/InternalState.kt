@@ -8,14 +8,15 @@ interface InternalState : State {
 
     fun doEnter(transitionParams: TransitionParams<*>)
     fun doExit(transitionParams: TransitionParams<*>)
+    /** @return true if event was processed */
+    fun doProcessEvent(event: Event, argument: Any?): Boolean
 
+    fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
+            Pair<InternalTransition<E>, TransitionDirection>?
     fun recursiveEnterInitialState()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
     fun recursiveStop()
-
-    /** @return true if event was processed */
-    fun recursiveProcessEvent(event: Event, argument: Any?): Boolean
 }
 
 internal fun InternalState.isNeighbor(state: State) = parent?.states?.contains(state) == true

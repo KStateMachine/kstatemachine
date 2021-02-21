@@ -92,6 +92,35 @@ open class DefaultState(override val name: String? = null) : InternalState {
         }
     }
 
+    override fun doProcessEvent(event: Event, argument: Any?): Boolean {
+        val machine = machine as InternalStateMachine
+
+        if (isFinished)
+            machine.log("$this is finished, skipping event $event, with argument $argument")
+
+        val (transition, direction) = recursiveFindUniqueTransitionWithDirection(event) ?: return false
+
+        val transitionParams = TransitionParams(transition, direction, event, argument)
+
+        val targetState = direction.targetState as? InternalState
+
+        if (direction !is NoTransition) {
+            machine.log("$this triggering $transition from ${transition.sourceState}")
+            transition.transitionNotify { onTriggered(transitionParams) }
+
+            machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+        }
+
+        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
+        return true
+    }
+
+    override fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
+            Pair<InternalTransition<E>, TransitionDirection>? {
+        return currentState?.recursiveFindUniqueTransitionWithDirection(event)
+            ?: findUniqueTransitionWithDirection(event)
+    }
+
     override fun recursiveEnterInitialState() {
         if (states.isEmpty()) return
 
@@ -126,37 +155,6 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _isActive = false
         isFinished = false
         _states.forEach { it.recursiveStop() }
-    }
-
-    override fun recursiveProcessEvent(event: Event, argument: Any?): Boolean {
-        val machine = machine as InternalStateMachine
-
-        if (isFinished)
-            machine.log("$this is finished, skipping event $event, with argument $argument")
-
-        val fromState = if (currentState != null) currentState!! else return false
-
-        val transitionWithDirection = fromState.findUniqueTransitionWithDirection(event)
-
-        if (transitionWithDirection != null) {
-            val (transition, direction) = transitionWithDirection
-
-            val transitionParams = TransitionParams(transition, direction, event, argument)
-
-            val targetState = direction.targetState as? InternalState
-
-            if (direction !is NoTransition) {
-                machine.log("$this triggering $transition from $fromState")
-                transition.transitionNotify { onTriggered(transitionParams) }
-
-                machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
-            }
-
-            targetState?.let { switchToTargetState(it, fromState, transitionParams) }
-            return true
-        } else {
-            return fromState.recursiveProcessEvent(event, argument)
-        }
     }
 
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }

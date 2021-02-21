@@ -50,8 +50,7 @@ class ExportPlantUmlVisitor : Visitor {
 
         val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
 
-        val source = transition.sourceState as InternalState
-        if (source.isNeighbor(targetState))
+        if (transition.sourceState.isNeighbor(targetState))
             line(transitionString)
         else
             crossLevelTransitions.add(transitionString)
