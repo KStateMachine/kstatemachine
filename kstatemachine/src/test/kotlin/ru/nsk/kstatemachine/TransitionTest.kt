@@ -120,34 +120,4 @@ class TransitionTest {
         then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).should().onEntryState(state2)
     }
-
-    @Test
-    fun overrideParentTransition() {
-        val callbacks = mock<Callbacks>()
-
-        lateinit var state2: State
-        lateinit var state3: State
-
-        val machine = createStateMachine {
-            transitionTo<SwitchEvent> {
-                targetState = { state3 }
-                onTriggered { callbacks.onTriggeredTransition(it.event, 3) }
-            }
-
-            initialState("state1") {
-                // overrides parent transition
-                transitionTo<SwitchEvent> {
-                    targetState = { state2 }
-                    onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
-                }
-            }
-            state2 = state("state2") { callbacks.listen(this) }
-            state3 = state("state3") { callbacks.listen(this) }
-        }
-
-        machine.processEvent(SwitchEvent)
-
-        then(callbacks).should().onTriggeredTransition(SwitchEvent, 2)
-        then(callbacks).should().onEntryState(state2)
-    }
 }
