@@ -95,8 +95,10 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun doProcessEvent(event: Event, argument: Any?): Boolean {
         val machine = machine as InternalStateMachine
 
-        if (isFinished)
+        if (isFinished) {
             machine.log("$this is finished, skipping event $event, with argument $argument")
+            return false
+        }
 
         val (transition, direction) = recursiveFindUniqueTransitionWithDirection(event) ?: return false
 

@@ -2,7 +2,6 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
-import java.lang.IllegalStateException
 
 private object State1 : DefaultState("state1")
 private object State2 : DefaultState("state2")

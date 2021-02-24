@@ -4,7 +4,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
-import java.lang.IllegalStateException
 
 private open class HierarchyEventL1 : Event
 private open class HierarchyEventL2 : HierarchyEventL1()

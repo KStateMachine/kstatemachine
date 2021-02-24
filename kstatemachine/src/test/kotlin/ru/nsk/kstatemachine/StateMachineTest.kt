@@ -218,10 +218,7 @@ class StateMachineTest {
 
         lateinit var final: State
         val machine = createStateMachine {
-            final = finalState("final") {
-                onEntry { callbacks.onEntryState(this) }
-                onExit { callbacks.onExitState(this) }
-            }
+            final = finalState("final") { callbacks.listen(this) }
             setInitialState(final)
 
             onFinished { callbacks.onFinished(this) }
@@ -229,6 +226,31 @@ class StateMachineTest {
 
         then(callbacks).should().onEntryState(final)
         then(callbacks).should().onFinished(machine)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun finishedStateMachineIgnoresEvent() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var final: State
+        val machine = createStateMachine {
+            final = finalState("final") { callbacks.listen(this) }
+            setInitialState(final)
+
+            onFinished { callbacks.onFinished(this) }
+
+            transition<SwitchEvent> {
+                targetState = final
+                callbacks.listen(this)
+            }
+        }
+
+        then(callbacks).should().onEntryState(final)
+        then(callbacks).should().onFinished(machine)
+        then(callbacks).shouldHaveNoMoreInteractions()
+
+        machine.processEvent(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
 
@@ -267,7 +289,7 @@ class StateMachineTest {
                 initialState("state2_1") { callbacks.listen(this) }
                 state22 = state("state2_2") { callbacks.listen(this) }
             }
-            
+
             onStarted { callbacks.onStarted(this) }
         }
 
