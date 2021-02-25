@@ -4,7 +4,7 @@ import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 
 @StateMachineDslMarker
-interface State : TransitionsStateHelper, VisitorAcceptor {
+interface State : StateTransitionsHelper, VisitorAcceptor {
     val name: String?
     val states: Set<State>
     val initialState: State?

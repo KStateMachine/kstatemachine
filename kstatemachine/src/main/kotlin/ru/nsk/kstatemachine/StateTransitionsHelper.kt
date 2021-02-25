@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 /**
  * Helper interface for [State] to keep transitions logic separately.
  */
-interface TransitionsStateHelper {
+interface StateTransitionsHelper {
     val transitions: Set<Transition<*>>
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E>
@@ -21,24 +21,24 @@ interface TransitionsStateHelper {
     fun asState(): State
 }
 
-fun TransitionsStateHelper.requireTransition(name: String) =
+fun StateTransitionsHelper.requireTransition(name: String) =
     requireNotNull(findTransition(name)) { "Transition $name not found" }
 
 /**
  * Get transition by Event class. This might be used to start listening to transition after state machine setup.
  */
-inline fun <reified E : Event> TransitionsStateHelper.findTransition(): Transition<E>? {
+inline fun <reified E : Event> StateTransitionsHelper.findTransition(): Transition<E>? {
     @Suppress("UNCHECKED_CAST")
     return transitions.find { it.eventMatcher.eventClass == E::class } as Transition<E>?
 }
 
-inline fun <reified E : Event> TransitionsStateHelper.requireTransition() =
+inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
     requireNotNull(findTransition<E>()) { "Transition for ${E::class} not found" }
 
 /**
  * Overload for transition without any parameters.
  */
-inline fun <reified E : Event> TransitionsStateHelper.transition(
+inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
 ): Transition<E> =
     addTransition(DefaultTransition(name, isInstanceOf(), asState()))
@@ -49,9 +49,9 @@ inline fun <reified E : Event> TransitionsStateHelper.transition(
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> TransitionsStateHelper.transition(
+inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
-    block: (GuardedTransitionBuilder<E>.() -> Unit),
+    block: GuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
     val builder = GuardedTransitionBuilder<E>().apply {
         eventMatcher = isInstanceOf()
@@ -80,9 +80,9 @@ inline fun <reified E : Event> TransitionsStateHelper.transition(
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> TransitionsStateHelper.transitionTo(
+inline fun <reified E : Event> StateTransitionsHelper.transitionTo(
     name: String? = null,
-    block: (GuardedTransitionToBuilder<E>.() -> Unit),
+    block: GuardedTransitionToBuilder<E>.() -> Unit,
 ): Transition<E> {
     val builder = GuardedTransitionToBuilder<E>().apply {
         eventMatcher = isInstanceOf()
@@ -102,7 +102,7 @@ inline fun <reified E : Event> TransitionsStateHelper.transitionTo(
  * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
  * For example target state may be different depending on some condition.
  */
-inline fun <reified E : Event> TransitionsStateHelper.transitionConditionally(
+inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
     name: String? = null,
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
