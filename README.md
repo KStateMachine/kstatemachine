@@ -379,6 +379,20 @@ groups its child states. Child states inherit there parent transitions.
 
 ![Inherit transitions diagram](./doc/diagrams/inherit-transitions.png)
 
+A child state can override an inherited transition. To override parent transition child state should define any
+transition that matches the event.
+
+```kotlin
+createStateMachine {
+    val state2 = state("state2")
+    // all nested states inherit this parent transition
+    transition<SwitchEvent> { targetState = state2 }
+
+    // child state overrides transitions for all events
+    initialState("state1") { transition<Event>() }
+}
+```
+
 ### Cross level transitions
 
 A transition can have any state as its target. This means that the target state does not have to be on the same level in
@@ -396,7 +410,7 @@ calls.
 
 ## Parallel states
 
-_Comming soon..._
+_Coming soon..._
 
 ## Arguments
 

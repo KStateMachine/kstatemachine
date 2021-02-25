@@ -38,6 +38,33 @@ class TransitionOverrideTest {
         then(callbacks).should().onTriggeredTransition(SwitchEvent)
         then(callbacks).shouldHaveNoMoreInteractions()
     }
+
+    @Test
+    fun overrideAllEvents() {
+        val callbacks = mock<Callbacks>()
+
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine {
+            transitionTo<SwitchEvent> {
+                targetState = { state2 }
+                onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+            }
+
+            state1 = initialState("state1") {
+                // override all events
+                transition<Event> { callbacks.listen(this) }
+                callbacks.listen(this)
+            }
+            state2 = state("state2") { callbacks.listen(this) }
+        }
+
+        then(callbacks).should().onEntryState(state1)
+        machine.processEvent(SwitchEvent)
+        then(callbacks).should().onTriggeredTransition(SwitchEvent)
+        then(callbacks).shouldHaveNoMoreInteractions()
+    }
 }
 
 private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
