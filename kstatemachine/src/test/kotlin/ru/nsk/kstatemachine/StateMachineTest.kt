@@ -6,6 +6,8 @@ import com.nhaarman.mockitokotlin2.then
 import com.nhaarman.mockitokotlin2.times
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
+import io.kotest.matchers.collections.containExactly
+import io.kotest.matchers.should
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
@@ -336,5 +338,37 @@ class StateMachineTest {
         then(callbacks).should(times(2)).onEntryState(machine)
         then(callbacks).should().onEntryState(state1)
         then(callbacks).shouldHaveNoMoreInteractions()
+    }
+
+    @Test
+    fun activeStates() {
+        lateinit var state1: State
+        lateinit var state2: State
+        lateinit var state21: State
+        lateinit var state211: State
+
+        val machine = createStateMachine {
+            state1 = initialState("state1") {
+                transitionTo<SwitchEvent> {
+                    targetState = { state2 }
+                }
+            }
+            state2 = state("state2") {
+                state21 = initialState("state21") {
+                    state211 = addInitialState(createStateMachine(start = false) {
+                        // should not be included
+                        initialState("state2111")
+                    })
+                }
+            }
+        }
+
+        var activeStates = machine.activeStates()
+        activeStates should containExactly(machine, state1)
+
+        machine.processEvent(SwitchEvent)
+
+        activeStates = machine.activeStates()
+        activeStates should containExactly(machine, state2, state21, state211)
     }
 }

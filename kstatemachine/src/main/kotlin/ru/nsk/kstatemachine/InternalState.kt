@@ -19,6 +19,7 @@ interface InternalState : State {
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
     fun recursiveStop()
+    fun recursiveFillActiveStates(states: MutableSet<State>)
 }
 
 internal fun InternalState.isNeighbor(state: State) = parent?.states?.contains(state) == true

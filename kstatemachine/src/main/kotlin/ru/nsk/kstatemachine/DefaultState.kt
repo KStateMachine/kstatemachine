@@ -159,6 +159,19 @@ open class DefaultState(override val name: String? = null) : InternalState {
         _states.forEach { it.recursiveStop() }
     }
 
+    override fun recursiveFillActiveStates(states: MutableSet<State>) {
+        if (isActive) {
+            states.add(this)
+
+            val currentState = currentState
+            // do not include nested state machine states
+            if (currentState is StateMachine)
+                states.add(currentState)
+            else
+                currentState?.recursiveFillActiveStates(states)
+        }
+    }
+
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
 
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {

@@ -30,6 +30,12 @@ interface StateMachine : State {
      */
     fun processEvent(event: Event, argument: Any? = null)
 
+    /**
+     * Set of states that the state machine is currently in.
+     * Internal states of nested machines are not included.
+     */
+    fun activeStates() : Set<State>
+
     fun log(message: String) = logger.log(message)
 
     override fun accept(visitor: Visitor) = visitor.visit(this)

@@ -84,6 +84,10 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         }
     }
 
+    override fun activeStates(): Set<State> {
+        return mutableSetOf<State>().also { recursiveFillActiveStates(it) }
+    }
+
     /**
      *  Starts machine if its inner state machine
      */
