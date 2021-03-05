@@ -9,6 +9,13 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 interface Event
 
 /**
+ * Event that holds type safe argument
+ */
+interface ArgEvent<A : Any> : Event {
+    val argument: A
+}
+
+/**
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
 interface Transition<E : Event> : VisitorAcceptor {
@@ -18,7 +25,8 @@ interface Transition<E : Event> : VisitorAcceptor {
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
-     * This argument must be set from transition listener. Such transition must have only one listener setting argument.
+     * This argument must be set from transition listener. Such transition must have only one listener
+     * that sets the argument.
      */
     var argument: Any?
     val listeners: Collection<Listener>

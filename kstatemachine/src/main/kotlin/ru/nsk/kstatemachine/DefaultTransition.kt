@@ -16,6 +16,7 @@ open class DefaultTransition<E : Event>(
      * not during state machine configuration. So it is possible to check some outer (business logic) values in it.
      * If [Transition] does not have target state then [StateMachine] keeps current state
      * when such [Transition] is triggered.
+     * This function should not have side effects.
      */
     private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
 

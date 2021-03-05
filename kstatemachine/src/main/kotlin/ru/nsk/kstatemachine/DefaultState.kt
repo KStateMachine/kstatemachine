@@ -228,6 +228,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 }
 
+open class DefaultArgState<A>(override val name: String? = null) : DefaultState(name), ArgState<A> {
+    override val argument: A
+        get() = TODO("Not yet implemented")
+}
+
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")

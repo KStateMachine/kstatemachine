@@ -24,6 +24,20 @@ class ConditionalTransitionBuilder<E : Event> : TransitionBuilder<E>() {
     lateinit var direction: () -> TransitionDirection
 }
 
+/**
+ * Type safe argument transition builder
+ */
+class GuardedArgTransitionBuilder<A : Any, E : ArgEvent<A>> : BaseGuardedTransitionBuilder<E>() {
+    var targetState: ArgState<A>? = null
+}
+
+/**
+ * Type safe argument transitionTo builder
+ */
+class GuardedArgTransitionToBuilder<A : Any, E : ArgEvent<A>> : BaseGuardedTransitionBuilder<E>() {
+    lateinit var targetState: () -> ArgState<A>
+}
+
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
 

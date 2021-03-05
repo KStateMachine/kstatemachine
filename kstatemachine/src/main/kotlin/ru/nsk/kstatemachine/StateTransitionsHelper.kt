@@ -72,6 +72,29 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
     return addTransition(transition)
 }
 
+inline fun <A : Any, reified E : ArgEvent<A>> StateTransitionsHelper.argTransition(
+    name: String? = null,
+    block: GuardedArgTransitionBuilder<A, E>.() -> Unit,
+): Transition<E> {
+    val builder = GuardedArgTransitionBuilder<A, E>().apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+
+    val direction = {
+        if (builder.guard()) {
+            val target = builder.targetState
+            if (target == null) stay() else targetState(target)
+        } else {
+            noTransition()
+        }
+    }
+
+    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
+    builder.listener?.let { transition.addListener(it) }
+    return addTransition(transition)
+}
+
 /**
  * This is more powerful version of [transition] function.
  * Here target state is a lambda which returns desired State.

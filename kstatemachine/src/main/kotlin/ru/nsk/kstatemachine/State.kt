@@ -46,6 +46,13 @@ interface State : StateTransitionsHelper, VisitorAcceptor {
  */
 interface FinalState : State
 
+/**
+ * State that requires argument to be entered
+ */
+interface ArgState<A> : State {
+    val argument: A
+}
+
 typealias StateBlock<S> = S.() -> Unit
 
 fun State.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
@@ -76,6 +83,9 @@ fun <S : State> S.onFinished(block: StateBlock<S>) {
  */
 fun State.state(name: String? = null, init: StateBlock<State>? = null) =
     addState(DefaultState(name), init)
+
+fun <A> State.argState(name: String? = null, init: StateBlock<ArgState<A>>? = null) =
+    addState(DefaultArgState(name), init)
 
 /**
  * A shortcut for [state] and [State.setInitialState] calls
