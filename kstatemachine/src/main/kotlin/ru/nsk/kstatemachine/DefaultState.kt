@@ -229,7 +229,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 }
 
 open class DefaultArgState<A>(override val name: String? = null) : DefaultState(name), ArgState<A> {
-    override val argument: A
+    override val arg: A
         get() = TODO("Not yet implemented")
 }
 

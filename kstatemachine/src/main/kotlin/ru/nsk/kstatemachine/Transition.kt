@@ -9,10 +9,10 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 interface Event
 
 /**
- * Event that holds type safe argument
+ * Event with type safe argument
  */
 interface ArgEvent<A : Any> : Event {
-    val argument: A
+    val arg: A
 }
 
 /**

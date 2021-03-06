@@ -349,7 +349,7 @@ class StateMachineTest {
 
         val machine = createStateMachine {
             state1 = initialState("state1") {
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state2 }
                 }
             }

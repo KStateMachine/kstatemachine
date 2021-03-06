@@ -14,7 +14,7 @@ fun main() {
         initialState("Top level 1") {
             initialState("Nested 11") {
                 // Target state is declared in another state
-                transitionTo<SwitchEvent2> { targetState = { nested22 } }
+                transitionOn<SwitchEvent2> { targetState = { nested22 } }
             }
         }
 

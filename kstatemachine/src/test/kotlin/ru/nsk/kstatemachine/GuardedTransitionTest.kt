@@ -31,7 +31,7 @@ class GuardedTransitionTest {
     }
 
     @Test
-    fun guardedTransitionToWithLateinitState() {
+    fun guardedTransitionOnWithLateinitState() {
         val callbacks = mock<Callbacks>()
 
         var value = "value1";
@@ -40,7 +40,7 @@ class GuardedTransitionTest {
             lateinit var second: State
 
             initialState("first") {
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     guard = { value == "value2" }
                     targetState = { second }
                     callbacks.listen(this)
@@ -69,13 +69,13 @@ class GuardedTransitionTest {
             state1 = initialState("state1") {
                 callbacks.listen(this)
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     guard = { false }
                     targetState = { state2 }
                     callbacks.listen(this)
                 }
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     guard = { true }
                     targetState = { state3 }
                     callbacks.listen(this)

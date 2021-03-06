@@ -51,48 +51,27 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  */
 inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
-    block: GuardedTransitionBuilder<E>.() -> Unit,
+    block: SimpleGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = GuardedTransitionBuilder<E>().apply {
+    val builder = SimpleGuardedTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val direction = {
-        if (builder.guard()) {
-            val target = builder.targetState
-            if (target == null) stay() else targetState(target)
-        } else {
-            noTransition()
-        }
-    }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
-inline fun <A : Any, reified E : ArgEvent<A>> StateTransitionsHelper.argTransition(
+/**
+ * Creates type safe argument transition.
+ */
+inline fun <reified E : ArgEvent<A>, A : Any> StateTransitionsHelper.argTransition(
     name: String? = null,
-    block: GuardedArgTransitionBuilder<A, E>.() -> Unit,
+    block: ArgGuardedTransitionBuilder<E, A>.() -> Unit,
 ): Transition<E> {
-    val builder = GuardedArgTransitionBuilder<A, E>().apply {
+    val builder = ArgGuardedTransitionBuilder<E, A>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val direction = {
-        if (builder.guard()) {
-            val target = builder.targetState
-            if (target == null) stay() else targetState(target)
-        } else {
-            noTransition()
-        }
-    }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
 /**
@@ -103,22 +82,15 @@ inline fun <A : Any, reified E : ArgEvent<A>> StateTransitionsHelper.argTransiti
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> StateTransitionsHelper.transitionTo(
+inline fun <reified E : Event> StateTransitionsHelper.transitionOn(
     name: String? = null,
-    block: GuardedTransitionToBuilder<E>.() -> Unit,
+    block: SimpleGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = GuardedTransitionToBuilder<E>().apply {
+    val builder = SimpleGuardedTransitionOnBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val direction = {
-        if (builder.guard()) targetState(builder.targetState()) else noTransition()
-    }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
 /**
@@ -129,12 +101,9 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
     name: String? = null,
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = ConditionalTransitionBuilder<E>().apply {
+    val builder = ConditionalTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), builder.direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }

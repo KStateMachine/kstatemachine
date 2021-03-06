@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 import org.junit.jupiter.api.Test
 
-private class StringArgumentEvent(override val argument: String) : ArgEvent<String>
+private class NameEvent(override val arg: String) : ArgEvent<String>
 
 class SafeArgumentStatesTest {
     @Test
@@ -13,15 +13,12 @@ class SafeArgumentStatesTest {
 
             initialState("state1") {
                 // FIXME how I can remove String argument?
-                argTransition<String, StringArgumentEvent> {
+                argTransition<NameEvent, String> {
                     targetState = state2
                 }
-                // desired
-                argTransition<StringArgumentEvent> {
-                    targetState = state2
-                }
+
                 // this can only give runtime error
-                transition<StringArgumentEvent> {
+                transition<NameEvent> {
                     targetState = state3
                 }
             }

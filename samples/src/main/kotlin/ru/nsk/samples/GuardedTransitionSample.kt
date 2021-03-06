@@ -14,7 +14,7 @@ fun main() {
         logger = StateMachine.Logger { println(it) }
 
         addInitialState(States1.InitialState(42)) {
-            transitionTo<SwitchEvent1> {
+            transitionOn<SwitchEvent1> {
                 guard = { this@addInitialState.value > 10 }
                 targetState = { States1.FinalState }
             }

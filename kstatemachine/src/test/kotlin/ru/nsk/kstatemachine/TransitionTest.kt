@@ -80,7 +80,7 @@ class TransitionTest {
                         fail("incorrect direction ${it.direction}")
                 }
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state2 }
                     callbacks.listen(this)
                 }
@@ -106,7 +106,7 @@ class TransitionTest {
         lateinit var state2: State
 
         val machine = createStateMachine {
-            transitionTo<SwitchEvent> {
+            transitionOn<SwitchEvent> {
                 targetState = { state2 }
                 callbacks.listen(this)
             }

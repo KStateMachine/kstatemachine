@@ -41,7 +41,7 @@ fun main() {
             }
 
             // Setup guarded transition with a lambda calculating targetState
-            transitionTo<SwitchRedEvent> {
+            transitionOn<SwitchRedEvent> {
                 guard = { false } // Never trigger this transition
                 targetState = { redState }
             }

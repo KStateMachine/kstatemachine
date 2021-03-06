@@ -50,7 +50,10 @@ interface FinalState : State
  * State that requires argument to be entered
  */
 interface ArgState<A> : State {
-    val argument: A
+    /**
+     * This property might be accessed only while this state is active
+     */
+    val arg: A
 }
 
 typealias StateBlock<S> = S.() -> Unit

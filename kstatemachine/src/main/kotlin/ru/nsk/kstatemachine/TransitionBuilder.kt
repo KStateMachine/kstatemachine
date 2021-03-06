@@ -3,40 +3,81 @@ package ru.nsk.kstatemachine
 import kotlin.reflect.KClass
 
 @StateMachineDslMarker
-open class TransitionBuilder<E : Event> {
+abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: State) {
     var listener: Transition.Listener? = null
     lateinit var eventMatcher: EventMatcher<E>
+
+    abstract fun build(): Transition<E>
 }
 
-open class BaseGuardedTransitionBuilder<E : Event> : TransitionBuilder<E>() {
+abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+    TransitionBuilder<E>(name, sourceState) {
     var guard: () -> Boolean = { true }
 }
 
-class GuardedTransitionBuilder<E : Event> : BaseGuardedTransitionBuilder<E>() {
-    var targetState: State? = null
+abstract class GuardedTransitionBuilder<E : Event, S : State>(name: String?, sourceState: State) :
+    BaseGuardedTransitionBuilder<E>(name, sourceState) {
+    var targetState: S? = null
+
+    override fun build(): Transition<E> {
+        val direction = {
+            if (guard()) {
+                val target = targetState
+                if (target == null) stay() else targetState(target)
+            } else {
+                noTransition()
+            }
+        }
+
+        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        listener?.let { transition.addListener(it) }
+        return transition
+    }
 }
 
-class GuardedTransitionToBuilder<E : Event> : BaseGuardedTransitionBuilder<E>() {
-    lateinit var targetState: () -> State
+abstract class GuardedTransitionOnBuilder<E : Event, S : State>(name: String?, sourceState: State) :
+    BaseGuardedTransitionBuilder<E>(name, sourceState) {
+    lateinit var targetState: () -> S
+
+    override fun build(): Transition<E> {
+        val direction = {
+            if (guard()) targetState(targetState()) else noTransition()
+        }
+
+        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        listener?.let { transition.addListener(it) }
+        return transition
+    }
 }
 
-class ConditionalTransitionBuilder<E : Event> : TransitionBuilder<E>() {
+class SimpleGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+    GuardedTransitionBuilder<E, State>(name, sourceState)
+
+class SimpleGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: State) :
+    GuardedTransitionOnBuilder<E, State>(name, sourceState)
+
+class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+    TransitionBuilder<E>(name, sourceState) {
     lateinit var direction: () -> TransitionDirection
+
+    override fun build(): Transition<E> {
+        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        listener?.let { transition.addListener(it) }
+        return transition
+    }
 }
 
 /**
  * Type safe argument transition builder
  */
-class GuardedArgTransitionBuilder<A : Any, E : ArgEvent<A>> : BaseGuardedTransitionBuilder<E>() {
-    var targetState: ArgState<A>? = null
-}
+class ArgGuardedTransitionBuilder<E : ArgEvent<A>, A : Any>(name: String?, sourceState: State) :
+    GuardedTransitionBuilder<E, ArgState<A>>(name, sourceState)
 
 /**
- * Type safe argument transitionTo builder
+ * Type safe argument transitionOn builder
  */
-class GuardedArgTransitionToBuilder<A : Any, E : ArgEvent<A>> : BaseGuardedTransitionBuilder<E>() {
-    lateinit var targetState: () -> ArgState<A>
-}
+class ArgGuardedTransitionOnBuilder<E : ArgEvent<A>, A : Any>(name: String?, sourceState: State) :
+    GuardedTransitionOnBuilder<E, ArgState<A>>(name, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }

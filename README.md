@@ -184,7 +184,7 @@ transition<YellowEvent> {
 }
 ```
 
-There is an extended version of `transition()` function, it is called `transitionTo()`. It works the same way but takes
+There is an extended version of `transition()` function, it is called `transitionOn()`. It works the same way but takes
 a lambda to calculate target state. This allows to use `lateinit` state variables and to choose target state depending
 on an application business logic like with [conditional transitions](#conditional-transitions) but with shorter syntax
 and less flexibility:
@@ -194,7 +194,7 @@ createStateMachine {
     lateinit var yellowState: State
 
     greenState {
-        transitionTo<YellowEvent> {
+        transitionOn<YellowEvent> {
             targetState = { yellowState }
         }
     }
@@ -233,7 +233,7 @@ createStateMachine {
 ### Guarded transitions
 
 Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is a special kind
-of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionTo()`
+of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionOn()`
 functions to create guarded transition:
 
 ```kotlin
