@@ -5,14 +5,16 @@
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 
 KStateMachine is a Kotlin DSL library for creating finite state
-machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and hierarchical state machines
-(HSM) and listen to its states and transitions changes to perform side effects.
+machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarchical state machines
+(HSM).
 
 ## Overview
 
 Main features are:
 
 * Kotlin DSL syntax for defining state machine structure;
+* Event based - transitions are performed by processing incoming events;
+* Listeners for states and transitions;
 * [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with dynamic target state
   which is calculated in a moment of event processing depending on application business logic;
 * [Nested states](#nested-states) - hierarchical state machines (HSMs)
@@ -20,7 +22,8 @@ Main features are:
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
-  and  [Graphviz](https://graphviz.org/).
+  and  [Graphviz](https://graphviz.org/);
+* Built-in [logging](#logging) support.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
