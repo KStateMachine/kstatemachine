@@ -228,9 +228,20 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 }
 
-open class DefaultArgState<A>(override val name: String? = null) : DefaultState(name), ArgState<A> {
-    override val arg: A
-        get() = TODO("Not yet implemented")
+open class DefaultArgState<A : Any>(override val name: String? = null) : DefaultState(name), ArgState<A> {
+    private var _arg: A? = null
+    override val arg: A get() = requireNotNull(_arg) { "Type safe argument is not set. Is the state active?" }
+
+    override fun doEnter(transitionParams: TransitionParams<*>) {
+        @Suppress("UNCHECKED_CAST")
+        if (!isActive) _arg = (transitionParams.event as ArgEvent<A>).arg
+        super.doEnter(transitionParams)
+    }
+
+    override fun doExit(transitionParams: TransitionParams<*>) {
+        super.doExit(transitionParams)
+        if (isActive) _arg = null
+    }
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
