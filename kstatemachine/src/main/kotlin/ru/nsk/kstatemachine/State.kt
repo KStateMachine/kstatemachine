@@ -49,7 +49,7 @@ interface FinalState : State
 /**
  * State that requires argument to be entered
  */
-interface ArgState<A> : State {
+interface ArgState<A : Any> : State {
     /**
      * This property might be accessed only while this state is active
      */
@@ -87,7 +87,7 @@ fun <S : State> S.onFinished(block: StateBlock<S>) {
 fun State.state(name: String? = null, init: StateBlock<State>? = null) =
     addState(DefaultState(name), init)
 
-fun <A> State.argState(name: String? = null, init: StateBlock<ArgState<A>>? = null) =
+fun <A : Any> State.argState(name: String? = null, init: StateBlock<ArgState<A>>? = null) =
     addState(DefaultArgState(name), init)
 
 /**

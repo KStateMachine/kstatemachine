@@ -230,7 +230,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
 
 open class DefaultArgState<A : Any>(override val name: String? = null) : DefaultState(name), ArgState<A> {
     private var _arg: A? = null
-    override val arg: A get() = requireNotNull(_arg) { "Type safe argument is not set. Is the state active?" }
+    override val arg: A get() = checkNotNull(_arg) { "Type safe argument is not set. Is the state active?" }
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
         @Suppress("UNCHECKED_CAST")

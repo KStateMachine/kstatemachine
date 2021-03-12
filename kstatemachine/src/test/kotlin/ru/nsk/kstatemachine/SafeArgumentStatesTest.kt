@@ -1,27 +1,35 @@
 package ru.nsk.kstatemachine
 
+import com.nhaarman.mockitokotlin2.isA
+import com.nhaarman.mockitokotlin2.then
+import io.kotest.assertions.throwables.shouldThrow
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import java.lang.IllegalStateException
 
 private class NameEvent(override val arg: String) : ArgEvent<String>
 
 class SafeArgumentStatesTest {
     @Test
     fun safeArgumentState() {
+        lateinit var state2: ArgState<String>
+
         val machine = createStateMachine {
-            val state2 = argState<String>("state2")
-            val state3 = argState<Int>("state3")
+            state2 = argState("state2")
 
             initialState("state1") {
-                // FIXME how I can remove String argument?
                 argTransition<NameEvent, String> {
                     targetState = state2
                 }
-
-                // this can only give runtime error
-                transition<NameEvent> {
-                    targetState = state3
-                }
             }
         }
+
+        shouldThrow<IllegalStateException> { state2.arg }
+
+        val name = "testName"
+        machine.processEvent(NameEvent(name))
+
+        assertThat(state2.arg, equalTo(name))
     }
 }

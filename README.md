@@ -27,7 +27,7 @@ Main features are:
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
-Building blocks (main classes) of this library:
+Building blocks (main interfaces) of the library:
 
 * `StateMachine` - is a collection of states and transitions between them, processes events when started;
 * `State` - states where state machine can go to;
@@ -45,9 +45,9 @@ val machine = createStateMachine {
     // Setup is made in this block ...
 }
 // After setup it is ready to process events
-machine.processEvent(SwitchGreenEvent)
+machine.processEvent(GreenEvent)
 // ...
-machine.processEvent(SwitchYellowEvent)
+machine.processEvent(YellowEvent)
 ```
 
 ## Quick start sample (finishing traffic light)
@@ -272,7 +272,7 @@ decision:
 redState {
     // A conditional transition helps to control when it 
     // should be triggered and determine its target state
-    transitionConditionally<SwitchGreenEvent> {
+    transitionConditionally<GreenEvent> {
         direction = {
             // Suppose you have a function returning some 
             // business logic value which may differ
@@ -309,7 +309,7 @@ There are two predefined event matchers:
 * `isInstanceOf()` matches specified class and its subclasses (default);
 * `isEqual()` matches only specified class.
 
-You can define your own matcher by subclassing `EventMatcher` class.
+You can define your own matchers by subclassing `EventMatcher` class.
 
 ## Logging
 
