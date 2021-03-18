@@ -9,7 +9,7 @@ class TransitionOverrideTest {
     fun overrideParentTransitionSameEventType() = overrideParentTransitionWithEventType<SwitchEvent>()
 
     @Test
-    fun overrideParentTransitionDifferentEventType() = overrideParentTransitionWithEventType<Event>()
+    fun overrideParentTransitionDifferentEventType() = overrideParentTransitionWithEventType<UnitEvent>()
 
     /**
      * It is not possible to override with [noTransition]. Currently I do not think it is necessary.
@@ -43,8 +43,8 @@ class TransitionOverrideTest {
     fun overrideAllEvents() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state1: State
-        lateinit var state2: State
+        lateinit var state1: UnitState
+        lateinit var state2: UnitState
 
         val machine = createStateMachine {
             transitionOn<SwitchEvent> {
@@ -70,8 +70,8 @@ class TransitionOverrideTest {
 private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     val callbacks = mock<Callbacks>()
 
-    lateinit var state2: State
-    lateinit var state3: State
+    lateinit var state2: UnitState
+    lateinit var state3: UnitState
 
     val machine = createStateMachine {
         transitionOn<SwitchEvent> {
@@ -98,7 +98,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
 }
 
 private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createStateMachine {
-    lateinit var state2: State
+    lateinit var state2: UnitState
     transitionOn<SwitchEvent> {
         targetState = { state2 }
         onTriggered { callbacks.onTriggeredTransition(it.event, 2) }

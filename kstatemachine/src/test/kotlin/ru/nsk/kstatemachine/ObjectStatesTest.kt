@@ -3,8 +3,8 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-private object State1 : DefaultState("state1")
-private object State2 : DefaultState("state2")
+private object State1 : DefaultUnitState("state1")
+private object State2 : DefaultUnitState("state2")
 
 /**
  * States are mutable and currently it is not possible to use object states in multiple [StateMachine] instances.

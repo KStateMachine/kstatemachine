@@ -3,13 +3,13 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
-object SwitchEvent2 : Event
+object SwitchEvent2 : UnitEvent()
 
 fun main() {
     val machine = createStateMachine {
         logger = StateMachine.Logger { println(it) }
 
-        lateinit var nested22: State
+        lateinit var nested22: UnitState
 
         initialState("Top level 1") {
             initialState("Nested 11") {

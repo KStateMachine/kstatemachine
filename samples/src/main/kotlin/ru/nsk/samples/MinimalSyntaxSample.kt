@@ -3,8 +3,8 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 
 // Define events
-object YellowEvent : Event
-object RedEvent : Event
+object YellowEvent : UnitEvent()
+object RedEvent : UnitEvent()
 
 fun main() {
     // Create state machine and configure its states in a setup block

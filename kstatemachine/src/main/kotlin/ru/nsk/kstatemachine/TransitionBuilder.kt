@@ -50,12 +50,6 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : State>(name: String?, s
     }
 }
 
-class SimpleGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
-    GuardedTransitionBuilder<E, State>(name, sourceState)
-
-class SimpleGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: State) :
-    GuardedTransitionOnBuilder<E, State>(name, sourceState)
-
 class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State) :
     TransitionBuilder<E>(name, sourceState) {
     lateinit var direction: () -> TransitionDirection
@@ -68,16 +62,25 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State)
 }
 
 /**
+ * Not only [UnitEvent] but [Event] with any data can lead to [UnitState]
+ */
+class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+    GuardedTransitionBuilder<E, UnitState>(name, sourceState)
+
+class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: State) :
+    GuardedTransitionOnBuilder<E, UnitState>(name, sourceState)
+
+/**
  * Type safe argument transition builder
  */
-class ArgGuardedTransitionBuilder<E : ArgEvent<A>, A : Any>(name: String?, sourceState: State) :
-    GuardedTransitionBuilder<E, ArgState<A>>(name, sourceState)
+class DataGuardedTransitionBuilder<E : DataEvent<D>, D>(name: String?, sourceState: State) :
+    GuardedTransitionBuilder<E, DataState<D>>(name, sourceState)
 
 /**
  * Type safe argument transitionOn builder
  */
-class ArgGuardedTransitionOnBuilder<E : ArgEvent<A>, A : Any>(name: String?, sourceState: State) :
-    GuardedTransitionOnBuilder<E, ArgState<A>>(name, sourceState)
+class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D>(name: String?, sourceState: State) :
+    GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }

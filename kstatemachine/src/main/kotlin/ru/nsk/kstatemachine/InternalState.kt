@@ -42,4 +42,3 @@ internal fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: 
     check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
     return transitions.firstOrNull()
 }
-

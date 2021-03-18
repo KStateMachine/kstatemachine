@@ -12,9 +12,9 @@ class NestedStateTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var firstL1: State
-        lateinit var firstL2: State
-        val firstL3 = object : DefaultState("firstL3") {}
+        lateinit var firstL1: UnitState
+        lateinit var firstL2: UnitState
+        val firstL3 = object : DefaultUnitState("firstL3") {}
 
         createStateMachine {
             firstL1 = initialState("firstL1") {
@@ -40,10 +40,10 @@ class NestedStateTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var firstL1: State
-        lateinit var secondL1: State
-        lateinit var firstL2: State
-        lateinit var secondL2: State
+        lateinit var firstL1: UnitState
+        lateinit var secondL1: UnitState
+        lateinit var firstL2: UnitState
+        lateinit var secondL2: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }
@@ -87,10 +87,10 @@ class NestedStateTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var initialL1: State
-        lateinit var finalL1: State
-        lateinit var initialL2: State
-        lateinit var finalL2: State
+        lateinit var initialL1: UnitState
+        lateinit var finalL1: UnitState
+        lateinit var initialL2: UnitState
+        lateinit var finalL2: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }

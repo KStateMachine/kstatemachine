@@ -42,19 +42,23 @@ interface State : StateTransitionsHelper, VisitorAcceptor {
 }
 
 /**
- * When [StateMachine] enters this state it finishes and does not accept events any more.
+ * State which holds data while it is active
  */
-interface FinalState : State
-
-/**
- * State that requires argument to be entered
- */
-interface ArgState<A : Any> : State {
+interface DataState<out D> : State {
     /**
      * This property might be accessed only while this state is active
      */
-    val arg: A
+    val data: D
 }
+
+typealias UnitState = DataState<Unit>
+
+/**
+ * When [StateMachine] enters this state it finishes and does not accept events any more.
+ */
+interface FinalState : State
+interface FinalDataState<out D> : DataState<D>, FinalState
+typealias FinalUnitState = FinalDataState<Unit>
 
 typealias StateBlock<S> = S.() -> Unit
 
@@ -84,16 +88,19 @@ fun <S : State> S.onFinished(block: StateBlock<S>) {
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [State.findState] and for debugging.
  */
-fun State.state(name: String? = null, init: StateBlock<State>? = null) =
-    addState(DefaultState(name), init)
+fun State.state(name: String? = null, init: StateBlock<UnitState>? = null) =
+    dataState(name, init)
 
-fun <A : Any> State.argState(name: String? = null, init: StateBlock<ArgState<A>>? = null) =
-    addState(DefaultArgState(name), init)
+fun <D> State.dataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
+    addState(DefaultState(name), init)
 
 /**
  * A shortcut for [state] and [State.setInitialState] calls
  */
-fun State.initialState(name: String? = null, init: StateBlock<State>? = null) =
+fun State.initialState(name: String? = null, init: StateBlock<UnitState>? = null) =
+    initialDataState(name, init)
+
+fun <D> State.initialDataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
     addInitialState(DefaultState(name), init)
 
 /**
@@ -109,7 +116,11 @@ fun <S : State> State.addInitialState(state: S, init: StateBlock<S>? = null): S 
  * Helper method for adding final states. This is exactly the same as simply call [State.addState] but makes
  * code more self expressive.
  */
-fun <S : FinalState> State.addFinalState(state: S, init: StateBlock<S>? = null) = addState(state, init)
+fun <S : FinalState> State.addFinalState(state: S, init: StateBlock<S>? = null) =
+    addState(state, init)
 
-fun State.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+fun State.finalState(name: String? = null, init: StateBlock<FinalUnitState>? = null) =
+    finalDataState(name, init)
+
+fun <D> State.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
     addState(DefaultFinalState(name), init)

@@ -16,7 +16,7 @@ class TransitionTest {
     fun transitionArgument() {
         val callbacks = mock<Callbacks>()
 
-        val second = object : DefaultState("second") {}
+        val second = object : DefaultUnitState("second") {}
 
         val machine = createStateMachine {
             addState(second) {
@@ -41,7 +41,7 @@ class TransitionTest {
 
     @Test
     fun requireTransition() {
-        val state = object : DefaultState() {}
+        val state = object : DefaultUnitState() {}
 
         lateinit var firstTransition: Transition<*>
         lateinit var secondTransition: Transition<*>
@@ -63,8 +63,8 @@ class TransitionTest {
     fun transitionDirection() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state1: State
-        lateinit var state2: State
+        lateinit var state1: UnitState
+        lateinit var state2: UnitState
 
         val machine = createStateMachine {
             state1 = initialState("1") {
@@ -103,7 +103,7 @@ class TransitionTest {
     fun topLevelTransition() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state2: State
+        lateinit var state2: UnitState
 
         val machine = createStateMachine {
             transitionOn<SwitchEvent> {

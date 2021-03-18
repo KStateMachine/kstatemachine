@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.then
 import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 
-private class CustomEvent(val value: Int) : Event
+private class CustomEvent(val value: Int) : UnitEvent()
 
 class CustomTransition(name: String, sourceState: State, targetState: State) :
     DefaultTransition<Event>(name, isInstanceOf(), sourceState, targetState) {

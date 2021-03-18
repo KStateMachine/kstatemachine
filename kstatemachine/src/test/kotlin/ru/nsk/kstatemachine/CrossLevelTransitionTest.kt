@@ -14,7 +14,7 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
+        lateinit var state1: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }
@@ -43,9 +43,9 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state11: State
-        lateinit var state12: State
+        lateinit var state1: UnitState
+        lateinit var state11: UnitState
+        lateinit var state12: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }
@@ -96,9 +96,9 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state11: State
-        lateinit var state12: State
+        lateinit var state1: UnitState
+        lateinit var state11: UnitState
+        lateinit var state12: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }
@@ -137,9 +137,9 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state21: State
-        lateinit var state2: State
+        lateinit var state1: UnitState
+        lateinit var state21: UnitState
+        lateinit var state2: UnitState
 
         val machine = createStateMachine {
             state1 = initialState("1") {
@@ -176,10 +176,10 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state11: State
-        lateinit var state2: State
-        lateinit var state22: State
+        lateinit var state1: UnitState
+        lateinit var state11: UnitState
+        lateinit var state2: UnitState
+        lateinit var state22: UnitState
 
         val machine = createStateMachine {
             state1 = initialState("1") {
@@ -226,9 +226,9 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state11: State
-        lateinit var state2: State
+        lateinit var state1: UnitState
+        lateinit var state11: UnitState
+        lateinit var state2: UnitState
 
         val machine = createStateMachine {
             state1 = initialState("1") {
@@ -267,9 +267,9 @@ class CrossLevelTransitionTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var state1: State
-        lateinit var state11: State
-        lateinit var state12: State
+        lateinit var state1: UnitState
+        lateinit var state11: UnitState
+        lateinit var state12: UnitState
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }

@@ -1,12 +1,12 @@
 package ru.nsk.kstatemachine
 
 
-object SwitchEvent : Event
-object SwitchEventL1 : Event
-object SwitchEventL2 : Event
+object SwitchEvent : UnitEvent()
+object SwitchEventL1 : UnitEvent()
+object SwitchEventL2 : UnitEvent()
 
-object FirstEvent : Event
-object SecondEvent : Event
+object FirstEvent : UnitEvent()
+object SecondEvent : UnitEvent()
 
 interface Callbacks {
     fun onStarted(machine: StateMachine)

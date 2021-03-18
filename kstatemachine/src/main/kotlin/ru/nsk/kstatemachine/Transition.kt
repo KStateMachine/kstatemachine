@@ -9,10 +9,17 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 interface Event
 
 /**
- * Event with type safe argument
+ * Event holding some data
  */
-interface ArgEvent<A : Any> : Event {
-    val arg: A
+interface DataEvent<out D> : Event {
+    val data: D
+}
+
+/**
+ * Event without data
+ */
+abstract class UnitEvent : DataEvent<Unit> {
+    override val data: Unit = Unit
 }
 
 /**

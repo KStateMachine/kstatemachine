@@ -3,13 +3,14 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 
 // Define events
-object SwitchYellowEvent : Event
+object SwitchYellowEvent : UnitEvent()
 
+//FIXME update sample
 // Events often hold some useful data
-class SwitchRedEvent(val data: String) : Event
+class SwitchRedEvent(val info: String) : UnitEvent()
 
 // Subclass DefaultState if you need
-class YellowState(val data: Int) : DefaultState("Yellow")
+class YellowState(val info: Int) : DefaultUnitState("Yellow")
 
 fun main() {
     val machine = createStateMachine(
@@ -63,8 +64,8 @@ fun main() {
                         else -> noTransition()
                     }
                 }
-                // Access data from a State subclass
-                onTriggered { println("Switching state with data: ${this@yellowState.data}") }
+                // Access info from a State subclass
+                onTriggered { println("Switching state with info: ${this@yellowState.info}") }
             }
         }
 

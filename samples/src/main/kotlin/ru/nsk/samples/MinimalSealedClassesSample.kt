@@ -4,15 +4,15 @@ import ru.nsk.kstatemachine.*
 
 // Define events
 sealed class Events {
-    object YellowEvent : Event
-    object RedEvent : Event
+    object YellowEvent : UnitEvent()
+    object RedEvent : UnitEvent()
 }
 
 // Define states
 sealed class States {
-    object GreenState : DefaultState("Green")
-    object YellowState : DefaultState("Yellow")
-    object RedState : DefaultFinalState("Red") // State machine finishes when enters final state
+    object GreenState : DefaultUnitState("Green")
+    object YellowState : DefaultUnitState("Yellow")
+    object RedState : DefaultFinalUnitState("Red") // State machine finishes when enters final state
 }
 
 fun main() {

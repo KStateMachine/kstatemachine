@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.visitors.Visitor
 @DslMarker
 annotation class StateMachineDslMarker
 
-interface StateMachine : State {
+interface StateMachine : UnitState {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
@@ -34,7 +34,7 @@ interface StateMachine : State {
      * Set of states that the state machine is currently in.
      * Internal states of nested machines are not included.
      */
-    fun activeStates() : Set<State>
+    fun activeStates(): Set<State>
 
     fun log(message: String) = logger.log(message)
 

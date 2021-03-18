@@ -9,7 +9,7 @@ class ConditionalTransitionTest {
     fun conditionalTransitionStay() {
         val callbacks = mock<Callbacks>()
 
-        val first = object : DefaultState("first") {}
+        val first = object : DefaultUnitState("first") {}
 
         val machine = createStateMachine {
             addInitialState(first) {
@@ -33,7 +33,7 @@ class ConditionalTransitionTest {
     fun conditionalTransitionNoTransition() {
         val callbacks = mock<Callbacks>()
 
-        val first = object : DefaultState("first") {}
+        val first = object : DefaultUnitState("first") {}
 
         val machine = createStateMachine {
             addInitialState(first) {
@@ -59,8 +59,8 @@ class ConditionalTransitionTest {
     fun conditionalTransitionTargetState() {
         val callbacks = mock<Callbacks>()
 
-        val first = object : DefaultState("first") {}
-        val second = object : DefaultState("second") {}
+        val first = object : DefaultUnitState("first") {}
+        val second = object : DefaultUnitState("second") {}
 
         val machine = createStateMachine {
             addInitialState(first) {
@@ -89,8 +89,8 @@ class ConditionalTransitionTest {
     fun conditionalTransition() {
         val callbacks = mock<Callbacks>()
 
-        val first = object : DefaultState("first") {}
-        val second = object : DefaultState("second") {}
+        val first = object : DefaultUnitState("first") {}
+        val second = object : DefaultUnitState("second") {}
 
         val machine = createStateMachine {
             addInitialState(first) {

@@ -37,7 +37,7 @@ class GuardedTransitionTest {
         var value = "value1";
 
         val machine = createStateMachine {
-            lateinit var second: State
+            lateinit var second: UnitState
 
             initialState("first") {
                 transitionOn<SwitchEvent> {
@@ -61,9 +61,9 @@ class GuardedTransitionTest {
     fun guardedTransitionSameEvent() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state1: State
-        lateinit var state2: State
-        lateinit var state3: State
+        lateinit var state1: UnitState
+        lateinit var state2: UnitState
+        lateinit var state3: UnitState
 
         val machine = createStateMachine {
             state1 = initialState("state1") {

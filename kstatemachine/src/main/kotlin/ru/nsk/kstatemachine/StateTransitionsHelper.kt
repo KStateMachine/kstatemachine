@@ -51,23 +51,9 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  */
 inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
-    block: SimpleGuardedTransitionBuilder<E>.() -> Unit,
+    block: UnitGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = SimpleGuardedTransitionBuilder<E>(name, asState()).apply {
-        eventMatcher = isInstanceOf()
-        block()
-    }
-    return addTransition(builder.build())
-}
-
-/**
- * Creates type safe argument transition.
- */
-inline fun <reified E : ArgEvent<A>, A : Any> StateTransitionsHelper.argTransition(
-    name: String? = null,
-    block: ArgGuardedTransitionBuilder<E, A>.() -> Unit,
-): Transition<E> {
-    val builder = ArgGuardedTransitionBuilder<E, A>(name, asState()).apply {
+    val builder = UnitGuardedTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
@@ -84,9 +70,9 @@ inline fun <reified E : ArgEvent<A>, A : Any> StateTransitionsHelper.argTransiti
  */
 inline fun <reified E : Event> StateTransitionsHelper.transitionOn(
     name: String? = null,
-    block: SimpleGuardedTransitionOnBuilder<E>.() -> Unit,
+    block: UnitGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = SimpleGuardedTransitionOnBuilder<E>(name, asState()).apply {
+    val builder = UnitGuardedTransitionOnBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
@@ -102,6 +88,31 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
     val builder = ConditionalTransitionBuilder<E>(name, asState()).apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+    return addTransition(builder.build())
+}
+
+/**
+ * Creates type safe argument transition.
+ */
+inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
+    name: String? = null,
+    block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
+): Transition<E> {
+    val builder = DataGuardedTransitionBuilder<E, D>(name, asState()).apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+    return addTransition(builder.build())
+}
+
+inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransitionOn(
+    name: String? = null,
+    block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
+): Transition<E> {
+    val builder = DataGuardedTransitionOnBuilder<E, D>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }

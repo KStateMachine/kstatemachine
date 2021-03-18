@@ -2,11 +2,11 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 
-object SwitchEvent1 : Event
+object SwitchEvent1 : UnitEvent()
 
 sealed class States1 {
-    class InitialState(val value: Int) : DefaultState("State 1")
-    object FinalState : DefaultFinalState("State 2")
+    class InitialState(val value: Int) : DefaultUnitState("State 1")
+    object FinalState : DefaultFinalUnitState("State 2")
 }
 
 fun main() {

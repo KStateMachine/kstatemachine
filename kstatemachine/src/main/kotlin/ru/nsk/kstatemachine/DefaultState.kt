@@ -3,7 +3,10 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
-open class DefaultState(override val name: String? = null) : InternalState {
+open class DefaultState<out D>(override val name: String? = null) : InternalState, DataState<D> {
+    private var _data: D? = null
+    override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
+
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
     override val listeners: Collection<State.Listener> get() = _listeners
 
@@ -80,6 +83,9 @@ open class DefaultState(override val name: String? = null) : InternalState {
         if (!_isActive) {
             machine.log("Parent $parent entering child $this")
             _isActive = true
+            @Suppress("UNCHECKED_CAST")
+            //FIXME this method is called not only for target state
+            _data = (transitionParams.event as DataEvent<D>).data
             stateNotify { onEntry(transitionParams) }
         }
     }
@@ -87,6 +93,7 @@ open class DefaultState(override val name: String? = null) : InternalState {
     override fun doExit(transitionParams: TransitionParams<*>) {
         if (_isActive) {
             machine.log("Exiting $this")
+            if (isActive) _data = null
             _isActive = false
             stateNotify { onExit(transitionParams) }
         }
@@ -210,9 +217,12 @@ open class DefaultState(override val name: String? = null) : InternalState {
     /**
      * Initial event which is processed on state machine start
      */
-    internal object StartEvent : Event
+    internal object StartEvent : UnitEvent()
 
-    internal fun makeStartTransitionParams(sourceState: State, targetState: State = sourceState): TransitionParams<*> {
+    internal fun makeStartTransitionParams(
+        sourceState: State,
+        targetState: State = sourceState
+    ): TransitionParams<*> {
         val transition = DefaultTransition(
             "Starting",
             EventMatcher.isInstanceOf(),
@@ -228,23 +238,11 @@ open class DefaultState(override val name: String? = null) : InternalState {
     }
 }
 
-open class DefaultArgState<A : Any>(override val name: String? = null) : DefaultState(name), ArgState<A> {
-    private var _arg: A? = null
-    override val arg: A get() = checkNotNull(_arg) { "Type safe argument is not set. Is the state active?" }
+typealias DefaultUnitState = DefaultState<Unit>
 
-    override fun doEnter(transitionParams: TransitionParams<*>) {
-        @Suppress("UNCHECKED_CAST")
-        if (!isActive) _arg = (transitionParams.event as ArgEvent<A>).arg
-        super.doEnter(transitionParams)
-    }
-
-    override fun doExit(transitionParams: TransitionParams<*>) {
-        super.doExit(transitionParams)
-        if (isActive) _arg = null
-    }
-}
-
-open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
+open class DefaultFinalState<out D>(name: String? = null) : DefaultState<D>(name), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")
 }
+
+typealias DefaultFinalUnitState = DefaultFinalState<Unit>
