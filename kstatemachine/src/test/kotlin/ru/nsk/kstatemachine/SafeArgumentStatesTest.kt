@@ -11,6 +11,7 @@ class SafeArgumentStatesTest {
     @Test
     fun safeArgumentState() {
         lateinit var state2: DataState<String>
+        lateinit var state4: UnitState
 
         val machine = createStateMachine {
             state2 = dataState("state2")
@@ -23,6 +24,9 @@ class SafeArgumentStatesTest {
 //                transition<SwitchEvent> {
 //                    targetState = state2
 //                }
+                transition<NameEvent> {
+                    targetState = state4
+                }
             }
         }
 

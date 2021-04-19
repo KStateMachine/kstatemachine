@@ -5,7 +5,7 @@ import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-private open class HierarchyEventL1 : UnitEvent()
+private open class HierarchyEventL1 : UnitEvent
 private open class HierarchyEventL2 : HierarchyEventL1()
 
 class EventMatcherTest {

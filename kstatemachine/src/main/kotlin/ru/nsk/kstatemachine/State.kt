@@ -51,14 +51,14 @@ interface DataState<out D> : State {
     val data: D
 }
 
-typealias UnitState = DataState<Unit>
+interface UnitState : State
 
 /**
  * When [StateMachine] enters this state it finishes and does not accept events any more.
  */
 interface FinalState : State
-interface FinalDataState<out D> : DataState<D>, FinalState
-typealias FinalUnitState = FinalDataState<Unit>
+interface FinalDataState<out D> : FinalState, DataState<D>
+interface FinalUnitState : FinalState, UnitState
 
 typealias StateBlock<S> = S.() -> Unit
 
@@ -89,7 +89,7 @@ fun <S : State> S.onFinished(block: StateBlock<S>) {
  * with [State.findState] and for debugging.
  */
 fun State.state(name: String? = null, init: StateBlock<UnitState>? = null) =
-    dataState(name, init)
+    addState(DefaultUnitState(name), init)
 
 fun <D> State.dataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
     addState(DefaultState(name), init)
@@ -98,7 +98,7 @@ fun <D> State.dataState(name: String? = null, init: StateBlock<DataState<D>>? = 
  * A shortcut for [state] and [State.setInitialState] calls
  */
 fun State.initialState(name: String? = null, init: StateBlock<UnitState>? = null) =
-    initialDataState(name, init)
+    addInitialState(DefaultUnitState(name), init)
 
 fun <D> State.initialDataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
     addInitialState(DefaultState(name), init)
@@ -120,7 +120,7 @@ fun <S : FinalState> State.addFinalState(state: S, init: StateBlock<S>? = null) 
     addState(state, init)
 
 fun State.finalState(name: String? = null, init: StateBlock<FinalUnitState>? = null) =
-    finalDataState(name, init)
+    addState(DefaultFinalUnitState(name), init)
 
 fun <D> State.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
     addState(DefaultFinalState(name), init)

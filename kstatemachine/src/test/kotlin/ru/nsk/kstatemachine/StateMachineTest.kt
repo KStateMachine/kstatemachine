@@ -13,8 +13,8 @@ import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.Testing.startFrom
 
-private object OnEvent : UnitEvent()
-private object OffEvent : UnitEvent()
+private object OnEvent : UnitEvent
+private object OffEvent : UnitEvent
 
 class StateMachineTest {
     @Test

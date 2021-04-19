@@ -3,10 +3,27 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
-open class DefaultState<out D>(override val name: String? = null) : InternalState, DataState<D> {
+open class DefaultUnitState(name: String? = null) : DefaultStateImpl(name), UnitState
+
+open class DefaultState<out D>(name: String? = null) : DefaultStateImpl(name), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
 
+    override fun onDoEnter(transitionParams: TransitionParams<*>) {
+        //FIXME this method is called not only for target state
+        // make unitstate separated class?
+        if (this == transitionParams.direction.targetState) {
+            @Suppress("UNCHECKED_CAST")
+            _data = (transitionParams.event as DataEvent<D>).data
+        }
+    }
+
+    override fun onDoExit(transitionParams: TransitionParams<*>) {
+        _data = null
+    }
+}
+
+open class DefaultStateImpl(override val name: String?) : InternalState {
     private val _listeners = CopyOnWriteArraySet<State.Listener>()
     override val listeners: Collection<State.Listener> get() = _listeners
 
@@ -79,13 +96,19 @@ open class DefaultState<out D>(override val name: String? = null) : InternalStat
 
     override fun asState() = this
 
+    open fun onDoEnter(transitionParams: TransitionParams<*>) {
+        /* empty */
+    }
+
+    open fun onDoExit(transitionParams: TransitionParams<*>) {
+        /* empty */
+    }
+
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!_isActive) {
             machine.log("Parent $parent entering child $this")
             _isActive = true
-            @Suppress("UNCHECKED_CAST")
-            //FIXME this method is called not only for target state
-            _data = (transitionParams.event as DataEvent<D>).data
+            onDoEnter(transitionParams)
             stateNotify { onEntry(transitionParams) }
         }
     }
@@ -93,7 +116,7 @@ open class DefaultState<out D>(override val name: String? = null) : InternalStat
     override fun doExit(transitionParams: TransitionParams<*>) {
         if (_isActive) {
             machine.log("Exiting $this")
-            if (isActive) _data = null
+            onDoExit(transitionParams)
             _isActive = false
             stateNotify { onExit(transitionParams) }
         }
@@ -217,7 +240,7 @@ open class DefaultState<out D>(override val name: String? = null) : InternalStat
     /**
      * Initial event which is processed on state machine start
      */
-    internal object StartEvent : UnitEvent()
+    internal object StartEvent : UnitEvent
 
     internal fun makeStartTransitionParams(
         sourceState: State,
@@ -238,11 +261,12 @@ open class DefaultState<out D>(override val name: String? = null) : InternalStat
     }
 }
 
-typealias DefaultUnitState = DefaultState<Unit>
-
 open class DefaultFinalState<out D>(name: String? = null) : DefaultState<D>(name), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")
 }
 
-typealias DefaultFinalUnitState = DefaultFinalState<Unit>
+open class DefaultFinalUnitState(name: String?) : DefaultUnitState(name), FinalUnitState {
+    override fun <E : Event> addTransition(transition: Transition<E>) =
+        throw UnsupportedOperationException("FinalState can not have transitions")
+}
