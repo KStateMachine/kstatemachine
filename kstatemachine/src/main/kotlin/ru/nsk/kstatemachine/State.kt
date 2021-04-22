@@ -51,6 +51,9 @@ interface DataState<out D> : State {
     val data: D
 }
 
+/**
+ * State without data field that is used by typesafe transitions
+ */
 interface UnitState : State
 
 /**
@@ -99,9 +102,6 @@ fun <D> State.dataState(name: String? = null, init: StateBlock<DataState<D>>? = 
  */
 fun State.initialState(name: String? = null, init: StateBlock<UnitState>? = null) =
     addInitialState(DefaultUnitState(name), init)
-
-fun <D> State.initialDataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
-    addInitialState(DefaultState(name), init)
 
 /**
  * A shortcut for [State.addState] and [State.setInitialState] calls

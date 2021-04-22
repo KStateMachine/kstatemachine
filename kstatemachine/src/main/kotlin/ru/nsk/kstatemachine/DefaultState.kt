@@ -96,12 +96,12 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
 
     override fun asState() = this
 
-    open fun onDoEnter(transitionParams: TransitionParams<*>) {
-        /* empty */
+    protected open fun onDoEnter(transitionParams: TransitionParams<*>) {
+        /* default empty */
     }
 
-    open fun onDoExit(transitionParams: TransitionParams<*>) {
-        /* empty */
+    protected open fun onDoExit(transitionParams: TransitionParams<*>) {
+        /* default empty */
     }
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
