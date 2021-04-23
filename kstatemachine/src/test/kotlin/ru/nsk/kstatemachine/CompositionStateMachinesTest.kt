@@ -21,9 +21,9 @@ class CompositionStateMachinesTest {
 private fun composition(startInnerMachineOnSetup: Boolean) {
     val callbacks = mock<Callbacks>()
 
-    val outerState1 = DefaultUnitState("Outer state1")
-    val innerState1 = DefaultUnitState("Inner state1")
-    val innerState2 = DefaultUnitState("Inner state2")
+    val outerState1 = DefaultState("Outer state1")
+    val innerState1 = DefaultState("Inner state1")
+    val innerState2 = DefaultState("Inner state2")
 
     val innerMachine = createStateMachine("Inner machine", startInnerMachineOnSetup) {
         callbacks.listen(this)

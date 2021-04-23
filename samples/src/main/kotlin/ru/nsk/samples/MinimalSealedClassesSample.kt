@@ -10,9 +10,9 @@ sealed class Events {
 
 // Define states
 sealed class States {
-    object GreenState : DefaultUnitState("Green")
-    object YellowState : DefaultUnitState("Yellow")
-    object RedState : DefaultFinalUnitState("Red") // State machine finishes when enters final state
+    object GreenState : DefaultState("Green")
+    object YellowState : DefaultState("Yellow")
+    object RedState : DefaultFinalState("Red") // State machine finishes when enters final state
 }
 
 fun main() {

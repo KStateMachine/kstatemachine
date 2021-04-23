@@ -25,7 +25,7 @@ class ExportPlantUmlVisitor : Visitor {
         line("@enduml")
     }
 
-    override fun visit(state: State) {
+    override fun visit(state: IState) {
         if (state.states.isEmpty()) {
             line("state ${state.graphName()}")
         } else {
@@ -56,7 +56,7 @@ class ExportPlantUmlVisitor : Visitor {
             crossLevelTransitions.add(transitionString)
     }
 
-    private fun processStateBody(state: State) {
+    private fun processStateBody(state: IState) {
         val states = state.states
         // visit states
         states.forEach { visit(it) }
@@ -71,7 +71,7 @@ class ExportPlantUmlVisitor : Visitor {
         states.flatMap { it.transitions }.forEach { visit(it) }
 
         // add finish transitions
-        states.filterIsInstance<FinalState>()
+        states.filterIsInstance<IFinalState>()
             .forEach { line("${it.graphName()} --> $STAR") }
     }
 
@@ -80,7 +80,7 @@ class ExportPlantUmlVisitor : Visitor {
     private companion object {
         const val STAR = "[*]"
         const val SINGLE_INDENT = "    "
-        fun State.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
+        fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
 }

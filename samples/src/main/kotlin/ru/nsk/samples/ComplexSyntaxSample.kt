@@ -8,8 +8,8 @@ object SwitchYellowEvent : Event
 // Events often hold some useful data
 class SwitchRedEvent(val info: String) : Event
 
-// Subclass DefaultUnitState if you need
-class YellowState(val info: Int) : DefaultUnitState("Yellow")
+// Subclass DefaultState if you need
+class YellowState(val info: Int) : DefaultState("Yellow")
 
 fun main() {
     val machine = createStateMachine(

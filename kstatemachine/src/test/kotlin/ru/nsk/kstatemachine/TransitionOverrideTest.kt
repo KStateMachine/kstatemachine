@@ -43,8 +43,8 @@ class TransitionOverrideTest {
     fun overrideAllEvents() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state1: UnitState
-        lateinit var state2: UnitState
+        lateinit var state1: State
+        lateinit var state2: State
 
         val machine = createStateMachine {
             transitionOn<SwitchEvent> {
@@ -70,8 +70,8 @@ class TransitionOverrideTest {
 private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     val callbacks = mock<Callbacks>()
 
-    lateinit var state2: UnitState
-    lateinit var state3: UnitState
+    lateinit var state2: State
+    lateinit var state3: State
 
     val machine = createStateMachine {
         transitionOn<SwitchEvent> {
@@ -98,7 +98,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
 }
 
 private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createStateMachine {
-    lateinit var state2: UnitState
+    lateinit var state2: State
     transitionOn<SwitchEvent> {
         targetState = { state2 }
         onTriggered { callbacks.onTriggeredTransition(it.event, 2) }

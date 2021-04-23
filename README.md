@@ -30,7 +30,7 @@ _The library is currently in a development phase. You are welcome to propose use
 Building blocks (main interfaces) of the library:
 
 * `StateMachine` - is a collection of states and transitions between them, processes events when started;
-* `State` - states where state machine can go to;
+* `IState` - states where state machine can go to;
 * `Event` - is a base class for events or other words actions which are processed by state machine and may trigger
   transitions;
 * `Transition` - is an operation of moving from one state to another.

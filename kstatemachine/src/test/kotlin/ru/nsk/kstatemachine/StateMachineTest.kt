@@ -29,8 +29,8 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var on: UnitState
-        lateinit var off: UnitState
+        lateinit var on: State
+        lateinit var off: State
 
         val machine = createStateMachine {
             on = initialState("on") {
@@ -90,7 +90,7 @@ class StateMachineTest {
     @Test
     fun currentStateNotification() {
         val callbacks = mock<Callbacks>()
-        lateinit var first: UnitState
+        lateinit var first: State
 
         val machine = createStateMachine {
             first = initialState("first")
@@ -105,7 +105,7 @@ class StateMachineTest {
         createStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
-                val listener = object : State.Listener {}
+                val listener = object : IState.Listener {}
                 addListener(listener)
                 shouldThrow<IllegalArgumentException> { addListener(listener) }
             }
@@ -147,7 +147,7 @@ class StateMachineTest {
 
     @Test
     fun setInitialStateAfterStart() {
-        lateinit var first: UnitState
+        lateinit var first: State
         val machine = createStateMachine {
             first = initialState("first")
         }
@@ -178,8 +178,8 @@ class StateMachineTest {
 
     @Test
     fun requireState() {
-        lateinit var first: UnitState
-        lateinit var second: UnitState
+        lateinit var first: State
+        lateinit var second: State
         val machine = createStateMachine {
             first = initialState("first")
             second = state("second")
@@ -203,7 +203,7 @@ class StateMachineTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var first: UnitState
+        lateinit var first: State
         val machine = createStateMachine {
             first = initialState {
                 onEntry { callbacks.onEntryState(this) }
@@ -218,7 +218,7 @@ class StateMachineTest {
     fun finishingStateMachine() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var final: UnitState
+        lateinit var final: State
         val machine = createStateMachine {
             final = finalState("final") { callbacks.listen(this) }
             setInitialState(final)
@@ -235,7 +235,7 @@ class StateMachineTest {
     fun finishedStateMachineIgnoresEvent() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var final: UnitState
+        lateinit var final: State
         val machine = createStateMachine {
             final = finalState("final") { callbacks.listen(this) }
             setInitialState(final)
@@ -260,7 +260,7 @@ class StateMachineTest {
     fun stateMachineEntryExit() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var initialState: UnitState
+        lateinit var initialState: State
 
         val machine = createStateMachine {
             callbacks.listen(this)
@@ -278,8 +278,8 @@ class StateMachineTest {
     fun startFrom() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state2: UnitState
-        lateinit var state22: UnitState
+        lateinit var state2: State
+        lateinit var state22: State
 
         val machine = createStateMachine(start = false) {
             callbacks.listen(this)
@@ -308,8 +308,8 @@ class StateMachineTest {
     fun restartMachine() {
         val callbacks = mock<Callbacks>()
 
-        lateinit var state1: UnitState
-        lateinit var state2: UnitState
+        lateinit var state1: State
+        lateinit var state2: State
 
         val machine = createStateMachine(start = false) {
             logger = StateMachine.Logger { println(it) }
@@ -342,10 +342,10 @@ class StateMachineTest {
 
     @Test
     fun activeStates() {
-        lateinit var state1: UnitState
-        lateinit var state2: UnitState
-        lateinit var state21: UnitState
-        lateinit var state211: UnitState
+        lateinit var state1: State
+        lateinit var state2: State
+        lateinit var state21: State
+        lateinit var state211: State
 
         val machine = createStateMachine {
             state1 = initialState("state1") {

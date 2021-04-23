@@ -21,7 +21,7 @@ interface DataEvent<out D> : Event {
 interface Transition<E : Event> : VisitorAcceptor {
     val name: String?
     val eventMatcher: EventMatcher<E>
-    val sourceState: State
+    val sourceState: IState
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.

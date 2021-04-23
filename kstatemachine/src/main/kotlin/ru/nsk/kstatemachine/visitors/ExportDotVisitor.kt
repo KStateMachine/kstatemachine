@@ -31,7 +31,7 @@ class ExportDotVisitor : Visitor {
         machine.states.flatMap { it.transitions }.forEach { visit(it) }
 
         // add finish transitions
-        val finalStates = machine.states.filterIsInstance<FinalState>()
+        val finalStates = machine.states.filterIsInstance<IFinalState>()
         finalStates.forEach { line("    ${it.graphName()} -> $FINISH;") }
 
         // add initial and finish nodes
@@ -42,7 +42,7 @@ class ExportDotVisitor : Visitor {
         line("}")
     }
 
-    override fun visit(state: State) {
+    override fun visit(state: IState) {
         line("    ${state.graphName()};")
     }
 
@@ -60,7 +60,7 @@ class ExportDotVisitor : Visitor {
     private companion object {
         const val INITIAL = "INITIAL"
         const val FINISH = "FINISH"
-        fun State.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
+        fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " [ label = \"$name\" ]" else ""
     }
 }

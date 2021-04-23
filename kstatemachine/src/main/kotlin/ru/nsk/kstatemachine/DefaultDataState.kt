@@ -3,15 +3,13 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
-open class DefaultUnitState(name: String? = null) : DefaultStateImpl(name), UnitState
+open class DefaultState(name: String? = null) : BaseStateImpl(name), State
 
-open class DefaultState<out D>(name: String? = null) : DefaultStateImpl(name), DataState<D> {
+open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
-        //FIXME this method is called not only for target state
-        // make unitstate separated class?
         if (this == transitionParams.direction.targetState) {
             @Suppress("UNCHECKED_CAST")
             _data = (transitionParams.event as DataEvent<D>).data
@@ -23,12 +21,12 @@ open class DefaultState<out D>(name: String? = null) : DefaultStateImpl(name), D
     }
 }
 
-open class DefaultStateImpl(override val name: String?) : InternalState {
-    private val _listeners = CopyOnWriteArraySet<State.Listener>()
-    override val listeners: Collection<State.Listener> get() = _listeners
+open class BaseStateImpl(override val name: String?) : InternalState {
+    private val _listeners = CopyOnWriteArraySet<IState.Listener>()
+    override val listeners: Collection<IState.Listener> get() = _listeners
 
     private val _states = mutableSetOf<InternalState>()
-    override val states: Set<State> get() = _states
+    override val states: Set<IState> get() = _states
 
     /**
      * Might be null only before [setInitialState] call.
@@ -50,16 +48,16 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
 
     private var isFinished = false
 
-    override fun <L : State.Listener> addListener(listener: L): L {
+    override fun <L : IState.Listener> addListener(listener: L): L {
         require(_listeners.add(listener)) { "$listener is already added" }
         return listener
     }
 
-    override fun removeListener(listener: State.Listener) {
+    override fun removeListener(listener: IState.Listener) {
         _listeners.remove(listener)
     }
 
-    override fun <S : State> addState(state: S, init: StateBlock<S>?): S {
+    override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
 
         state.name?.let {
@@ -75,7 +73,7 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
 
     override fun findState(name: String) = states.find { it.name == name }
 
-    override fun setInitialState(state: State) {
+    override fun setInitialState(state: IState) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         check(!machine.isRunning) { "Can not change initial state after state machine started" }
 
@@ -189,7 +187,7 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
         _states.forEach { it.recursiveStop() }
     }
 
-    override fun recursiveFillActiveStates(states: MutableSet<State>) {
+    override fun recursiveFillActiveStates(states: MutableSet<IState>) {
         if (isActive) {
             states.add(this)
 
@@ -214,7 +212,7 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
 
         currentState = state
 
-        val finish = state is FinalState
+        val finish = state is IFinalState
         if (finish) isFinished = true
 
         state.doEnter(transitionParams)
@@ -243,8 +241,8 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
     internal object StartEvent : Event
 
     internal fun makeStartTransitionParams(
-        sourceState: State,
-        targetState: State = sourceState
+        sourceState: IState,
+        targetState: IState = sourceState
     ): TransitionParams<*> {
         val transition = DefaultTransition(
             "Starting",
@@ -261,12 +259,12 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
     }
 }
 
-open class DefaultFinalState<out D>(name: String? = null) : DefaultState<D>(name), FinalDataState<D> {
+open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")
 }
 
-open class DefaultFinalUnitState(name: String?) : DefaultUnitState(name), FinalUnitState {
+open class DefaultFinalState(name: String?) : DefaultState(name), FinalState {
     override fun <E : Event> addTransition(transition: Transition<E>) =
         throw UnsupportedOperationException("FinalState can not have transitions")
 }

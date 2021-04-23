@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 /**
  * Defines state API for internal library usage. All states must implement this interface.
  */
-interface InternalState : State {
+interface InternalState : IState {
     override var parent: InternalState?
 
     fun doEnter(transitionParams: TransitionParams<*>)
@@ -19,14 +19,14 @@ interface InternalState : State {
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
     fun recursiveStop()
-    fun recursiveFillActiveStates(states: MutableSet<State>)
+    fun recursiveFillActiveStates(states: MutableSet<IState>)
 }
 
-internal fun InternalState.isNeighbor(state: State) = parent?.states?.contains(state) == true
+internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
 
 internal fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
 
-internal fun InternalState.stateNotify(block: State.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }

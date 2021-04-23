@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 
-class SubclassState : DefaultUnitState() {
+class SubclassState : DefaultState() {
     val dataField = 0
 }
 

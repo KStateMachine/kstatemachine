@@ -3,19 +3,19 @@ package ru.nsk.kstatemachine
 import kotlin.reflect.KClass
 
 @StateMachineDslMarker
-abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: State) {
+abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: IState) {
     var listener: Transition.Listener? = null
     lateinit var eventMatcher: EventMatcher<E>
 
     abstract fun build(): Transition<E>
 }
 
-abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
     var guard: () -> Boolean = { true }
 }
 
-abstract class GuardedTransitionBuilder<E : Event, S : State>(name: String?, sourceState: State) :
+abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
     var targetState: S? = null
 
@@ -35,7 +35,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : State>(name: String?, sou
     }
 }
 
-abstract class GuardedTransitionOnBuilder<E : Event, S : State>(name: String?, sourceState: State) :
+abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
     lateinit var targetState: () -> S
 
@@ -50,7 +50,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : State>(name: String?, s
     }
 }
 
-class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State) :
+class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
     lateinit var direction: () -> TransitionDirection
 
@@ -62,24 +62,24 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State)
 }
 
 /**
- * Any [Event] (with any data) can lead to [UnitState]
+ * Any [Event] (with any data) can lead to [State]
  */
-class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
-    GuardedTransitionBuilder<E, UnitState>(name, sourceState)
+class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
+    GuardedTransitionBuilder<E, State>(name, sourceState)
 
-class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: State) :
-    GuardedTransitionOnBuilder<E, UnitState>(name, sourceState)
+class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: IState) :
+    GuardedTransitionOnBuilder<E, State>(name, sourceState)
 
 /**
  * Type safe argument transition builder
  */
-class DataGuardedTransitionBuilder<E : DataEvent<D>, D>(name: String?, sourceState: State) :
+class DataGuardedTransitionBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
     GuardedTransitionBuilder<E, DataState<D>>(name, sourceState)
 
 /**
  * Type safe argument transitionOn builder
  */
-class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D>(name: String?, sourceState: State) :
+class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {

@@ -15,7 +15,7 @@ class DataStateTest {
     fun initialDataState_negative() {
         shouldThrow<Exception> {
             createStateMachine {
-                addInitialState(DefaultState<String>("state1"))
+                addInitialState(DefaultDataState<String>("state1"))
             }
         }
     }

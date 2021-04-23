@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultUnitState(name) {
+internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
@@ -43,7 +43,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultUn
         recursiveEnterInitialState()
     }
 
-    override fun startFrom(state: State) {
+    override fun startFrom(state: IState) {
         val transitionParams = makeStartTransitionParams(this, state)
         run(transitionParams)
         switchToTargetState(state as InternalState, this, transitionParams)
@@ -84,8 +84,8 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultUn
         }
     }
 
-    override fun activeStates(): Set<State> {
-        return mutableSetOf<State>().also { recursiveFillActiveStates(it) }
+    override fun activeStates(): Set<IState> {
+        return mutableSetOf<IState>().also { recursiveFillActiveStates(it) }
     }
 
     /**

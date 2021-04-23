@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 
 /**
- * Helper interface for [State] to keep transitions logic separately.
+ * Helper interface for [IState] to keep transitions logic separately.
  */
 interface StateTransitionsHelper {
     val transitions: Set<Transition<*>>
@@ -18,7 +18,7 @@ interface StateTransitionsHelper {
     /**
      * For internal use only
      */
-    fun asState(): State
+    fun asState(): IState
 }
 
 fun StateTransitionsHelper.requireTransition(name: String) =

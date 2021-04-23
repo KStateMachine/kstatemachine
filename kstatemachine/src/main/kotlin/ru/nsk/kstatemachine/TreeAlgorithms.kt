@@ -35,7 +35,7 @@ internal object TreeAlgorithms {
         return targetPath
     }
 
-    private fun State.findDepth(): Int {
+    private fun IState.findDepth(): Int {
         var depth = 0
         var parent = this.parent
         while (parent != null) {

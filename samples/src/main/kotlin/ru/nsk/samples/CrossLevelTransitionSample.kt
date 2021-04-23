@@ -9,7 +9,7 @@ fun main() {
     val machine = createStateMachine {
         logger = StateMachine.Logger { println(it) }
 
-        lateinit var nested22: UnitState
+        lateinit var nested22: State
 
         initialState("Top level 1") {
             initialState("Nested 11") {
