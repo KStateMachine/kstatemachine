@@ -12,8 +12,8 @@ class NestedStateTest {
         val callbacks = mock<Callbacks>()
         val inOrder = inOrder(callbacks)
 
-        lateinit var firstL1: UnitState
-        lateinit var firstL2: UnitState
+        lateinit var firstL1: State
+        lateinit var firstL2: State
         val firstL3 = object : DefaultUnitState("firstL3") {}
 
         createStateMachine {

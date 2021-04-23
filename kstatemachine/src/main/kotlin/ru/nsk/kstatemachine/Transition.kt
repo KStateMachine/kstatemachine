@@ -16,12 +16,6 @@ interface DataEvent<out D> : Event {
 }
 
 /**
- * Event without data
- * FIXME currently this interface is useless and can be safely removed
- */
-interface UnitEvent : Event
-
-/**
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
 interface Transition<E : Event> : VisitorAcceptor {

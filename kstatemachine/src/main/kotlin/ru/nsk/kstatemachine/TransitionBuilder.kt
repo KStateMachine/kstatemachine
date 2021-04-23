@@ -62,7 +62,7 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: State)
 }
 
 /**
- * Not only [UnitEvent] but [Event] with any data can lead to [UnitState]
+ * Any [Event] (with any data) can lead to [UnitState]
  */
 class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: State) :
     GuardedTransitionBuilder<E, UnitState>(name, sourceState)

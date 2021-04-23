@@ -9,7 +9,7 @@ class TransitionOverrideTest {
     fun overrideParentTransitionSameEventType() = overrideParentTransitionWithEventType<SwitchEvent>()
 
     @Test
-    fun overrideParentTransitionDifferentEventType() = overrideParentTransitionWithEventType<UnitEvent>()
+    fun overrideParentTransitionDifferentEventType() = overrideParentTransitionWithEventType<Event>()
 
     /**
      * It is not possible to override with [noTransition]. Currently I do not think it is necessary.

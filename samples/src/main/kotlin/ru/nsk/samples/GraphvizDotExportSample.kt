@@ -3,7 +3,7 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToDot
 
-object SwitchEvent : UnitEvent
+object SwitchEvent : Event
 
 fun main() {
     val machine = createStateMachine("Traffic lights") {

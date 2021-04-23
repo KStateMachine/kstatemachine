@@ -582,8 +582,6 @@ machine.
 
 ## Samples
 
-* [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
-  shows different syntax variants and library possibilities in one place, so it looks messy
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
@@ -591,6 +589,8 @@ machine.
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
+* [Complex syntax sample](./samples/src/main/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
+  shows many syntax variants and library possibilities, so it looks messy
 
 ## Install
 

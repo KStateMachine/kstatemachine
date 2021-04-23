@@ -4,8 +4,8 @@ import ru.nsk.kstatemachine.*
 
 // Define events
 sealed class Events {
-    object YellowEvent : UnitEvent
-    object RedEvent : UnitEvent
+    object YellowEvent : Event
+    object RedEvent : Event
 }
 
 // Define states

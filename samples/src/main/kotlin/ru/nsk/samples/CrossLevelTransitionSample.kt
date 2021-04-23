@@ -3,7 +3,7 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
-object SwitchEvent2 : UnitEvent
+object SwitchEvent2 : Event
 
 fun main() {
     val machine = createStateMachine {

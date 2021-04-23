@@ -29,7 +29,6 @@ class CrossLevelTransitionTest {
             }
         }
 
-
         then(callbacks).should(inOrder).onEntryState(state1)
 
         machine.processEvent(SwitchEvent)
@@ -72,7 +71,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -120,7 +118,6 @@ class CrossLevelTransitionTest {
             }
         }
 
-
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
 
@@ -158,7 +155,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
 
@@ -207,7 +203,6 @@ class CrossLevelTransitionTest {
             }
         }
 
-
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
 
@@ -248,7 +243,6 @@ class CrossLevelTransitionTest {
                 callbacks.listen(this)
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -295,7 +289,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)

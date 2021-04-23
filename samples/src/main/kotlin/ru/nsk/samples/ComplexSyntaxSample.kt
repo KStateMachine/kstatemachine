@@ -3,13 +3,12 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 
 // Define events
-object SwitchYellowEvent : UnitEvent
+object SwitchYellowEvent : Event
 
-//FIXME update sample
 // Events often hold some useful data
-class SwitchRedEvent(val info: String) : UnitEvent
+class SwitchRedEvent(val info: String) : Event
 
-// Subclass DefaultState if you need
+// Subclass DefaultUnitState if you need
 class YellowState(val info: Int) : DefaultUnitState("Yellow")
 
 fun main() {

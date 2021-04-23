@@ -63,7 +63,6 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         addState(innerMachine)
     }
 
-
     then(callbacks).should().onEntryState(outerState1)
 
     machine.processEvent(SwitchEvent)

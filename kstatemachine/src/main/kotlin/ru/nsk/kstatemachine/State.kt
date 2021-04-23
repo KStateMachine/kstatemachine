@@ -52,7 +52,7 @@ interface DataState<out D> : State {
 }
 
 /**
- * State without data field that is used by typesafe transitions
+ * Simple state without data field that is used by typesafe transitions
  */
 interface UnitState : State
 

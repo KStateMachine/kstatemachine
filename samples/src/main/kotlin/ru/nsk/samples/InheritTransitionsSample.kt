@@ -4,8 +4,8 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 import java.lang.System.lineSeparator
 
-object ExitEvent : UnitEvent
-object NextEvent : UnitEvent
+object ExitEvent : Event
+object NextEvent : Event
 
 /**
  * Nested states allow us to group states and inherit its parent transitions

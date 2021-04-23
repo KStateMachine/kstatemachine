@@ -240,7 +240,7 @@ open class DefaultStateImpl(override val name: String?) : InternalState {
     /**
      * Initial event which is processed on state machine start
      */
-    internal object StartEvent : UnitEvent
+    internal object StartEvent : Event
 
     internal fun makeStartTransitionParams(
         sourceState: State,
