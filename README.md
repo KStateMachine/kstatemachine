@@ -20,6 +20,7 @@ Main features are:
 * [Nested states](#nested-states) - hierarchical state machines (HSMs)
   with [cross level transitions](#cross-level-transitions) support;
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
+* [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;  
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
   and  [Graphviz](https://graphviz.org/);
@@ -415,6 +416,8 @@ calls.
 
 _Coming soon..._
 
+## Typesafe transitions
+
 ## Arguments
 
 _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
@@ -589,6 +592,7 @@ machine.
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
+* [Typesafe transition sample](./samples/src/main/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)
 * [Complex syntax sample](./samples/src/main/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
   shows many syntax variants and library possibilities, so it looks messy
 
