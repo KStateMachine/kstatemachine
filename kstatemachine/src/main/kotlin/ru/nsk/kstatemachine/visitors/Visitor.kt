@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine.visitors
 
+import ru.nsk.kstatemachine.Event
 import ru.nsk.kstatemachine.IState
 import ru.nsk.kstatemachine.StateMachine
 import ru.nsk.kstatemachine.Transition
@@ -10,7 +11,7 @@ import ru.nsk.kstatemachine.Transition
 interface Visitor {
     fun visit(machine: StateMachine)
     fun visit(state: IState)
-    fun visit(transition: Transition<*>)
+    fun <E : Event> visit(transition: Transition<E>)
 }
 
 interface VisitorAcceptor {

@@ -22,9 +22,7 @@ fun main() {
 
         initialState("loginForm") {
             dataTransition<LoginEvent, LoginData> {
-                guard = {
-                    checkUserPassword()//FIXME pass transition or event to guard?
-                }
+                guard = { checkUserPassword(it.data) }
                 targetState = accountFormState
             }
         }

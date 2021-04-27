@@ -246,15 +246,15 @@ open class BaseStateImpl(override val name: String?) : InternalState {
     ): TransitionParams<*> {
         val transition = DefaultTransition(
             "Starting",
-            EventMatcher.isInstanceOf(),
+            EventMatcher.isInstanceOf<StartEvent>(),
             sourceState,
             targetState,
         )
 
         return TransitionParams(
             transition,
-            transition.produceTargetStateDirection(),
-            StartEvent
+            transition.produceTargetStateDirection(StartEvent),
+            StartEvent,
         )
     }
 }

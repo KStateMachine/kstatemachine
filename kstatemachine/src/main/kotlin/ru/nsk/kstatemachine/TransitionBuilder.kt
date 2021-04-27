@@ -12,7 +12,7 @@ abstract class TransitionBuilder<E : Event>(protected val name: String?, protect
 
 abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    var guard: () -> Boolean = { true }
+    var guard: (E) -> Boolean = { true }
 }
 
 abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
@@ -20,8 +20,8 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
     var targetState: S? = null
 
     override fun build(): Transition<E> {
-        val direction = {
-            if (guard()) {
+        val direction: TransitionDirectionProducer<E> = {
+            if (guard(it)) {
                 val target = targetState
                 if (target == null) stay() else targetState(target)
             } else {
@@ -37,11 +37,11 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
 
 abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
-    lateinit var targetState: () -> S
+    lateinit var targetState: (E) -> S
 
     override fun build(): Transition<E> {
-        val direction = {
-            if (guard()) targetState(targetState()) else noTransition()
+        val direction: TransitionDirectionProducer<E> = {
+            if (guard(it)) targetState(targetState(it)) else noTransition()
         }
 
         val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
@@ -52,7 +52,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
 
 class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    lateinit var direction: () -> TransitionDirection
+    lateinit var direction: TransitionDirectionProducer<E>
 
     override fun build(): Transition<E> {
         val transition = DefaultTransition(name, eventMatcher, sourceState, direction)

@@ -2,6 +2,8 @@ package ru.nsk.kstatemachine
 
 import java.util.concurrent.CopyOnWriteArraySet
 
+typealias TransitionDirectionProducer<E> = (E) -> TransitionDirection
+
 open class DefaultTransition<E : Event>(
     override val name: String?,
     override val eventMatcher: EventMatcher<E>,
@@ -18,7 +20,7 @@ open class DefaultTransition<E : Event>(
      * when such [Transition] is triggered.
      * This function should not have side effects.
      */
-    private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
+    private var targetStateDirectionProducer: TransitionDirectionProducer<E> = { stay() }
 
     override var argument: Any? = null
 
@@ -39,7 +41,7 @@ open class DefaultTransition<E : Event>(
         name: String?,
         eventMatcher: EventMatcher<E>,
         sourceState: IState,
-        targetStateDirectionProducer: () -> TransitionDirection
+        targetStateDirectionProducer: TransitionDirectionProducer<E>
     ) : this(name, eventMatcher, sourceState) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
@@ -55,7 +57,7 @@ open class DefaultTransition<E : Event>(
 
     override fun isMatchingEvent(event: Event) = eventMatcher.match(event)
 
-    override fun produceTargetStateDirection() = targetStateDirectionProducer()
+    override fun produceTargetStateDirection(event: E) = targetStateDirectionProducer(event)
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }

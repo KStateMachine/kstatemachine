@@ -9,7 +9,7 @@ import org.hamcrest.Matchers.sameInstance
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
-const val ARG = 1
+private const val ARGUMENT = 1
 
 class TransitionTest {
     @Test
@@ -22,14 +22,14 @@ class TransitionTest {
             addState(second) {
                 onEntry {
                     callbacks.onEntryState(this)
-                    assertThat(it.transition.argument, equalTo(ARG))
+                    assertThat(it.transition.argument, equalTo(ARGUMENT))
                 }
             }
             initialState("first") {
                 transition<SwitchEvent> {
                     targetState = second
                     onTriggered {
-                        it.transition.argument = ARG
+                        it.transition.argument = ARGUMENT
                     }
                 }
             }

@@ -37,7 +37,7 @@ internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<In
 internal fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
         : Pair<InternalTransition<E>, TransitionDirection>? {
     val transitions = findTransitionsByEvent(event)
-        .map { it to it.produceTargetStateDirection() }
+        .map { it to it.produceTargetStateDirection(event) }
         .filter { it.second !is NoTransition }
     check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
     return transitions.firstOrNull()

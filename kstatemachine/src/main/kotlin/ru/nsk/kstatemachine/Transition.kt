@@ -71,7 +71,7 @@ data class TransitionParams<E : Event>(
  */
 interface InternalTransition<E : Event> : Transition<E> {
     override val sourceState: InternalState
-    fun produceTargetStateDirection(): TransitionDirection
+    fun produceTargetStateDirection(event: E): TransitionDirection
 }
 
 internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =

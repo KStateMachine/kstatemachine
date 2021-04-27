@@ -46,11 +46,11 @@ class ExportDotVisitor : Visitor {
         line("    ${state.graphName()};")
     }
 
-    override fun visit(transition: Transition<*>) {
-        transition as InternalTransition<*>
+    override fun <E : Event> visit(transition: Transition<E>) {
+        transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection().targetState ?: return
+        val targetState = transition.produceTargetStateDirection(VisitorEvent).targetState ?: return
 
         line("    $sourceState -> $targetState${label(transition.name)};")
     }
@@ -63,6 +63,8 @@ class ExportDotVisitor : Visitor {
         fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " [ label = \"$name\" ]" else ""
     }
+
+    private object VisitorEvent : Event
 }
 
 fun StateMachine.exportToDot() = with(ExportDotVisitor()) {

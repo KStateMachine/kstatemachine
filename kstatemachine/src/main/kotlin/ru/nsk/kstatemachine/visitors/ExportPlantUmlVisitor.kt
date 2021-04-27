@@ -42,11 +42,11 @@ class ExportPlantUmlVisitor : Visitor {
      * It requires to see all states declarations first to provide correct rendering,
      * so we have to store them to print after state declaration.
      */
-    override fun visit(transition: Transition<*>) {
-        transition as InternalTransition<*>
+    override fun <E : Event> visit(transition: Transition<E>) {
+        transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection().targetState ?: return
+        val targetState = transition.produceTargetStateDirection(VisitorEvent).targetState ?: return
 
         val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
 
@@ -83,6 +83,8 @@ class ExportPlantUmlVisitor : Visitor {
         fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
+
+    private object VisitorEvent : Event
 }
 
 fun StateMachine.exportToPlantUml() = with(ExportPlantUmlVisitor()) {
