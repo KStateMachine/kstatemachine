@@ -71,8 +71,20 @@ data class TransitionParams<E : Event>(
  */
 interface InternalTransition<E : Event> : Transition<E> {
     override val sourceState: InternalState
-    fun produceTargetStateDirection(event: E): TransitionDirection
+    fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
+
 }
 
 internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =
     listeners.forEach { it.apply(block) }
+
+internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
+
+sealed class TransitionDirectionProducerPolicy<E : Event> {
+    class DefaultPolicy<E : Event>(val event: E) : TransitionDirectionProducerPolicy<E>()
+
+    /**
+     * TODO find the way to collect target states of conditional transitions
+     */
+    class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>()
+}

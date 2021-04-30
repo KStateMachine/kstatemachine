@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -253,7 +254,7 @@ open class BaseStateImpl(override val name: String?) : InternalState {
 
         return TransitionParams(
             transition,
-            transition.produceTargetStateDirection(StartEvent),
+            transition.produceTargetStateDirection(DefaultPolicy(StartEvent)),
             StartEvent,
         )
     }

@@ -1,13 +1,14 @@
 package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 /**
  * Export state machine to Graphviz DOT language format.
  * @see <a href="https://graphviz.org/doc/info/lang.html">Graphviz DOT language</a>
  *
  * Exporting nested states is not currently supported use [exportToPlantUml].
- * Conditional transitions depending on external data not currently supported.
+ * Conditional transitions are not supported.
  */
 class ExportDotVisitor : Visitor {
     private val builder = StringBuilder()
@@ -50,7 +51,7 @@ class ExportDotVisitor : Visitor {
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection(VisitorEvent).targetState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState ?: return
 
         line("    $sourceState -> $targetState${label(transition.name)};")
     }
@@ -63,8 +64,6 @@ class ExportDotVisitor : Visitor {
         fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " [ label = \"$name\" ]" else ""
     }
-
-    private object VisitorEvent : Event
 }
 
 fun StateMachine.exportToDot() = with(ExportDotVisitor()) {

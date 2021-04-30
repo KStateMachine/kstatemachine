@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 import kotlin.reflect.KClass
 
 @StateMachineDslMarker
@@ -21,11 +22,18 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
-            if (guard(it)) {
-                val target = targetState
-                if (target == null) stay() else targetState(target)
-            } else {
-                noTransition()
+            when (it) {
+                is DefaultPolicy<E> ->
+                    if (guard(it.event)) {
+                        val target = targetState
+                        if (target == null) stay() else targetState(target)
+                    } else {
+                        noTransition()
+                    }
+                is CollectTargetStatesPolicy<E> -> {
+                    val target = targetState
+                    if (target == null) stay() else targetState(target)
+                }
             }
         }
 
@@ -41,7 +49,10 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
-            if (guard(it)) targetState(targetState(it)) else noTransition()
+            when (it) {
+                is DefaultPolicy<E> -> if (guard(it.event)) targetState(targetState(it.event)) else noTransition()
+                is CollectTargetStatesPolicy<E> -> noTransition()
+            }
         }
 
         val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
@@ -52,9 +63,16 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
 
 class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    lateinit var direction: TransitionDirectionProducer<E>
+    lateinit var direction: (E) -> TransitionDirection
 
     override fun build(): Transition<E> {
+        val direction: TransitionDirectionProducer<E> = {
+            when (it) {
+                is DefaultPolicy<E> -> direction(it.event)
+                is CollectTargetStatesPolicy<E> -> noTransition()
+            }
+        }
+
         val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
         listener?.let { transition.addListener(it) }
         return transition

@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+
 /**
  * Defines state API for internal library usage. All states must implement this interface.
  */
@@ -36,9 +38,10 @@ internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<In
 
 internal fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
         : Pair<InternalTransition<E>, TransitionDirection>? {
+    val policy = DefaultPolicy(event)
     val transitions = findTransitionsByEvent(event)
-        .map { it to it.produceTargetStateDirection(event) }
+        .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
-    check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
+    check(transitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
     return transitions.firstOrNull()
 }

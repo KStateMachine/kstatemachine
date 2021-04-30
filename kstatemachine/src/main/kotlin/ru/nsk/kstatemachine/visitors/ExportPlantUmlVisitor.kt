@@ -1,12 +1,13 @@
 package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 /**
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
- * Conditional transitions depending on external data not currently supported.
+ * Conditional transitions are not supported.
  */
 class ExportPlantUmlVisitor : Visitor {
     private val builder = StringBuilder()
@@ -46,7 +47,7 @@ class ExportPlantUmlVisitor : Visitor {
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection(VisitorEvent).targetState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState ?: return
 
         val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
 
@@ -83,8 +84,6 @@ class ExportPlantUmlVisitor : Visitor {
         fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
-
-    private object VisitorEvent : Event
 }
 
 fun StateMachine.exportToPlantUml() = with(ExportPlantUmlVisitor()) {

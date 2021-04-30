@@ -497,9 +497,8 @@ call `processEvent()` function.
 
 ## Export
 
-_Note: conditional or guarded transitions might be exported not completely. Lambdas that are passed to calculate next
-state (`guard` or `direction`) would be called during export process. The export result depends on what they will
-return._
+_Note: Currently transitions defined by `transitionConditionally()` and `transitionOn()` functions are not exported.
+User defined lambdas that are passed to calculate next state could not be correctly called during export process._
 
 ### PlantUML
 
