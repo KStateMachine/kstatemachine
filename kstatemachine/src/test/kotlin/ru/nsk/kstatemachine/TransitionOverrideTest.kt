@@ -47,7 +47,7 @@ class TransitionOverrideTest {
         lateinit var state2: State
 
         val machine = createStateMachine {
-            transitionTo<SwitchEvent> {
+            transitionOn<SwitchEvent> {
                 targetState = { state2 }
                 onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
             }
@@ -74,14 +74,14 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     lateinit var state3: State
 
     val machine = createStateMachine {
-        transitionTo<SwitchEvent> {
+        transitionOn<SwitchEvent> {
             targetState = { state3 }
             onTriggered { callbacks.onTriggeredTransition(it.event, 3) }
         }
 
         initialState("state1") {
             // overrides parent transition
-            transitionTo<E> {
+            transitionOn<E> {
                 targetState = { state2 }
                 onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
             }
@@ -99,7 +99,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
 
 private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createStateMachine {
     lateinit var state2: State
-    transitionTo<SwitchEvent> {
+    transitionOn<SwitchEvent> {
         targetState = { state2 }
         onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
     }

@@ -34,7 +34,7 @@ interface StateMachine : State {
      * Set of states that the state machine is currently in.
      * Internal states of nested machines are not included.
      */
-    fun activeStates() : Set<State>
+    fun activeStates(): Set<IState>
 
     fun log(message: String) = logger.log(message)
 
@@ -52,13 +52,13 @@ interface StateMachine : State {
          * this method might be used to listen to all transitions in one place
          * instead of listening for each transition separately.
          */
-        fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) = Unit
+        fun onTransition(sourceState: IState, targetState: IState?, event: Event, argument: Any?) = Unit
 
         /**
          * Notifies about state changes.
          * This method will also be triggered on adding listener with a current state of a state machine.
          */
-        fun onStateChanged(newState: State) = Unit
+        fun onStateChanged(newState: IState) = Unit
 
         /**
          * Notifies that state machine has stopped.
@@ -98,21 +98,21 @@ fun StateMachine.onStopped(block: StateMachine.() -> Unit) {
 
 fun StateMachine.onTransition(
     block: StateMachine.(
-        sourceState: State,
-        targetState: State?,
+        sourceState: IState,
+        targetState: IState?,
         event: Event,
         argument: Any?
     ) -> Unit
 ) {
     addListener(object : StateMachine.Listener {
-        override fun onTransition(sourceState: State, targetState: State?, event: Event, argument: Any?) =
+        override fun onTransition(sourceState: IState, targetState: IState?, event: Event, argument: Any?) =
             block(sourceState, targetState, event, argument)
     })
 }
 
-fun StateMachine.onStateChanged(block: StateMachine.(newState: State) -> Unit) {
+fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) {
     addListener(object : StateMachine.Listener {
-        override fun onStateChanged(newState: State) = block(newState)
+        override fun onStateChanged(newState: IState) = block(newState)
     })
 }
 
@@ -132,7 +132,7 @@ fun createStateMachine(
  * Defines state machine API for internal library usage.
  */
 interface InternalStateMachine : StateMachine, InternalState {
-    fun startFrom(state: State)
+    fun startFrom(state: IState)
 }
 
 fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
@@ -142,5 +142,5 @@ object Testing {
     /**
      * Method for testing purpose. It allows to start machine from particular [state]
      */
-    fun StateMachine.startFrom(state: State) = (this as InternalStateMachine).startFrom(state)
+    fun StateMachine.startFrom(state: IState) = (this as InternalStateMachine).startFrom(state)
 }

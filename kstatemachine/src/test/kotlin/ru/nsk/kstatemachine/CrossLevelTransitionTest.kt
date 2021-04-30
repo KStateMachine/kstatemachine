@@ -22,13 +22,12 @@ class CrossLevelTransitionTest {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state1 }
                     callbacks.listen(this)
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
 
@@ -53,7 +52,7 @@ class CrossLevelTransitionTest {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
-                transitionTo<SwitchEventL1> {
+                transitionOn<SwitchEventL1> {
                     targetState = { state1 }
                     callbacks.listen(this)
                 }
@@ -61,7 +60,7 @@ class CrossLevelTransitionTest {
                 state11 = initialState("11") {
                     callbacks.listen(this)
 
-                    transitionTo<SwitchEventL2> {
+                    transitionOn<SwitchEventL2> {
                         targetState = { state12 }
                         callbacks.listen(this)
                     }
@@ -72,7 +71,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -106,7 +104,7 @@ class CrossLevelTransitionTest {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state12 }
                     callbacks.listen(this)
                 }
@@ -119,7 +117,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -145,7 +142,7 @@ class CrossLevelTransitionTest {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state21 }
                     callbacks.listen(this)
                 }
@@ -158,7 +155,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
 
@@ -188,7 +184,7 @@ class CrossLevelTransitionTest {
                 state11 = initialState("11") {
                     callbacks.listen(this)
 
-                    transitionTo<SwitchEvent> {
+                    transitionOn<SwitchEvent> {
                         targetState = { state22 }
                         callbacks.listen(this)
                     }
@@ -206,7 +202,6 @@ class CrossLevelTransitionTest {
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -237,7 +232,7 @@ class CrossLevelTransitionTest {
                 state11 = initialState("11") {
                     callbacks.listen(this)
 
-                    transitionTo<SwitchEvent> {
+                    transitionOn<SwitchEvent> {
                         targetState = { state2 }
                         callbacks.listen(this)
                     }
@@ -248,7 +243,6 @@ class CrossLevelTransitionTest {
                 callbacks.listen(this)
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)
@@ -280,7 +274,7 @@ class CrossLevelTransitionTest {
                 state11 = initialState("11") {
                     callbacks.listen(this)
 
-                    transitionTo<SwitchEvent> {
+                    transitionOn<SwitchEvent> {
                         targetState = { state12 }
                         callbacks.listen(this)
                     }
@@ -288,14 +282,13 @@ class CrossLevelTransitionTest {
                 state12 = state("12") {
                     callbacks.listen(this)
 
-                    transitionTo<SwitchEvent> {
+                    transitionOn<SwitchEvent> {
                         targetState = { state1 }
                         callbacks.listen(this)
                     }
                 }
             }
         }
-
 
         then(callbacks).should(inOrder).onEntryState(state1)
         then(callbacks).should(inOrder).onEntryState(state11)

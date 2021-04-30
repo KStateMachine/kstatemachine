@@ -5,7 +5,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 open class DefaultTransition<E : Event>(
     override val name: String?,
     override val eventMatcher: EventMatcher<E>,
-    sourceState: State
+    sourceState: IState
 ) : InternalTransition<E> {
     private val _listeners = CopyOnWriteArraySet<Transition.Listener>()
     override val listeners: Collection<Transition.Listener> get() = _listeners
@@ -16,16 +16,17 @@ open class DefaultTransition<E : Event>(
      * not during state machine configuration. So it is possible to check some outer (business logic) values in it.
      * If [Transition] does not have target state then [StateMachine] keeps current state
      * when such [Transition] is triggered.
+     * This function should not have side effects.
      */
-    private var targetStateDirectionProducer: () -> TransitionDirection = { stay() }
+    private var targetStateDirectionProducer: TransitionDirectionProducer<E> = { stay() }
 
     override var argument: Any? = null
 
     constructor(
         name: String?,
         eventMatcher: EventMatcher<E>,
-        sourceState: State,
-        targetState: State?
+        sourceState: IState,
+        targetState: IState?
     ) : this(name, eventMatcher, sourceState) {
         targetStateDirectionProducer = if (targetState == null) {
             { stay() }
@@ -37,8 +38,8 @@ open class DefaultTransition<E : Event>(
     constructor(
         name: String?,
         eventMatcher: EventMatcher<E>,
-        sourceState: State,
-        targetStateDirectionProducer: () -> TransitionDirection
+        sourceState: IState,
+        targetStateDirectionProducer: TransitionDirectionProducer<E>
     ) : this(name, eventMatcher, sourceState) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
@@ -54,7 +55,8 @@ open class DefaultTransition<E : Event>(
 
     override fun isMatchingEvent(event: Event) = eventMatcher.match(event)
 
-    override fun produceTargetStateDirection() = targetStateDirectionProducer()
+    override fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>) =
+        targetStateDirectionProducer(policy)
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 }

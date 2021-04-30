@@ -1,13 +1,14 @@
 package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 /**
  * Export state machine to Graphviz DOT language format.
  * @see <a href="https://graphviz.org/doc/info/lang.html">Graphviz DOT language</a>
  *
  * Exporting nested states is not currently supported use [exportToPlantUml].
- * Conditional transitions depending on external data not currently supported.
+ * Conditional transitions are not supported.
  */
 class ExportDotVisitor : Visitor {
     private val builder = StringBuilder()
@@ -31,7 +32,7 @@ class ExportDotVisitor : Visitor {
         machine.states.flatMap { it.transitions }.forEach { visit(it) }
 
         // add finish transitions
-        val finalStates = machine.states.filterIsInstance<FinalState>()
+        val finalStates = machine.states.filterIsInstance<IFinalState>()
         finalStates.forEach { line("    ${it.graphName()} -> $FINISH;") }
 
         // add initial and finish nodes
@@ -42,15 +43,15 @@ class ExportDotVisitor : Visitor {
         line("}")
     }
 
-    override fun visit(state: State) {
+    override fun visit(state: IState) {
         line("    ${state.graphName()};")
     }
 
-    override fun visit(transition: Transition<*>) {
-        transition as InternalTransition<*>
+    override fun <E : Event> visit(transition: Transition<E>) {
+        transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection().targetState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState ?: return
 
         line("    $sourceState -> $targetState${label(transition.name)};")
     }
@@ -60,7 +61,7 @@ class ExportDotVisitor : Visitor {
     private companion object {
         const val INITIAL = "INITIAL"
         const val FINISH = "FINISH"
-        fun State.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
+        fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " [ label = \"$name\" ]" else ""
     }
 }

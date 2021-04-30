@@ -11,16 +11,16 @@ object SecondEvent : Event
 interface Callbacks {
     fun onStarted(machine: StateMachine)
     fun onStopped(machine: StateMachine)
-    fun onStateChanged(state: State)
-    fun onFinished(state: State)
+    fun onStateChanged(state: IState)
+    fun onFinished(state: IState)
     fun onIgnoredEvent(event: Event)
     fun onTriggeredTransition(event: Event)
     fun onTriggeredTransition(event: Event, index: Int)
-    fun onEntryState(state: State)
-    fun onExitState(state: State)
+    fun onEntryState(state: IState)
+    fun onExitState(state: IState)
 }
 
-fun Callbacks.listen(state: State) {
+fun Callbacks.listen(state: IState) {
     state.onEntry { onEntryState(this) }
     state.onExit { onExitState(this) }
     state.onFinished { onFinished(this) }

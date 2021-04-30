@@ -43,7 +43,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         recursiveEnterInitialState()
     }
 
-    override fun startFrom(state: State) {
+    override fun startFrom(state: IState) {
         val transitionParams = makeStartTransitionParams(this, state)
         run(transitionParams)
         switchToTargetState(state as InternalState, this, transitionParams)
@@ -84,8 +84,8 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
         }
     }
 
-    override fun activeStates(): Set<State> {
-        return mutableSetOf<State>().also { recursiveFillActiveStates(it) }
+    override fun activeStates(): Set<IState> {
+        return mutableSetOf<IState>().also { recursiveFillActiveStates(it) }
     }
 
     /**

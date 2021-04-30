@@ -1,9 +1,11 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+
 /**
  * Defines state API for internal library usage. All states must implement this interface.
  */
-interface InternalState : State {
+interface InternalState : IState {
     override var parent: InternalState?
 
     fun doEnter(transitionParams: TransitionParams<*>)
@@ -19,14 +21,14 @@ interface InternalState : State {
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
     fun recursiveStop()
-    fun recursiveFillActiveStates(states: MutableSet<State>)
+    fun recursiveFillActiveStates(states: MutableSet<IState>)
 }
 
-internal fun InternalState.isNeighbor(state: State) = parent?.states?.contains(state) == true
+internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
 
 internal fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
 
-internal fun InternalState.stateNotify(block: State.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }
@@ -36,10 +38,10 @@ internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<In
 
 internal fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
         : Pair<InternalTransition<E>, TransitionDirection>? {
+    val policy = DefaultPolicy(event)
     val transitions = findTransitionsByEvent(event)
-        .map { it to it.produceTargetStateDirection() }
+        .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
-    check(transitions.size <= 1) { "Multiple transitions match $event $transitions in $this" }
+    check(transitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
     return transitions.firstOrNull()
 }
-

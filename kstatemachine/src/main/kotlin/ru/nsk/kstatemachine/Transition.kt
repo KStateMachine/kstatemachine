@@ -9,16 +9,24 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 interface Event
 
 /**
+ * Event holding some data
+ */
+interface DataEvent<out D> : Event {
+    val data: D
+}
+
+/**
  * Represent a transition between states, which gets triggered when specified [Event] is posted to [StateMachine]
  */
 interface Transition<E : Event> : VisitorAcceptor {
     val name: String?
     val eventMatcher: EventMatcher<E>
-    val sourceState: State
+    val sourceState: IState
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
-     * This argument must be set from transition listener. Such transition must have only one listener setting argument.
+     * This argument must be set from transition listener. Such transition must have only one listener
+     * that sets the argument.
      */
     var argument: Any?
     val listeners: Collection<Listener>
@@ -63,8 +71,20 @@ data class TransitionParams<E : Event>(
  */
 interface InternalTransition<E : Event> : Transition<E> {
     override val sourceState: InternalState
-    fun produceTargetStateDirection(): TransitionDirection
+    fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
+
 }
 
 internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =
     listeners.forEach { it.apply(block) }
+
+internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
+
+sealed class TransitionDirectionProducerPolicy<E : Event> {
+    class DefaultPolicy<E : Event>(val event: E) : TransitionDirectionProducerPolicy<E>()
+
+    /**
+     * TODO find the way to collect target states of conditional transitions
+     */
+    class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>()
+}

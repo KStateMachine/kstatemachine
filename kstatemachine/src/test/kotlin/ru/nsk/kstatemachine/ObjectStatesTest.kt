@@ -9,7 +9,7 @@ private object State2 : DefaultState("state2")
 /**
  * States are mutable and currently it is not possible to use object states in multiple [StateMachine] instances.
  * May be it might be partly fixed with moving mutated state part into [StateMachine] (some graph object),
- * but it will not completely protect from wrong usage (for example [State] subclasses may hold some mutable data).
+ * but it will not completely protect from wrong usage (for example [IState] subclasses may hold some mutable data).
  */
 class ObjectStatesTest {
     @Test

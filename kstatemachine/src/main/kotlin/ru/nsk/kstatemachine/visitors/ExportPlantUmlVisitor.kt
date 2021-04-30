@@ -1,12 +1,13 @@
 package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 /**
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
- * Conditional transitions depending on external data not currently supported.
+ * Conditional transitions are not supported.
  */
 class ExportPlantUmlVisitor : Visitor {
     private val builder = StringBuilder()
@@ -25,7 +26,7 @@ class ExportPlantUmlVisitor : Visitor {
         line("@enduml")
     }
 
-    override fun visit(state: State) {
+    override fun visit(state: IState) {
         if (state.states.isEmpty()) {
             line("state ${state.graphName()}")
         } else {
@@ -42,11 +43,11 @@ class ExportPlantUmlVisitor : Visitor {
      * It requires to see all states declarations first to provide correct rendering,
      * so we have to store them to print after state declaration.
      */
-    override fun visit(transition: Transition<*>) {
-        transition as InternalTransition<*>
+    override fun <E : Event> visit(transition: Transition<E>) {
+        transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection().targetState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState ?: return
 
         val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
 
@@ -56,7 +57,7 @@ class ExportPlantUmlVisitor : Visitor {
             crossLevelTransitions.add(transitionString)
     }
 
-    private fun processStateBody(state: State) {
+    private fun processStateBody(state: IState) {
         val states = state.states
         // visit states
         states.forEach { visit(it) }
@@ -71,7 +72,7 @@ class ExportPlantUmlVisitor : Visitor {
         states.flatMap { it.transitions }.forEach { visit(it) }
 
         // add finish transitions
-        states.filterIsInstance<FinalState>()
+        states.filterIsInstance<IFinalState>()
             .forEach { line("${it.graphName()} --> $STAR") }
     }
 
@@ -80,7 +81,7 @@ class ExportPlantUmlVisitor : Visitor {
     private companion object {
         const val STAR = "[*]"
         const val SINGLE_INDENT = "    "
-        fun State.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
+        fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
 }

@@ -6,10 +6,10 @@ import ru.nsk.kstatemachine.*
 object SwitchYellowEvent : Event
 
 // Events often hold some useful data
-class SwitchRedEvent(val data: String) : Event
+class SwitchRedEvent(val info: String) : Event
 
 // Subclass DefaultState if you need
-class YellowState(val data: Int) : DefaultState("Yellow")
+class YellowState(val info: Int) : DefaultState("Yellow")
 
 fun main() {
     val machine = createStateMachine(
@@ -41,7 +41,7 @@ fun main() {
             }
 
             // Setup guarded transition with a lambda calculating targetState
-            transitionTo<SwitchRedEvent> {
+            transitionOn<SwitchRedEvent> {
                 guard = { false } // Never trigger this transition
                 targetState = { redState }
             }
@@ -63,8 +63,8 @@ fun main() {
                         else -> noTransition()
                     }
                 }
-                // Access data from a State subclass
-                onTriggered { println("Switching state with data: ${this@yellowState.data}") }
+                // Access info from a State subclass
+                onTriggered { println("Switching state with info: ${this@yellowState.info}") }
             }
         }
 

@@ -105,7 +105,7 @@ class StateMachineTest {
         createStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
-                val listener = object : State.Listener {}
+                val listener = object : IState.Listener {}
                 addListener(listener)
                 shouldThrow<IllegalArgumentException> { addListener(listener) }
             }
@@ -349,7 +349,7 @@ class StateMachineTest {
 
         val machine = createStateMachine {
             state1 = initialState("state1") {
-                transitionTo<SwitchEvent> {
+                transitionOn<SwitchEvent> {
                     targetState = { state2 }
                 }
             }

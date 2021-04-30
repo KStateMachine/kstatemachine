@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 
 /**
- * Helper interface for [State] to keep transitions logic separately.
+ * Helper interface for [IState] to keep transitions logic separately.
  */
 interface StateTransitionsHelper {
     val transitions: Set<Transition<*>>
@@ -18,7 +18,7 @@ interface StateTransitionsHelper {
     /**
      * For internal use only
      */
-    fun asState(): State
+    fun asState(): IState
 }
 
 fun StateTransitionsHelper.requireTransition(name: String) =
@@ -51,25 +51,13 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  */
 inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
-    block: GuardedTransitionBuilder<E>.() -> Unit,
+    block: UnitGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = GuardedTransitionBuilder<E>().apply {
+    val builder = UnitGuardedTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val direction = {
-        if (builder.guard()) {
-            val target = builder.targetState
-            if (target == null) stay() else targetState(target)
-        } else {
-            noTransition()
-        }
-    }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
 /**
@@ -80,22 +68,15 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> StateTransitionsHelper.transitionTo(
+inline fun <reified E : Event> StateTransitionsHelper.transitionOn(
     name: String? = null,
-    block: GuardedTransitionToBuilder<E>.() -> Unit,
+    block: UnitGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = GuardedTransitionToBuilder<E>().apply {
+    val builder = UnitGuardedTransitionOnBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
-
-    val direction = {
-        if (builder.guard()) targetState(builder.targetState()) else noTransition()
-    }
-
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
 /**
@@ -106,12 +87,34 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
     name: String? = null,
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = ConditionalTransitionBuilder<E>().apply {
+    val builder = ConditionalTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = isInstanceOf()
         block()
     }
+    return addTransition(builder.build())
+}
 
-    val transition = DefaultTransition(name, builder.eventMatcher, asState(), builder.direction)
-    builder.listener?.let { transition.addListener(it) }
-    return addTransition(transition)
+/**
+ * Creates type safe argument transition.
+ */
+inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
+    name: String? = null,
+    block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
+): Transition<E> {
+    val builder = DataGuardedTransitionBuilder<E, D>(name, asState()).apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+    return addTransition(builder.build())
+}
+
+inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransitionOn(
+    name: String? = null,
+    block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
+): Transition<E> {
+    val builder = DataGuardedTransitionOnBuilder<E, D>(name, asState()).apply {
+        eventMatcher = isInstanceOf()
+        block()
+    }
+    return addTransition(builder.build())
 }

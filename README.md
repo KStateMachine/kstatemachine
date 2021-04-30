@@ -5,29 +5,33 @@
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 
 KStateMachine is a Kotlin DSL library for creating finite state
-machines [FSM](https://en.wikipedia.org/wiki/Finite-state_machine) and hierarchical state machines
-(HSM) and listen to its states and transitions changes to perform side effects.
+machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarchical state machines
+(HSM).
 
 ## Overview
 
 Main features are:
 
 * Kotlin DSL syntax for defining state machine structure;
+* Event based - transitions are performed by processing incoming events;
+* Listeners for states and transitions;
 * [Guarded](#guarded-transitions) and [Conditional transitions](#conditional-transitions) with dynamic target state
   which is calculated in a moment of event processing depending on application business logic;
 * [Nested states](#nested-states) - hierarchical state machines (HSMs)
   with [cross level transitions](#cross-level-transitions) support;
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
+* [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;  
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
-  and  [Graphviz](https://graphviz.org/).
+  and  [Graphviz](https://graphviz.org/);
+* Built-in [logging](#logging) support.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
-Building blocks (main classes) of this library:
+Building blocks (main interfaces) of the library:
 
 * `StateMachine` - is a collection of states and transitions between them, processes events when started;
-* `State` - states where state machine can go to;
+* `IState` - states where state machine can go to;
 * `Event` - is a base class for events or other words actions which are processed by state machine and may trigger
   transitions;
 * `Transition` - is an operation of moving from one state to another.
@@ -42,9 +46,9 @@ val machine = createStateMachine {
     // Setup is made in this block ...
 }
 // After setup it is ready to process events
-machine.processEvent(SwitchGreenEvent)
+machine.processEvent(GreenEvent)
 // ...
-machine.processEvent(SwitchYellowEvent)
+machine.processEvent(YellowEvent)
 ```
 
 ## Quick start sample (finishing traffic light)
@@ -184,7 +188,7 @@ transition<YellowEvent> {
 }
 ```
 
-There is an extended version of `transition()` function, it is called `transitionTo()`. It works the same way but takes
+There is an extended version of `transition()` function, it is called `transitionOn()`. It works the same way but takes
 a lambda to calculate target state. This allows to use `lateinit` state variables and to choose target state depending
 on an application business logic like with [conditional transitions](#conditional-transitions) but with shorter syntax
 and less flexibility:
@@ -194,7 +198,7 @@ createStateMachine {
     lateinit var yellowState: State
 
     greenState {
-        transitionTo<YellowEvent> {
+        transitionOn<YellowEvent> {
             targetState = { yellowState }
         }
     }
@@ -233,7 +237,7 @@ createStateMachine {
 ### Guarded transitions
 
 Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is a special kind
-of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionTo()`
+of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionOn()`
 functions to create guarded transition:
 
 ```kotlin
@@ -269,7 +273,7 @@ decision:
 redState {
     // A conditional transition helps to control when it 
     // should be triggered and determine its target state
-    transitionConditionally<SwitchGreenEvent> {
+    transitionConditionally<GreenEvent> {
         direction = {
             // Suppose you have a function returning some 
             // business logic value which may differ
@@ -306,7 +310,7 @@ There are two predefined event matchers:
 * `isInstanceOf()` matches specified class and its subclasses (default);
 * `isEqual()` matches only specified class.
 
-You can define your own matcher by subclassing `EventMatcher` class.
+You can define your own matchers by subclassing `EventMatcher` class.
 
 ## Logging
 
@@ -412,6 +416,8 @@ calls.
 
 _Coming soon..._
 
+## Typesafe transitions
+
 ## Arguments
 
 _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
@@ -491,9 +497,8 @@ call `processEvent()` function.
 
 ## Export
 
-_Note: conditional or guarded transitions might be exported not completely. Lambdas that are passed to calculate next
-state (`guard` or `direction`) would be called during export process. The export result depends on what they will
-return._
+_Note: Currently transitions defined by `transitionConditionally()` and `transitionOn()` functions are not exported.
+User defined lambdas that are passed to calculate next state could not be correctly called during export process._
 
 ### PlantUML
 
@@ -579,8 +584,6 @@ machine.
 
 ## Samples
 
-* [Full syntax sample](./samples/src/main/kotlin/ru/nsk/samples/FullSyntaxSample.kt)
-  shows different syntax variants and library possibilities in one place, so it looks messy
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
@@ -588,6 +591,9 @@ machine.
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
+* [Typesafe transition sample](./samples/src/main/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)
+* [Complex syntax sample](./samples/src/main/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
+  shows many syntax variants and library possibilities, so it looks messy
 
 ## Install
 
