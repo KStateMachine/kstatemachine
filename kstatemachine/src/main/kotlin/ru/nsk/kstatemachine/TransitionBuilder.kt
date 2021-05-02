@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import kotlin.reflect.KClass
 
 @StateMachineDslMarker

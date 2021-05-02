@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
 
 /**
  * Export state machine to Graphviz DOT language format.

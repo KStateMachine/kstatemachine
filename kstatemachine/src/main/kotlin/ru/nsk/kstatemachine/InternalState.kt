@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 
 /**
  * Defines state API for internal library usage. All states must implement this interface.

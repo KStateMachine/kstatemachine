@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 

@@ -20,7 +20,7 @@ Main features are:
 * [Nested states](#nested-states) - hierarchical state machines (HSMs)
   with [cross level transitions](#cross-level-transitions) support;
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
-* [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;  
+* [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
   and  [Graphviz](https://graphviz.org/);
@@ -417,6 +417,24 @@ calls.
 _Coming soon..._
 
 ## Typesafe transitions
+
+It is a common case when a state expects to receive some data from event. Library provides typesafe API for such case.
+It is implemented with `DataEvent` and `DataState`. Both interfaces are parameterized with data type. To create typesafe
+transition use `dataTransition()` and `dataTransitionOn()` functions. This API helps to ensure that event data parameter
+type matches data parameter type that is expected by a target state of a transition. Compiler will protect you from
+defining a transition with incompatible data type parameters of event and target state.
+
+```kotlin
+class StringEvent(override val data: String) : DataEvent<String>
+
+createStateMachine {
+    val state2 = dataState<String>()
+
+    initialState {
+        dataTransition<StringEvent, String> { targetState = state2 }
+    }
+}
+```
 
 ## Arguments
 
