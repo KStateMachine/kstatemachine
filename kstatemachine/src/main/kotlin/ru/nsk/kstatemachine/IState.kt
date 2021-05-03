@@ -19,11 +19,6 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
     fun <S : IState> addState(state: S, init: StateBlock<S>? = null): S
 
     /**
-     * Get state by name. This might be used to start listening to state after state machine setup.
-     */
-    fun findState(name: String): IState?
-
-    /**
      * Currently initial state is mandatory, but if we add parallel states it might change.
      */
     fun setInitialState(state: IState)
@@ -64,6 +59,11 @@ interface FinalState : IFinalState, State
 interface FinalDataState<out D> : IFinalState, DataState<D>
 
 typealias StateBlock<S> = S.() -> Unit
+
+/**
+ * Get state by name. This might be used to start listening to state after state machine setup.
+ */
+fun IState.findState(name: String): IState? = states.find { it.name == name }
 
 fun IState.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
 

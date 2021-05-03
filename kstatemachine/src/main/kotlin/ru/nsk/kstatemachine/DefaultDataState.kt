@@ -72,8 +72,6 @@ open class BaseStateImpl(override val name: String?) : InternalState {
         return state
     }
 
-    override fun findState(name: String) = states.find { it.name == name }
-
     override fun setInitialState(state: IState) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         check(!machine.isRunning) { "Can not change initial state after state machine started" }
@@ -85,11 +83,6 @@ open class BaseStateImpl(override val name: String?) : InternalState {
         _transitions += transition
         return transition
     }
-
-    /**
-     * Get transition by name. This might be used to start listening to transition after state machine setup.
-     */
-    override fun findTransition(name: String) = transitions.find { it.name == name }
 
     override fun toString() = "${this::class.simpleName}(name=$name)"
 
