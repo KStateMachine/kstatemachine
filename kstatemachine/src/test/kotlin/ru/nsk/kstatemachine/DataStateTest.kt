@@ -112,4 +112,22 @@ class DataStateTest {
         assertThat(state2.data, equalTo(name))
         assertThat(state22.data, equalTo(id))
     }
+
+    @Test
+    fun implicitDataStateActivationByCrossLevelTransition_negative() {
+        val machine = createStateMachine {
+            lateinit var state21: State
+
+            initialState {
+                transitionOn<SwitchEvent> { targetState = { state21 } }
+            }
+            dataState<Int> {
+                onEntry { println(data) }
+
+                state21 = initialState()
+            }
+        }
+
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
 }

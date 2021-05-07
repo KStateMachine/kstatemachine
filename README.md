@@ -428,13 +428,20 @@ defining a transition with incompatible data type parameters of event and target
 class StringEvent(override val data: String) : DataEvent<String>
 
 createStateMachine {
-    val state2 = dataState<String>()
+    val state2 = dataState<String> {
+        onEntry { println(data) }
+    }
 
     initialState {
         dataTransition<StringEvent, String> { targetState = state2 }
     }
 }
 ```
+
+State `data` field value is set and might be accessed only while the state is active. When `DataState` is activated it
+requires data value from a `DataEvent`. This should be taken into account when mixing typesafe transitions with
+cross-level transitions. Cross-level transition may trigger `DataState` activation implicitly, and exception will be
+thrown in such case.
 
 ## Arguments
 
@@ -444,7 +451,7 @@ _Note: Type of arguments is `Any?`, so it is not type safe ot use them._
 
 Usually if event may hold some data we define Event subclass, it is type safe. Sometimes if data is optional it may be
 simpler to use event argument. You can specify arbitrary argument with an event in `processEvent()` function. Then you
-can get this argument in state and transition listeners.
+can get this argument in a state and transition listeners.
 
 ```kotlin
 val machine = createStateMachine {

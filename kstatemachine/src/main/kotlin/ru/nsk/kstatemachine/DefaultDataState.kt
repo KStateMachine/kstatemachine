@@ -13,7 +13,14 @@ open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
         if (this == transitionParams.direction.targetState) {
             @Suppress("UNCHECKED_CAST")
-            _data = (transitionParams.event as DataEvent<D>).data
+            val event = transitionParams.event as? DataEvent<D>
+            checkNotNull(event) { "${transitionParams.event} does not contain data required by $this" }
+            _data = event.data
+        } else {
+            error(
+                "$this is implicitly activated, this might be a result of a cross-level transition. " +
+                        "Currently there is no way to get data for this state."
+            )
         }
     }
 
