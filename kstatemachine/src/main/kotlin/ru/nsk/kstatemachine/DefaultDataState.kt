@@ -4,9 +4,11 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
-open class DefaultState(name: String? = null) : BaseStateImpl(name), State
+open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+    BaseStateImpl(name, childMode), State
 
-open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), DataState<D> {
+open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+    BaseStateImpl(name, childMode), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
 
@@ -29,7 +31,7 @@ open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), 
     }
 }
 
-open class BaseStateImpl(override val name: String?) : InternalState {
+open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState {
     private val _listeners = CopyOnWriteArraySet<IState.Listener>()
     override val listeners: Collection<IState.Listener> get() = _listeners
 
