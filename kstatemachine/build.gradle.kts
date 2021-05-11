@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.5.0"
     `java-library`
 }
 group = "ru.nsk"
-version = "0.5.4"
+version = "0.5.5"
 
 repositories {
     mavenCentral()
