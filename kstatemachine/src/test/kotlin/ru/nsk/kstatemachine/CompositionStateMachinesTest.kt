@@ -25,7 +25,7 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
     val innerState1 = DefaultState("Inner state1")
     val innerState2 = DefaultState("Inner state2")
 
-    val innerMachine = createStateMachine("Inner machine", startInnerMachineOnSetup) {
+    val innerMachine = createStateMachine("Inner machine", start = startInnerMachineOnSetup) {
         callbacks.listen(this)
 
         onStarted {

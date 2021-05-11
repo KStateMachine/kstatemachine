@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
-internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultState(name) {
+internal class StateMachineImpl(name: String?, childMode: ChildMode) :
+    InternalStateMachine, DefaultState(name, childMode) {
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
@@ -40,7 +41,7 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
 
     override fun start() {
         run(makeStartTransitionParams(this))
-        recursiveEnterInitialState()
+        recursiveEnterInitialStates()
     }
 
     override fun startFrom(state: IState) {
@@ -51,7 +52,8 @@ internal class StateMachineImpl(name: String?) : InternalStateMachine, DefaultSt
 
     private fun run(transitionParams: TransitionParams<*>) {
         check(!isRunning) { "$this is already started" }
-        checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+        if (childMode == ChildMode.EXCLUSIVE)
+            checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         _isRunning = true
         log("$this started")

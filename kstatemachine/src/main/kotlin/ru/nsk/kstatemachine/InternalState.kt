@@ -17,7 +17,7 @@ interface InternalState : IState {
     fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
             Pair<InternalTransition<E>, TransitionDirection>?
 
-    fun recursiveEnterInitialState()
+    fun recursiveEnterInitialStates()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
     fun recursiveStop()
