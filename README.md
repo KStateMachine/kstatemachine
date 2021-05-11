@@ -429,7 +429,7 @@ class StringEvent(override val data: String) : DataEvent<String>
 
 createStateMachine {
     val state2 = dataState<String> {
-        onEntry { println(data) }
+        onEntry { println("State data: $data") }
     }
 
     initialState {

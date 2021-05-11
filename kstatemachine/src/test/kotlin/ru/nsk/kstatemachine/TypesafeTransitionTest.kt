@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 private class NameEvent(override val data: String) : DataEvent<String>
 private class IdEvent(override val data: Int) : DataEvent<Int>
 
-class DataStateTest {
+class TypesafeTransitionTest {
     @Test
     fun initialDataState_negative() {
         shouldThrow<Exception> {
@@ -129,5 +129,23 @@ class DataStateTest {
         }
 
         shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
+
+    @Test
+    fun transitionWithEventSuperType() {
+        lateinit var state2: DataState<Number>
+
+        val machine = createStateMachine {
+            state2 = dataState("state2")
+
+            initialState("state1") {
+                dataTransition<IdEvent, Number> { targetState = state2 }
+            }
+        }
+
+        val id = 42
+        machine.processEvent(IdEvent(id))
+
+        assertThat(state2.data, equalTo(id))
     }
 }
