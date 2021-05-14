@@ -14,8 +14,10 @@ interface InternalState : IState {
     /** @return true if event was processed */
     fun doProcessEvent(event: Event, argument: Any?): Boolean
 
-    fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
-            Pair<InternalTransition<E>, TransitionDirection>?
+    /**
+     * If state is in [ChildMode.PARALLEL] there might be more than one [ResolvedTransition]
+     */
+    fun <E : Event> recursiveFindUniqueResolvedTransitions(event: E): List<ResolvedTransition<E>>
 
     fun recursiveEnterInitialStates()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
@@ -36,12 +38,11 @@ internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<In
     return triggeringTransitions as List<InternalTransition<E>>
 }
 
-internal fun <E : Event> InternalState.findUniqueTransitionWithDirection(event: E)
-        : Pair<InternalTransition<E>, TransitionDirection>? {
+internal fun <E : Event> InternalState.findUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
     val policy = DefaultPolicy(event)
     val transitions = findTransitionsByEvent(event)
         .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
     check(transitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
-    return transitions.firstOrNull()
+    return transitions.singleOrNull()
 }

@@ -75,6 +75,11 @@ interface InternalTransition<E : Event> : Transition<E> {
 
 }
 
+/**
+ * Transition that matches event and has a meaningful direction (except [NoTransition])
+ */
+typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirection>
+
 internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =
     listeners.forEach { it.apply(block) }
 

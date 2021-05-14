@@ -132,27 +132,33 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             return false
         }
 
-        val (transition, direction) = recursiveFindUniqueTransitionWithDirection(event) ?: return false
+        val resolvedTransitions = recursiveFindUniqueResolvedTransitions(event)
+        if (resolvedTransitions.isEmpty()) return false
 
-        val transitionParams = TransitionParams(transition, direction, event, argument)
+        for ((transition, direction) in resolvedTransitions) {
+            val transitionParams = TransitionParams(transition, direction, event, argument)
 
-        val targetState = direction.targetState as? InternalState
+            val targetState = direction.targetState as? InternalState
 
-        if (direction !is NoTransition) {
-            machine.log("$this triggering $transition from ${transition.sourceState}")
-            transition.transitionNotify { onTriggered(transitionParams) }
+            if (direction !is NoTransition) {
+                machine.log("$this triggering $transition from ${transition.sourceState}")
+                transition.transitionNotify { onTriggered(transitionParams) }
 
-            machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+                machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+            }
+
+            targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
         }
-
-        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
         return true
     }
 
-    override fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
-            Pair<InternalTransition<E>, TransitionDirection>? {
-        return currentState?.recursiveFindUniqueTransitionWithDirection(event)
-            ?: findUniqueTransitionWithDirection(event)
+    /**
+     * @return list of resolved transitions, only state with [ChildMode.PARALLEL] may return more than one element.
+     */
+    override fun <E : Event> recursiveFindUniqueResolvedTransitions(event: E): List<ResolvedTransition<E>> {
+        return getCurrentStates()
+            .flatMap { it.recursiveFindUniqueResolvedTransitions(event) }
+            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(event)) }
     }
 
     override fun recursiveEnterInitialStates() {
