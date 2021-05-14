@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class TransitionOverrideTest {
@@ -17,31 +16,29 @@ class TransitionOverrideTest {
      */
     @Test
     fun overrideWithNoTransitionNegative() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = overrideWithDirection(callbacks, noTransition())
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent, 2)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent, 2) }
     }
 
     @Test
     fun overrideWithStay() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = overrideWithDirection(callbacks, stay())
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun overrideAllEvents() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -60,15 +57,15 @@ class TransitionOverrideTest {
             state2 = state("state2") { callbacks.listen(this) }
         }
 
-        then(callbacks).should().onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 }
 
 private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
-    val callbacks = mock<Callbacks>()
+    val callbacks = mockkCallbacks()
 
     lateinit var state2: State
     lateinit var state3: State
@@ -92,9 +89,10 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
 
     machine.processEvent(SwitchEvent)
 
-    then(callbacks).should().onTriggeredTransition(SwitchEvent, 2)
-    then(callbacks).should().onEntryState(state2)
-    then(callbacks).shouldHaveNoMoreInteractions()
+    verifySequence {
+        callbacks.onTriggeredTransition(SwitchEvent, 2)
+        callbacks.onEntryState(state2)
+    }
 }
 
 private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createStateMachine {

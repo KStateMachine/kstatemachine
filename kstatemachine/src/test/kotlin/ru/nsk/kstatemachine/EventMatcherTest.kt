@@ -1,8 +1,9 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.Called
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 private open class HierarchyEventL1 : Event
@@ -11,7 +12,7 @@ private open class HierarchyEventL2 : HierarchyEventL1()
 class EventMatcherTest {
     @Test
     fun eventMatcherIsEqual() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("state1") {
@@ -30,13 +31,12 @@ class EventMatcherTest {
 
         machine.processEvent(event)
 
-        then(callbacks).should().onTriggeredTransition(event)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
     @Test
     fun eventMatcherIsEqualNegative() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("state1") {
@@ -51,12 +51,12 @@ class EventMatcherTest {
 
         machine.processEvent(event)
 
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verify { callbacks wasNot Called }
     }
 
     @Test
     fun eventMatcherInstanceOf() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("state1") {
@@ -71,13 +71,12 @@ class EventMatcherTest {
 
         machine.processEvent(event)
 
-        then(callbacks).should().onTriggeredTransition(event)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
     @Test
     fun eventMatcherInstanceOfNegative() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("state1") {

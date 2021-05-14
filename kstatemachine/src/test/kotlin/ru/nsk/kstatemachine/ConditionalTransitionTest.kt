@@ -1,7 +1,8 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.Called
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 private class ConditionEvent(val data: Boolean) : Event
@@ -9,7 +10,7 @@ private class ConditionEvent(val data: Boolean) : Event
 class ConditionalTransitionTest {
     @Test
     fun conditionalTransitionStay() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
 
@@ -24,16 +25,16 @@ class ConditionalTransitionTest {
             }
         }
 
-        then(callbacks).should().onEntryState(first)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun conditionalTransitionNoTransition() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
 
@@ -51,15 +52,15 @@ class ConditionalTransitionTest {
             }
         }
 
-        then(callbacks).should().onEntryState(first)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verify { callbacks wasNot Called }
     }
 
     @Test
     fun conditionalTransitionTargetState() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
@@ -76,18 +77,19 @@ class ConditionalTransitionTest {
             addState(second) { callbacks.listen(this) }
         }
 
-        then(callbacks).should().onEntryState(first)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onExitState(first)
-        then(callbacks).should().onEntryState(second)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(first)
+            callbacks.onEntryState(second)
+        }
     }
 
     @Test
     fun conditionalTransition() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
@@ -104,18 +106,19 @@ class ConditionalTransitionTest {
             addState(second) { callbacks.listen(this) }
         }
 
-        then(callbacks).should().onEntryState(first)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onExitState(first)
-        then(callbacks).should().onEntryState(second)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(first)
+            callbacks.onEntryState(second)
+        }
     }
 
     @Test
     fun conditionalTransitionByEventData() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
@@ -135,12 +138,13 @@ class ConditionalTransitionTest {
         }
 
         val event = ConditionEvent(false)
-        then(callbacks).should().onEntryState(first)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
         machine.processEvent(event)
-        then(callbacks).should().onTriggeredTransition(event)
-        then(callbacks).should().onExitState(first)
-        then(callbacks).should().onEntryState(third)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(event)
+            callbacks.onExitState(first)
+            callbacks.onEntryState(third)
+        }
     }
 }

@@ -1,11 +1,10 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.inOrder
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
 import io.kotest.matchers.should
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class ParallelStatesTest {
@@ -20,8 +19,7 @@ class ParallelStatesTest {
 
     @Test
     fun parallelStateMachine() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -32,22 +30,22 @@ class ParallelStatesTest {
             state2 = state { callbacks.listen(this) }
         }
 
-        then(callbacks).should(inOrder).onEntryState(machine)
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state2)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state2)
+        }
 
         machine.activeStates() should containExactlyInAnyOrder(machine, state1, state2)
 
-        assert(machine.isActive)
-        assert(state1.isActive)
-        assert(state2.isActive)
+        machine.isActive.shouldBeTrue()
+        state1.isActive.shouldBeTrue()
+        state2.isActive.shouldBeTrue()
     }
 
     @Test
     fun enterParallelStates() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -66,19 +64,19 @@ class ParallelStatesTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
-        then(callbacks).should(inOrder).onEntryState(state111)
-        then(callbacks).should(inOrder).onEntryState(state12)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+            callbacks.onEntryState(state111)
+            callbacks.onEntryState(state12)
+        }
 
         machine.activeStates() should containExactlyInAnyOrder(machine, state1, state11, state12, state111)
     }
 
     @Test
     fun exitParallelStates() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -97,38 +95,46 @@ class ParallelStatesTest {
             state2 = state("state2") { callbacks.listen(this) }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
-        then(callbacks).should(inOrder).onEntryState(state12)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+            callbacks.onEntryState(state12)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onExitState(state12)
-        then(callbacks).should(inOrder).onExitState(state1)
-        then(callbacks).should(inOrder).onEntryState(state2)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onExitState(state11)
+            callbacks.onExitState(state12)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+        }
     }
 
     @Test
     fun processEventByParallelStates() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 state {
-                    transition<SwitchEvent> { callbacks.listen(this) }
+                    transition<SwitchEvent> {
+                        onTriggered { callbacks.onTriggeredTransition(it.event, 1) }
+                    }
                 }
                 state {
-                    transition<SwitchEvent> { callbacks.listen(this) }
+                    transition<SwitchEvent> {
+                        onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+                    }
                 }
             }
         }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent, 1)
+            callbacks.onTriggeredTransition(SwitchEvent, 2)
+        }
     }
 }

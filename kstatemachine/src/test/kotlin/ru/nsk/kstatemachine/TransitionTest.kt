@@ -1,11 +1,9 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.sameInstance
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
@@ -14,7 +12,7 @@ private const val ARGUMENT = 1
 class TransitionTest {
     @Test
     fun transitionArgument() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val second = object : DefaultState("second") {}
 
@@ -22,7 +20,7 @@ class TransitionTest {
             addState(second) {
                 onEntry {
                     callbacks.onEntryState(this)
-                    assertThat(it.transition.argument, equalTo(ARGUMENT))
+                    it.transition.argument shouldBe ARGUMENT
                 }
             }
             initialState("first") {
@@ -36,7 +34,7 @@ class TransitionTest {
         }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onEntryState(second)
+        verifySequence { callbacks.onEntryState(second) }
     }
 
     @Test
@@ -53,15 +51,15 @@ class TransitionTest {
             }
         }
 
-        assertThat(state.requireTransition("firstTransition"), sameInstance(firstTransition))
-        assertThat(state.requireTransition<SecondEvent>(), sameInstance(secondTransition))
+        state.requireTransition("firstTransition") shouldBeSameInstanceAs firstTransition
+        state.requireTransition<SecondEvent>() shouldBeSameInstanceAs secondTransition
         shouldThrow<IllegalArgumentException> { state.requireTransition("thirdTransition") }
         shouldThrow<IllegalArgumentException> { state.requireTransition<SwitchEvent>() }
     }
 
     @Test
     fun transitionDirection() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -70,7 +68,7 @@ class TransitionTest {
             state1 = initialState("1") {
                 onEntry {
                     callbacks.onEntryState(this)
-                    assertThat(it.direction.targetState, sameInstance(this))
+                    it.direction.targetState shouldBeSameInstanceAs this
                 }
 
                 onExit {
@@ -86,22 +84,23 @@ class TransitionTest {
                 }
             }
 
-            state2 = state("2")
+            state2 = state("2") { callbacks.listen(this) }
         }
 
-        then(callbacks).should().onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onExitState(state1)
-        then(callbacks).should().onEntryState(state1)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+        }
     }
 
     @Test
     fun topLevelTransition() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state2: State
 
@@ -117,7 +116,9 @@ class TransitionTest {
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onEntryState(state2)
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onEntryState(state2)
+        }
     }
 }

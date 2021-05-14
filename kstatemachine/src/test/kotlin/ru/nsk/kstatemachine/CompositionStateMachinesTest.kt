@@ -1,9 +1,9 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.verify
+import io.mockk.verifyOrder
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
-
 
 /**
  * In a parent state machine it is not possible to use as transitions targets states from inner machine and vise versa.
@@ -19,7 +19,7 @@ class CompositionStateMachinesTest {
 }
 
 private fun composition(startInnerMachineOnSetup: Boolean) {
-    val callbacks = mock<Callbacks>()
+    val callbacks = mockkCallbacks()
 
     val outerState1 = DefaultState("Outer state1")
     val innerState1 = DefaultState("Inner state1")
@@ -63,16 +63,26 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         addState(innerMachine)
     }
 
-    then(callbacks).should().onEntryState(outerState1)
+    verifyOrder {
+        callbacks.onEntryState(machine)
+        callbacks.onEntryState(outerState1)
+    }
 
     machine.processEvent(SwitchEvent)
 
-    then(callbacks).should().onStarted(innerMachine)
-    then(callbacks).should().onEntryState(innerMachine)
-    then(callbacks).should().onEntryState(innerState1)
+    verify {
+        callbacks.onTriggeredTransition(SwitchEvent)
+        callbacks.onExitState(outerState1)
+        callbacks.onStarted(innerMachine)
+        callbacks.onEntryState(innerMachine)
+        callbacks.onEntryState(innerState1)
+    }
 
     innerMachine.processEvent(SwitchEvent)
 
-    then(callbacks).should().onExitState(innerState1)
-    then(callbacks).should().onEntryState(innerState2)
+    verifyOrder {
+        callbacks.onTriggeredTransition(SwitchEvent)
+        callbacks.onExitState(innerState1)
+        callbacks.onEntryState(innerState2)
+    }
 }

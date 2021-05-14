@@ -1,8 +1,6 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.inOrder
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class CrossLevelTransitionTest {
@@ -11,8 +9,7 @@ class CrossLevelTransitionTest {
      */
     @Test
     fun selfToSelf() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
 
@@ -29,18 +26,16 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun selfToSelfWithChildren() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -72,27 +67,31 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
 
         machine.processEvent(SwitchEventL2)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL2)
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onEntryState(state12)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(SwitchEventL2)
+            callbacks.onExitState(state11)
+            callbacks.onEntryState(state12)
+        }
 
         machine.processEvent(SwitchEventL1)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
-        then(callbacks).should(inOrder).onExitState(state12)
-        then(callbacks).should(inOrder).onEntryState(state11)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEventL1)
+            callbacks.onExitState(state12)
+            callbacks.onEntryState(state11)
+        }
     }
 
     @Test
     fun parentToChild() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -118,21 +117,23 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onEntryState(state12)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state11)
+            callbacks.onEntryState(state12)
+        }
     }
 
     @Test
     fun toNeighborsChild() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state21: State
@@ -156,21 +157,21 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state1)
-        then(callbacks).should(inOrder).onEntryState(state2)
-        then(callbacks).should(inOrder).onEntryState(state21)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+            callbacks.onEntryState(state21)
+        }
     }
 
     @Test
     fun childToNeighborsChild() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -203,23 +204,25 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onExitState(state1)
-        then(callbacks).should(inOrder).onEntryState(state2)
-        then(callbacks).should(inOrder).onEntryState(state22)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state11)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+            callbacks.onEntryState(state22)
+        }
     }
 
     @Test
     fun childToTopLevelNeighbor() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -244,22 +247,24 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onExitState(state1)
-        then(callbacks).should(inOrder).onEntryState(state2)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state11)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+        }
     }
 
     @Test
     fun childToParent() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state11: State
@@ -290,20 +295,25 @@ class CrossLevelTransitionTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(state1)
-        then(callbacks).should(inOrder).onEntryState(state11)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state11)
-        then(callbacks).should(inOrder).onEntryState(state12)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state11)
+            callbacks.onEntryState(state12)
+        }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEvent)
-        then(callbacks).should(inOrder).onExitState(state12)
-        then(callbacks).should(inOrder).onEntryState(state11)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state12)
+            callbacks.onEntryState(state11)
+        }
     }
 }

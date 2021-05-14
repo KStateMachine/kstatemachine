@@ -1,5 +1,9 @@
 package ru.nsk.kstatemachine
 
+import io.mockk.MockKVerificationScope
+import io.mockk.clearMocks
+import io.mockk.mockk
+import io.mockk.verifySequence
 
 object SwitchEvent : Event
 object SwitchEventL1 : Event
@@ -28,4 +32,11 @@ fun Callbacks.listen(state: IState) {
 
 inline fun <reified E : Event> Callbacks.listen(transitionBuilder: TransitionBuilder<E>) {
     transitionBuilder.onTriggered { onTriggeredTransition(it.event) }
+}
+
+fun mockkCallbacks() = mockk<Callbacks>(relaxUnitFun = true)
+
+fun verifySequenceAndClear(mock: Any, verifyBlock: MockKVerificationScope.() -> Unit) {
+    verifySequence(verifyBlock = verifyBlock)
+    clearMocks(mock)
 }

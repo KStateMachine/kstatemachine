@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.visitors.exportToDot
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
@@ -65,7 +64,7 @@ class ExportTest {
             }
         }
 
-        assertThat(machine.exportToDot(), equalTo(DOT_RESULT))
+        machine.exportToDot() shouldBe DOT_RESULT
     }
 
     @Test
@@ -91,6 +90,6 @@ class ExportTest {
             }
         }
 
-        assertThat(machine.exportToPlantUml(), equalTo(PLANTUML_RESULT))
+        machine.exportToPlantUml() shouldBe PLANTUML_RESULT
     }
 }
