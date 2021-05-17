@@ -58,9 +58,13 @@ class ExportPlantUmlVisitor : Visitor {
     }
 
     private fun processStateBody(state: IState) {
-        val states = state.states
-        // visit states
-        states.forEach { visit(it) }
+        val states = state.states.toList()
+        // visit child states
+        for (s in states.indices) {
+            visit(states[s])
+            if (s != states.lastIndex && state.childMode == ChildMode.PARALLEL)
+                line(PARALLEL)
+        }
 
         // add initial transition
         line("")
@@ -81,6 +85,7 @@ class ExportPlantUmlVisitor : Visitor {
     private companion object {
         const val STAR = "[*]"
         const val SINGLE_INDENT = "    "
+        const val PARALLEL = "--"
         fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
         fun label(name: String?) = if (name != null) " : $name" else ""
     }

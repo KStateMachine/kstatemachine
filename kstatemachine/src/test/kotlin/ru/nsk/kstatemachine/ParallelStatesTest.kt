@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
 import io.kotest.matchers.should
+import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
@@ -112,7 +113,7 @@ class ParallelStatesTest {
     }
 
     @Test
-    fun processEventByParallelStates() {
+    fun processEventByParallelStates_negative() {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -130,11 +131,30 @@ class ParallelStatesTest {
             }
         }
 
-        machine.processEvent(SwitchEvent)
-
-        verifySequence {
-            callbacks.onTriggeredTransition(SwitchEvent, 1)
-            callbacks.onTriggeredTransition(SwitchEvent, 2)
+        shouldThrow<IllegalStateException> {
+            machine.processEvent(SwitchEvent)
         }
+    }
+
+    @Test
+    fun processEventByParallelStates() {
+        val callbacks = mockkCallbacks()
+
+        val machine = createStateMachine {
+            initialState(childMode = ChildMode.PARALLEL) {
+                state {
+                    transition<FirstEvent> { callbacks.listen(this) }
+                }
+                state {
+                    transition<SecondEvent> { callbacks.listen(this) }
+                }
+            }
+        }
+
+        machine.processEvent(FirstEvent)
+        verify { callbacks.onTriggeredTransition(FirstEvent) }
+
+        machine.processEvent(SecondEvent)
+        verify { callbacks.onTriggeredTransition(SecondEvent) }
     }
 }

@@ -3,6 +3,8 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
+object SwitchEvent : Event
+
 fun main() {
     val machine = createStateMachine("Nested states") {
         val state1 = initialState("State1")

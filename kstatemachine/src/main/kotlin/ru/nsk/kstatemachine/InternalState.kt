@@ -14,11 +14,7 @@ interface InternalState : IState {
     /** @return true if event was processed */
     fun doProcessEvent(event: Event, argument: Any?): Boolean
 
-    /**
-     * If state is in [ChildMode.PARALLEL] there might be more than one [ResolvedTransition]
-     */
-    fun <E : Event> recursiveFindUniqueResolvedTransitions(event: E): List<ResolvedTransition<E>>
-
+    fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
     fun recursiveEnterInitialStates()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
     fun recursiveExit(transitionParams: TransitionParams<*>)
