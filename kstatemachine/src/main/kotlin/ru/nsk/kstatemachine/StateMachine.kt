@@ -121,9 +121,10 @@ fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) 
  */
 fun createStateMachine(
     name: String? = null,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     init: StateMachineBlock
-): StateMachine = StateMachineImpl(name).apply {
+): StateMachine = StateMachineImpl(name, childMode).apply {
     init()
     if (start) start()
 }

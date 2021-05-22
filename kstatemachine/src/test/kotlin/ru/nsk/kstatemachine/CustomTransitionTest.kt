@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 
@@ -22,7 +21,7 @@ class CustomTransition(name: String, sourceState: IState, targetState: IState) :
 class CustomTransitionTest {
     @Test
     fun customTransition() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val event = CustomEvent(42)
 
@@ -40,6 +39,6 @@ class CustomTransitionTest {
 
         machine.processEvent(event)
 
-        then(callbacks).should().onTriggeredTransition(event)
+        verifySequence { callbacks.onTriggeredTransition(event) }
     }
 }

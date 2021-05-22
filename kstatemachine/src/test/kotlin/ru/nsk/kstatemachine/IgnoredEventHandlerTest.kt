@@ -1,14 +1,13 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class IgnoredEventHandlerTest {
     @Test
     fun ignoredEventHandler() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("first")
@@ -19,7 +18,7 @@ class IgnoredEventHandlerTest {
         }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onIgnoredEvent(SwitchEvent)
+        verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 
     @Test
@@ -39,7 +38,7 @@ class IgnoredEventHandlerTest {
 
     @Test
     fun processEventOnFinishedStateMachine() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             setInitialState(finalState("final"))
@@ -51,9 +50,9 @@ class IgnoredEventHandlerTest {
             }
         }
 
-        then(callbacks).should().onFinished(machine)
+        verifySequenceAndClear(callbacks) { callbacks.onFinished(machine) }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onIgnoredEvent(SwitchEvent)
+        verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 }

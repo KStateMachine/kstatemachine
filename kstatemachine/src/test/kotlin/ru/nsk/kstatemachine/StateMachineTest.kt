@@ -1,15 +1,13 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.inOrder
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
-import com.nhaarman.mockitokotlin2.times
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.matchers.collections.containExactly
 import io.kotest.matchers.should
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.sameInstance
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.Called
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.Testing.startFrom
 
@@ -26,8 +24,7 @@ class StateMachineTest {
 
     @Test
     fun onOffDsl() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var on: State
         lateinit var off: State
@@ -53,25 +50,29 @@ class StateMachineTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(on)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(on) }
 
         machine.processEvent(OffEvent)
-        then(callbacks).should(inOrder).onTriggeredTransition(OffEvent)
-        then(callbacks).should(inOrder).onExitState(on)
-        then(callbacks).should(inOrder).onEntryState(off)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(OffEvent)
+            callbacks.onExitState(on)
+            callbacks.onEntryState(off)
+        }
 
         machine.processEvent(OnEvent)
-        then(callbacks).should(inOrder).onTriggeredTransition(OnEvent)
-        then(callbacks).should(inOrder).onExitState(off)
-        then(callbacks).should(inOrder).onEntryState(on)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(OnEvent)
+            callbacks.onExitState(off)
+            callbacks.onEntryState(on)
+        }
 
         machine.processEvent(OnEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verify { callbacks wasNot Called }
     }
 
     @Test
     fun genericOnTransitionNotification() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             initialState("first") {
@@ -84,12 +85,12 @@ class StateMachineTest {
         }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun currentStateNotification() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
         lateinit var first: State
 
         val machine = createStateMachine {
@@ -97,7 +98,7 @@ class StateMachineTest {
         }
         machine.onStateChanged { callbacks.onStateChanged(it) }
 
-        then(callbacks).should().onStateChanged(first)
+        verifySequence { callbacks.onStateChanged(first) }
     }
 
     @Test
@@ -185,8 +186,8 @@ class StateMachineTest {
             second = state("second")
         }
 
-        assertThat(machine.requireState("first"), sameInstance(first))
-        assertThat(machine.requireState("second"), sameInstance(second))
+        machine.requireState("first") shouldBeSameInstanceAs first
+        machine.requireState("second") shouldBeSameInstanceAs second
         shouldThrow<IllegalArgumentException> { machine.requireState("third") }
     }
 
@@ -200,8 +201,7 @@ class StateMachineTest {
 
     @Test
     fun onStartedListener() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var first: State
         val machine = createStateMachine {
@@ -210,13 +210,16 @@ class StateMachineTest {
             }
             onStarted { callbacks.onStarted(this) }
         }
-        then(callbacks).should(inOrder).onStarted(machine)
-        then(callbacks).should(inOrder).onEntryState(first)
+
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onEntryState(first)
+        }
     }
 
     @Test
     fun finishingStateMachine() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var final: State
         val machine = createStateMachine {
@@ -226,14 +229,15 @@ class StateMachineTest {
             onFinished { callbacks.onFinished(this) }
         }
 
-        then(callbacks).should().onEntryState(final)
-        then(callbacks).should().onFinished(machine)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onEntryState(final)
+            callbacks.onFinished(machine)
+        }
     }
 
     @Test
     fun finishedStateMachineIgnoresEvent() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var final: State
         val machine = createStateMachine {
@@ -248,17 +252,18 @@ class StateMachineTest {
             }
         }
 
-        then(callbacks).should().onEntryState(final)
-        then(callbacks).should().onFinished(machine)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(final)
+            callbacks.onFinished(machine)
+        }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verify { callbacks wasNot Called }
     }
 
     @Test
     fun stateMachineEntryExit() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var initialState: State
 
@@ -270,13 +275,15 @@ class StateMachineTest {
             }
         }
 
-        then(callbacks).should().onEntryState(machine)
-        then(callbacks).should().onEntryState(initialState)
+        verifySequence {
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(initialState)
+        }
     }
 
     @Test
     fun startFrom() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state2: State
         lateinit var state22: State
@@ -297,16 +304,17 @@ class StateMachineTest {
 
         machine.startFrom(state22)
 
-        then(callbacks).should().onStarted(machine)
-        then(callbacks).should().onEntryState(machine)
-        then(callbacks).should().onEntryState(state2)
-        then(callbacks).should().onEntryState(state22)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(state2)
+            callbacks.onEntryState(state22)
+        }
     }
 
     @Test
     fun restartMachine() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -324,20 +332,21 @@ class StateMachineTest {
 
         machine.startFrom(state2)
 
-        then(callbacks).should().onStarted(machine)
-        then(callbacks).should().onStarted(machine)
-        then(callbacks).should().onEntryState(machine)
-        then(callbacks).should().onEntryState(state2)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onStarted(machine)
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(state2)
+        }
 
         machine.stop()
-        then(callbacks).should().onStopped(machine)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequenceAndClear(callbacks) { callbacks.onStopped(machine) }
 
         machine.start()
-        then(callbacks).should(times(2)).onStarted(machine)
-        then(callbacks).should(times(2)).onEntryState(machine)
-        then(callbacks).should().onEntryState(state1)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(state1)
+        }
     }
 
     @Test

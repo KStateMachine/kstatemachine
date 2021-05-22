@@ -4,9 +4,11 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import java.util.concurrent.CopyOnWriteArraySet
 
-open class DefaultState(name: String? = null) : BaseStateImpl(name), State
+open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+    BaseStateImpl(name, childMode), State
 
-open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), DataState<D> {
+open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+    BaseStateImpl(name, childMode), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
 
@@ -29,7 +31,7 @@ open class DefaultDataState<out D>(name: String? = null) : BaseStateImpl(name), 
     }
 }
 
-open class BaseStateImpl(override val name: String?) : InternalState {
+open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState {
     private val _listeners = CopyOnWriteArraySet<IState.Listener>()
     override val listeners: Collection<IState.Listener> get() = _listeners
 
@@ -37,7 +39,7 @@ open class BaseStateImpl(override val name: String?) : InternalState {
     override val states: Set<IState> get() = _states
 
     /**
-     * Might be null only before [setInitialState] call.
+     * In [ChildMode.EXCLUSIVE] might be null only before [setInitialState] call if there are child states.
      */
     protected var currentState: InternalState? = null
 
@@ -81,6 +83,7 @@ open class BaseStateImpl(override val name: String?) : InternalState {
 
     override fun setInitialState(state: IState) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
+        check(childMode == ChildMode.EXCLUSIVE) { "Can not set initial state in parallel child mode" }
         check(!machine.isRunning) { "Can not change initial state after state machine started" }
 
         _initialState = state as InternalState
@@ -129,7 +132,7 @@ open class BaseStateImpl(override val name: String?) : InternalState {
             return false
         }
 
-        val (transition, direction) = recursiveFindUniqueTransitionWithDirection(event) ?: return false
+        val (transition, direction) = recursiveFindUniqueResolvedTransition(event) ?: return false
 
         val transitionParams = TransitionParams(transition, direction, event, argument)
 
@@ -146,25 +149,34 @@ open class BaseStateImpl(override val name: String?) : InternalState {
         return true
     }
 
-    override fun <E : Event> recursiveFindUniqueTransitionWithDirection(event: E):
-            Pair<InternalTransition<E>, TransitionDirection>? {
-        return currentState?.recursiveFindUniqueTransitionWithDirection(event)
-            ?: findUniqueTransitionWithDirection(event)
+    override fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
+        val resolvedTransitions = getCurrentStates()
+            .mapNotNull { it.recursiveFindUniqueResolvedTransition(event) }
+            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(event)) }
+        check(resolvedTransitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
+        return resolvedTransitions.singleOrNull()
     }
 
-    override fun recursiveEnterInitialState() {
+    override fun recursiveEnterInitialStates() {
         if (states.isEmpty()) return
 
-        val initialState = checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
-
-        setCurrentState(initialState, makeStartTransitionParams(initialState))
-
-        initialState.recursiveEnterInitialState()
+        when (childMode) {
+            ChildMode.EXCLUSIVE -> {
+                val initialState =
+                    checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+                setCurrentState(initialState, makeStartTransitionParams(initialState))
+                initialState.recursiveEnterInitialStates()
+            }
+            ChildMode.PARALLEL -> _states.forEach {
+                notifyStateEntry(it, makeStartTransitionParams(it))
+                it.recursiveEnterInitialStates()
+            }
+        }
     }
 
     override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
         if (path.isEmpty()) {
-            recursiveEnterInitialState()
+            recursiveEnterInitialStates()
         } else {
             val state = path.removeLast()
             setCurrentState(state, transitionParams)
@@ -175,9 +187,8 @@ open class BaseStateImpl(override val name: String?) : InternalState {
     }
 
     override fun recursiveExit(transitionParams: TransitionParams<*>) {
-        if (states.isNotEmpty())
-            requireCurrentState().recursiveExit(transitionParams)
-
+        for (currentState in getCurrentStates())
+            currentState.recursiveExit(transitionParams)
         doExit(transitionParams)
     }
 
@@ -189,35 +200,43 @@ open class BaseStateImpl(override val name: String?) : InternalState {
     }
 
     override fun recursiveFillActiveStates(states: MutableSet<IState>) {
-        if (isActive) {
-            states.add(this)
+        if (!_isActive) return
+        states.add(this)
 
-            val currentState = currentState
+        for (currentState in getCurrentStates()) {
             // do not include nested state machine states
             if (currentState is StateMachine)
                 states.add(currentState)
             else
-                currentState?.recursiveFillActiveStates(states)
+                currentState.recursiveFillActiveStates(states)
         }
     }
 
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
 
+    private fun getCurrentStates() = when (childMode) {
+        ChildMode.EXCLUSIVE -> listOfNotNull(currentState)
+        ChildMode.PARALLEL -> _states.toList()
+    }
+
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
-        if (currentState == state) return
-
-        currentState?.recursiveExit(transitionParams)
-
-        val machine = machine as InternalStateMachine
+        require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
+        if (currentState == state) return
+        currentState?.recursiveExit(transitionParams)
         currentState = state
 
+        notifyStateEntry(state, transitionParams)
+    }
+
+    private fun notifyStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
         val finish = state is IFinalState
         if (finish) isFinished = true
 
         state.doEnter(transitionParams)
 
+        val machine = machine as InternalStateMachine
         if (finish) {
             machine.log("Parent $this finish")
             stateNotify { onFinished() }

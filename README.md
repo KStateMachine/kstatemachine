@@ -22,8 +22,7 @@ Main features are:
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
 * [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;
 * [Argument](#arguments) passing for events and transitions;
-* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/)
-  and  [Graphviz](https://graphviz.org/);
+* [Export state machine](#export) structure to [PlantUML](https://plantuml.com/);
 * Built-in [logging](#logging) support.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
@@ -537,23 +536,6 @@ println(machine.exportToPlantUml())
 
 Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
 
-### Graphviz
-
-Graphviz uses [DOT language](https://graphviz.org/doc/info/lang.html) to visualize graphs. Use `exportToDot()` extension
-function to export state machine to DOT language.
-
-```kotlin
-val machine = createStateMachine { /*...*/ }
-println(machine.exportToDot())
-```
-
-Copy/paste resulting output to any tool supporting DOT language, for example:
-
-* https://dreampuf.github.io/GraphvizOnline/
-* http://magjac.com/graphviz-visual-editor/
-
-_Note: Graphviz export does not support nested states._
-
 ## Consider using Kotlin `sealed` classes
 
 With sealed classes for states and events your state machine structure may look simpler. Try to compare this two samples
@@ -611,7 +593,6 @@ machine.
 
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
-* [Graphviz DOT export sample](./samples/src/main/kotlin/ru/nsk/samples/GraphvizDotExportSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)

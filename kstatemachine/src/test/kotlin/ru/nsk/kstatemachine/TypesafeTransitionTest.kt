@@ -1,10 +1,8 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
+import io.kotest.matchers.shouldBe
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 private class NameEvent(override val data: String) : DataEvent<String>
@@ -37,7 +35,7 @@ class TypesafeTransitionTest {
         val name = "testName"
         machine.processEvent(NameEvent(name))
 
-        assertThat(state2.data, equalTo(name))
+        state2.data shouldBe name
     }
 
     @Test
@@ -58,18 +56,18 @@ class TypesafeTransitionTest {
         val name = "testName"
         machine.processEvent(NameEvent(name))
 
-        assertThat(state2.data, equalTo(name))
+        state2.data shouldBe name
 
         val id = 42
         machine.processEvent(IdEvent(id))
 
         shouldThrow<IllegalStateException> { state2.data }
-        assertThat(state3.data, equalTo(id))
+        state3.data shouldBe id
     }
 
     @Test
     fun multipleNestedDataStates() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
         lateinit var state1: State
         lateinit var state2: DataState<String>
         lateinit var state21: State
@@ -93,24 +91,27 @@ class TypesafeTransitionTest {
             }
         }
 
-        then(callbacks).should().onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
         val name = "testName"
         machine.processEvent(NameEvent(name))
-        then(callbacks).should().onExitState(state1)
-        then(callbacks).should().onEntryState(state2)
-        then(callbacks).should().onEntryState(state21)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+            callbacks.onEntryState(state21)
+        }
 
-        assertThat(state2.data, equalTo(name))
+        state2.data shouldBe name
 
         val id = 42
         machine.processEvent(IdEvent(id))
-        then(callbacks).should().onExitState(state21)
-        then(callbacks).should().onEntryState(state22)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onExitState(state21)
+            callbacks.onEntryState(state22)
+        }
 
-        assertThat(state2.data, equalTo(name))
-        assertThat(state22.data, equalTo(id))
+        state2.data shouldBe name
+        state22.data shouldBe id
     }
 
     @Test
@@ -146,6 +147,6 @@ class TypesafeTransitionTest {
         val id = 42
         machine.processEvent(IdEvent(id))
 
-        assertThat(state2.data, equalTo(id))
+        state2.data shouldBe id
     }
 }

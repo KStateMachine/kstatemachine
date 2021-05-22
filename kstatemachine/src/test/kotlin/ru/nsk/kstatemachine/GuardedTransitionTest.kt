@@ -1,13 +1,14 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
+import io.mockk.Called
+import io.mockk.verify
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class GuardedTransitionTest {
     @Test
     fun guardedTransition() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         var value = "value1"
 
@@ -24,15 +25,16 @@ class GuardedTransitionTest {
         }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveZeroInteractions()
+        verify { callbacks wasNot Called }
+
         value = "value2"
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
+        verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun guardedTransitionOnWithLateinitState() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         var value = "value1"
 
@@ -51,15 +53,16 @@ class GuardedTransitionTest {
         }
 
         machine.processEvent(SwitchEvent)
-        then(callbacks).shouldHaveZeroInteractions()
+        verify { callbacks wasNot Called }
+
         value = "value2"
         machine.processEvent(SwitchEvent)
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
+        verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
     @Test
     fun guardedTransitionSameEvent() {
-        val callbacks = mock<Callbacks>()
+        val callbacks = mockkCallbacks()
 
         lateinit var state1: State
         lateinit var state2: State
@@ -86,13 +89,14 @@ class GuardedTransitionTest {
             state3 = state("state3") { callbacks.listen(this) }
         }
 
-        then(callbacks).should().onEntryState(state1)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
         machine.processEvent(SwitchEvent)
 
-        then(callbacks).should().onTriggeredTransition(SwitchEvent)
-        then(callbacks).should().onExitState(state1)
-        then(callbacks).should().onEntryState(state3)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state3)
+        }
     }
 }

@@ -1,16 +1,13 @@
 package ru.nsk.kstatemachine
 
-import com.nhaarman.mockitokotlin2.inOrder
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.then
 import io.kotest.assertions.throwables.shouldThrow
+import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 
 class NestedStateTest {
     @Test
     fun startNestedStatesBranch() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var firstL1: State
         lateinit var firstL2: State
@@ -30,15 +27,16 @@ class NestedStateTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(firstL1)
-        then(callbacks).should(inOrder).onEntryState(firstL2)
-        then(callbacks).should(inOrder).onEntryState(firstL3)
+        verifySequence {
+            callbacks.onEntryState(firstL1)
+            callbacks.onEntryState(firstL2)
+            callbacks.onEntryState(firstL3)
+        }
     }
 
     @Test
     fun exitEnterNestedStatesBranch() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var firstL1: State
         lateinit var secondL1: State
@@ -70,22 +68,25 @@ class NestedStateTest {
             }
         }
 
-        then(callbacks).should(inOrder).onEntryState(firstL1)
-        then(callbacks).should(inOrder).onEntryState(firstL2)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(firstL1)
+            callbacks.onEntryState(firstL2)
+        }
 
         machine.processEvent(SwitchEventL1)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
-        then(callbacks).should(inOrder).onExitState(firstL2)
-        then(callbacks).should(inOrder).onExitState(firstL1)
-        then(callbacks).should(inOrder).onEntryState(secondL1)
-        then(callbacks).should(inOrder).onEntryState(secondL2)
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEventL1)
+            callbacks.onExitState(firstL2)
+            callbacks.onExitState(firstL1)
+            callbacks.onEntryState(secondL1)
+            callbacks.onEntryState(secondL2)
+        }
     }
 
     @Test
     fun nestedStateFinishL2() {
-        val callbacks = mock<Callbacks>()
-        val inOrder = inOrder(callbacks)
+        val callbacks = mockkCallbacks()
 
         lateinit var initialL1: State
         lateinit var finalL1: State
@@ -124,26 +125,29 @@ class NestedStateTest {
             onFinished { callbacks.onFinished(this) }
         }
 
-        then(callbacks).should(inOrder).onEntryState(initialL1)
-        then(callbacks).should(inOrder).onEntryState(initialL2)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(initialL1)
+            callbacks.onEntryState(initialL2)
+        }
 
         machine.processEvent(SwitchEventL2)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL2)
-        then(callbacks).should(inOrder).onExitState(initialL2)
-        then(callbacks).should(inOrder).onEntryState(finalL2)
-        then(callbacks).should(inOrder).onFinished(initialL1)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(SwitchEventL2)
+            callbacks.onExitState(initialL2)
+            callbacks.onEntryState(finalL2)
+            callbacks.onFinished(initialL1)
+        }
 
         machine.processEvent(SwitchEventL1)
 
-        then(callbacks).should(inOrder).onTriggeredTransition(SwitchEventL1)
-        then(callbacks).should(inOrder).onExitState(finalL2)
-        then(callbacks).should(inOrder).onExitState(initialL1)
-        then(callbacks).should(inOrder).onEntryState(finalL1)
-        then(callbacks).should(inOrder).onFinished(machine)
-        then(callbacks).shouldHaveNoMoreInteractions()
+        verifySequence {
+            callbacks.onTriggeredTransition(SwitchEventL1)
+            callbacks.onExitState(finalL2)
+            callbacks.onExitState(initialL1)
+            callbacks.onEntryState(finalL1)
+            callbacks.onFinished(machine)
+        }
     }
 
     @Test

@@ -12,6 +12,7 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
     val machine: StateMachine
     val isActive: Boolean
     val listeners: Collection<Listener>
+    val childMode: ChildMode
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -35,6 +36,8 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
         fun onFinished() = Unit
     }
 }
+
+enum class ChildMode { EXCLUSIVE, PARALLEL }
 
 /**
  * Simple state without data field that is used by typesafe transitions
@@ -91,17 +94,26 @@ fun <S : IState> S.onFinished(block: StateBlock<S>) {
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [IState.findState] and for debugging.
  */
-fun IState.state(name: String? = null, init: StateBlock<State>? = null) =
-    addState(DefaultState(name), init)
+fun IState.state(
+    name: String? = null,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
+    init: StateBlock<State>? = null
+) = addState(DefaultState(name, childMode), init)
 
-fun <D> IState.dataState(name: String? = null, init: StateBlock<DataState<D>>? = null) =
-    addState(DefaultDataState(name), init)
+fun <D> IState.dataState(
+    name: String? = null,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
+    init: StateBlock<DataState<D>>? = null
+) = addState(DefaultDataState(name, childMode), init)
 
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
  */
-fun IState.initialState(name: String? = null, init: StateBlock<State>? = null) =
-    addInitialState(DefaultState(name), init)
+fun IState.initialState(
+    name: String? = null,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
+    init: StateBlock<State>? = null
+) = addInitialState(DefaultState(name, childMode), init)
 
 /**
  * A shortcut for [IState.addState] and [IState.setInitialState] calls
