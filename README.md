@@ -21,6 +21,7 @@ Main features are:
   with [cross level transitions](#cross-level-transitions) support;
 * [Composed (nested) state machines.](#composed-(nested)-state-machines) Use state machines as atomic child states;
 * [Typesafe transitions](#typesafe-transitions) to pass data in typesafe way from event to state;
+* [Parallel states](#parallel-states) to avoid a combinatorial explosion of states;
 * [Argument](#arguments) passing for events and transitions;
 * [Export state machine](#export) structure to [PlantUML](https://plantuml.com/);
 * Built-in [logging](#logging) support.
@@ -413,7 +414,28 @@ calls.
 
 ## Parallel states
 
-_Coming soon..._
+Sometimes it might be useful to have a state machine containing mutually exclusive properties. Assume your laptop, it
+might be charging, sleeping, its lid may be open at the same time. If you try to create a state machine for those
+properties you will have _3 * 3 = 9_ amount of states
+(_"Charging, Sleeping, LidOpen"_, _"OnBattery, Sleeping, LidOpen"_, etc...). This is where parallel states come into
+play. This feature helps to avoid combinatorial explosion of states. Using parallel states this machine will look like
+this:
+
+![Parallel states diagram](./doc/diagrams/parallel-states.png)
+
+Set `childMode` argument of a state machine, or a state creation functions to `ChildMode.PARALLEL`.
+When a state with parallel child mode is entered, all its child states will be simultaneously entered:
+
+```kotlin
+createStateMachine(childMode = ChildMode.PARALLEL) {
+    state("Charger") {
+        initialState("Charging") { /* ... */ }
+        state("OnBattery") { /* ... */ }
+    }
+    state("Lid") { /* ... */ }
+    // ..
+}
+```
 
 ## Typesafe transitions
 
