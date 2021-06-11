@@ -613,6 +613,7 @@ machine.
 
 ## Samples
 
+* [Simple Android 2D shooter game sample](https://github.com/nsk90/android-kstatemachine-sample)
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
