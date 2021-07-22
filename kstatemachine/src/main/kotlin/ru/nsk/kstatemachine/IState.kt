@@ -11,6 +11,7 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
     val parent: IState?
     val machine: StateMachine
     val isActive: Boolean
+    val isFinished: Boolean
     val listeners: Collection<Listener>
     val childMode: ChildMode
 
@@ -31,7 +32,8 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
         fun onExit(transitionParams: TransitionParams<*>) = Unit
 
         /**
-         * Notifies that child [IFinalState] is entered.
+         * If child mode is [ChildMode.EXCLUSIVE] notifies that child [IFinalState] is entered.
+         * If child mode is [ChildMode.PARALLEL] notifies that all children has finished.
          */
         fun onFinished() = Unit
     }

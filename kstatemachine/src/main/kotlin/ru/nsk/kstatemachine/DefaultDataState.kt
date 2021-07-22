@@ -56,7 +56,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     private var _isActive = false
     override val isActive get() = _isActive
 
-    private var isFinished = false
+    private var _isFinished = false
+    override val isFinished get() = _isFinished
 
     override fun <L : IState.Listener> addListener(listener: L): L {
         require(_listeners.add(listener)) { "$listener is already added" }
@@ -69,6 +70,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
+        if (childMode == ChildMode.PARALLEL)
+            require(state !is FinalState) { "Can not add FinalState in parallel child mode" }
 
         state.name?.let {
             require(findState(it, recursive = false) == null) { "State with name $it already exists" }
@@ -122,6 +125,14 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             _isActive = false
             stateNotify { onExit(transitionParams) }
         }
+    }
+
+    override fun afterChildFinished(state: InternalState) {
+        if (childMode == ChildMode.PARALLEL)
+            if (states.all { it.isFinished }) {
+                _isFinished = true
+                stateNotify { onFinished() }
+            }
     }
 
     override fun doProcessEvent(event: Event, argument: Any?): Boolean {
@@ -195,7 +206,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override fun recursiveStop() {
         currentState = null
         _isActive = false
-        isFinished = false
+        _isFinished = false
         _states.forEach { it.recursiveStop() }
     }
 
@@ -231,8 +242,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     private fun notifyStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
-        val finish = state is IFinalState
-        if (finish) isFinished = true
+        val finish = when (childMode) {
+            ChildMode.EXCLUSIVE -> state is IFinalState
+            ChildMode.PARALLEL -> states.all { it.isFinished }
+        }
+
+        if (finish) _isFinished = true
 
         state.doEnter(transitionParams)
 
@@ -243,6 +258,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
 
         machine.machineNotify { onStateChanged(state) }
+
+        if (finish) parent?.afterChildFinished(this)
     }
 
     internal fun switchToTargetState(

@@ -10,6 +10,7 @@ interface InternalState : IState {
 
     fun doEnter(transitionParams: TransitionParams<*>)
     fun doExit(transitionParams: TransitionParams<*>)
+    fun afterChildFinished(state: InternalState)
 
     /** @return true if event was processed */
     fun doProcessEvent(event: Event, argument: Any?): Boolean
