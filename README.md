@@ -12,6 +12,7 @@ machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarc
 
 Main features are:
 
+* Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK;
 * Kotlin DSL syntax for defining state machine structure;
 * Event based - transitions are performed by processing incoming events;
 * Listeners for states and transitions;
@@ -50,6 +51,15 @@ machine.processEvent(GreenEvent)
 // ...
 machine.processEvent(YellowEvent)
 ```
+
+## [Android sample app](https://github.com/nsk90/android-kstatemachine-sample)
+
+The library itself does not depend on Android.
+
+<p align="center">
+    <img src="https://github.com/nsk90/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
+        alt="Android sample app" width="300"/>
+</p>
 
 ## Quick start sample (finishing traffic light)
 
@@ -423,8 +433,8 @@ this:
 
 ![Parallel states diagram](./doc/diagrams/parallel-states.png)
 
-Set `childMode` argument of a state machine, or a state creation functions to `ChildMode.PARALLEL`.
-When a state with parallel child mode is entered, all its child states will be simultaneously entered:
+Set `childMode` argument of a state machine, or a state creation functions to `ChildMode.PARALLEL`. When a state with
+parallel child mode is entered, all its child states will be simultaneously entered:
 
 ```kotlin
 createStateMachine(childMode = ChildMode.PARALLEL) {
