@@ -71,7 +71,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         check(!machine.isRunning) { "Can not add state after state machine started" }
 
         state.name?.let {
-            require(findState(it) == null) { "State with name $it already exists" }
+            require(findState(it, recursive = false) == null) { "State with name $it already exists" }
         }
 
         state as InternalState

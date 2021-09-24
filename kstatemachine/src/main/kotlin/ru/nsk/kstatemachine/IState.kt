@@ -66,9 +66,17 @@ typealias StateBlock<S> = S.() -> Unit
 /**
  * Get state by name. This might be used to start listening to state after state machine setup.
  */
-fun IState.findState(name: String): IState? = states.find { it.name == name }
+fun IState.findState(name: String, recursive: Boolean = true): IState? {
+    val result = states.find { it.name == name }
 
-fun IState.requireState(name: String) = requireNotNull(findState(name)) { "State $name not found" }
+    if (!recursive || result != null)
+        return result
+
+    return states.firstNotNullOfOrNull { it.findState(name, recursive) }
+}
+
+fun IState.requireState(name: String, recursive: Boolean = true) =
+    requireNotNull(findState(name, recursive)) { "State $name not found" }
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 

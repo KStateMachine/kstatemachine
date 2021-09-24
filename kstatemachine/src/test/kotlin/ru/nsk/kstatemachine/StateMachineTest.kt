@@ -187,8 +187,25 @@ class StateMachineTest {
         }
 
         machine.requireState("first") shouldBeSameInstanceAs first
-        machine.requireState("second") shouldBeSameInstanceAs second
+        machine.requireState("second", recursive = false) shouldBeSameInstanceAs second
         shouldThrow<IllegalArgumentException> { machine.requireState("third") }
+    }
+
+    @Test
+    fun requireStateRecursive() {
+        lateinit var first: State
+        lateinit var firstNested: State
+        val machine = createStateMachine {
+            first = initialState("first") {
+                firstNested = initialState("firstNested")
+            }
+        }
+
+        machine.requireState("firstNested") shouldBeSameInstanceAs firstNested
+        shouldThrow<IllegalArgumentException> {
+            machine.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
+        }
+        first.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
     }
 
     @Test
