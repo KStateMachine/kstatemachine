@@ -4,6 +4,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 ![Dependencies none](https://img.shields.io/badge/dependencies-none-green)
+[![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 
 KStateMachine is a Kotlin DSL library for creating finite state
 machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarchical state machines
