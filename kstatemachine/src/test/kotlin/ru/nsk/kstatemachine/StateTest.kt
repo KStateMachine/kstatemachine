@@ -42,6 +42,16 @@ class StateTest {
         }
     }
 
+    @Test
+    fun finalStateTransitionExplicitState() {
+        createStateMachine {
+            val final = addFinalState(DefaultFinalState("final")) {
+                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
+            }
+            setInitialState(final)
+        }
+    }
+
     /**
      * This test should not compile
      */

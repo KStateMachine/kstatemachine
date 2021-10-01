@@ -109,6 +109,7 @@ class StateMachineTest {
                 val listener = object : IState.Listener {}
                 addListener(listener)
                 shouldThrow<IllegalArgumentException> { addListener(listener) }
+                removeListener(listener)
             }
         }
     }
@@ -123,6 +124,7 @@ class StateMachineTest {
             val listener = object : StateMachine.Listener {}
             addListener(listener)
             shouldThrow<IllegalArgumentException> { addListener(listener) }
+            removeListener(listener)
         }
     }
 
@@ -134,6 +136,7 @@ class StateMachineTest {
                 val listener = object : Transition.Listener {}
                 transition.addListener(listener)
                 shouldThrow<IllegalArgumentException> { transition.addListener(listener) }
+                transition.removeListener(listener)
             }
         }
     }

@@ -140,7 +140,7 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
     addState(state, init)
 
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
-    addState(DefaultFinalState(name), init)
+    addFinalState(DefaultFinalState(name), init)
 
 fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
-    addState(DefaultFinalDataState(name), init)
+    addFinalState(DefaultFinalDataState(name), init)

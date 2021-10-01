@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -120,5 +121,22 @@ class TransitionTest {
             callbacks.onTriggeredTransition(SwitchEvent)
             callbacks.onEntryState(state2)
         }
+    }
+
+    @Test
+    fun transitionToNullTargetState() {
+        val callbacks = mockkCallbacks()
+
+        val machine = createStateMachine {
+            initialState("initial") {
+                transition<SwitchEvent> {
+                    targetState = null
+                    callbacks.listen(this)
+                }
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+        verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 }

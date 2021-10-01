@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import org.junit.jupiter.api.Test
@@ -14,6 +15,31 @@ class TypesafeTransitionTest {
         shouldThrow<Exception> {
             createStateMachine {
                 addInitialState(DefaultDataState<String>("state1"))
+            }
+        }
+    }
+
+    @Test
+    fun finalDataStateTransition() {
+        lateinit var final: DataState<Int>
+
+        val machine = createStateMachine {
+            initialState("initial") {
+                dataTransitionOn<IdEvent, Int> { targetState = { final } }
+            }
+            final = finalDataState("final")
+        }
+
+        machine.processEvent(IdEvent(42))
+        machine.activeStates().shouldContainExactly(machine, final)
+    }
+
+    @Test
+    fun finalDataStateCannotHaveTransition() {
+        createStateMachine {
+            initialState("initial")
+            finalDataState<Int>("final") {
+                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
             }
         }
     }
