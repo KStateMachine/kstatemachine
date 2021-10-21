@@ -67,3 +67,13 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUS
         error("Internal error PseudoState can not be entered or exited, looks that machine is purely configured")
 
 }
+
+class DefaultHistoryState(name: String? = null, override val historyType: HistoryType = HistoryType.SHALLOW) :
+    BaseStateImpl(name, ChildMode.EXCLUSIVE), HistoryState {
+    override fun <S : IState> addState(state: S, init: StateBlock<S>?) =
+        throw UnsupportedOperationException("HistoryState can not have child states")
+
+
+    override fun <E : Event> addTransition(transition: Transition<E>) =
+        throw UnsupportedOperationException("HistoryState can not have transitions")
+}
