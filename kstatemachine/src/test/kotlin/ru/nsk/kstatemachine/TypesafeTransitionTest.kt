@@ -46,10 +46,18 @@ class TypesafeTransitionTest {
 
     @Test
     fun singleDataState() {
+        val testName = "testName"
+
         lateinit var state2: DataState<String>
 
         val machine = createStateMachine {
-            state2 = dataState("state2")
+            val state3 = state("state3")
+
+            state2 = dataState("state2") {
+                onEntry { data shouldBe testName }
+                onExit { shouldThrow<IllegalStateException> { data } }
+                transition<SwitchEvent> { targetState = state3 }
+            }
 
             initialState("state1") {
                 dataTransition<NameEvent, String> { targetState = state2 }
@@ -58,10 +66,11 @@ class TypesafeTransitionTest {
 
         shouldThrow<IllegalStateException> { state2.data }
 
-        val name = "testName"
-        machine.processEvent(NameEvent(name))
+        machine.processEvent(NameEvent(testName))
+        state2.data shouldBe testName
 
-        state2.data shouldBe name
+        machine.processEvent(SwitchEvent)
+        shouldThrow<IllegalStateException> { state2.data }
     }
 
     @Test
