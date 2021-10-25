@@ -139,4 +139,19 @@ class TransitionTest {
         machine.processEvent(SwitchEvent)
         verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
+
+    @Test
+    fun transitionWithShortcutMethod() {
+        lateinit var finalState: FinalState
+
+        val machine = createStateMachine {
+            finalState = finalState()
+            initialState {
+                transition<SwitchEvent>("transition1", finalState)
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+        finalState.isActive shouldBe true
+    }
 }

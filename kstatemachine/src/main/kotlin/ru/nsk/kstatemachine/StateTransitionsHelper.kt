@@ -36,12 +36,13 @@ inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
     requireNotNull(findTransition<E>()) { "Transition for ${E::class} not found" }
 
 /**
- * Overload for transition without any parameters.
+ * Shortcut overload for transition with an optional target state
  */
 inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
+    targetState: State? = null
 ): Transition<E> =
-    addTransition(DefaultTransition(name, isInstanceOf(), asState()))
+    addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
 
 /**
  * Creates transition.
