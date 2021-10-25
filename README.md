@@ -129,6 +129,4 @@ dependencies {
 
 Where `<Tag>` is a library version.
 
-## License
-
-[MIT License](./LICENSE)
+## Licensed under the [Boost Software License](./LICENSE)
