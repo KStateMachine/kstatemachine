@@ -43,6 +43,20 @@ class StateTest {
     }
 
     @Test
+    fun explicitFinalStateMarkerUsage() {
+        class MyState : DefaultState(), FinalState {
+            override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
+        }
+
+        createStateMachine {
+            val final = addFinalState(MyState()) {
+                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
+            }
+            setInitialState(final)
+        }
+    }
+
+    @Test
     fun finalStateTransitionExplicitState() {
         createStateMachine {
             val final = addFinalState(DefaultFinalState("final")) {

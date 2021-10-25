@@ -57,9 +57,15 @@ interface DataState<out D> : IState {
 }
 
 /**
- * When [StateMachine] enters this state it finishes and does not accept events any more.
+ * Marker interface. When [StateMachine] enters this state it finishes and does not accept events anymore.
+ * If you use this interface to mark final state directly instead of subclassing [DefaultFinalState] or
+ * [DefaultFinalDataState] you must explicitly choose [addTransition] overload from this interface.
  */
-interface IFinalState : IState
+interface IFinalState : IState {
+    override fun <E : Event> addTransition(transition: Transition<E>) =
+        throw UnsupportedOperationException("FinalState can not have transitions")
+}
+
 interface FinalState : IFinalState, State
 interface FinalDataState<out D> : IFinalState, DataState<D>
 

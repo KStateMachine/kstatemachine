@@ -296,12 +296,10 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 }
 
-open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
-    override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("FinalState can not have transitions")
+open class DefaultFinalState(name: String?) : DefaultState(name), FinalState {
+    override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
 }
 
-open class DefaultFinalState(name: String?) : DefaultState(name), FinalState {
-    override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("FinalState can not have transitions")
+open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
+    override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }
