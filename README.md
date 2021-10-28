@@ -14,23 +14,23 @@ machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarc
 
 Main features are:
 
-* Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK;
-* Kotlin DSL syntax for defining state machine structure;
-* Event based - transitions are performed by processing incoming events;
-* Listeners for states and transitions;
+* Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK
+* Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
+* Event based - transitions are performed by processing incoming events
+* Listeners for states and transitions
 * [Guarded](./doc/detailed_doc.md#guarded-transitions)
   and [Conditional transitions](./doc/detailed_doc.md#conditional-transitions) with dynamic target state which
-  is calculated in a moment of event processing depending on application business logic;
+  is calculated in a moment of event processing depending on application business logic
 * [Nested states](./doc/detailed_doc.md#nested-states) - hierarchical state machines (HSMs)
-  with [cross level transitions](./doc/detailed_doc.md#cross-level-transitions) support;
+  with [cross level transitions](./doc/detailed_doc.md#cross-level-transitions) support
 * [Composed (nested) state machines.](./doc/detailed_doc.md#composed-(nested)-state-machines) Use state machines
-  as atomic child states;
+  as atomic child states
 * [Typesafe transitions](./doc/detailed_doc.md#typesafe-transitions) to pass data in typesafe way from event to
-  state;
-* [Parallel states](./doc/detailed_doc.md#parallel-states) to avoid a combinatorial explosion of states;
-* [Argument](./doc/detailed_doc.md#arguments) passing for events and transitions;
+  state
+* [Parallel states](./doc/detailed_doc.md#parallel-states) to avoid a combinatorial explosion of states
+* [Argument](./doc/detailed_doc.md#arguments) passing for events and transitions
 * [Export state machine](./doc/detailed_doc.md#export) structure to [PlantUML](https://plantuml.com/);
-* Built-in [logging](./doc/detailed_doc.md#logging) support.
+* Built-in [logging](./doc/detailed_doc.md#logging) support
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 

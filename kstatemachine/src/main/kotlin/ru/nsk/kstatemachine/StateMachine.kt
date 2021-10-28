@@ -48,7 +48,7 @@ interface StateMachine : State {
 
         /**
          * This method is called when transition is performed.
-         * There might be may transitions from one state to another,
+         * There might be many transitions from one state to another,
          * this method might be used to listen to all transitions in one place
          * instead of listening for each transition separately.
          */

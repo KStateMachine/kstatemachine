@@ -27,7 +27,7 @@ fun main() {
             transition<Events.YellowEvent> {
                 targetState = States.YellowState
                 // Add transition listener
-                onTriggered { println("Transition on ${it.event}") }
+                onTriggered { println("Transition on ${it.event::class.simpleName}") }
             }
         }
 

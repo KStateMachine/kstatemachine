@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.matchers.collections.containExactly
 import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.Called
 import io.mockk.verify
@@ -68,6 +69,28 @@ class StateMachineTest {
 
         machine.processEvent(OnEvent)
         verify { callbacks wasNot Called }
+    }
+
+    @Test
+    fun nonDslUsage() {
+        val machine = StateMachineImpl("machine", ChildMode.EXCLUSIVE)
+        val first = DefaultState("first")
+        val second = DefaultState("second")
+
+        second.onEntry { println("$name entered") }
+
+        val transition = DefaultTransition<SwitchEvent>("transition", EventMatcher.isInstanceOf(), first, second)
+        transition.onTriggered { println("${it.transition.name} triggered") }
+
+        first.addTransition(transition)
+
+        machine.addInitialState(first)
+        machine.addState(second)
+        machine.start()
+
+        machine.processEvent(SwitchEvent)
+
+        second.isActive shouldBe true
     }
 
     @Test

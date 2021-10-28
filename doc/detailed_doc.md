@@ -3,16 +3,16 @@
 ## Workflow
 Building blocks (main interfaces) of the library:
 
-* `StateMachine` - is a collection of states and transitions between them, processes events when started;
-* `IState` - states where state machine can go to;
+* `StateMachine` - is a collection of states and transitions between them, processes events when started
+* `IState` - states where state machine can go to
 * `Event` - is a base class for events or other words actions which are processed by state machine and may trigger
-  transitions;
-* `Transition` - is an operation of moving from one state to another.
+  transitions
+* `Transition` - is an operation of moving from one state to another
 
 Working with state machine consists of two major steps:
 
-* Creation and initial setup;
-* Processing events, on which state machine can switch its states and notify about changes.
+* Creation and initial setup
+* Processing events, on which state machine can switch its states and notify about changes
 
 ```kotlin
 val machine = createStateMachine {
@@ -233,8 +233,8 @@ transition<SwitchEvent> {
 
 There are two predefined event matchers:
 
-* `isInstanceOf()` matches specified class and its subclasses (default);
-* `isEqual()` matches only specified class.
+* `isInstanceOf()` matches specified class and its subclasses (default)
+* `isEqual()` matches only specified class
 
 You can define your own matchers by subclassing `EventMatcher` class.
 

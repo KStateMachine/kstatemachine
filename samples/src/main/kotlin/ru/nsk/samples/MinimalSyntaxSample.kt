@@ -17,7 +17,7 @@ fun main() {
             transition<RedEvent> {
                 targetState = redState
                 // Add transition listener
-                onTriggered { println("Transition on ${it.event}") }
+                onTriggered { println("Transition on ${it.event::class.simpleName}") }
             }
         }
 
