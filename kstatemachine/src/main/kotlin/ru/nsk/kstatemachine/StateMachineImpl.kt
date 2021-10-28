@@ -5,8 +5,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
-
-    override var logger = StateMachine.Logger {}
+    override var logger: StateMachine.Logger = NullLogger
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
     override var pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
         error(
@@ -23,6 +22,10 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
 
     private var _isRunning = false
     override val isRunning get() = _isRunning
+
+    private object NullLogger : StateMachine.Logger {
+        override fun log(message: String) {}
+    }
 
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
@@ -56,7 +59,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
 
         _isRunning = true
-        log("$this started")
+        log { "$this started" }
         machineNotify { onStarted() }
         doEnter(transitionParams)
     }
@@ -64,7 +67,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     override fun stop() {
         _isRunning = false
         recursiveStop()
-        log("$this stopped")
+        log { "$this stopped" }
         machineNotify { onStopped() }
     }
 
@@ -78,7 +81,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
 
         try {
             if (!doProcessEvent(event, argument)) {
-                log("$this ignored $event")
+                log { "$this ignored $event" }
                 ignoredEventHandler.onIgnoredEvent(event, argument)
             }
         } finally {
@@ -86,8 +89,36 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
         }
     }
 
+    private fun doProcessEvent(event: Event, argument: Any?): Boolean {
+        if (isFinished) {
+            log { "$this is finished, skipping event $event, with argument $argument" }
+            return false
+        }
+
+        val (transition, direction) = recursiveFindUniqueResolvedTransition(event) ?: return false
+
+        val transitionParams = TransitionParams(transition, direction, event, argument)
+
+        val targetState = direction.targetState as? InternalState
+
+        if (direction !is NoTransition) {
+            log { "${event::class.simpleName} triggers $transition from ${transition.sourceState} to $targetState" }
+            transition.transitionNotify { onTriggered(transitionParams) }
+
+            machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
+        }
+
+        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
+        return true
+    }
+
     override fun activeStates(): Set<IState> {
         return mutableSetOf<IState>().also { recursiveFillActiveStates(it) }
+    }
+
+    override fun log(lazyMessage: () -> String) {
+        if (logger != NullLogger)
+            logger.log(lazyMessage())
     }
 
     /**
@@ -95,6 +126,4 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
      */
     override fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
-
-    override fun toString() = "${this::class.simpleName}(name=$name)"
 }

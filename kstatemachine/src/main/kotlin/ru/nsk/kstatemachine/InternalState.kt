@@ -12,9 +12,6 @@ interface InternalState : IState {
     fun doExit(transitionParams: TransitionParams<*>)
     fun afterChildFinished(state: InternalState)
 
-    /** @return true if event was processed */
-    fun doProcessEvent(event: Event, argument: Any?): Boolean
-
     fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
     fun recursiveEnterInitialStates()
     fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)

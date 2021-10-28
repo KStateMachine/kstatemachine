@@ -26,6 +26,8 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
     val innerState2 = DefaultState("Inner state2")
 
     val innerMachine = createStateMachine("Inner machine", start = startInnerMachineOnSetup) {
+        logger = StateMachine.Logger { println(it) }
+
         callbacks.listen(this)
 
         onStarted {
@@ -35,7 +37,7 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         addInitialState(innerState1) {
             callbacks.listen(this)
 
-            transition<SwitchEvent> {
+            transition<SwitchEvent>("Switch") {
                 targetState = innerState2
 
                 callbacks.listen(this)

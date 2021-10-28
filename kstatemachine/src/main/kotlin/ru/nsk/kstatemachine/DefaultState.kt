@@ -97,7 +97,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         return transition
     }
 
-    override fun toString() = "${this::class.simpleName}(name=$name)"
+    override fun toString() = "${this::class.simpleName}${if (name != null) "($name)" else ""}"
 
     override fun asState() = this
 
@@ -111,7 +111,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!_isActive) {
-            machine.log("Parent $parent entering child $this")
+            if (parent != null) machine.log { "Parent $parent entering child $this" }
             _isActive = true
             onDoEnter(transitionParams)
             stateNotify { onEntry(transitionParams) }
@@ -120,7 +120,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun doExit(transitionParams: TransitionParams<*>) {
         if (_isActive) {
-            machine.log("Exiting $this")
+            machine.log { "Exiting $this" }
             onDoExit(transitionParams)
             _isActive = false
             stateNotify { onExit(transitionParams) }
@@ -133,31 +133,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 _isFinished = true
                 stateNotify { onFinished() }
             }
-    }
-
-    override fun doProcessEvent(event: Event, argument: Any?): Boolean {
-        val machine = machine as InternalStateMachine
-
-        if (isFinished) {
-            machine.log("$this is finished, skipping event $event, with argument $argument")
-            return false
-        }
-
-        val (transition, direction) = recursiveFindUniqueResolvedTransition(event) ?: return false
-
-        val transitionParams = TransitionParams(transition, direction, event, argument)
-
-        val targetState = direction.targetState as? InternalState
-
-        if (direction !is NoTransition) {
-            machine.log("$this triggering $transition from ${transition.sourceState}")
-            transition.transitionNotify { onTriggered(transitionParams) }
-
-            machine.machineNotify { onTransition(transition.sourceState, targetState, event, argument) }
-        }
-
-        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
-        return true
     }
 
     override fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
@@ -253,7 +228,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         val machine = machine as InternalStateMachine
         if (finish) {
-            machine.log("Parent $this finish")
+            machine.log { "$this finished" }
             stateNotify { onFinished() }
         }
 

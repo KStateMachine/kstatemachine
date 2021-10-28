@@ -36,7 +36,7 @@ interface StateMachine : State {
      */
     fun activeStates(): Set<IState>
 
-    fun log(message: String) = logger.log(message)
+    fun log(lazyMessage: () -> String)
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 

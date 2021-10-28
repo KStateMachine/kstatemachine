@@ -58,5 +58,5 @@ open class DefaultTransition<E : Event>(
     override fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>) =
         targetStateDirectionProducer(policy)
 
-    override fun toString() = "${this::class.simpleName}(name=$name)"
+    override fun toString() = "${this::class.simpleName}${if (name != null) "($name)" else ""}"
 }
