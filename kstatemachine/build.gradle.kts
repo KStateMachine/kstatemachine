@@ -12,7 +12,7 @@ plugins {
     jacoco
 }
 group = "ru.nsk"
-version = "0.6.5"
+version = "0.7.0"
 
 repositories {
     mavenCentral()
