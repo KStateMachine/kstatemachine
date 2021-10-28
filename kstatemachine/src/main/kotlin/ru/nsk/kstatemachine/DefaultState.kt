@@ -271,7 +271,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 }
 
-open class DefaultFinalState(name: String?) : DefaultState(name), FinalState {
+open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
 }
 
