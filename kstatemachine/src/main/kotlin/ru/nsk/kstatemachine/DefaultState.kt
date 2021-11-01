@@ -127,12 +127,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun afterChildFinished(state: InternalState) {
-        if (childMode == ChildMode.PARALLEL)
-            if (states.all { it.isFinished }) {
-                _isFinished = true
-                stateNotify { onFinished() }
-            }
+    override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
+        if (childMode == ChildMode.PARALLEL && states.all { it.isFinished }) {
+            _isFinished = true
+            machine.log { "$this finishes" }
+            stateNotify { onFinished(transitionParams) }
+        }
     }
 
     override fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
@@ -222,19 +222,19 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             ChildMode.PARALLEL -> states.all { it.isFinished }
         }
 
-        if (finish) _isFinished = true
+        if (finish) {
+            _isFinished = true
+            machine.log { "$this finishes" }
+        }
 
         state.doEnter(transitionParams)
 
         val machine = machine as InternalStateMachine
-        if (finish) {
-            machine.log { "$this finished" }
-            stateNotify { onFinished() }
-        }
+        if (finish) stateNotify { onFinished(transitionParams) }
 
         machine.machineNotify { onStateChanged(state) }
 
-        if (finish) parent?.afterChildFinished(this)
+        if (finish) parent?.afterChildFinished(this, transitionParams)
     }
 
     internal fun switchToTargetState(

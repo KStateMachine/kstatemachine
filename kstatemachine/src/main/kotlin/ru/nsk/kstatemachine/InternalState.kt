@@ -10,7 +10,7 @@ interface InternalState : IState {
 
     fun doEnter(transitionParams: TransitionParams<*>)
     fun doExit(transitionParams: TransitionParams<*>)
-    fun afterChildFinished(state: InternalState)
+    fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
 
     fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
     fun recursiveEnterInitialStates()

@@ -35,7 +35,7 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
          * If child mode is [ChildMode.EXCLUSIVE] notifies that child [IFinalState] is entered.
          * If child mode is [ChildMode.PARALLEL] notifies that all children has finished.
          */
-        fun onFinished() = Unit
+        fun onFinished(transitionParams: TransitionParams<*>) = Unit
     }
 }
 
@@ -100,9 +100,9 @@ fun <S : IState> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
     })
 }
 
-fun <S : IState> S.onFinished(block: StateBlock<S>) {
+fun <S : IState> S.onFinished(block: S.(TransitionParams<*>) -> Unit) {
     addListener(object : IState.Listener {
-        override fun onFinished() = block()
+        override fun onFinished(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
 }
 
