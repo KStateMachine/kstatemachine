@@ -1,12 +1,11 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class NestedStateTest {
-    @Test
-    fun startNestedStatesBranch() {
+class NestedStateTest : StringSpec({
+    "start nested states branch" {
         val callbacks = mockkCallbacks()
 
         lateinit var firstL1: State
@@ -34,8 +33,7 @@ class NestedStateTest {
         }
     }
 
-    @Test
-    fun exitEnterNestedStatesBranch() {
+    "exit enter nested states branch" {
         val callbacks = mockkCallbacks()
 
         lateinit var firstL1: State
@@ -84,8 +82,7 @@ class NestedStateTest {
         }
     }
 
-    @Test
-    fun nestedStateFinishL2() {
+    "nested state finish L2" {
         val callbacks = mockkCallbacks()
 
         lateinit var initialL1: State
@@ -150,8 +147,7 @@ class NestedStateTest {
         }
     }
 
-    @Test
-    fun nestedNoInitialState() {
+    "nested no initial state" {
         val machine = createStateMachine(start = false) {
             initialState("firstL1") {
                 state("firstL2")
@@ -160,4 +156,4 @@ class NestedStateTest {
 
         shouldThrow<IllegalStateException> { machine.start() }
     }
-}
+})

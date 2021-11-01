@@ -1,17 +1,16 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class ParallelStatesTest {
-    @Test
-    fun initialStateInParallelMode_negative() {
+class ParallelStatesTest : StringSpec({
+    "initial state in parallel mode negative" {
         createStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 shouldThrow<IllegalStateException> { initialState() }
@@ -19,8 +18,7 @@ class ParallelStatesTest {
         }
     }
 
-    @Test
-    fun finalStateInParallelMode_negative() {
+    "final state in parallel mode negative" {
         createStateMachine(childMode = ChildMode.PARALLEL) {
             shouldThrow<IllegalArgumentException> {
                 finalState()
@@ -28,8 +26,7 @@ class ParallelStatesTest {
         }
     }
 
-    @Test
-    fun parallelStateMachine() {
+    "parallel state machine" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -54,8 +51,7 @@ class ParallelStatesTest {
         state2.isActive.shouldBeTrue()
     }
 
-    @Test
-    fun enterParallelStates() {
+    "enter parallel states" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -85,8 +81,7 @@ class ParallelStatesTest {
         machine.activeStates() should containExactlyInAnyOrder(machine, state1, state11, state12, state111)
     }
 
-    @Test
-    fun exitParallelStates() {
+    "exit parallel states" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -122,8 +117,7 @@ class ParallelStatesTest {
         }
     }
 
-    @Test
-    fun processEventByParallelStates_negative() {
+    "process event by parallel states negative" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -146,8 +140,7 @@ class ParallelStatesTest {
         }
     }
 
-    @Test
-    fun processEventByParallelStates() {
+    "process event by parallel states" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -169,11 +162,8 @@ class ParallelStatesTest {
     }
 
     // FIXME add sample code and readme refs
-    /**
-     * StateMachine finishes when all child parallel states has finished
-     */
-    @Test
-    fun finishingWithParallelStates() {
+    // StateMachine finishes when all child parallel states has finished
+    "finishing with parallel states" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: IState
@@ -219,8 +209,7 @@ class ParallelStatesTest {
         state2.isFinished shouldBe true
     }
 
-    @Test
-    fun finishingWithParallelStates_negative() {
+    "finishing with parallel states negative" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: IState
@@ -238,4 +227,4 @@ class ParallelStatesTest {
             callbacks.onFinished(state1)
         }
     }
-}
+})

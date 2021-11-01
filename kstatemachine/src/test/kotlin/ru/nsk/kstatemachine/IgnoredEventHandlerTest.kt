@@ -1,12 +1,11 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class IgnoredEventHandlerTest {
-    @Test
-    fun ignoredEventHandler() {
+class IgnoredEventHandlerTest : StringSpec({
+    "ignored event handler" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -21,8 +20,7 @@ class IgnoredEventHandlerTest {
         verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 
-    @Test
-    fun exceptionalIgnoredEventHandler() {
+    "exceptional ignored event handler" {
         val machine = createStateMachine {
             initialState("first")
 
@@ -36,8 +34,7 @@ class IgnoredEventHandlerTest {
         }
     }
 
-    @Test
-    fun processEventOnFinishedStateMachine() {
+    "process event on finished state machine" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -55,4 +52,4 @@ class IgnoredEventHandlerTest {
         machine.processEvent(SwitchEvent)
         verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
-}
+})

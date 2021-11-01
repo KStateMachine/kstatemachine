@@ -1,14 +1,11 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class CrossLevelTransitionTest {
-    /**
-     * Currently transition from self to self is same as targetless transition
-     */
-    @Test
-    fun selfToSelf() {
+class CrossLevelTransitionTest : StringSpec({
+    // Transition from self to self is same as targetless transition
+    "self to self" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -33,8 +30,7 @@ class CrossLevelTransitionTest {
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun selfToSelfWithChildren() {
+    "self to self with children" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -89,8 +85,7 @@ class CrossLevelTransitionTest {
         }
     }
 
-    @Test
-    fun parentToChild() {
+    "parent to child" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -131,8 +126,7 @@ class CrossLevelTransitionTest {
         }
     }
 
-    @Test
-    fun toNeighborsChild() {
+    "to neighbors child" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -169,8 +163,7 @@ class CrossLevelTransitionTest {
         }
     }
 
-    @Test
-    fun childToNeighborsChild() {
+    "child to neighbors child" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -220,8 +213,7 @@ class CrossLevelTransitionTest {
         }
     }
 
-    @Test
-    fun childToTopLevelNeighbor() {
+    "child to top level neighbor" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -262,8 +254,7 @@ class CrossLevelTransitionTest {
         }
     }
 
-    @Test
-    fun childToParent() {
+    "child to parent" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -316,4 +307,4 @@ class CrossLevelTransitionTest {
             callbacks.onEntryState(state11)
         }
     }
-}
+})

@@ -1,17 +1,16 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.Called
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
 private open class HierarchyEventL1 : Event
 private open class HierarchyEventL2 : HierarchyEventL1()
 
-class EventMatcherTest {
-    @Test
-    fun eventMatcherIsEqual() {
+class EventMatcherTest : StringSpec({
+    "EventMatcher::isEqual()" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -34,8 +33,7 @@ class EventMatcherTest {
         verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
-    @Test
-    fun eventMatcherIsEqualNegative() {
+    "EventMatcher::isEqual() negative" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -54,8 +52,7 @@ class EventMatcherTest {
         verify { callbacks wasNot Called }
     }
 
-    @Test
-    fun eventMatcherInstanceOf() {
+    "EventMatcher::isInstanceOf()" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -74,8 +71,7 @@ class EventMatcherTest {
         verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
-    @Test
-    fun eventMatcherInstanceOfNegative() {
+    "EventMatcher::isInstanceOf() negative" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -95,4 +91,4 @@ class EventMatcherTest {
             machine.processEvent(HierarchyEventL2())
         }
     }
-}
+})

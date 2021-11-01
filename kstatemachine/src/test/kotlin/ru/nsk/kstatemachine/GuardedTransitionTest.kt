@@ -1,13 +1,12 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.Called
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class GuardedTransitionTest {
-    @Test
-    fun guardedTransition() {
+class GuardedTransitionTest : StringSpec({
+    "guarded transition" {
         val callbacks = mockkCallbacks()
 
         var value = "value1"
@@ -32,8 +31,7 @@ class GuardedTransitionTest {
         verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun guardedTransitionOnWithLateinitState() {
+    "guarded transitionOn() with lateinit state" {
         val callbacks = mockkCallbacks()
 
         var value = "value1"
@@ -60,8 +58,7 @@ class GuardedTransitionTest {
         verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun guardedTransitionSameEvent() {
+    "guarded transition same event" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -99,4 +96,4 @@ class GuardedTransitionTest {
             callbacks.onEntryState(state3)
         }
     }
-}
+})

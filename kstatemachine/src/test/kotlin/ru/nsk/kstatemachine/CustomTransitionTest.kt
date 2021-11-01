@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 
 private class CustomEvent(val value: Int) : Event
@@ -18,9 +18,8 @@ class CustomTransition(name: String, sourceState: IState, targetState: IState) :
  * when it is triggered with [Transition.isMatchingEvent]. Currently I do not see real use cases to do it,
  * as conditional transitions might be used for the same purpose.
  */
-class CustomTransitionTest {
-    @Test
-    fun customTransition() {
+class CustomTransitionTest : StringSpec({
+    "custom transition" {
         val callbacks = mockkCallbacks()
 
         val event = CustomEvent(42)
@@ -41,4 +40,4 @@ class CustomTransitionTest {
 
         verifySequence { callbacks.onTriggeredTransition(event) }
     }
-}
+})

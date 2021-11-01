@@ -1,21 +1,18 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
-class TransitionOverrideTest {
-    @Test
-    fun overrideParentTransitionSameEventType() = overrideParentTransitionWithEventType<SwitchEvent>()
+class TransitionOverrideTest : StringSpec({
+    "override parent transition same event type" { overrideParentTransitionWithEventType<SwitchEvent>() }
 
-    @Test
-    fun overrideParentTransitionDifferentEventType() = overrideParentTransitionWithEventType<Event>()
+    "override parent transition different event type" { overrideParentTransitionWithEventType<Event>() }
 
-    /**
-     * It is not possible to override with [noTransition]. Currently I do not think it is necessary.
-     * [stay] should fit such case, see [overrideWithStay].
+    /*
+     * It is not possible to override with [noTransition]. Currently, I do not think it is necessary.
+     * [stay] should fit such case, see "override with stay()".
      */
-    @Test
-    fun overrideWithNoTransitionNegative() {
+    "override with noTransition() negative" {
         val callbacks = mockkCallbacks()
 
         val machine = overrideWithDirection(callbacks, noTransition())
@@ -25,8 +22,7 @@ class TransitionOverrideTest {
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent, 2) }
     }
 
-    @Test
-    fun overrideWithStay() {
+    "override with stay()" {
         val callbacks = mockkCallbacks()
 
         val machine = overrideWithDirection(callbacks, stay())
@@ -36,8 +32,7 @@ class TransitionOverrideTest {
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun overrideAllEvents() {
+    "override all events" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -62,7 +57,7 @@ class TransitionOverrideTest {
         machine.processEvent(SwitchEvent)
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
-}
+})
 
 private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     val callbacks = mockkCallbacks()

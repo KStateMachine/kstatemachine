@@ -129,4 +129,10 @@ dependencies {
 
 Where `<Tag>` is a library version.
 
+## Build
+
+Run `./gradlew build` or build with `Intellij IDEA`.
+
+To run tests from IDE download official [Kotest plugin](https://github.com/kotest/kotest-intellij-plugin).
+
 ## Licensed under the [Boost Software License](./LICENSE)

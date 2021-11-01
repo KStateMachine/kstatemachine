@@ -1,22 +1,20 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.verify
 import io.mockk.verifyOrder
-import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
 /**
  * In a parent state machine it is not possible to use as transitions targets states from inner machine and vise versa.
  * Inner machine is treated as atomic state by outer one.
  * Inner machine is started automatically when outer one enters it.
  */
-class CompositionStateMachinesTest {
-    @Test
-    fun compositionInnerAutoStart() = composition(false)
+class CompositionStateMachinesTest : StringSpec({
+    "composition inner auto start" { composition(false) }
 
-    @Test
-    fun compositionInnerManualStart() = composition(true)
-}
+    "composition inner manual start" { composition(true) }
+})
+
 
 private fun composition(startInnerMachineOnSetup: Boolean) {
     val callbacks = mockkCallbacks()

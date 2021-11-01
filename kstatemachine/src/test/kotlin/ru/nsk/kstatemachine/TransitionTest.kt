@@ -1,18 +1,17 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 
 private const val ARGUMENT = 1
 
-class TransitionTest {
-    @Test
-    fun transitionArgument() {
+class TransitionTest : StringSpec({
+    "transition argument" {
         val callbacks = mockkCallbacks()
 
         val second = object : DefaultState("second") {}
@@ -38,8 +37,7 @@ class TransitionTest {
         verifySequence { callbacks.onEntryState(second) }
     }
 
-    @Test
-    fun requireTransition() {
+    "require transition" {
         val state = object : DefaultState() {}
 
         lateinit var firstTransition: Transition<*>
@@ -58,8 +56,7 @@ class TransitionTest {
         shouldThrow<IllegalArgumentException> { state.requireTransition<SwitchEvent>() }
     }
 
-    @Test
-    fun transitionDirection() {
+    "transition direction" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -99,8 +96,7 @@ class TransitionTest {
         }
     }
 
-    @Test
-    fun topLevelTransition() {
+    "top level transition" {
         val callbacks = mockkCallbacks()
 
         lateinit var state2: State
@@ -123,8 +119,7 @@ class TransitionTest {
         }
     }
 
-    @Test
-    fun transitionToNullTargetState() {
+    "transition to null target state" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -140,8 +135,7 @@ class TransitionTest {
         verify { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun transitionWithShortcutMethod() {
+    "transition with shortcut method" {
         lateinit var finalState: FinalState
 
         val machine = createStateMachine {
@@ -154,4 +148,4 @@ class TransitionTest {
         machine.processEvent(SwitchEvent)
         finalState.isActive shouldBe true
     }
-}
+})

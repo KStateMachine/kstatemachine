@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
+import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.containExactly
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -9,22 +10,19 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.Called
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.Testing.startFrom
 
 private object OnEvent : Event
 private object OffEvent : Event
 
-class StateMachineTest {
-    @Test
-    fun noInitialState() {
+class StateMachineTest : StringSpec({
+    "no initial state" {
         shouldThrow<IllegalStateException> {
             createStateMachine {}
         }
     }
 
-    @Test
-    fun onOffDsl() {
+    "on off dsl" {
         val callbacks = mockkCallbacks()
 
         lateinit var on: State
@@ -71,8 +69,7 @@ class StateMachineTest {
         verify { callbacks wasNot Called }
     }
 
-    @Test
-    fun nonDslUsage() {
+    "non dsl usage" {
         val machine = StateMachineImpl("machine", ChildMode.EXCLUSIVE)
         val first = DefaultState("first")
         val second = DefaultState("second")
@@ -93,8 +90,7 @@ class StateMachineTest {
         second.isActive shouldBe true
     }
 
-    @Test
-    fun genericOnTransitionNotification() {
+    "generic onTransition() notification" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -111,8 +107,7 @@ class StateMachineTest {
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun currentStateNotification() {
+    "onStateChanged() notification" {
         val callbacks = mockkCallbacks()
         lateinit var first: State
 
@@ -124,8 +119,7 @@ class StateMachineTest {
         verifySequence { callbacks.onStateChanged(first) }
     }
 
-    @Test
-    fun addSameStateListener() {
+    "add same state listener" {
         createStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
@@ -137,8 +131,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun addSameStateMachineListener() {
+    "add same state machine listener" {
         createStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
@@ -151,8 +144,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun addSameTransitionListener() {
+    "add same transition listener" {
         createStateMachine {
             initialState("first") {
                 val transition = transition<SwitchEvent>()
@@ -164,16 +156,14 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun addStateAfterStart() {
+    "add state after start" {
         val machine = createStateMachine {
             initialState("first")
         }
         shouldThrow<IllegalStateException> { machine.state() }
     }
 
-    @Test
-    fun setInitialStateAfterStart() {
+    "set initial state after start" {
         lateinit var first: State
         val machine = createStateMachine {
             first = initialState("first")
@@ -182,8 +172,7 @@ class StateMachineTest {
         shouldThrowUnit<IllegalStateException> { machine.setInitialState(first) }
     }
 
-    @Test
-    fun pendingEventHandler() {
+    "pending event handler" {
         val machine = createStateMachine {
             val second = state("second")
             initialState("first") {
@@ -203,8 +192,7 @@ class StateMachineTest {
         machine.processEvent(SwitchEvent)
     }
 
-    @Test
-    fun requireState() {
+    "require state" {
         lateinit var first: State
         lateinit var second: State
         val machine = createStateMachine {
@@ -217,8 +205,7 @@ class StateMachineTest {
         shouldThrow<IllegalArgumentException> { machine.requireState("third") }
     }
 
-    @Test
-    fun requireStateRecursive() {
+    "require state recursive" {
         lateinit var first: State
         lateinit var firstNested: State
         val machine = createStateMachine {
@@ -234,16 +221,14 @@ class StateMachineTest {
         first.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
     }
 
-    @Test
-    fun processEventBeforeStarted() {
+    "process event before started" {
         createStateMachine {
             initialState("first")
             shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
         }
     }
 
-    @Test
-    fun onStartedListener() {
+    "onStarted() listener" {
         val callbacks = mockkCallbacks()
 
         lateinit var first: State
@@ -260,8 +245,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun finishingStateMachine() {
+    "finishing state machine" {
         val callbacks = mockkCallbacks()
 
         lateinit var final: State
@@ -278,8 +262,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun finishedStateMachineIgnoresEvent() {
+    "finished state machine ignores event" {
         val callbacks = mockkCallbacks()
 
         lateinit var final: State
@@ -304,8 +287,7 @@ class StateMachineTest {
         verify { callbacks wasNot Called }
     }
 
-    @Test
-    fun stateMachineEntryExit() {
+    "state machine entry exit" {
         val callbacks = mockkCallbacks()
 
         lateinit var initialState: State
@@ -324,8 +306,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun startFrom() {
+    "startFrom()" {
         val callbacks = mockkCallbacks()
 
         lateinit var state2: State
@@ -355,8 +336,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun restartMachine() {
+    "restart machine" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State
@@ -392,8 +372,7 @@ class StateMachineTest {
         }
     }
 
-    @Test
-    fun activeStates() {
+    "activeStates()" {
         lateinit var state1: State
         lateinit var state2: State
         lateinit var state21: State
@@ -423,4 +402,4 @@ class StateMachineTest {
         activeStates = machine.activeStates()
         activeStates should containExactly(machine, state2, state21, state211)
     }
-}
+})

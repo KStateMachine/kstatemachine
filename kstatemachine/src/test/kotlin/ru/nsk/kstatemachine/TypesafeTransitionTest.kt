@@ -1,17 +1,16 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
 private class NameEvent(override val data: String) : DataEvent<String>
 private class IdEvent(override val data: Int) : DataEvent<Int>
 
-class TypesafeTransitionTest {
-    @Test
-    fun initialDataState_negative() {
+class TypesafeTransitionTest : StringSpec({
+    "initial DataState negative" {
         shouldThrow<Exception> {
             createStateMachine {
                 addInitialState(DefaultDataState<String>("state1"))
@@ -19,8 +18,7 @@ class TypesafeTransitionTest {
         }
     }
 
-    @Test
-    fun finalDataStateTransition() {
+    "FinalDataState transition" {
         lateinit var final: DataState<Int>
 
         val machine = createStateMachine {
@@ -34,8 +32,7 @@ class TypesafeTransitionTest {
         machine.activeStates().shouldContainExactly(machine, final)
     }
 
-    @Test
-    fun finalDataStateCannotHaveTransition() {
+    "FinalDataState cannot have transition" {
         createStateMachine {
             initialState("initial")
             finalDataState<Int>("final") {
@@ -44,8 +41,7 @@ class TypesafeTransitionTest {
         }
     }
 
-    @Test
-    fun singleDataState() {
+    "single data state" {
         val testName = "testName"
 
         lateinit var state2: DataState<String>
@@ -73,8 +69,7 @@ class TypesafeTransitionTest {
         shouldThrow<IllegalStateException> { state2.data }
     }
 
-    @Test
-    fun multipleDataStates() {
+    "multiple data states" {
         lateinit var state2: DataState<String>
         lateinit var state3: DataState<Int>
 
@@ -100,8 +95,7 @@ class TypesafeTransitionTest {
         state3.data shouldBe id
     }
 
-    @Test
-    fun multipleNestedDataStates() {
+    "multiple nested data states" {
         val callbacks = mockkCallbacks()
         lateinit var state1: State
         lateinit var state2: DataState<String>
@@ -149,8 +143,7 @@ class TypesafeTransitionTest {
         state22.data shouldBe id
     }
 
-    @Test
-    fun implicitDataStateActivationByCrossLevelTransition_negative() {
+    "implicit data state activation by cross level transition negative" {
         val machine = createStateMachine {
             lateinit var state21: State
 
@@ -167,8 +160,7 @@ class TypesafeTransitionTest {
         shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
     }
 
-    @Test
-    fun transitionWithEventSuperType() {
+    "transition with event super type" {
         lateinit var state2: DataState<Number>
 
         val machine = createStateMachine {
@@ -184,4 +176,4 @@ class TypesafeTransitionTest {
 
         state2.data shouldBe id
     }
-}
+})

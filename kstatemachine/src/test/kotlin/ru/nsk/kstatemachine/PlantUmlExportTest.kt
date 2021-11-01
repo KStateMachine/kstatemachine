@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
 private const val PLANTUML_NESTED_STATES_RESULT = """@startuml
@@ -53,9 +53,8 @@ state parallel_states {
 @enduml
 """
 
-class PlantUmlExportTest {
-    @Test
-    fun exportNestedStates() {
+class PlantUmlExportTest : StringSpec({
+    "export nested states" {
         val machine = createStateMachine("Nested states") {
             val state1 = initialState("State1")
             val state3 = finalState("State3")
@@ -80,8 +79,7 @@ class PlantUmlExportTest {
         machine.exportToPlantUml() shouldBe PLANTUML_NESTED_STATES_RESULT
     }
 
-    @Test
-    fun exportParallelStates() {
+    "export parallel states" {
         val machine = createStateMachine("Parallel states") {
             initialState("parallel states", ChildMode.PARALLEL) {
                 state("State1") {
@@ -111,4 +109,4 @@ class PlantUmlExportTest {
 
         machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
     }
-}
+})

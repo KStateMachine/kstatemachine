@@ -1,13 +1,14 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
 import org.junit.jupiter.api.Test
 
 class SubclassState : DefaultState() {
     val dataField = 0
 }
 
-class StateTest {
+class StateTest : StringSpec({
     @Test
     fun stateSubclass() {
         val machine = createStateMachine {
@@ -42,10 +43,10 @@ class StateTest {
         }
     }
 
-    @Test
-    fun explicitFinalStateMarkerUsage() {
+    "explicit final state marker usage" {
         class MyState : DefaultState(), FinalState {
-            override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
+            override fun <E : Event> addTransition(transition: Transition<E>) =
+                super<FinalState>.addTransition(transition)
         }
 
         createStateMachine {
@@ -56,8 +57,7 @@ class StateTest {
         }
     }
 
-    @Test
-    fun finalStateTransitionExplicitState() {
+    "final state transition explicit state" {
         createStateMachine {
             val final = addFinalState(DefaultFinalState("final")) {
                 shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
@@ -66,11 +66,8 @@ class StateTest {
         }
     }
 
-    /**
-     * This test should not compile
-     */
-    @Test
-    fun dslMarker() {
+    // This test should not compile
+    "dsl marker" {
 //        createStateMachine {
 //            val subclassState = addState(SubclassState())
 //
@@ -96,4 +93,4 @@ class StateTest {
 //            setInitialState(subclassState)
 //        }
     }
-}
+})

@@ -1,15 +1,14 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.Called
 import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Test
 
 private class ConditionEvent(val data: Boolean) : Event
 
-class ConditionalTransitionTest {
-    @Test
-    fun conditionalTransitionStay() {
+class ConditionalTransitionTest : StringSpec({
+    "conditional transition stay()" {
         val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
@@ -32,8 +31,7 @@ class ConditionalTransitionTest {
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
 
-    @Test
-    fun conditionalTransitionNoTransition() {
+    "conditional transition noTransition()" {
         val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
@@ -58,8 +56,7 @@ class ConditionalTransitionTest {
         verify { callbacks wasNot Called }
     }
 
-    @Test
-    fun conditionalTransitionTargetState() {
+    "conditional transition targetState()" {
         val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
@@ -87,8 +84,7 @@ class ConditionalTransitionTest {
         }
     }
 
-    @Test
-    fun conditionalTransition() {
+    "conditional transition" {
         val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
@@ -116,8 +112,7 @@ class ConditionalTransitionTest {
         }
     }
 
-    @Test
-    fun conditionalTransitionByEventData() {
+    "conditional transition by event data" {
         val callbacks = mockkCallbacks()
 
         val first = object : DefaultState("first") {}
@@ -147,4 +142,4 @@ class ConditionalTransitionTest {
             callbacks.onEntryState(third)
         }
     }
-}
+})
