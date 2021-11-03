@@ -1,6 +1,7 @@
 # Detailed documentation
 
 ## Workflow
+
 Building blocks (main interfaces) of the library:
 
 * `StateMachine` - is a collection of states and transitions between them, processes events when started
@@ -40,40 +41,54 @@ By default, `createStateMachine()` starts state machine. You can control it usin
 
 ## Setup states
 
-In state machine setup block we define states with `state()` function and set initial one with `setInitialState()`:
+### Default states
+
+`IState` is just an interface, `DefaultState` & co. are implementations.
+
+Use default states if you do not need to distinguish states (by type) outside from state machine. Otherwise, consider
+using [state subclasses](#state-subclasses).
+
+In state machine setup block define states with `initialState()`, `state()` and `finalState()` functions:
 
 ```kotlin
 createStateMachine {
-    // Use state() function to create State and add it to StateMachine
-    val greenState = state()
+    // Use initialState() function to create initial State and add it to StateMachine
+    // State machine enters this state after setup is complete
+    val greenState = initialState()
     // State name is optional and is useful to getting state instance
     // after state machine setup and for debugging
     val yellowState = state("Yellow")
-
-    // State machine enters this state after setup is complete
-    setInitialState(greenState)
-}
-```
-
-You can use `initialState()` and `addInitialState()` shortcut functions to create/add and set initial state:
-
-```kotlin
-createStateMachine {
-    val greenState = initialState("Green")
+    val redState = finalState()
     // ...
 }
 ```
 
-You can use `State` subclasses with `addState()` and `addInitialState()` functions:
+You can use `setInitialState()` function to set initial state separately:
 
 ```kotlin
-object SomeState : DefaultState()
+createStateMachine {
+    val greenState = state()
+    setInitialState(greenState)
+    // ...
+}
+```
+
+### State subclasses
+
+You can use your own `IState` subclasses with `addInitialState()`, `addState()` and `addFinalState()` functions.
+Subclass `DefaultState`, `DefaultFinalState` or their [data](#typesafe-transitions) analogs `DefaultDataState`
+, `DefaultFinalDataState`, then you can easily distinguish your states by type when observing state changes:
+
+```kotlin
+class SomeState : DefaultState()
 
 createStateMachine {
     val someState = addState(SomeState())
     // ...
 }
 ```
+
+### Listen states
 
 In state setup blocks we can add listeners for states:
 
@@ -102,6 +117,8 @@ greenState {
         // Set target state where state machine go when this transition is triggered
         targetState = yellowState
     }
+    // The same with shortcut version
+    transition<RedEvent>("My transition", redState)
 }
 ```
 
