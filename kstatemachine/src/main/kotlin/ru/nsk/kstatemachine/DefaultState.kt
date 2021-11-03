@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
+import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :

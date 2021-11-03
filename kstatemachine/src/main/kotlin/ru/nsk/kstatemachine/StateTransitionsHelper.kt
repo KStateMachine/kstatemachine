@@ -41,8 +41,7 @@ inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
 inline fun <reified E : Event> StateTransitionsHelper.transition(
     name: String? = null,
     targetState: State? = null
-): Transition<E> =
-    addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
+): Transition<E> = addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
 
 /**
  * Creates transition.
@@ -96,7 +95,20 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
 }
 
 /**
- * Creates type safe argument transition.
+ * Shortcut function for type safe argument transition.
+ * Data transition can not be targetless as it does not make sense.
+ */
+inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
+    name: String? = null,
+    targetState: DataState<D>
+): Transition<E> {
+    require(targetState != asState()) {
+        "data transition should no be self targeted, use simple transition instead"
+    }
+    return addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
+}
+/**
+ * Creates type safe argument transition to [DataState].
  */
 inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
     name: String? = null,
@@ -106,9 +118,18 @@ inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
         eventMatcher = isInstanceOf()
         block()
     }
+    requireNotNull(builder.targetState) {
+        "data transition should no be targetless, specify targetState or use simple transition instead"
+    }
+    require(builder.targetState != asState()) {
+        "data transition should no be self targeted, use simple transition instead"
+    }
     return addTransition(builder.build())
 }
 
+/**
+ * Data transition, otherwise same as [transitionOn]
+ */
 inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransitionOn(
     name: String? = null,
     block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,

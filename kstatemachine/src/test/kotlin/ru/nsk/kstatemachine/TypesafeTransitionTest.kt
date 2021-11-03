@@ -4,7 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.mockk.verify
 import io.mockk.verifySequence
+import java.lang.IllegalArgumentException
 
 private class NameEvent(override val data: String) : DataEvent<String>
 private class IdEvent(override val data: Int) : DataEvent<Int>
@@ -175,5 +177,68 @@ class TypesafeTransitionTest : StringSpec({
         machine.processEvent(IdEvent(id))
 
         state2.data shouldBe id
+    }
+
+    "targetless data transition negative" {
+        shouldThrow<IllegalArgumentException> {
+            createStateMachine {
+                initialState("state1") {
+                    dataTransition<IdEvent, Int> {}
+                }
+            }
+        }
+    }
+
+    "targetless transition in data state" {
+        val callbacks = mockkCallbacks()
+
+        val machine = createStateMachine {
+            val dataState = dataState<Int>("state2") {
+                transition<SwitchEvent> { callbacks.listen(this) }
+            }
+
+            initialState("state1") {
+                dataTransition<IdEvent, Int>(targetState = dataState)
+            }
+        }
+
+        machine.processEvent(IdEvent(13))
+        machine.processEvent(SwitchEvent)
+
+        verify { callbacks.onTriggeredTransition(SwitchEvent) }
+    }
+
+    "self targeted transition in data state" {
+        shouldThrow<IllegalArgumentException> {
+            createStateMachine {
+                initialState("state1")
+
+                dataState<Int>("state2") {
+                    dataTransition<IdEvent, Int>(targetState = this)
+                }
+            }
+        }
+    }
+
+    "self targeted transitionOn() does not update data, cannot throw on construction" {
+        lateinit var dataState: DataState<Int>
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            initialState("state1") {
+                dataTransitionOn<IdEvent, Int> { targetState = { dataState } }
+            }
+
+            dataState = dataState("state2") {
+                dataTransitionOn<IdEvent, Int> { targetState = { dataState } }
+            }
+        }
+
+        machine.processEvent(IdEvent(1))
+        dataState.data shouldBe 1
+
+        machine.processEvent(IdEvent(2))
+        dataState.data shouldBe 1
     }
 })
