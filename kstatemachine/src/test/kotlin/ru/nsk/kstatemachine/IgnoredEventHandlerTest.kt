@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.mockk.verify
 import io.mockk.verifySequence
 
 class IgnoredEventHandlerTest : StringSpec({
@@ -51,5 +52,25 @@ class IgnoredEventHandlerTest : StringSpec({
 
         machine.processEvent(SwitchEvent)
         verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
+    }
+
+    "ignored event on conditional noTransition()" {
+        val callbacks = mockkCallbacks()
+
+        val machine = createStateMachine {
+            val state = state()
+
+            initialState {
+                transitionConditionally<SwitchEvent> { direction = { noTransition() } }
+            }
+
+            ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
+                callbacks.onIgnoredEvent(event)
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+
+        verify { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 })

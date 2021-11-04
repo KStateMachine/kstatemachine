@@ -193,6 +193,8 @@ class TypesafeTransitionTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
             val dataState = dataState<Int>("state2") {
                 transition<SwitchEvent> { callbacks.listen(this) }
             }
