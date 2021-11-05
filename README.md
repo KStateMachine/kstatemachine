@@ -34,7 +34,7 @@ Main features are:
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
-## SEE DETAILED DOCUMENTATION [HERE](./doc/detailed_doc.md)
+## SEE [WIKI PAGE](https://github.com/nsk90/kstatemachine/wiki) FOR MORE INFO
 
 ## [Android sample app](https://github.com/nsk90/android-kstatemachine-sample)
 
