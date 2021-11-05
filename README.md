@@ -17,32 +17,26 @@ Main features are:
 * Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * Event based - transitions are performed by processing incoming events
-* Listeners for states and transitions
-* [Guarded](./doc/detailed_doc.md#guarded-transitions)
-  and [Conditional transitions](./doc/detailed_doc.md#conditional-transitions) with dynamic target state which is
-  calculated in a moment of event processing depending on application business logic
-* [Nested states](./doc/detailed_doc.md#nested-states) - hierarchical state machines (HSMs)
-  with [cross level transitions](./doc/detailed_doc.md#cross-level-transitions) support
-* [Composed (nested) state machines.](./doc/detailed_doc.md#composed-(nested)-state-machines) Use state machines as
-  atomic child states
-* [Typesafe transitions](./doc/detailed_doc.md#typesafe-transitions) to pass data in typesafe way from event to state
-* [Parallel states](./doc/detailed_doc.md#parallel-states) to avoid a combinatorial explosion of states
-* [Argument](./doc/detailed_doc.md#arguments) passing for events and transitions
-* [Export state machine](./doc/detailed_doc.md#export) structure to [PlantUML](https://plantuml.com/);
-* Built-in [logging](./doc/detailed_doc.md#logging) support
+* Listeners for machine, states and transitions, all callbacks are shipped with information about current transition
+* [Guarded](https://github.com/nsk90/kstatemachine/wiki#guarded-transitions)
+  and [Conditional transitions](https://github.com/nsk90/kstatemachine/wiki#conditional-transitions) with dynamic target
+  state which is calculated in a moment of event processing depending on application business logic
+* [Nested states](https://github.com/nsk90/kstatemachine/wiki#nested-states) - hierarchical state machines (HSMs)
+  with [cross level transitions](https://github.com/nsk90/kstatemachine/wiki#cross-level-transitions) support
+* [Composed (nested) state machines.](https://github.com/nsk90/kstatemachine/wiki#composed-(nested)-state-machines) Use
+  state machines as atomic child states
+* [Typesafe transitions](https://github.com/nsk90/kstatemachine/wiki#typesafe-transitions) to pass data in typesafe way
+  from event to state
+* [Parallel states](https://github.com/nsk90/kstatemachine/wiki#parallel-states) to avoid a combinatorial explosion of
+  states
+* [Argument](https://github.com/nsk90/kstatemachine/wiki#arguments) passing for events and transitions
+* [Export state machine](https://github.com/nsk90/kstatemachine/wiki#export) structure
+  to [PlantUML](https://plantuml.com/);
+* Built-in [logging](https://github.com/nsk90/kstatemachine/wiki#logging) support
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
 ## SEE [WIKI PAGE](https://github.com/nsk90/kstatemachine/wiki) FOR MORE INFO
-
-## [Android sample app](https://github.com/nsk90/android-kstatemachine-sample)
-
-The library itself does not depend on Android.
-
-<p align="center">
-    <img src="https://github.com/nsk90/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
-        alt="Android sample app" width="300"/>
-</p>
 
 ## Quick start sample (finishing traffic light)
 
@@ -93,6 +87,14 @@ fun main() {
 ## Samples
 
 * [Simple Android 2D shooter game sample](https://github.com/nsk90/android-kstatemachine-sample)
+
+  The library itself does not depend on Android.
+
+  <p align="center">
+      <img src="https://github.com/nsk90/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
+          alt="Android sample app" height="450"/>
+  </p>
+
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
