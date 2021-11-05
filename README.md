@@ -19,14 +19,13 @@ Main features are:
 * Event based - transitions are performed by processing incoming events
 * Listeners for states and transitions
 * [Guarded](./doc/detailed_doc.md#guarded-transitions)
-  and [Conditional transitions](./doc/detailed_doc.md#conditional-transitions) with dynamic target state which
-  is calculated in a moment of event processing depending on application business logic
+  and [Conditional transitions](./doc/detailed_doc.md#conditional-transitions) with dynamic target state which is
+  calculated in a moment of event processing depending on application business logic
 * [Nested states](./doc/detailed_doc.md#nested-states) - hierarchical state machines (HSMs)
   with [cross level transitions](./doc/detailed_doc.md#cross-level-transitions) support
-* [Composed (nested) state machines.](./doc/detailed_doc.md#composed-(nested)-state-machines) Use state machines
-  as atomic child states
-* [Typesafe transitions](./doc/detailed_doc.md#typesafe-transitions) to pass data in typesafe way from event to
-  state
+* [Composed (nested) state machines.](./doc/detailed_doc.md#composed-(nested)-state-machines) Use state machines as
+  atomic child states
+* [Typesafe transitions](./doc/detailed_doc.md#typesafe-transitions) to pass data in typesafe way from event to state
 * [Parallel states](./doc/detailed_doc.md#parallel-states) to avoid a combinatorial explosion of states
 * [Argument](./doc/detailed_doc.md#arguments) passing for events and transitions
 * [Export state machine](./doc/detailed_doc.md#export) structure to [PlantUML](https://plantuml.com/);
@@ -50,45 +49,44 @@ The library itself does not depend on Android.
 ![Traffic light diagram](./doc/diagrams/finishing-traffic-light.png)
 
 ```kotlin
-// Define events
 sealed class Events {
-    object YellowEvent : Event
-    object RedEvent : Event
+    object NextEvent : Event
 }
 
-// Define states
 sealed class States {
-    object GreenState : DefaultState("Green")
-    object YellowState : DefaultState("Yellow")
-    object RedState : DefaultFinalState("Red") // State machine finishes when enters final state
+    object GreenState : DefaultState()
+    object YellowState : DefaultState()
+    object RedState : DefaultFinalState() // Machine finishes when enters final state
 }
 
 fun main() {
     // Create state machine and configure its states in a setup block
     val machine = createStateMachine {
-        addInitialState(States.GreenState) {
+        addInitialState(GreenState) {
             // Add state listeners
-            onEntry { println("Enter $name state") }
-            onExit { println("Exit $name state") }
+            onEntry { println("Enter green") }
+            onExit { println("Exit green") }
 
-            // Setup transition on YellowEvent
-            transition<Events.YellowEvent> {
-                targetState = States.YellowState
+            // Setup transition
+            transition<NextEvent> {
+                targetState = YellowState
                 // Add transition listener
-                onTriggered { println("Transition on ${it.event}") }
+                onTriggered { println("Transition triggered") }
             }
         }
 
-        addState(States.YellowState) {
-            transition<Events.RedEvent> { targetState = States.RedState }
+        addState(YellowState) {
+            transition<NextEvent>(targetState = RedState)
         }
 
-        addFinalState(States.RedState)
+        addFinalState(RedState)
+
+        onFinished { println("Finished") }
     }
 
-    // Process events
-    machine.processEvent(Events.YellowEvent)
-    machine.processEvent(Events.RedEvent)
+    // Now we can process events
+    machine.processEvent(NextEvent)
+    machine.processEvent(NextEvent)
 }
 ```
 

@@ -1,44 +1,45 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.samples.Events.NextEvent
+import ru.nsk.samples.States.*
 
-// Define events
 sealed class Events {
-    object YellowEvent : Event
-    object RedEvent : Event
+    object NextEvent : Event
 }
 
-// Define states
 sealed class States {
-    object GreenState : DefaultState("Green")
-    object YellowState : DefaultState("Yellow")
-    object RedState : DefaultFinalState("Red") // State machine finishes when enters final state
+    object GreenState : DefaultState()
+    object YellowState : DefaultState()
+    object RedState : DefaultFinalState() // Machine finishes when enters final state
 }
 
 fun main() {
     // Create state machine and configure its states in a setup block
     val machine = createStateMachine {
-        addInitialState(States.GreenState) {
+        addInitialState(GreenState) {
             // Add state listeners
-            onEntry { println("Enter $name state") }
-            onExit { println("Exit $name state") }
+            onEntry { println("Enter green") }
+            onExit { println("Exit green") }
 
-            // Setup transition on YellowEvent
-            transition<Events.YellowEvent> {
-                targetState = States.YellowState
+            // Setup transition
+            transition<NextEvent> {
+                targetState = YellowState
                 // Add transition listener
-                onTriggered { println("Transition on ${it.event::class.simpleName}") }
+                onTriggered { println("Transition triggered") }
             }
         }
 
-        addState(States.YellowState) {
-            transition<Events.RedEvent> { targetState = States.RedState }
+        addState(YellowState) {
+            transition<NextEvent>(targetState = RedState)
         }
 
-        addFinalState(States.RedState)
+        addFinalState(RedState)
+
+        onFinished { println("Finished") }
     }
 
-    // Process events
-    machine.processEvent(Events.YellowEvent)
-    machine.processEvent(Events.RedEvent)
+    // Now we can process events
+    machine.processEvent(NextEvent)
+    machine.processEvent(NextEvent)
 }

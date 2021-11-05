@@ -1,7 +1,7 @@
 @startuml
 hide empty description
 [*] -> GreenState
-GreenState -> YellowState : YellowEvent
-YellowState -> RedState : RedEvent
+GreenState -> YellowState : NextEvent
+YellowState -> RedState : NextEvent
 RedState -> [*]
-@enduml 
+@enduml
