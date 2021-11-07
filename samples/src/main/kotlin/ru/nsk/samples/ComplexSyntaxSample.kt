@@ -45,7 +45,7 @@ fun main() {
                 guard = { false } // Never trigger this transition
                 targetState = {
                     val condition = true
-                    if (condition) redState else redState
+                    if (condition) redState else greenState
                 }
             }
         }
