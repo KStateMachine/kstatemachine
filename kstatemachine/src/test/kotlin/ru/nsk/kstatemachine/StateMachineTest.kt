@@ -98,9 +98,7 @@ class StateMachineTest : StringSpec({
                 transition<SwitchEvent>()
             }
 
-            onTransition { _, _, event, _ ->
-                callbacks.onTriggeredTransition(event)
-            }
+            onTransition { callbacks.onTriggeredTransition(it.event) }
         }
 
         machine.processEvent(SwitchEvent)

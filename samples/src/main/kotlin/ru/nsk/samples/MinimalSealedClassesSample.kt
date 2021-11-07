@@ -3,6 +3,7 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.Events.NextEvent
 import ru.nsk.samples.States.*
+import ru.nsk.samples.States.YellowState
 
 sealed class Events {
     object NextEvent : Event
@@ -19,8 +20,8 @@ fun main() {
     val machine = createStateMachine {
         addInitialState(GreenState) {
             // Add state listeners
-            onEntry { println("Enter green") }
-            onExit { println("Exit green") }
+            onEntry { println("Enter $this") }
+            onExit { println("Exit $this") }
 
             // Setup transition
             transition<NextEvent> {

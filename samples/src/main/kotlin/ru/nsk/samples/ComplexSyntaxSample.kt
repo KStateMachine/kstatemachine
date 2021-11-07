@@ -43,7 +43,10 @@ fun main() {
             // Setup guarded transition with a lambda calculating targetState
             transitionOn<SwitchRedEvent> {
                 guard = { false } // Never trigger this transition
-                targetState = { redState }
+                targetState = {
+                    val condition = true
+                    if (condition) redState else redState
+                }
             }
         }
 
@@ -96,17 +99,14 @@ fun main() {
 
     // Listeners might be added in or after setup block
     with(machine) {
-        onTransition { sourceState, targetState, event, argument ->
+        onTransition {
             // Listen to all transitions in one place
             // instead of listening to each transition separately
-            println("Transition from $sourceState to $targetState on $event with argument: $argument")
+            println("Transition from ${it.transition.sourceState} to ${it.direction.targetState} " +
+                    "on ${it.event} with argument: ${it.argument}")
         }
-        onStateChanged { state ->
-            println("State changed to $state")
-        }
-        onFinished {
-            println("$name finished")
-        }
+        onStateChanged { println("State changed to $it") }
+        onFinished { println("$name finished") }
     }
 
     // Access state after state machine setup

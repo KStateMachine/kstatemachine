@@ -31,7 +31,7 @@ interface StateMachine : State {
     fun processEvent(event: Event, argument: Any? = null)
 
     /**
-     * Set of states that the state machine is currently in.
+     * Set of states that the state machine is currently in, including machine itself.
      * Internal states of nested machines are not included.
      */
     fun activeStates(): Set<IState>
@@ -52,7 +52,7 @@ interface StateMachine : State {
          * this method might be used to listen to all transitions in one place
          * instead of listening for each transition separately.
          */
-        fun onTransition(sourceState: IState, targetState: IState?, event: Event, argument: Any?) = Unit
+        fun onTransition(transitionParams: TransitionParams<*>) = Unit
 
         /**
          * Notifies about state changes.
@@ -96,17 +96,10 @@ fun StateMachine.onStopped(block: StateMachine.() -> Unit) {
     })
 }
 
-fun StateMachine.onTransition(
-    block: StateMachine.(
-        sourceState: IState,
-        targetState: IState?,
-        event: Event,
-        argument: Any?
-    ) -> Unit
-) {
+fun StateMachine.onTransition(block: StateMachine.(TransitionParams<*>) -> Unit) {
     addListener(object : StateMachine.Listener {
-        override fun onTransition(sourceState: IState, targetState: IState?, event: Event, argument: Any?) =
-            block(sourceState, targetState, event, argument)
+        override fun onTransition(transitionParams: TransitionParams<*>) =
+            block(transitionParams)
     })
 }
 

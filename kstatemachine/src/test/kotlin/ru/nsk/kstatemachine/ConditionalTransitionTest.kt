@@ -45,9 +45,7 @@ class ConditionalTransitionTest : StringSpec({
                     callbacks.listen(this)
                 }
             }
-            onTransition { _, _, event, _ ->
-                callbacks.onTriggeredTransition(event)
-            }
+            onTransition { callbacks.onTriggeredTransition(it.event) }
         }
 
         verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }

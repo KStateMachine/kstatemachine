@@ -2,9 +2,7 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 
-// Define events
-object YellowEvent : Event
-object RedEvent : Event
+object NextEvent1 : Event
 
 fun main() {
     // Create state machine and configure its states in a setup block
@@ -13,24 +11,26 @@ fun main() {
         val redState = finalState()
 
         val yellowState = state {
-            // Setup transition on RedEvent
-            transition<RedEvent> {
+            // Setup transition
+            transition<NextEvent1> {
                 targetState = redState
                 // Add transition listener
-                onTriggered { println("Transition on ${it.event::class.simpleName}") }
+                onTriggered { println("Transition triggered") }
             }
         }
 
-        initialState {
+        initialState("green") {
             // Add state listeners
-            onEntry { println("Enter $name state") }
-            onExit { println("Exit $name state") }
+            onEntry { println("Enter $name") }
+            onExit { println("Exit $name") }
 
-            transition<YellowEvent> { targetState = yellowState }
+            transition<NextEvent1>(targetState = yellowState)
         }
+
+        onFinished { println("Finished") }
     }
 
-    // Process events
-    machine.processEvent(YellowEvent)
-    machine.processEvent(RedEvent)
+    // Now we can process events
+    machine.processEvent(NextEvent1)
+    machine.processEvent(NextEvent1)
 }
