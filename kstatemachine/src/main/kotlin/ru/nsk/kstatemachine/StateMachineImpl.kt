@@ -30,10 +30,6 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
         require(_machineListeners.add(listener)) { "$listener is already added" }
-
-        val currentState = currentState
-        if (currentState != null)
-            listener.onStateChanged(currentState)
         return listener
     }
 

@@ -56,7 +56,6 @@ interface StateMachine : State {
 
         /**
          * Notifies about state changes.
-         * This method will also be triggered on adding listener with a current state of a state machine.
          */
         fun onStateChanged(newState: IState) = Unit
 

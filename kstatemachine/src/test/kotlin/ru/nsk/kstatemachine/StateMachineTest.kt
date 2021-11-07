@@ -109,10 +109,10 @@ class StateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
         lateinit var first: State
 
-        val machine = createStateMachine {
+        createStateMachine {
             first = initialState("first")
+            onStateChanged { callbacks.onStateChanged(it) }
         }
-        machine.onStateChanged { callbacks.onStateChanged(it) }
 
         verifySequence { callbacks.onStateChanged(first) }
     }
