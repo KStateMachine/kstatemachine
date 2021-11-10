@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
+import kotlin.reflect.KClass
 
 @StateMachineDslMarker
 interface IState : StateTransitionsHelper, VisitorAcceptor {
@@ -91,6 +92,41 @@ fun IState.findState(name: String, recursive: Boolean = true): IState? {
 
 fun IState.requireState(name: String, recursive: Boolean = true) =
     requireNotNull(findState(name, recursive)) { "State $name not found" }
+
+/**
+ * Find state by type. Search by type is suitable when using own state subclasses that usually do not have a name.
+ * Only on state should match the type or exception will be thrown.
+ */
+inline fun <reified S : IState> IState.findState(recursive: Boolean = true) = findState(S::class, recursive)
+
+/**
+ * For internal use. Workaround that Kotlin does not support recursive inline functions.
+ */
+@Suppress("UNCHECKED_CAST")
+fun <S : IState> IState.findState(`class`: KClass<S>, recursive: Boolean = true): S? {
+    fun requireSingleOrEmpty(collection: Collection<*>) = require(collection.size <= 1) {
+        "More than one state matches ${`class`.simpleName}"
+    }
+
+    val filtered = states.filter { `class`.isInstance(it) }
+    requireSingleOrEmpty(filtered)
+
+    if (!recursive) return filtered.singleOrNull() as S?
+
+    val nestedFiltered = states.mapNotNull { it.findState(`class`, recursive) }
+    requireSingleOrEmpty(nestedFiltered)
+
+    val allFiltered = filtered + nestedFiltered
+    requireSingleOrEmpty(allFiltered)
+
+    return allFiltered.singleOrNull() as S?
+}
+
+/**
+ * Require state by type
+ */
+inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
+    requireNotNull(findState<S>(recursive)) { "State ${S::class.simpleName} not found" }
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 

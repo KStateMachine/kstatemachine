@@ -4,15 +4,15 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.containExactly
 import io.kotest.matchers.should
-import org.junit.jupiter.api.Test
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 class SubclassState : DefaultState() {
     val dataField = 0
 }
 
 class StateTest : StringSpec({
-    @Test
-    fun stateSubclass() {
+    "state subclass" {
         val machine = createStateMachine {
             // simple but little bit explicit, easy to forget addState() call
             val subclassState = addState(SubclassState()) {
@@ -35,10 +35,18 @@ class StateTest : StringSpec({
         machine.processEvent(SwitchEvent)
     }
 
-    @Test
-    fun finalStateTransition() {
+    "final state transition" {
         createStateMachine {
             val final = finalState("final") {
+                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
+            }
+            setInitialState(final)
+        }
+    }
+
+    "final state transition with explicit state" {
+        createStateMachine {
+            val final = addFinalState(DefaultFinalState("final")) {
                 shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
             }
             setInitialState(final)
@@ -59,13 +67,63 @@ class StateTest : StringSpec({
         }
     }
 
-    "final state transition explicit state" {
-        createStateMachine {
-            val final = addFinalState(DefaultFinalState("final")) {
-                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
-            }
-            setInitialState(final)
+    "requireState()" {
+        lateinit var first: State
+        lateinit var second: State
+        val machine = createStateMachine {
+            first = initialState("first")
+            second = state("second")
         }
+
+        machine.requireState("first") shouldBeSameInstanceAs first
+        machine.requireState("second", recursive = false) shouldBeSameInstanceAs second
+        shouldThrow<IllegalArgumentException> { machine.requireState("third") }
+    }
+
+    "requireState() recursive" {
+        lateinit var first: State
+        lateinit var firstNested: State
+        val machine = createStateMachine {
+            first = initialState("first") {
+                firstNested = initialState("firstNested")
+            }
+        }
+
+        machine.requireState("firstNested") shouldBeSameInstanceAs firstNested
+        shouldThrow<IllegalArgumentException> {
+            machine.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
+        }
+        first.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
+    }
+
+    "requireState() by type" {
+        open class SubclassState : DefaultState()
+        open class UnusedSubclassState : DefaultState()
+
+        class FirstState(val value: Int = 42) : DefaultState()
+        class SecondState : SubclassState()
+        class ThirdInnerState : SubclassState()
+
+        lateinit var first: FirstState
+        lateinit var second: State
+        lateinit var third: State
+        val machine = createStateMachine {
+            first = addInitialState(FirstState())
+            second = addState(SecondState()) {
+                third = addState(ThirdInnerState())
+            }
+        }
+
+        machine.requireState<FirstState>() shouldBeSameInstanceAs first
+        machine.requireState<FirstState>().value shouldBe first.value
+        machine.requireState<SecondState>(recursive = false) shouldBeSameInstanceAs second
+
+        shouldThrow<IllegalArgumentException> { machine.requireState<ThirdInnerState>(recursive = false) }
+        machine.requireState<ThirdInnerState>() shouldBeSameInstanceAs third
+
+        shouldThrow<IllegalArgumentException> { machine.requireState<UnusedSubclassState>() }
+        shouldThrow<IllegalArgumentException> { machine.requireState<State>() }
+        shouldThrow<IllegalArgumentException> { machine.requireState<SubclassState>() }
     }
 
     "activeStates()" {
@@ -113,6 +171,16 @@ class StateTest : StringSpec({
 
         machine.activeStates(true ) should containExactly(machine, state1, state2)
         machine.activeStates() should containExactly(state1, state2)
+    }
+
+    "do not allow nested states with same name" {
+        shouldThrow<IllegalStateException> {
+            createStateMachine {
+                initialState("first") {
+                    initialState("first")
+                }
+            }
+        }
     }
 
     // This code should not compile

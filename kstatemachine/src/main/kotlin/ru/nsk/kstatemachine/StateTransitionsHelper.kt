@@ -33,7 +33,7 @@ inline fun <reified E : Event> StateTransitionsHelper.findTransition(): Transiti
 }
 
 inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
-    requireNotNull(findTransition<E>()) { "Transition for ${E::class} not found" }
+    requireNotNull(findTransition<E>()) { "Transition for ${E::class.simpleName} not found" }
 
 /**
  * Shortcut overload for transition with an optional target state

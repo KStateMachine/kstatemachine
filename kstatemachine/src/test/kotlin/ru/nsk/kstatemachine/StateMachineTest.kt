@@ -190,35 +190,6 @@ class StateMachineTest : StringSpec({
         machine.processEvent(SwitchEvent)
     }
 
-    "require state" {
-        lateinit var first: State
-        lateinit var second: State
-        val machine = createStateMachine {
-            first = initialState("first")
-            second = state("second")
-        }
-
-        machine.requireState("first") shouldBeSameInstanceAs first
-        machine.requireState("second", recursive = false) shouldBeSameInstanceAs second
-        shouldThrow<IllegalArgumentException> { machine.requireState("third") }
-    }
-
-    "require state recursive" {
-        lateinit var first: State
-        lateinit var firstNested: State
-        val machine = createStateMachine {
-            first = initialState("first") {
-                firstNested = initialState("firstNested")
-            }
-        }
-
-        machine.requireState("firstNested") shouldBeSameInstanceAs firstNested
-        shouldThrow<IllegalArgumentException> {
-            machine.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
-        }
-        first.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
-    }
-
     "process event before started" {
         createStateMachine {
             initialState("first")
