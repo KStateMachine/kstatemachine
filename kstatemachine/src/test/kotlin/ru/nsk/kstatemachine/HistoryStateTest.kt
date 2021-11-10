@@ -39,6 +39,26 @@ class HistoryStateTest : StringSpec({
         machine.processEvent(SwitchEvent)
     }
 
+    "shallow history in flat machine" {
+        lateinit var history : HistoryState
+        lateinit var state2 : State
+
+        val machine = createStateMachine {
+            initialState {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state {
+                transitionOn<SwitchEvent> { targetState = { history } }
+            }
+            history = historyState()
+        }
+
+        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+
+
+    }
+
     "more than one HistoryState not allowed" {
         shouldThrow<IllegalArgumentException> {
             createStateMachine {

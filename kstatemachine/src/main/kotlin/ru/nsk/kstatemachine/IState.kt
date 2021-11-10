@@ -108,6 +108,9 @@ interface RedirectPseudoState : PseudoState {
  */
 interface HistoryState : PseudoState {
     val historyType: HistoryType
+    /** Initial parent state if was not set explicitly */
+    val defaultState: State
+    fun storeState(owner: IState, currentState: IState)
 }
 
 typealias StateBlock<S> = S.() -> Unit

@@ -33,6 +33,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override val initialState get() = data.initialState
 
+    private val historyStates: List<HistoryState> get() = states.filterIsInstance<HistoryState>()
+
     override val machine get() = if (this is StateMachine) this else requireParent().machine
 
     override val transitions: Set<Transition<*>> get() = data.transitions
@@ -68,8 +70,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
-        if (childMode == ChildMode.PARALLEL)
+        if (childMode == ChildMode.PARALLEL) {
             require(state !is FinalState) { "Can not add FinalState in parallel child mode" }
+            if (state is HistoryState)
+                require(state.historyType != HistoryType.SHALLOW) {
+                    "Can not add Shallow HistoryState in parallel child mode"
+                }
+        }
 
         state.name?.let {
             require(findState(it, recursive = false) == null) { "State with name $it already exists" }
@@ -207,6 +214,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         require(states.contains(state)) { "$state is not a child of $this" }
 
         if (data.currentState == state) return
+
+        // store history
+        data.currentState?.let { currentState ->
+            // FIXME only State is supported (not DataState), add some check?
+            historyStates.forEach { it.storeState(this, currentState) }
+        }
+
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
