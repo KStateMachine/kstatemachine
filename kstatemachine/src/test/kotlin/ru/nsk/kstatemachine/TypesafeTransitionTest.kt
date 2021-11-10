@@ -31,7 +31,7 @@ class TypesafeTransitionTest : StringSpec({
         }
 
         machine.processEvent(IdEvent(42))
-        machine.activeStates().shouldContainExactly(machine, final)
+        machine.activeStates().shouldContainExactly(final)
     }
 
     "FinalDataState cannot have transition" {

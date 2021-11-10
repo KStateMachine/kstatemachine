@@ -44,7 +44,7 @@ class ParallelStatesTest : StringSpec({
             callbacks.onEntryState(state2)
         }
 
-        machine.activeStates() should containExactlyInAnyOrder(machine, state1, state2)
+        machine.activeStates() should containExactlyInAnyOrder(state1, state2)
 
         machine.isActive.shouldBeTrue()
         state1.isActive.shouldBeTrue()
@@ -78,7 +78,7 @@ class ParallelStatesTest : StringSpec({
             callbacks.onEntryState(state12)
         }
 
-        machine.activeStates() should containExactlyInAnyOrder(machine, state1, state11, state12, state111)
+        machine.activeStates() should containExactlyInAnyOrder(state1, state11, state12, state111)
     }
 
     "exit parallel states" {

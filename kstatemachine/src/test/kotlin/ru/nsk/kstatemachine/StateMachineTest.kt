@@ -369,35 +369,4 @@ class StateMachineTest : StringSpec({
             callbacks.onEntryState(state1)
         }
     }
-
-    "activeStates()" {
-        lateinit var state1: State
-        lateinit var state2: State
-        lateinit var state21: State
-        lateinit var state211: State
-
-        val machine = createStateMachine {
-            state1 = initialState("state1") {
-                transitionOn<SwitchEvent> {
-                    targetState = { state2 }
-                }
-            }
-            state2 = state("state2") {
-                state21 = initialState("state21") {
-                    state211 = addInitialState(createStateMachine(start = false) {
-                        // should not be included
-                        initialState("state2111")
-                    })
-                }
-            }
-        }
-
-        var activeStates = machine.activeStates()
-        activeStates should containExactly(machine, state1)
-
-        machine.processEvent(SwitchEvent)
-
-        activeStates = machine.activeStates()
-        activeStates should containExactly(machine, state2, state21, state211)
-    }
 })

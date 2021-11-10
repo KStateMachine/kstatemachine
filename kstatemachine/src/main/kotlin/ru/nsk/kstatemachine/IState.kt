@@ -25,6 +25,12 @@ interface IState : StateTransitionsHelper, VisitorAcceptor {
      */
     fun setInitialState(state: IState)
 
+    /**
+     * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
+     * Internal states of nested machines are not included.
+     */
+    fun activeStates(selfIncluding: Boolean = false): Set<IState>
+
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {

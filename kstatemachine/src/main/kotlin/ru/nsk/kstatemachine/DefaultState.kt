@@ -93,6 +93,10 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         _initialState = state as InternalState
     }
 
+    override fun activeStates(selfIncluding: Boolean): Set<IState> {
+        return mutableSetOf<IState>().also { recursiveFillActiveStates(it, this, selfIncluding) }
+    }
+
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         _transitions += transition
         return transition
@@ -186,16 +190,20 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         _states.forEach { it.recursiveStop() }
     }
 
-    override fun recursiveFillActiveStates(states: MutableSet<IState>) {
+    override fun recursiveFillActiveStates(states: MutableSet<IState>, self: IState, selfIncluding: Boolean) {
         if (!_isActive) return
-        states.add(this)
+        if (this == self) {
+            if (selfIncluding) states.add(this)
+        } else {
+            states.add(this)
+        }
 
         for (currentState in getCurrentStates()) {
             // do not include nested state machine states
             if (currentState is StateMachine)
                 states.add(currentState)
             else
-                currentState.recursiveFillActiveStates(states)
+                currentState.recursiveFillActiveStates(states, self, selfIncluding)
         }
     }
 

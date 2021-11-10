@@ -108,10 +108,6 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
         return true
     }
 
-    override fun activeStates(): Set<IState> {
-        return mutableSetOf<IState>().also { recursiveFillActiveStates(it) }
-    }
-
     override fun log(lazyMessage: () -> String) {
         if (logger != NullLogger)
             logger.log(lazyMessage())
