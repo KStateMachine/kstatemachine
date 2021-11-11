@@ -25,13 +25,16 @@ fun StateTransitionsHelper.requireTransition(name: String) =
     requireNotNull(findTransition(name)) { "Transition $name not found" }
 
 /**
- * Get transition by Event class. This might be used to start listening to transition after state machine setup.
+ * Find transition by Event type. This might be used to start listening to transition after state machine setup.
  */
 inline fun <reified E : Event> StateTransitionsHelper.findTransition(): Transition<E>? {
     @Suppress("UNCHECKED_CAST")
     return transitions.find { it.eventMatcher.eventClass == E::class } as Transition<E>?
 }
 
+/**
+ * Require transition by Event type
+ */
 inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
     requireNotNull(findTransition<E>()) { "Transition for ${E::class.simpleName} not found" }
 

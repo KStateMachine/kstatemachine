@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
-import java.lang.IllegalArgumentException
 
 private class NameEvent(override val data: String) : DataEvent<String>
 private class IdEvent(override val data: Int) : DataEvent<Int>

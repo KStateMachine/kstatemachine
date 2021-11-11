@@ -1,6 +1,5 @@
 package ru.nsk.kstatemachine
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -35,25 +34,6 @@ class TransitionTest : StringSpec({
 
         machine.processEvent(SwitchEvent)
         verifySequence { callbacks.onEntryState(second) }
-    }
-
-    "require transition" {
-        val state = object : DefaultState() {}
-
-        lateinit var firstTransition: Transition<*>
-        lateinit var secondTransition: Transition<*>
-
-        createStateMachine {
-            addInitialState(state) {
-                firstTransition = transition<FirstEvent>("firstTransition")
-                secondTransition = transition<SecondEvent>()
-            }
-        }
-
-        state.requireTransition("firstTransition") shouldBeSameInstanceAs firstTransition
-        state.requireTransition<SecondEvent>() shouldBeSameInstanceAs secondTransition
-        shouldThrow<IllegalArgumentException> { state.requireTransition("thirdTransition") }
-        shouldThrow<IllegalArgumentException> { state.requireTransition<SwitchEvent>() }
     }
 
     "transition direction" {

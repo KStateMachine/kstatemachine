@@ -3,10 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.containExactly
-import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.Called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -22,7 +19,7 @@ class StateMachineTest : StringSpec({
         }
     }
 
-    "on off dsl" {
+    "on off dsl sample" {
         val callbacks = mockkCallbacks()
 
         lateinit var on: State
@@ -90,7 +87,7 @@ class StateMachineTest : StringSpec({
         second.isActive shouldBe true
     }
 
-    "generic onTransition() notification" {
+    "onTransition() notification" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
