@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
+
 internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     InternalStateMachine, DefaultState(name, childMode) {
     /** Access to this field must be thread safe. */
@@ -39,6 +41,8 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     }
 
     override fun start() {
+        accept(CheckUniqueNamesVisitor())
+
         run(makeStartTransitionParams(this))
         recursiveEnterInitialStates()
     }

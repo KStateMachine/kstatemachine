@@ -173,16 +173,6 @@ class StateTest : StringSpec({
         machine.activeStates() should containExactly(state1, state2)
     }
 
-    "do not allow nested states with same name" {
-        shouldThrow<IllegalStateException> {
-            createStateMachine {
-                initialState("first") {
-                    initialState("first")
-                }
-            }
-        }
-    }
-
     // This code should not compile
     "dsl marker" {
 //        createStateMachine {
