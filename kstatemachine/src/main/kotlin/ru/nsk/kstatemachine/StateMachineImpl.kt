@@ -1,6 +1,12 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
+/**
+ * Defines state machine API for internal library usage.
+ */
+abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
+    internal abstract fun startFrom(state: IState)
+}
 
 internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     InternalStateMachine(name, childMode) {
@@ -123,3 +129,6 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     override fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
 }
+
+fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
+    machineListeners.forEach { it.apply(block) }

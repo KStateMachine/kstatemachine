@@ -114,13 +114,3 @@ fun createStateMachine(
     init()
     if (start) start()
 }
-
-/**
- * Defines state machine API for internal library usage.
- */
-abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
-    internal abstract fun startFrom(state: IState)
-}
-
-fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
-    machineListeners.forEach { it.apply(block) }
