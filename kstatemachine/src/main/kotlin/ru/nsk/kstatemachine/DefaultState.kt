@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
+import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -32,7 +33,7 @@ open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = 
     }
 }
 
-open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState {
+open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState() {
     private val _listeners = CopyOnWriteArraySet<IState.Listener>()
     override val listeners: Collection<IState.Listener> get() = _listeners
 
@@ -93,8 +94,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         _initialState = state as InternalState
     }
 
-    override fun activeStates(selfIncluding: Boolean): Set<IState> {
-        return mutableSetOf<IState>().also { recursiveFillActiveStates(it, this, selfIncluding) }
+    override fun activeStates(selfIncluding: Boolean) = with(GetActiveStatesVisitor(selfIncluding)) {
+        accept(this)
+        return@with activeStates
     }
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
@@ -190,26 +192,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         _states.forEach { it.recursiveStop() }
     }
 
-    override fun recursiveFillActiveStates(states: MutableSet<IState>, self: IState, selfIncluding: Boolean) {
-        if (!_isActive) return
-        if (this == self) {
-            if (selfIncluding) states.add(this)
-        } else {
-            states.add(this)
-        }
-
-        for (currentState in getCurrentStates()) {
-            // do not include nested state machine states
-            if (currentState is StateMachine)
-                states.add(currentState)
-            else
-                currentState.recursiveFillActiveStates(states, self, selfIncluding)
-        }
-    }
-
     private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
 
-    private fun getCurrentStates() = when (childMode) {
+    override fun getCurrentStates() = when (childMode) {
         ChildMode.EXCLUSIVE -> listOfNotNull(currentState)
         ChildMode.PARALLEL -> _states.toList()
     }

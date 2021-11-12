@@ -124,10 +124,3 @@ interface InternalStateMachine : StateMachine, InternalState {
 
 fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
     machineListeners.forEach { it.apply(block) }
-
-object Testing {
-    /**
-     * Method for testing purpose. It allows to start machine from particular [state]
-     */
-    fun StateMachine.startFrom(state: IState) = (this as InternalStateMachine).startFrom(state)
-}

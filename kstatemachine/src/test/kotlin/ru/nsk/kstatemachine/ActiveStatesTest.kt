@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.containExactly
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
 
 class ActiveStatesTest : StringSpec({
@@ -53,6 +54,19 @@ class ActiveStatesTest : StringSpec({
     }
 
     "activeStates() do not include nested machines states" {
-        TODO()
+        lateinit var initialState: State
+        lateinit var nestedMachine: State
+        val machine = createStateMachine {
+            initialState = initialState {
+                nestedMachine = addInitialState(createStateMachine {
+                    initialState()
+                })
+            }
+        }
+
+        val s = DefaultState()
+        s.recursiveEnterInitialStates()
+
+        machine.activeStates().shouldContainExactly(initialState, nestedMachine)
     }
 })
