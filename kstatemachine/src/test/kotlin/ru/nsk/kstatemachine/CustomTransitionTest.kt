@@ -15,7 +15,7 @@ class CustomTransition(name: String, sourceState: IState, targetState: IState) :
 
 /**
  * This is possible to subclass [DefaultTransition] and manually control
- * when it is triggered with [Transition.isMatchingEvent]. Currently I do not see real use cases to do it,
+ * when it is triggered with [Transition.isMatchingEvent]. Currently, I do not see real use cases to do it,
  * as conditional transitions might be used for the same purpose.
  */
 class CustomTransitionTest : StringSpec({

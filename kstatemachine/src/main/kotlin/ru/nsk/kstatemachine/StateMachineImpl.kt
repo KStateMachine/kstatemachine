@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 
 internal class StateMachineImpl(name: String?, childMode: ChildMode) :
-    InternalStateMachine, DefaultState(name, childMode) {
+    InternalStateMachine(name, childMode) {
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners

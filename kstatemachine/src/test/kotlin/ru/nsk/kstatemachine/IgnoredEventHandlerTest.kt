@@ -58,8 +58,6 @@ class IgnoredEventHandlerTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
-            val state = state()
-
             initialState {
                 transitionConditionally<SwitchEvent> { direction = { noTransition() } }
             }

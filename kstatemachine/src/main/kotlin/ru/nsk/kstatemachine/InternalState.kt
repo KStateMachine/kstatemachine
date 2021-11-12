@@ -3,26 +3,29 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 
 /**
- * Defines state API for internal library usage. All states must implement this interface.
+ * Defines state API for internal library usage. All states must implement this class.
+ * Unfortunately cannot use interface for this purpose.
  */
-interface InternalState : IState {
-    override var parent: InternalState?
+abstract class InternalState : IState {
+    override val parent: IState? get() = internalParent
+    internal var internalParent: InternalState? = null
 
-    fun doEnter(transitionParams: TransitionParams<*>)
-    fun doExit(transitionParams: TransitionParams<*>)
-    fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
+    internal abstract fun getCurrentStates(): List<InternalState>
 
-    fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
-    fun recursiveEnterInitialStates()
-    fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
-    fun recursiveExit(transitionParams: TransitionParams<*>)
-    fun recursiveStop()
-    fun recursiveFillActiveStates(states: MutableSet<IState>, self: IState, selfIncluding: Boolean)
+    internal abstract fun doEnter(transitionParams: TransitionParams<*>)
+    internal abstract fun doExit(transitionParams: TransitionParams<*>)
+    internal abstract fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
+
+    internal abstract fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
+    internal abstract fun recursiveEnterInitialStates()
+    internal abstract fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
+    internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
+    internal abstract fun recursiveStop()
 }
 
 internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
 
-internal fun InternalState.requireParent() = requireNotNull(parent) { "Parent is not set" }
+internal fun InternalState.requireParent() = requireNotNull(internalParent) { "Parent is not set" }
 
 internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
 

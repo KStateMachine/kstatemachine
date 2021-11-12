@@ -3,7 +3,6 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
-import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
@@ -43,12 +42,10 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     /**
      * In [ChildMode.EXCLUSIVE] might be null only before [setInitialState] call if there are child states.
      */
-    protected var currentState: InternalState? = null
+    private var currentState: InternalState? = null
 
     private var _initialState: InternalState? = null
     override val initialState get() = _initialState
-
-    override var parent: InternalState? = null
 
     override val machine get() = if (this is StateMachine) this else requireParent().machine
 
@@ -81,7 +78,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         state as InternalState
         require(_states.add(state)) { "$state already added" }
-        state.parent = this
+        state.internalParent = this
         if (init != null) state.init()
         return state
     }
@@ -228,7 +225,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         machine.machineNotify { onStateChanged(state) }
 
-        if (finish) parent?.afterChildFinished(this, transitionParams)
+        if (finish) internalParent?.afterChildFinished(this, transitionParams)
     }
 
     internal fun switchToTargetState(

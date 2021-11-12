@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 internal object TreeAlgorithms {
     /**
-     * @return Path from [targetState] to lowest common ancestor (lca).
+     * @return Path from [targetState] to the lowest common ancestor (lca).
      * This path always contains at lest one element - lca which is last.
      */
     fun InternalState.findPathFromTargetToLca(targetState: InternalState): MutableList<InternalState> {

@@ -2,8 +2,6 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.containExactly
-import io.kotest.matchers.should
 
 class SubclassState : DefaultState() {
     val dataField = 0
@@ -12,7 +10,7 @@ class SubclassState : DefaultState() {
 class StateTest : StringSpec({
     "state subclass" {
         val machine = createStateMachine {
-            // simple but little bit explicit, easy to forget addState() call
+            // simple but little explicit, easy to forget addState() call
             val subclassState = addState(SubclassState()) {
                 onEntry { println("Enter state with data: ${this@addState.dataField}") }
             }
