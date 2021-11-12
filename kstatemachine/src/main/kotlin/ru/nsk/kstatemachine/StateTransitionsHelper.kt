@@ -11,15 +11,15 @@ interface StateTransitionsHelper {
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E>
 
     /**
-     * Get transition by name. This might be used to start listening to transition after state machine setup.
-     */
-    fun findTransition(name: String) = transitions.find { it.name == name }
-
-    /**
      * For internal use only
      */
     fun asState(): IState
 }
+
+/**
+ * Find transition by name. This might be used to start listening to transition after state machine setup.
+ */
+fun StateTransitionsHelper.findTransition(name: String) = transitions.find { it.name == name }
 
 fun StateTransitionsHelper.requireTransition(name: String) =
     requireNotNull(findTransition(name)) { "Transition $name not found" }
