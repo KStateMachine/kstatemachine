@@ -10,7 +10,7 @@ private open class HierarchyEventL1 : Event
 private open class HierarchyEventL2 : HierarchyEventL1()
 
 class EventMatcherTest : StringSpec({
-    "EventMatcher::isEqual()" {
+    "isEqual()" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -33,7 +33,7 @@ class EventMatcherTest : StringSpec({
         verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
-    "EventMatcher::isEqual() negative" {
+    "isEqual() negative" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -52,7 +52,7 @@ class EventMatcherTest : StringSpec({
         verify { callbacks wasNot Called }
     }
 
-    "EventMatcher::isInstanceOf()" {
+    "isInstanceOf()" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
@@ -71,7 +71,7 @@ class EventMatcherTest : StringSpec({
         verifySequence { callbacks.onTriggeredTransition(event) }
     }
 
-    "EventMatcher::isInstanceOf() negative" {
+    "isInstanceOf() negative" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {

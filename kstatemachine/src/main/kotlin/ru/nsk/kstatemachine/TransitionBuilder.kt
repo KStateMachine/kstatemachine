@@ -2,7 +2,6 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
-import kotlin.reflect.KClass
 
 @StateMachineDslMarker
 abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: IState) {

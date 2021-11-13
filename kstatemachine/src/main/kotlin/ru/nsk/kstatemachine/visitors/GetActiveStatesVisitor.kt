@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
 
-class GetActiveStatesVisitor(private val selfIncluding: Boolean) : Visitor {
+internal class GetActiveStatesVisitor(private val selfIncluding: Boolean) : Visitor {
     private var _activeStates = mutableSetOf<IState>()
     private var runner: IState? = null
     val activeStates: Set<IState> get() = _activeStates

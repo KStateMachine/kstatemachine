@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 import kotlin.reflect.KClass
 
 @StateMachineDslMarker
-interface IState : StateTransitionsHelper, VisitorAcceptor {
+interface IState : TransitionStateApi, VisitorAcceptor {
     val name: String?
     val states: Set<IState>
     val initialState: IState?

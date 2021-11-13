@@ -24,3 +24,19 @@ fun noTransition(): TransitionDirection = NoTransition
 internal class TargetState(override val targetState: IState) : TransitionDirection()
 
 fun targetState(targetState: IState): TransitionDirection = TargetState(targetState)
+
+/**
+ * Transition that matches event and has a meaningful direction (except [NoTransition])
+ */
+typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirection>
+
+internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
+
+sealed class TransitionDirectionProducerPolicy<E : Event> {
+    class DefaultPolicy<E : Event>(val event: E) : TransitionDirectionProducerPolicy<E>()
+
+    /**
+     * TODO find the way to collect target states of conditional transitions
+     */
+    class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>()
+}

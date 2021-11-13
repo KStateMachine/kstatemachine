@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
+
 /**
  * Defines state machine API for internal library usage.
  */

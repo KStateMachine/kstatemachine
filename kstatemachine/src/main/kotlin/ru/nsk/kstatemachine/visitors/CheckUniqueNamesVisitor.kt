@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.IState
 import ru.nsk.kstatemachine.StateMachine
 import ru.nsk.kstatemachine.Transition
 
-internal class CheckUniqueNamesVisitor: Visitor {
+internal class CheckUniqueNamesVisitor : Visitor {
     private val stateNames = mutableSetOf<String>()
     private val transitionNames = mutableSetOf<String>()
 

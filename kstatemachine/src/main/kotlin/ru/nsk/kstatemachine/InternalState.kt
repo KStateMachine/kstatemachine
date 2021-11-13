@@ -18,7 +18,11 @@ abstract class InternalState : IState {
 
     internal abstract fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
     internal abstract fun recursiveEnterInitialStates()
-    internal abstract fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>)
+    internal abstract fun recursiveEnterStatePath(
+        path: MutableList<InternalState>,
+        transitionParams: TransitionParams<*>
+    )
+
     internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
     internal abstract fun recursiveStop()
 }

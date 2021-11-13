@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 /**
  * Helper interface for [IState] to keep transitions logic separately.
  */
-interface StateTransitionsHelper {
+interface TransitionStateApi {
     val transitions: Set<Transition<*>>
 
     fun <E : Event> addTransition(transition: Transition<E>): Transition<E>
@@ -19,15 +19,15 @@ interface StateTransitionsHelper {
 /**
  * Find transition by name. This might be used to start listening to transition after state machine setup.
  */
-fun StateTransitionsHelper.findTransition(name: String) = transitions.find { it.name == name }
+fun TransitionStateApi.findTransition(name: String) = transitions.find { it.name == name }
 
-fun StateTransitionsHelper.requireTransition(name: String) =
+fun TransitionStateApi.requireTransition(name: String) =
     requireNotNull(findTransition(name)) { "Transition $name not found" }
 
 /**
  * Find transition by Event type. This might be used to start listening to transition after state machine setup.
  */
-inline fun <reified E : Event> StateTransitionsHelper.findTransition(): Transition<E>? {
+inline fun <reified E : Event> TransitionStateApi.findTransition(): Transition<E>? {
     @Suppress("UNCHECKED_CAST")
     return transitions.find { it.eventMatcher.eventClass == E::class } as Transition<E>?
 }
@@ -35,13 +35,13 @@ inline fun <reified E : Event> StateTransitionsHelper.findTransition(): Transiti
 /**
  * Require transition by Event type
  */
-inline fun <reified E : Event> StateTransitionsHelper.requireTransition() =
+inline fun <reified E : Event> TransitionStateApi.requireTransition() =
     requireNotNull(findTransition<E>()) { "Transition for ${E::class.simpleName} not found" }
 
 /**
  * Shortcut overload for transition with an optional target state
  */
-inline fun <reified E : Event> StateTransitionsHelper.transition(
+inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
     targetState: State? = null
 ): Transition<E> = addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
@@ -52,7 +52,7 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> StateTransitionsHelper.transition(
+inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
     block: UnitGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
@@ -71,7 +71,7 @@ inline fun <reified E : Event> StateTransitionsHelper.transition(
  *
  * This is a special kind of conditional transition but with simpler syntax and less flexibility.
  */
-inline fun <reified E : Event> StateTransitionsHelper.transitionOn(
+inline fun <reified E : Event> TransitionStateApi.transitionOn(
     name: String? = null,
     block: UnitGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
@@ -86,7 +86,7 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionOn(
  * Creates conditional transition. Caller should specify lambda which calculates [TransitionDirection].
  * For example target state may be different depending on some condition.
  */
-inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
+inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
     name: String? = null,
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
@@ -101,7 +101,7 @@ inline fun <reified E : Event> StateTransitionsHelper.transitionConditionally(
  * Shortcut function for type safe argument transition.
  * Data transition can not be targetless as it does not make sense.
  */
-inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
+inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
     name: String? = null,
     targetState: DataState<D>
 ): Transition<E> {
@@ -110,10 +110,11 @@ inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
     }
     return addTransition(DefaultTransition(name, isInstanceOf(), asState(), targetState))
 }
+
 /**
  * Creates type safe argument transition to [DataState].
  */
-inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
+inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
     name: String? = null,
     block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
 ): Transition<E> {
@@ -133,7 +134,7 @@ inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransition(
 /**
  * Data transition, otherwise same as [transitionOn]
  */
-inline fun <reified E : DataEvent<D>, D> StateTransitionsHelper.dataTransitionOn(
+inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransitionOn(
     name: String? = null,
     block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
 ): Transition<E> {
