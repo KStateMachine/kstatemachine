@@ -87,7 +87,12 @@ fun IState.findState(name: String, recursive: Boolean = true): IState? {
     if (!recursive || result != null)
         return result
 
-    return states.firstNotNullOfOrNull { it.findState(name, recursive) }
+    return states.firstNotNullOfOrNull {
+        if (it is StateMachine) // do not go into nested state machines
+            null
+        else
+            it.findState(name, recursive)
+    }
 }
 
 fun IState.requireState(name: String, recursive: Boolean = true) =
