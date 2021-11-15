@@ -7,12 +7,12 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm") version "1.5.31"
     `java-library`
     jacoco
 }
 group = "ru.nsk"
-version = "0.8.0"
+version = "0.9.0"
 
 repositories {
     mavenCentral()
