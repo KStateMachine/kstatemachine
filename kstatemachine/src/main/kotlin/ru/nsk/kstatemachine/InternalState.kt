@@ -8,7 +8,8 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
  */
 abstract class InternalState : IState {
     override val parent: IState? get() = internalParent
-    internal var internalParent: InternalState? = null
+    internal abstract val internalParent: InternalState?
+    internal abstract fun setParent(parent: InternalState)
 
     internal abstract fun getCurrentStates(): List<InternalState>
 

@@ -30,6 +30,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     private var _isFinished = false
     override val isFinished get() = _isFinished
 
+    private var _internalParent: InternalState? = null
+    override val internalParent get() = _internalParent
+
+    override fun setParent(parent: InternalState) {
+        _internalParent = parent
+    }
+
     override fun <L : IState.Listener> addListener(listener: L): L {
         require(_listeners.add(listener)) { "$listener is already added" }
         return listener
@@ -50,7 +57,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         state as InternalState
         require(_states.add(state)) { "$state already added" }
-        state.internalParent = this
+        state.setParent(this)
+        
         if (init != null) state.init()
         return state
     }
