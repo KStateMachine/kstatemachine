@@ -88,7 +88,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
 
         try {
             if (!doProcessEvent(event, argument)) {
-                log { "$this ignored $event" }
+                log { "$this ignored ${event::class.simpleName}" }
                 ignoredEventHandler.onIgnoredEvent(event, argument)
             }
         } finally {
@@ -98,7 +98,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
 
     private fun doProcessEvent(event: Event, argument: Any?): Boolean {
         if (isFinished) {
-            log { "$this is finished, skipping event $event, with argument $argument" }
+            log { "$this is finished, skipping event ${event::class.simpleName}, with argument $argument" }
             return false
         }
 
