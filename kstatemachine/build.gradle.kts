@@ -7,7 +7,7 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version Versions.kotlin
     `java-library`
     jacoco
 }
@@ -53,7 +53,7 @@ tasks.check {
 }
 
 dependencies {
-    testImplementation("io.kotest:kotest-assertions-core:4.2.5")
-    testImplementation("io.kotest:kotest-runner-junit5:4.6.3")
-    testImplementation("io.mockk:mockk:1.11.0")
+    testImplementation("io.kotest:kotest-assertions-core:${Versions.kotestAssertions}")
+    testImplementation("io.kotest:kotest-runner-junit5:${Versions.kotestRunner}")
+    testImplementation("io.mockk:mockk:${Versions.mockk}")
 }
