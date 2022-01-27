@@ -33,10 +33,11 @@ fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection =
     TargetState(recursiveResolveTargetState(targetState))
 
 private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState {
-    return if (targetState is RedirectPseudoState)
-        recursiveResolveTargetState(targetState.resolveTargetState(this))
-    else
-        targetState
+    return when (targetState) {
+        is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
+        is HistoryState -> recursiveResolveTargetState(targetState.storedState)
+        else -> targetState
+    }
 }
 
 /**

@@ -89,6 +89,7 @@ open class DefaultHistoryState(
     override val defaultState get() = checkNotNull(_defaultState) { "Default state is not set" }
 
     private var _storedState: State? = null
+    val storedState: State
 
     override fun storeState(owner: IState, currentState: IState) {
         _storedState = currentState as State

@@ -111,6 +111,7 @@ interface HistoryState : PseudoState {
     /** Initial parent state if was not set explicitly */
     val defaultState: State
     fun storeState(owner: IState, currentState: IState)
+    val storedState: IState
 }
 
 typealias StateBlock<S> = S.() -> Unit
