@@ -12,7 +12,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override val states: Set<IState> get() = _states
 
     /**
-     * In [ChildMode.EXCLUSIVE] might be null only before [setInitialState] call if there are child states.
+     * In [ChildMode.EXCLUSIVE] is null if there are no child states, or if a state is not active.
+     * In [ChildMode.PARALLEL] it is always null.
      */
     private var currentState: InternalState? = null
 
@@ -58,7 +59,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         state as InternalState
         require(_states.add(state)) { "$state already added" }
         state.setParent(this)
-        
+
         if (init != null) state.init()
         return state
     }
@@ -106,6 +107,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         if (_isActive) {
             machine.log { "Exiting $this" }
             onDoExit(transitionParams)
+            currentState = null
             _isActive = false
             stateNotify { onExit(transitionParams) }
         }

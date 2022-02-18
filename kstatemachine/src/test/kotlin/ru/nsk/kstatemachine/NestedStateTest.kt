@@ -156,4 +156,56 @@ class NestedStateTest : StringSpec({
 
         shouldThrow<IllegalStateException> { machine.start() }
     }
+
+    "reenter initial nested state" {
+        val callbacks = mockkCallbacks()
+
+        lateinit var state1: State
+        lateinit var state11: State
+        lateinit var state2: State
+
+        val machine = createStateMachine {
+            state1 = initialState("1") {
+                callbacks.listen(this)
+
+                state11 = initialState("11") {
+                    callbacks.listen(this)
+                }
+
+                transitionOn<SwitchEvent> {
+                    targetState = { state2 }
+                    callbacks.listen(this)
+                }
+            }
+            state2 = state("2") {
+                callbacks.listen(this)
+
+                transitionOn<SwitchEvent> {
+                    targetState = { state1 }
+                    callbacks.listen(this)
+                }
+            }
+        }
+
+        verifySequenceAndClear(callbacks) {
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
+
+        machine.processEvent(SwitchEvent)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state11)
+            callbacks.onExitState(state1)
+            callbacks.onEntryState(state2)
+        }
+
+        machine.processEvent(SwitchEvent)
+        verifySequenceAndClear(callbacks) {
+            callbacks.onTriggeredTransition(SwitchEvent)
+            callbacks.onExitState(state2)
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state11)
+        }
+    }
 })
