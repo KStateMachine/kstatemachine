@@ -14,10 +14,11 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
+application {
+    mainClass.set("FullSyntaxSample")
+}
+
 dependencies {
     implementation(project(":kstatemachine"))
 }
 
-application {
-    mainClassName = "FullSyntaxSample"
-}
