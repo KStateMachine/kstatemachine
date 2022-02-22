@@ -3,7 +3,7 @@ object Versions {
     const val gradle = "7.1.0"
 
     // dependencies
-    const val mockk = "1.11.0"
-    const val kotestAssertions = "4.2.5"
-    const val kotestRunner = "4.6.3"
+    const val mockk = "1.12.2"
+    const val kotestAssertions = "5.1.0"
+    const val kotestRunner = "5.1.0"
 }
