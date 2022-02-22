@@ -10,6 +10,7 @@ plugins {
     kotlin("jvm") version Versions.kotlin
     `java-library`
     jacoco
+    `maven-publish`
 }
 group = "ru.nsk"
 version = "0.9.1"
