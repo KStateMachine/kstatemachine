@@ -7,13 +7,13 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version Versions.kotlin
+    kotlin("jvm")
     `java-library`
     jacoco
     `maven-publish`
 }
-group = "ru.nsk"
-version = "0.9.1"
+group = rootProject.group
+version = rootProject.version
 
 repositories {
     mavenCentral()

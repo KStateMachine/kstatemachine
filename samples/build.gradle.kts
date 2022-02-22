@@ -1,10 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version Versions.kotlin
+    kotlin("jvm")
     application
 }
-group = "ru.nsk"
+group = rootProject.group
+version = rootProject.version
 
 repositories {
     mavenCentral()
