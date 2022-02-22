@@ -7,10 +7,6 @@ plugins {
 group = rootProject.group
 version = rootProject.version
 
-repositories {
-    mavenCentral()
-}
-
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }

@@ -1,23 +1,14 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-    dependencies {
-        classpath("org.jacoco:org.jacoco.core:0.8.7")
-    }
-}
-
 plugins {
     kotlin("jvm")
     `java-library`
     jacoco
     `maven-publish`
 }
+
 group = rootProject.group
 version = rootProject.version
-
-repositories {
-    mavenCentral()
-}
 
 jacoco {
     toolVersion = "0.8.7"
@@ -51,6 +42,14 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 dependencies {
