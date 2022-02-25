@@ -5,6 +5,7 @@ plugins {
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
+    id("org.jetbrains.dokka") version "1.6.10"
 }
 
 group = rootProject.group
