@@ -1,19 +1,13 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
-    id("org.jetbrains.dokka") version "1.6.10"
+    id("org.jetbrains.dokka") version Versions.kotlin
 }
 
 group = rootProject.group
 version = rootProject.version
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
 
 tasks.test {
     useJUnitPlatform()

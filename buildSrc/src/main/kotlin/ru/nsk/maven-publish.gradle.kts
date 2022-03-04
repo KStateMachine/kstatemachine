@@ -1,5 +1,7 @@
 package ru.nsk
 
+import java.util.*
+
 plugins {
     java
     `maven-publish`
@@ -7,6 +9,11 @@ plugins {
 
 java {
     withSourcesJar()
+}
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.reader())
 }
 
 publishing {
@@ -51,15 +58,16 @@ publishing {
                     developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
                 }
             }
-//            repositories {
-//                maven {
-//                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-//                    credentials {
-//                         username = TODO()
-//                         password = TODO()
-//                    }
-//                }
-//            }
+
+            repositories {
+                maven {
+                    credentials {
+                        username = localProperties.getProperty("mavenUsername", "")
+                        password = localProperties.getProperty("mavenPassword", "")
+                    }
+                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+                }
+            }
         }
     }
 }
