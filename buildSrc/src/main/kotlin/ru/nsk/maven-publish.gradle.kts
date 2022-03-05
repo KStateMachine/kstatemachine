@@ -5,12 +5,16 @@ import java.util.*
 plugins {
     java
     `maven-publish`
+    signing
 }
 
 java {
+    // maven central requires these .jar files even if they are empty
     withSourcesJar()
+    withJavadocJar()
 }
 
+// local configuration with credentials is stored in local.properties file that is not under vcs
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) load(file.reader())
@@ -70,4 +74,13 @@ publishing {
             }
         }
     }
+}
+
+localProperties.getProperty("signing.gnupg.executable")?.let { ext.set("signing.gnupg.executable", it) }
+localProperties.getProperty("signing.gnupg.keyName")?.let { ext.set("signing.gnupg.keyName", it) }
+localProperties.getProperty("signing.gnupg.passphrase")?.let { ext.set("signing.gnupg.passphrase", it) }
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["mavenJava"])
 }
