@@ -108,6 +108,22 @@ fun main() {
 
 ## Install
 
+KStateMachine is available on Maven Central and JitPack repositories.
+
+### Maven Central
+
+Add the dependency:
+
+```groovy
+dependencies {
+    implementation 'io.github.nsk90:kstatemachine:<Tag>'
+}
+```
+
+Where `<Tag>` is a library version.
+
+### JitPack 
+
 Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
 root `build.gradle` at the end of repositories:
 
