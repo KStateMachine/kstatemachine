@@ -45,7 +45,8 @@ publishing {
                 licenses {
                     license {
                         name.set("Boost Software License 1.0")
-                        url.set("https://github.com/nsk90/kstatemachine/blob/master/LICENSE")
+                        url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
+                        distribution.set("repo")
                     }
                 }
                 developers {
