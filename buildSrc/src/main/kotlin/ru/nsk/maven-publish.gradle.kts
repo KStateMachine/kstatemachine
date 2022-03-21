@@ -77,11 +77,19 @@ publishing {
     }
 }
 
-localProperties.getProperty("signing.gnupg.executable")?.let { ext.set("signing.gnupg.executable", it) }
-localProperties.getProperty("signing.gnupg.keyName")?.let { ext.set("signing.gnupg.keyName", it) }
-localProperties.getProperty("signing.gnupg.passphrase")?.let { ext.set("signing.gnupg.passphrase", it) }
+localProperties.getProperty("signing.gnupg.executable")?.let { executable ->
+    ext.set("signing.gnupg.executable", executable)
 
-signing {
-    useGpgCmd()
-    sign(publishing.publications["mavenJava"])
+    localProperties.getProperty("signing.gnupg.keyName")?.let { keyName ->
+        ext.set("signing.gnupg.keyName", keyName)
+
+        localProperties.getProperty("signing.gnupg.passphrase")?.let { passphrase ->
+            ext.set("signing.gnupg.passphrase", passphrase)
+
+            signing {
+                useGpgCmd()
+                sign(publishing.publications["mavenJava"])
+            }
+        }
+    }
 }
