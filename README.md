@@ -93,7 +93,7 @@ fun main() {
 
   <p align="center">
       <img src="https://github.com/nsk90/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
-          alt="Android sample app" height="450"/>
+          alt="Android sample app" width="30%" height="30%"/>
   </p>
 
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
