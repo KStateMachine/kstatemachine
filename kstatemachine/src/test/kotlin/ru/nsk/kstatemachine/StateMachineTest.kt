@@ -337,4 +337,32 @@ class StateMachineTest : StringSpec({
             callbacks.onEntryState(state1)
         }
     }
+
+    "state machine listener callbacks sequence" {
+        val callbacks = mockkCallbacks()
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = finalState("state2")
+
+            onStarted { callbacks.onStarted(this) }
+            onStateChanged { callbacks.onStateChanged(it) }
+            onFinished { callbacks.onFinished(this) }
+        }
+
+        machine.processEvent(SwitchEvent)
+
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onStateChanged(state1)
+            callbacks.onStateChanged(state2)
+            callbacks.onFinished(machine)
+        }
+    }
 })

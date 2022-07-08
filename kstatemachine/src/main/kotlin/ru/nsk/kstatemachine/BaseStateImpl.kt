@@ -203,11 +203,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         state.doEnter(transitionParams)
 
         val machine = machine as InternalStateMachine
-        if (finish) stateNotify { onFinished(transitionParams) }
-
         machine.machineNotify { onStateChanged(state) }
 
-        if (finish) internalParent?.afterChildFinished(this, transitionParams)
+        if (finish)  {
+            stateNotify { onFinished(transitionParams) }
+            internalParent?.afterChildFinished(this, transitionParams)
+        }
     }
 
     internal fun switchToTargetState(
