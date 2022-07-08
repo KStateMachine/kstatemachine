@@ -32,7 +32,7 @@ internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(
 
 internal fun InternalState.requireParent() = requireNotNull(internalParent) { "Parent is not set" }
 
-internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach { it.apply(block) }
+internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach(block)
 
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }

@@ -125,11 +125,11 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     }
 
     /**
-     *  Starts machine if its inner state machine
+     * Starts machine if it is inner state of another one machine
      */
     override fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
 }
 
-fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
-    machineListeners.forEach { it.apply(block) }
+internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
+    machineListeners.forEach(block)
