@@ -26,6 +26,7 @@ abstract class InternalState : IState {
 
     internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
     internal abstract fun recursiveStop()
+    internal abstract fun cleanup()
 }
 
 internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true

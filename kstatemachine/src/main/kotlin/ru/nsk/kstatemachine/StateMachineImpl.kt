@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
+import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
 /**
  * Defines state machine API for internal library usage.
@@ -9,7 +10,7 @@ abstract class InternalStateMachine(name: String?, childMode: ChildMode) : State
     internal abstract fun startFrom(state: IState)
 }
 
-internal class StateMachineImpl(name: String?, childMode: ChildMode) :
+internal class StateMachineImpl(name: String?, childMode: ChildMode, override val autoDestroyOnStatesReuse: Boolean) :
     InternalStateMachine(name, childMode) {
     /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
@@ -22,6 +23,8 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
                     "Do not call processEvent() from notification listeners."
         )
     }
+    private var _isDestroyed: Boolean = false
+    override val isDestroyed get() = _isDestroyed
 
     /**
      * Help to check that [processEvent] is not called from state machine notification method.
@@ -61,6 +64,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     }
 
     private fun run(transitionParams: TransitionParams<*>) {
+        check(!isDestroyed) { "$this is already destroyed" }
         check(!isRunning) { "$this is already started" }
         if (childMode == ChildMode.EXCLUSIVE)
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
@@ -72,6 +76,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
     }
 
     override fun stop() {
+        check(!isDestroyed) { "$this is already destroyed" }
         _isRunning = false
         recursiveStop()
         log { "$this stopped" }
@@ -80,6 +85,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
 
     @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
+        check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
         if (isProcessingEvent)
@@ -129,6 +135,18 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode) :
      */
     override fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
+
+
+    override fun cleanup() {
+        _machineListeners.clear()
+        super.cleanup()
+    }
+
+    override fun destroy() {
+        stop()
+        accept(CleanupVisitor())
+        _isDestroyed = true
+    }
 }
 
 internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =

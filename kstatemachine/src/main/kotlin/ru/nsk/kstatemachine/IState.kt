@@ -34,6 +34,11 @@ interface IState : TransitionStateApi, VisitorAcceptor {
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
+    /**
+     * Called when state is sequentially used on multiple machine instances to perform cleanup steps here.
+     */
+    fun onCleanup() = Unit
+
     interface Listener {
         fun onEntry(transitionParams: TransitionParams<*>) = Unit
         fun onExit(transitionParams: TransitionParams<*>) = Unit

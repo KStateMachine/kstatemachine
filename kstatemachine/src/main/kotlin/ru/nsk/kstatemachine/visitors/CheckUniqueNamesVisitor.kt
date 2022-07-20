@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.IState
 import ru.nsk.kstatemachine.StateMachine
 import ru.nsk.kstatemachine.Transition
 
-internal class CheckUniqueNamesVisitor : Visitor {
+internal class CheckUniqueNamesVisitor : RecursiveVisitor {
     private val stateNames = mutableSetOf<String>()
     private val transitionNames = mutableSetOf<String>()
 
@@ -22,10 +22,5 @@ internal class CheckUniqueNamesVisitor : Visitor {
 
     override fun <E : Event> visit(transition: Transition<E>) {
         transition.name?.let { check(transitionNames.add(it)) { "Transition name is not unique: $it" } }
-    }
-
-    private fun IState.visitChildren() {
-        transitions.forEach { visit(it) }
-        states.forEach { visit(it) }
     }
 }

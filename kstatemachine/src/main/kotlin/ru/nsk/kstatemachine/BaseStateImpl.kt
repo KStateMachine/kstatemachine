@@ -5,46 +5,65 @@ import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 import java.util.concurrent.CopyOnWriteArraySet
 
 open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState() {
-    private val _listeners = CopyOnWriteArraySet<IState.Listener>()
-    override val listeners: Collection<IState.Listener> get() = _listeners
 
-    private val _states = mutableSetOf<InternalState>()
-    override val states: Set<IState> get() = _states
+    private class Data {
+        val listeners = CopyOnWriteArraySet<IState.Listener>()
+        val states = mutableSetOf<InternalState>()
+        var initialState: InternalState? = null
+
+        /**
+         * In [ChildMode.EXCLUSIVE] is null if there are no child states, or if a state is not active.
+         * In [ChildMode.PARALLEL] it is always null.
+         */
+        var currentState: InternalState? = null
+        val transitions = mutableSetOf<Transition<*>>()
+        var isActive = false
+        var isFinished = false
+        var internalParent: InternalState? = null
+    }
 
     /**
-     * In [ChildMode.EXCLUSIVE] is null if there are no child states, or if a state is not active.
-     * In [ChildMode.PARALLEL] it is always null.
+     * Encapsulates all mutable fields
      */
-    private var currentState: InternalState? = null
+    private var data = Data()
 
-    private var _initialState: InternalState? = null
-    override val initialState get() = _initialState
+    override val listeners: Collection<IState.Listener> get() = data.listeners
+
+    override val states: Set<IState> get() = data.states
+
+    override val initialState get() = data.initialState
 
     override val machine get() = if (this is StateMachine) this else requireParent().machine
 
-    private val _transitions = mutableSetOf<Transition<*>>()
-    override val transitions: Set<Transition<*>> get() = _transitions
+    override val transitions: Set<Transition<*>> get() = data.transitions
 
-    private var _isActive = false
-    override val isActive get() = _isActive
+    override val isActive get() = data.isActive
+    override val isFinished get() = data.isFinished
 
-    private var _isFinished = false
-    override val isFinished get() = _isFinished
 
-    private var _internalParent: InternalState? = null
-    override val internalParent get() = _internalParent
+    override val internalParent get() = data.internalParent
 
     override fun setParent(parent: InternalState) {
-        _internalParent = parent
+        check(parent !== data.internalParent) { "$parent is already a parent of $this" }
+        if (data.internalParent != null)
+            onStateReuseDetected()
+        data.internalParent = parent
+    }
+
+    private fun onStateReuseDetected() {
+        if (machine.autoDestroyOnStatesReuse)
+            machine.destroy()
+        else
+            error("State $this is already used in another machine instance")
     }
 
     override fun <L : IState.Listener> addListener(listener: L): L {
-        require(_listeners.add(listener)) { "$listener is already added" }
+        require(data.listeners.add(listener)) { "$listener is already added" }
         return listener
     }
 
     override fun removeListener(listener: IState.Listener) {
-        _listeners.remove(listener)
+        data.listeners.remove(listener)
     }
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
@@ -57,7 +76,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
 
         state as InternalState
-        require(_states.add(state)) { "$state already added" }
+        require(data.states.add(state)) { "$state already added" }
         state.setParent(this)
 
         if (init != null) state.init()
@@ -69,7 +88,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         check(childMode == ChildMode.EXCLUSIVE) { "Can not set initial state in parallel child mode" }
         check(!machine.isRunning) { "Can not change initial state after state machine started" }
 
-        _initialState = state as InternalState
+        data.initialState = state as InternalState
     }
 
     override fun activeStates(selfIncluding: Boolean) = with(GetActiveStatesVisitor(selfIncluding)) {
@@ -78,7 +97,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
-        _transitions += transition
+        data.transitions += transition
         return transition
     }
 
@@ -95,27 +114,27 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
-        if (!_isActive) {
+        if (!isActive) {
             if (parent != null) machine.log { "Parent $parent entering child $this" }
-            _isActive = true
+            data.isActive = true
             onDoEnter(transitionParams)
             stateNotify { onEntry(transitionParams) }
         }
     }
 
     override fun doExit(transitionParams: TransitionParams<*>) {
-        if (_isActive) {
+        if (isActive) {
             machine.log { "Exiting $this" }
             onDoExit(transitionParams)
-            currentState = null
-            _isActive = false
+            data.currentState = null
+            data.isActive = false
             stateNotify { onExit(transitionParams) }
         }
     }
 
     override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
         if (childMode == ChildMode.PARALLEL && states.all { it.isFinished }) {
-            _isFinished = true
+            data.isFinished = true
             machine.log { "$this finishes" }
             stateNotify { onFinished(transitionParams) }
         }
@@ -139,7 +158,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 setCurrentState(initialState, makeStartTransitionParams(initialState))
                 initialState.recursiveEnterInitialStates()
             }
-            ChildMode.PARALLEL -> _states.forEach {
+            ChildMode.PARALLEL -> data.states.forEach {
                 notifyStateEntry(it, makeStartTransitionParams(it))
                 it.recursiveEnterInitialStates()
             }
@@ -165,28 +184,33 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun recursiveStop() {
-        currentState = null
-        _isActive = false
-        _isFinished = false
-        _states.forEach { it.recursiveStop() }
+        data.currentState = null
+        data.isActive = false
+        data.isFinished = false
+        data.states.forEach { it.recursiveStop() }
     }
 
-    private fun requireCurrentState() = requireNotNull(currentState) { "Current state is not set" }
+    private fun requireCurrentState() = requireNotNull(data.currentState) { "Current state is not set" }
 
     override fun getCurrentStates() = when (childMode) {
-        ChildMode.EXCLUSIVE -> listOfNotNull(currentState)
-        ChildMode.PARALLEL -> _states.toList()
+        ChildMode.EXCLUSIVE -> listOfNotNull(data.currentState)
+        ChildMode.PARALLEL -> data.states.toList()
     }
 
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
-        if (currentState == state) return
-        currentState?.recursiveExit(transitionParams)
-        currentState = state
+        if (data.currentState == state) return
+        data.currentState?.recursiveExit(transitionParams)
+        data.currentState = state
 
         notifyStateEntry(state, transitionParams)
+    }
+
+    override fun cleanup() {
+        data = Data()
+        onCleanup()
     }
 
     private fun notifyStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
@@ -196,7 +220,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
 
         if (finish) {
-            _isFinished = true
+            data.isFinished = true
             machine.log { "$this finishes" }
         }
 
@@ -205,7 +229,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         val machine = machine as InternalStateMachine
         machine.machineNotify { onStateChanged(state) }
 
-        if (finish)  {
+        if (finish) {
             stateNotify { onFinished(transitionParams) }
             internalParent?.afterChildFinished(this, transitionParams)
         }

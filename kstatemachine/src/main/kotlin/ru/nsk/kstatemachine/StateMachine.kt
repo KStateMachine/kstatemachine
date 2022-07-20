@@ -12,6 +12,15 @@ interface StateMachine : State {
     val isRunning: Boolean
     val machineListeners: Collection<Listener>
 
+    /**
+     * Allows the library to automatically call destroy() on current state owning machine instance if user tries
+     * to reuse its states in another machine. Usually this is a result of using object states in sequentially created
+     * similar machines. destroy() will be called on the previous machine instance.
+     * If set to false an exception will be thrown.
+     */
+    val autoDestroyOnStatesReuse: Boolean
+    val isDestroyed: Boolean
+
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
@@ -29,6 +38,11 @@ interface StateMachine : State {
      * Machine must be started to process events
      */
     fun processEvent(event: Event, argument: Any? = null)
+
+    /**
+     * Destroys machine structure clearing all listeners, states etc.
+     */
+    fun destroy()
 
     fun log(lazyMessage: () -> String)
 
@@ -109,8 +123,9 @@ fun createStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
+    autoDestroyOnStatesReuse: Boolean = true,
     init: StateMachineBlock
-): StateMachine = StateMachineImpl(name, childMode).apply {
+): StateMachine = StateMachineImpl(name, childMode, autoDestroyOnStatesReuse).apply {
     init()
     if (start) start()
 }

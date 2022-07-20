@@ -67,7 +67,7 @@ class StateMachineTest : StringSpec({
     }
 
     "non dsl usage" {
-        val machine = StateMachineImpl("machine", ChildMode.EXCLUSIVE)
+        val machine = StateMachineImpl("machine", ChildMode.EXCLUSIVE, true)
         val first = DefaultState("first")
         val second = DefaultState("second")
 

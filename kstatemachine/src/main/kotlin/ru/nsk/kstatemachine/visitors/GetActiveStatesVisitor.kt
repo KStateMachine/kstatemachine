@@ -31,20 +31,3 @@ internal class GetActiveStatesVisitor(private val selfIncluding: Boolean) : Visi
 
     override fun <E : Event> visit(transition: Transition<E>) = Unit // noting to do
 }
-
-//override fun recursiveFillActiveStates(states: MutableSet<IState>, self: IState, selfIncluding: Boolean) {
-//    if (!_isActive) return
-//    if (this == self) {
-//        if (selfIncluding) states.add(this)
-//    } else {
-//        states.add(this)
-//    }
-//
-//    for (currentState in getCurrentStates()) {
-//        // do not include nested state machine states
-//        if (currentState is StateMachine)
-//            states.add(currentState)
-//        else
-//            currentState.recursiveFillActiveStates(states, self, selfIncluding)
-//    }
-//}

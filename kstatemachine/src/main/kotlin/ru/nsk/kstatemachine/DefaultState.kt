@@ -25,6 +25,10 @@ open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = 
     override fun onDoExit(transitionParams: TransitionParams<*>) {
         _data = null
     }
+
+    override fun onCleanup() {
+        _data = null
+    }
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
