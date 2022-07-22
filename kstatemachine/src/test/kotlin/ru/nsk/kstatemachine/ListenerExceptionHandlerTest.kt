@@ -37,14 +37,11 @@ class ListenerExceptionHandlerTest : StringSpec({
 
         val machine = createStateMachine(start = false) {
             onStarted { callbacks.onStarted(this) }
-
-            onEntry {
-                callbacks.listen(this)
-                error("test exception")
-            }
+            callbacks.listen(this)
+            onEntry { error("test exception") }
 
             state1 = initialState {
-                onEntry { callbacks.listen(this) }
+                callbacks.listen(this)
             }
         }
         shouldThrow<IllegalStateException> { machine.start() }

@@ -106,9 +106,14 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
+        if (isProcessingEvent) {
+            pendingEventHandler.onPendingEvent(event, argument)
+            // pending event cannot be processed while previous event is still processing
+            // even if PendingEventHandler does not throw
+            return
+        }
+
         runCheckingExceptions {
-            if (isProcessingEvent)
-                pendingEventHandler.onPendingEvent(event, argument)
             isProcessingEvent = true
 
             try {

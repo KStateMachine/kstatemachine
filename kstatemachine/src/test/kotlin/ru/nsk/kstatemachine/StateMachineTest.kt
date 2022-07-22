@@ -167,8 +167,10 @@ class StateMachineTest : StringSpec({
         shouldThrowUnit<IllegalStateException> { machine.setInitialState(first) }
     }
 
-    "pending event handler" {
+    "throwing PendingEventHandler does not destroy machine" {
         val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
             val second = state("second")
             initialState("first") {
                 transition<SwitchEvent> {
@@ -184,8 +186,8 @@ class StateMachineTest : StringSpec({
             }
         }
 
-        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
-        machine.isDestroyed shouldBe true
+        machine.processEvent(SwitchEvent)
+        machine.isDestroyed shouldBe false
     }
 
     "process event before started" {
