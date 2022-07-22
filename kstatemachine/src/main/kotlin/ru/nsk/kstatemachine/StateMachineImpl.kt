@@ -48,13 +48,11 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         override fun log(message: String) {}
     }
 
-    @Synchronized
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
         require(_machineListeners.add(listener)) { "$listener is already added" }
         return listener
     }
 
-    @Synchronized
     override fun removeListener(listener: StateMachine.Listener) {
         _machineListeners.remove(listener)
     }
@@ -104,7 +102,6 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         }
     }
 
-    @Synchronized
     override fun processEvent(event: Event, argument: Any?) {
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }

@@ -1,13 +1,11 @@
 package ru.nsk.kstatemachine
 
-import java.util.concurrent.CopyOnWriteArraySet
-
 open class DefaultTransition<E : Event>(
     override val name: String?,
     override val eventMatcher: EventMatcher<E>,
     sourceState: IState
 ) : InternalTransition<E> {
-    private val _listeners = CopyOnWriteArraySet<Transition.Listener>()
+    private val _listeners = mutableSetOf<Transition.Listener>()
     override val listeners: Collection<Transition.Listener> get() = _listeners
     override val sourceState = sourceState as InternalState
 

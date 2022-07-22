@@ -2,12 +2,11 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
-import java.util.concurrent.CopyOnWriteArraySet
 
 open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState() {
 
     private class Data {
-        val listeners = CopyOnWriteArraySet<IState.Listener>()
+        val listeners = mutableSetOf<IState.Listener>()
         val states = mutableSetOf<InternalState>()
         var initialState: InternalState? = null
 

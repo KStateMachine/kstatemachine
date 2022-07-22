@@ -9,6 +9,7 @@ interface StateMachine : State {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
+
     /**
      * If machine catches exception from client code (listeners callbacks) it stores it until event processing
      * completes, and passes it to this handler. That keeps machine in well-defined predictable state and allows
