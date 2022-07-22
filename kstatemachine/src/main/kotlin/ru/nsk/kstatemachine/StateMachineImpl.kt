@@ -8,6 +8,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
  */
 abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
     internal abstract fun startFrom(state: IState)
+    internal abstract fun delayListenerException(exception: Exception)
 }
 
 internal class StateMachineImpl(name: String?, childMode: ChildMode, override val autoDestroyOnStatesReuse: Boolean) :
@@ -23,6 +24,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
                     "Do not call processEvent() from notification listeners."
         )
     }
+    override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
 
@@ -34,6 +36,13 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
     private var _isRunning = false
     override val isRunning get() = _isRunning
+
+    private var delayedListenerException: Exception? = null
+
+    override fun delayListenerException(exception: Exception) {
+        if (delayedListenerException == null)
+            delayedListenerException = exception
+    }
 
     private object NullLogger : StateMachine.Logger {
         override fun log(message: String) {}
@@ -52,23 +61,32 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
     override fun start() {
         accept(CheckUniqueNamesVisitor())
+        checkBeforeRunMachine()
 
-        run(makeStartTransitionParams(this))
-        recursiveEnterInitialStates()
+        runCheckingExceptions {
+            runMachine(makeStartTransitionParams(this))
+            recursiveEnterInitialStates()
+        }
     }
 
     override fun startFrom(state: IState) {
-        val transitionParams = makeStartTransitionParams(this, state)
-        run(transitionParams)
-        switchToTargetState(state as InternalState, this, transitionParams)
+        checkBeforeRunMachine()
+
+        runCheckingExceptions {
+            val transitionParams = makeStartTransitionParams(this, state)
+            runMachine(transitionParams)
+            switchToTargetState(state as InternalState, this, transitionParams)
+        }
     }
 
-    private fun run(transitionParams: TransitionParams<*>) {
+    private fun checkBeforeRunMachine() {
         check(!isDestroyed) { "$this is already destroyed" }
         check(!isRunning) { "$this is already started" }
         if (childMode == ChildMode.EXCLUSIVE)
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+    }
 
+    private fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
         log { "$this started" }
         machineNotify { onStarted() }
@@ -77,10 +95,13 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
     override fun stop() {
         check(!isDestroyed) { "$this is already destroyed" }
-        _isRunning = false
-        recursiveStop()
-        log { "$this stopped" }
-        machineNotify { onStopped() }
+
+        runCheckingExceptions {
+            _isRunning = false
+            recursiveStop()
+            log { "$this stopped" }
+            machineNotify { onStopped() }
+        }
     }
 
     @Synchronized
@@ -88,17 +109,33 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
-        if (isProcessingEvent)
-            pendingEventHandler.onPendingEvent(event, argument)
-        isProcessingEvent = true
+        runCheckingExceptions {
+            if (isProcessingEvent)
+                pendingEventHandler.onPendingEvent(event, argument)
+            isProcessingEvent = true
 
-        try {
-            if (!doProcessEvent(event, argument)) {
-                log { "$this ignored ${event::class.simpleName}" }
-                ignoredEventHandler.onIgnoredEvent(event, argument)
+            try {
+                if (!doProcessEvent(event, argument)) {
+                    log { "$this ignored ${event::class.simpleName}" }
+                    ignoredEventHandler.onIgnoredEvent(event, argument)
+                }
+            } finally {
+                isProcessingEvent = false
             }
-        } finally {
-            isProcessingEvent = false
+        }
+    }
+
+    private fun runCheckingExceptions(block: () -> Unit) {
+        try {
+            block()
+        } catch (e: Exception) {
+            log { "Fatal exception happened, $this machine is in unpredictable state and will be destroyed: $e" }
+            runCatching { destroy(false) }
+            throw e
+        }
+        delayedListenerException?.let {
+            listenerExceptionHandler.onException(it)
+            delayedListenerException = null
         }
     }
 
@@ -142,12 +179,19 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         super.cleanup()
     }
 
-    override fun destroy() {
-        stop()
+    override fun destroy(stop: Boolean) {
+        if (stop) stop()
         accept(CleanupVisitor())
         _isDestroyed = true
     }
 }
 
-internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) =
-    machineListeners.forEach(block)
+internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) {
+    machineListeners.forEach {
+        try {
+            it.block()
+        } catch (e: Exception) {
+            delayListenerException(e)
+        }
+    }
+}

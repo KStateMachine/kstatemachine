@@ -40,14 +40,3 @@ inline fun <reified E : Event> Transition<E>.onTriggered(crossinline block: (Tra
         override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
     })
 }
-
-/**
- * Defines transition API for internal library usage. All transitions must implement this interface.
- */
-interface InternalTransition<E : Event> : Transition<E> {
-    override val sourceState: InternalState
-    fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
-}
-
-internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) =
-    listeners.forEach { it.apply(block) }

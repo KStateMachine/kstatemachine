@@ -9,6 +9,16 @@ interface StateMachine : State {
     var logger: Logger
     var ignoredEventHandler: IgnoredEventHandler
     var pendingEventHandler: PendingEventHandler
+    /**
+     * If machine catches exception from client code (listeners callbacks) it stores it until event processing
+     * completes, and passes it to this handler. That keeps machine in well-defined predictable state and allows
+     * to complete all required notifications.
+     * Note that generally speaking listeners should not throw.
+     *
+     * Default implementation rethrows exception (only first one).
+     * With your own handler you can mute or just log them for example.
+     */
+    var listenerExceptionHandler: ListenerExceptionHandler
     val isRunning: Boolean
     val machineListeners: Collection<Listener>
 
@@ -42,7 +52,7 @@ interface StateMachine : State {
     /**
      * Destroys machine structure clearing all listeners, states etc.
      */
-    fun destroy()
+    fun destroy(stop: Boolean = true)
 
     fun log(lazyMessage: () -> String)
 
@@ -86,6 +96,10 @@ interface StateMachine : State {
 
     fun interface PendingEventHandler {
         fun onPendingEvent(pendingEvent: Event, argument: Any?)
+    }
+
+    fun interface ListenerExceptionHandler {
+        fun onException(exception: Exception)
     }
 }
 

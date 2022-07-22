@@ -31,9 +31,18 @@ abstract class InternalState : IState {
 
 internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
 
-internal fun InternalState.requireParent() = requireNotNull(internalParent) { "Parent is not set" }
+internal fun InternalState.requireParent() = requireNotNull(internalParent) { "$this parent is not set" }
 
-internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) = listeners.forEach(block)
+internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) {
+    listeners.forEach {
+        try {
+            it.block()
+        } catch (e: Exception) {
+            val machine = machine as InternalStateMachine
+            machine.delayListenerException(e)
+        }
+    }
+}
 
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }

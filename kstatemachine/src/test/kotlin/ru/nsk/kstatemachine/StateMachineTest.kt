@@ -184,7 +184,8 @@ class StateMachineTest : StringSpec({
             }
         }
 
-        machine.processEvent(SwitchEvent)
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+        machine.isDestroyed shouldBe true
     }
 
     "process event before started" {
