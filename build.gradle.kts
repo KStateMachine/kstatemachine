@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "ru.nsk"
-version = "0.9.5"
+version = "0.10.0"
 
 allprojects {
     repositories {
