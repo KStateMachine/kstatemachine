@@ -147,26 +147,27 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         return resolvedTransitions.singleOrNull()
     }
 
-    override fun recursiveEnterInitialStates() {
+    override fun recursiveEnterInitialStates(argument: Any?) {
         if (states.isEmpty()) return
 
         when (childMode) {
             ChildMode.EXCLUSIVE -> {
-                val initialState =
-                    checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
-                setCurrentState(initialState, makeStartTransitionParams(initialState))
-                initialState.recursiveEnterInitialStates()
+                val initialState = checkNotNull(initialState) {
+                    "Initial state is not set, call setInitialState() first"
+                }
+                setCurrentState(initialState, makeStartTransitionParams(initialState, argument = argument))
+                initialState.recursiveEnterInitialStates(argument)
             }
             ChildMode.PARALLEL -> data.states.forEach {
-                notifyStateEntry(it, makeStartTransitionParams(it))
-                it.recursiveEnterInitialStates()
+                notifyStateEntry(it, makeStartTransitionParams(it, argument = argument))
+                it.recursiveEnterInitialStates(argument)
             }
         }
     }
 
     override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
         if (path.isEmpty()) {
-            recursiveEnterInitialStates()
+            recursiveEnterInitialStates(transitionParams.argument)
         } else {
             val state = path.removeLast()
             setCurrentState(state, transitionParams)
@@ -251,7 +252,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     internal fun makeStartTransitionParams(
         sourceState: IState,
-        targetState: IState = sourceState
+        targetState: IState = sourceState,
+        argument: Any?
     ): TransitionParams<*> {
         val transition = DefaultTransition(
             "Starting",
@@ -264,6 +266,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             transition,
             transition.produceTargetStateDirection(TransitionDirectionProducerPolicy.DefaultPolicy(StartEvent)),
             StartEvent,
+            argument,
         )
     }
 }

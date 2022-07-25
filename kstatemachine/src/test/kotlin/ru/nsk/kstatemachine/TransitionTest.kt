@@ -7,35 +7,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.fail
 
-private const val ARGUMENT = 1
-
 class TransitionTest : StringSpec({
-    "transition argument" {
-        val callbacks = mockkCallbacks()
-
-        val second = object : DefaultState("second") {}
-
-        val machine = createStateMachine {
-            addState(second) {
-                onEntry {
-                    callbacks.onEntryState(this)
-                    it.transition.argument shouldBe ARGUMENT
-                }
-            }
-            initialState("first") {
-                transition<SwitchEvent> {
-                    targetState = second
-                    onTriggered {
-                        it.transition.argument = ARGUMENT
-                    }
-                }
-            }
-        }
-
-        machine.processEvent(SwitchEvent)
-        verifySequence { callbacks.onEntryState(second) }
-    }
-
     "transition direction" {
         val callbacks = mockkCallbacks()
 

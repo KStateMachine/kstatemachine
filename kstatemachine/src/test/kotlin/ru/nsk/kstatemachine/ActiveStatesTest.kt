@@ -64,9 +64,6 @@ class ActiveStatesTest : StringSpec({
             }
         }
 
-        val s = DefaultState()
-        s.recursiveEnterInitialStates()
-
         machine.activeStates().shouldContainExactly(initialState, nestedMachine)
     }
 })

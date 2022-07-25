@@ -38,7 +38,7 @@ interface StateMachine : State {
     /**
      * Starts state machine
      */
-    fun start()
+    fun start(argument: Any? = null)
 
     /**
      * Forces state machine to stop

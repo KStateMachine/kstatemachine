@@ -1,0 +1,50 @@
+package ru.nsk.kstatemachine
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.verify
+import io.mockk.verifySequence
+import org.junit.jupiter.api.fail
+
+private const val ARGUMENT = 1
+
+class TransitionArgumentTest : StringSpec({
+    "transition argument" {
+        val callbacks = mockkCallbacks()
+
+        val second = object : DefaultState("second") {}
+
+        val machine = createStateMachine {
+            addState(second) {
+                callbacks.listen(this)
+                onEntry { it.transition.argument shouldBe ARGUMENT }
+            }
+            initialState("first") {
+                transition<SwitchEvent> {
+                    targetState = second
+                    onTriggered { it.transition.argument = ARGUMENT }
+                }
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+        verifySequence { callbacks.onEntryState(second) }
+    }
+
+    "transition argument on start" {
+        val callbacks = mockkCallbacks()
+        lateinit var state1: State
+
+        val machine = createStateMachine(start = false) {
+            state1 = initialState("first") {
+                callbacks.listen(this)
+                onEntry { it.argument shouldBe ARGUMENT }
+            }
+        }
+        machine.start(ARGUMENT)
+
+        machine.processEvent(SwitchEvent)
+        verifySequence { callbacks.onEntryState(state1) }
+    }
+})

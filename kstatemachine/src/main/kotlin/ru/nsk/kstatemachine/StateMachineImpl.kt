@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
  * Defines state machine API for internal library usage.
  */
 abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
-    internal abstract fun startFrom(state: IState)
+    internal abstract fun startFrom(state: IState, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
 }
 
@@ -57,21 +57,21 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         _machineListeners.remove(listener)
     }
 
-    override fun start() {
+    override fun start(argument: Any?) {
         accept(CheckUniqueNamesVisitor())
         checkBeforeRunMachine()
 
         runCheckingExceptions {
-            runMachine(makeStartTransitionParams(this))
-            recursiveEnterInitialStates()
+            runMachine(makeStartTransitionParams(this, argument = argument))
+            recursiveEnterInitialStates(argument)
         }
     }
 
-    override fun startFrom(state: IState) {
+    override fun startFrom(state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
         runCheckingExceptions {
-            val transitionParams = makeStartTransitionParams(this, state)
+            val transitionParams = makeStartTransitionParams(this, state, argument)
             runMachine(transitionParams)
             switchToTargetState(state as InternalState, this, transitionParams)
         }

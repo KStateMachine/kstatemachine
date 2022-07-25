@@ -202,9 +202,7 @@ class StateMachineTest : StringSpec({
 
         lateinit var first: State
         val machine = createStateMachine {
-            first = initialState {
-                onEntry { callbacks.onEntryState(this) }
-            }
+            first = initialState { callbacks.listen(this) }
             onStarted { callbacks.onStarted(this) }
         }
 
