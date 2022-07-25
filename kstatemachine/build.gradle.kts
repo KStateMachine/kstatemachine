@@ -13,6 +13,16 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks {
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = Versions.jvmTarget
+            languageVersion = Versions.languageVersion
+            apiVersion = Versions.apiVersion
+        }
+    }
+}
+
 dependencies {
     testImplementation("io.kotest:kotest-assertions-core:${Versions.kotestAssertions}")
     testImplementation("io.kotest:kotest-runner-junit5:${Versions.kotestRunner}")
