@@ -24,7 +24,8 @@ tasks {
 }
 
 dependencies {
-    testImplementation("io.kotest:kotest-assertions-core:${Versions.kotestAssertions}")
-    testImplementation("io.kotest:kotest-runner-junit5:${Versions.kotestRunner}")
+    testImplementation("io.kotest:kotest-assertions-core:${Versions.kotest}")
+    testImplementation("io.kotest:kotest-framework-datatest:${Versions.kotest}")
+    testImplementation("io.kotest:kotest-runner-junit5:${Versions.kotest}")
     testImplementation("io.mockk:mockk:${Versions.mockk}")
 }

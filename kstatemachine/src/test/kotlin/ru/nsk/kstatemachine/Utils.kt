@@ -5,6 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
 
+typealias Callback<T> = (T) -> Unit
+
 object SwitchEvent : Event
 object SwitchEventL1 : Event
 object SwitchEventL2 : Event
@@ -40,3 +42,9 @@ fun verifySequenceAndClear(mock: Any, verifyBlock: MockKVerificationScope.() -> 
     verifySequence(verifyBlock = verifyBlock)
     clearMocks(mock)
 }
+
+fun testError(message: String): Nothing {
+    throw TestException(message)
+}
+
+class TestException(message: String) : RuntimeException(message)

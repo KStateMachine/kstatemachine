@@ -14,6 +14,5 @@ object Versions {
 
     // dependencies
     const val mockk = "1.12.5"
-    const val kotestAssertions = "5.4.0"
-    const val kotestRunner = "5.4.0"
+    const val kotest = "5.4.0"
 }

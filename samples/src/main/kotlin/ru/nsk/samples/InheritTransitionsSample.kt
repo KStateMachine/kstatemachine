@@ -2,7 +2,6 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
-import java.lang.System.lineSeparator
 
 object ExitEvent : Event
 object NextEvent : Event
@@ -39,5 +38,5 @@ fun main() {
     machine.processEvent(NextEvent)
     machine.processEvent(ExitEvent)
 
-    println(lineSeparator() + machine.exportToPlantUml())
+    println("\n" + machine.exportToPlantUml())
 }

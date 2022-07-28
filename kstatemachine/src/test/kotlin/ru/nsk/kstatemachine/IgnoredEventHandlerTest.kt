@@ -2,6 +2,8 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
 
@@ -26,13 +28,12 @@ class IgnoredEventHandlerTest : StringSpec({
             initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-                error("unexpected $event")
+                testError("unexpected $event")
             }
         }
 
-        shouldThrow<IllegalStateException> {
-            machine.processEvent(SwitchEvent)
-        }
+        shouldThrow<TestException> { machine.processEvent(SwitchEvent) }
+        machine.isDestroyed shouldBe false
     }
 
     "process event on finished state machine" {

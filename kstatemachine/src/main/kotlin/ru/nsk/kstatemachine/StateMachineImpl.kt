@@ -113,17 +113,20 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
             return
         }
 
+        var eventProcessed: Boolean? = null
         runCheckingExceptions {
             isProcessingEvent = true
 
             try {
-                if (!doProcessEvent(event, argument)) {
-                    log { "$this ignored ${event::class.simpleName}" }
-                    ignoredEventHandler.onIgnoredEvent(event, argument)
-                }
+                eventProcessed = doProcessEvent(event, argument)
             } finally {
                 isProcessingEvent = false
             }
+        }
+
+        if (eventProcessed == false) {
+            log { "$this ignored ${event::class.simpleName}" }
+            ignoredEventHandler.onIgnoredEvent(event, argument)
         }
     }
 
@@ -136,8 +139,8 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
             throw e
         }
         delayedListenerException?.let {
-            listenerExceptionHandler.onException(it)
             delayedListenerException = null
+            listenerExceptionHandler.onException(it)
         }
     }
 

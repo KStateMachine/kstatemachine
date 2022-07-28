@@ -27,7 +27,7 @@ interface StateMachine : State {
      * Allows the library to automatically call destroy() on current state owning machine instance if user tries
      * to reuse its states in another machine. Usually this is a result of using object states in sequentially created
      * similar machines. destroy() will be called on the previous machine instance.
-     * If set to false an exception will be thrown.
+     * If set to false an exception will be thrown on state reuse attempt.
      */
     val autoDestroyOnStatesReuse: Boolean
     val isDestroyed: Boolean

@@ -176,13 +176,13 @@ class StateMachineTest : StringSpec({
                 transition<SwitchEvent> {
                     targetState = second
                     onTriggered {
-                        shouldThrow<IllegalStateException> { this@createStateMachine.processEvent(SwitchEvent) }
+                        shouldThrow<TestException> { this@createStateMachine.processEvent(SwitchEvent) }
                     }
                 }
             }
 
             pendingEventHandler = StateMachine.PendingEventHandler { _, _ ->
-                error("Already processing")
+                testError("Already processing")
             }
         }
 

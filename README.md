@@ -20,7 +20,8 @@ Main features are:
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * Backward compatible till Kotlin 1.4
 * Event based - transitions are performed by processing incoming events
-* Listeners for machine, states and transitions, all callbacks are shipped with information about current transition
+* Listeners for machine, states, state groups and transitions. Listener callbacks are shipped with information about
+  current transition
 * [Guarded](https://github.com/nsk90/kstatemachine/wiki#guarded-transitions)
   and [Conditional transitions](https://github.com/nsk90/kstatemachine/wiki#conditional-transitions) with dynamic target
   state which is calculated in a moment of event processing depending on application business logic
@@ -124,7 +125,7 @@ dependencies {
 
 Where `<Tag>` is a library version.
 
-### JitPack 
+### JitPack
 
 Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
 root `build.gradle` at the end of repositories:

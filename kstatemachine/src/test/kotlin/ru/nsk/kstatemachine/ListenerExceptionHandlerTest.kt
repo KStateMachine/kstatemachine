@@ -9,12 +9,12 @@ import ru.nsk.kstatemachine.Testing.startFrom
 
 class ListenerExceptionHandlerTest : StringSpec({
     "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
-        shouldThrow<IllegalStateException> {
+        shouldThrow<TestException> {
             createStateMachine {
                 logger = StateMachine.Logger { println(it) }
 
                 initialState {
-                    onEntry { error("test exception") }
+                    onEntry { testError("test exception") }
                 }
             }
         }
@@ -23,11 +23,11 @@ class ListenerExceptionHandlerTest : StringSpec({
     "default ListenerExceptionHandler rethrows exception from state onEntry() on manual start() call" {
         val machine = createStateMachine(start = false) {
             initialState {
-                onEntry { error("test exception") }
+                onEntry { testError("test exception") }
             }
         }
 
-        shouldThrow<IllegalStateException> { machine.start() }
+        shouldThrow<TestException> { machine.start() }
         machine.isDestroyed shouldBe false
     }
 
@@ -38,13 +38,13 @@ class ListenerExceptionHandlerTest : StringSpec({
         val machine = createStateMachine(start = false) {
             onStarted { callbacks.onStarted(this) }
             callbacks.listen(this)
-            onEntry { error("test exception") }
+            onEntry { testError("test exception") }
 
             state1 = initialState {
                 callbacks.listen(this)
             }
         }
-        shouldThrow<IllegalStateException> { machine.start() }
+        shouldThrow<TestException> { machine.start() }
 
         verifySequence {
             callbacks.onStarted(machine)
@@ -54,9 +54,9 @@ class ListenerExceptionHandlerTest : StringSpec({
     }
 
     "default ListenerExceptionHandler rethrows exception from onStarted() on start() call" {
-        shouldThrow<IllegalStateException> {
+        shouldThrow<TestException> {
             createStateMachine {
-                onStarted { error("test exception") }
+                onStarted { testError("test exception") }
 
                 initialState()
             }
@@ -68,21 +68,21 @@ class ListenerExceptionHandlerTest : StringSpec({
         val machine = createStateMachine(start = false) {
             initialState()
             state2 = state {
-                onEntry { error("test exception") }
+                onEntry { testError("test exception") }
             }
         }
 
-        shouldThrow<IllegalStateException> { machine.startFrom(state2) }
+        shouldThrow<TestException> { machine.startFrom(state2) }
         machine.isDestroyed shouldBe false
     }
 
     "default ListenerExceptionHandler rethrows exception from stop()" {
         val machine = createStateMachine {
             initialState()
-            onStopped { error("test exception") }
+            onStopped { testError("test exception") }
         }
 
-        shouldThrow<IllegalStateException> { machine.stop() }
+        shouldThrow<TestException> { machine.stop() }
         machine.isDestroyed shouldBe false
     }
 
@@ -93,15 +93,15 @@ class ListenerExceptionHandlerTest : StringSpec({
             listenerExceptionHandler = handlerMock
 
             initialState {
-                onEntry { error("test exception") }
+                onEntry { testError("test exception") }
             }
         }
 
-        verifySequence { handlerMock.onException(ofType<IllegalStateException>()) }
+        verifySequence { handlerMock.onException(ofType<TestException>()) }
         machine.isDestroyed shouldBe false
     }
 
     "machine is destroyed on unrecoverable exception and ListenerExceptionHandler is not called" {
-
+        // TODO
     }
 })
