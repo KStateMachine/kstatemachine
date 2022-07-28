@@ -2,8 +2,8 @@ plugins {
     kotlin("jvm") version Versions.kotlin apply false
 }
 
-group = "ru.nsk"
-version = "0.10.0"
+group = Versions.libraryGroup
+version = Versions.libraryVersion
 
 allprojects {
     repositories {
