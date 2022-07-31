@@ -114,19 +114,18 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         }
 
         var eventProcessed: Boolean? = null
-        runCheckingExceptions {
-            isProcessingEvent = true
-
-            try {
+        isProcessingEvent = true
+        try {
+            runCheckingExceptions {
                 eventProcessed = doProcessEvent(event, argument)
-            } finally {
-                isProcessingEvent = false
             }
-        }
 
-        if (eventProcessed == false) {
-            log { "$this ignored ${event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(event, argument)
+            if (eventProcessed == false) {
+                log { "$this ignored ${event::class.simpleName}" }
+                ignoredEventHandler.onIgnoredEvent(event, argument)
+            }
+        } finally {
+            isProcessingEvent = false
         }
     }
 
