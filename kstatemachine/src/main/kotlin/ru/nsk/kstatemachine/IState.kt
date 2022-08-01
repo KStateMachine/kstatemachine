@@ -88,9 +88,9 @@ interface FinalDataState<out D> : IFinalState, DataState<D>
  * Pseudo state is a state that machine passes automatically without explicit event.
  * FIXME inheriting State is correct? dsl is not working otherwise
  */
-interface PseudoState: State
+interface PseudoState : State
 
-interface RedirectPseudoState: PseudoState {
+interface RedirectPseudoState : PseudoState {
     fun resolveTargetState(): IState
 }
 

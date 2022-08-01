@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 
@@ -139,11 +140,15 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
+    override fun <E : Event> recursiveFindUniqueResolvedTransition(
+        eventAndArgument: EventAndArgument<E>
+    ): ResolvedTransition<E>? {
         val resolvedTransitions = getCurrentStates()
-            .mapNotNull { it.recursiveFindUniqueResolvedTransition(event) }
-            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(event)) }
-        check(resolvedTransitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
+            .mapNotNull { it.recursiveFindUniqueResolvedTransition(eventAndArgument) }
+            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) }
+        check(resolvedTransitions.size <= 1) {
+            "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
+        }
         return resolvedTransitions.singleOrNull()
     }
 
@@ -264,7 +269,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         return TransitionParams(
             transition,
-            transition.produceTargetStateDirection(TransitionDirectionProducerPolicy.DefaultPolicy(StartEvent)),
+            transition.produceTargetStateDirection(DefaultPolicy(EventAndArgument(StartEvent, argument))),
             StartEvent,
             argument,
         )

@@ -117,7 +117,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         isProcessingEvent = true
         try {
             runCheckingExceptions {
-                eventProcessed = doProcessEvent(event, argument)
+                eventProcessed = doProcessEvent(EventAndArgument(event, argument))
             }
 
             if (eventProcessed == false) {
@@ -143,13 +143,14 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         }
     }
 
-    private fun doProcessEvent(event: Event, argument: Any?): Boolean {
+    private fun <E: Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
+        val (event, argument) = eventAndArgument
         if (isFinished) {
             log { "$this is finished, skipping event ${event::class.simpleName}, with argument $argument" }
             return false
         }
 
-        val (transition, direction) = recursiveFindUniqueResolvedTransition(event) ?: return false
+        val (transition, direction) = recursiveFindUniqueResolvedTransition(eventAndArgument) ?: return false
 
         val transitionParams = TransitionParams(transition, direction, event, argument)
 

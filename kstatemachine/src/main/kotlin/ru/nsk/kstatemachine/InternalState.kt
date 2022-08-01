@@ -17,7 +17,10 @@ abstract class InternalState : IState {
     internal abstract fun doExit(transitionParams: TransitionParams<*>)
     internal abstract fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
 
-    internal abstract fun <E : Event> recursiveFindUniqueResolvedTransition(event: E): ResolvedTransition<E>?
+    internal abstract fun <E : Event> recursiveFindUniqueResolvedTransition(
+        eventAndArgument: EventAndArgument<E>
+    ): ResolvedTransition<E>?
+
     internal abstract fun recursiveEnterInitialStates(argument: Any?)
     internal abstract fun recursiveEnterStatePath(
         path: MutableList<InternalState>,
@@ -50,11 +53,11 @@ internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<In
     return triggeringTransitions as List<InternalTransition<E>>
 }
 
-internal fun <E : Event> InternalState.findUniqueResolvedTransition(event: E): ResolvedTransition<E>? {
-    val policy = DefaultPolicy(event)
-    val transitions = findTransitionsByEvent(event)
+internal fun <E : Event> InternalState.findUniqueResolvedTransition(eventAndArgument: EventAndArgument<E>): ResolvedTransition<E>? {
+    val policy = DefaultPolicy(eventAndArgument)
+    val transitions = findTransitionsByEvent(eventAndArgument.event)
         .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
-    check(transitions.size <= 1) { "Multiple transitions match $event, $transitions in $this" }
+    check(transitions.size <= 1) { "Multiple transitions match ${eventAndArgument.event}, $transitions in $this" }
     return transitions.singleOrNull()
 }

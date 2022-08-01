@@ -24,7 +24,7 @@ fun noTransition(): TransitionDirection = NoTransition
 internal class TargetState(targetState: IState) : TransitionDirection() {
     override val targetState = recursiveResolveTargetState(targetState)
 
-    private fun recursiveResolveTargetState(targetState: IState) : IState {
+    private fun recursiveResolveTargetState(targetState: IState): IState {
         return if (targetState is RedirectPseudoState)
             recursiveResolveTargetState(targetState.resolveTargetState())
         else
@@ -42,7 +42,7 @@ typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirectio
 internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
 
 sealed class TransitionDirectionProducerPolicy<E : Event> {
-    class DefaultPolicy<E : Event>(val event: E) : TransitionDirectionProducerPolicy<E>()
+    class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) : TransitionDirectionProducerPolicy<E>()
 
     /**
      * TODO find the way to collect target states of conditional transitions
