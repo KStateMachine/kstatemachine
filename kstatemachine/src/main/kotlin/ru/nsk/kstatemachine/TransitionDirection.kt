@@ -19,9 +19,18 @@ internal object NoTransition : TransitionDirection()
 fun noTransition(): TransitionDirection = NoTransition
 
 /**
- * [Transition] is triggered with a [targetState]
+ * [Transition] is triggered with a targetState, resolving it if possible
  */
-internal class TargetState(override val targetState: IState) : TransitionDirection()
+internal class TargetState(targetState: IState) : TransitionDirection() {
+    override val targetState = recursiveResolveTargetState(targetState)
+
+    private fun recursiveResolveTargetState(targetState: IState) : IState {
+        return if (targetState is RedirectPseudoState)
+            recursiveResolveTargetState(targetState.resolveTargetState())
+        else
+            targetState
+    }
+}
 
 fun targetState(targetState: IState): TransitionDirection = TargetState(targetState)
 

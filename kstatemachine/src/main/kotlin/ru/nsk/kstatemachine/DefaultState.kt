@@ -38,3 +38,28 @@ open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalSt
 open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }
+
+open class DefaultJoiceState(name: String? = null, private val joiceAction: () -> IState) :
+    BasePseudoState(name), RedirectPseudoState {
+
+    override fun resolveTargetState() = joiceAction()
+}
+
+open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUSIVE), PseudoState {
+    override fun doEnter(transitionParams: TransitionParams<*>) = internalError()
+    override fun doExit(transitionParams: TransitionParams<*>) = internalError()
+
+    override fun <L : IState.Listener> addListener(listener: L) =
+        throw UnsupportedOperationException("PseudoState can not have listeners")
+
+    override fun <S : IState> addState(state: S, init: StateBlock<S>?) =
+        throw UnsupportedOperationException("PseudoState can not have child states")
+
+
+    override fun <E : Event> addTransition(transition: Transition<E>) =
+        throw UnsupportedOperationException("PseudoState can not have transitions")
+
+    private fun internalError(): Nothing =
+        error("Internal error PseudoState can not be entered or exited, looks that machine is purely configured")
+
+}

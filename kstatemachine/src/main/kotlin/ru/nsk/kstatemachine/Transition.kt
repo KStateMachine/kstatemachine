@@ -13,7 +13,7 @@ interface Transition<E : Event> : VisitorAcceptor {
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
-     * This argument must be set from transition listener. Such transition must have only one listener
+     * This argument may be set from transition listener. Such transition must have only one listener
      * that sets the argument.
      */
     var argument: Any?

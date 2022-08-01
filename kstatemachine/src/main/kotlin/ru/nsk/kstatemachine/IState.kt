@@ -4,6 +4,9 @@ import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 import kotlin.reflect.KClass
 
+/**
+ * Base interface for all kind of states
+ */
 @StateMachineDslMarker
 interface IState : TransitionStateApi, VisitorAcceptor {
     val name: String?
@@ -22,7 +25,7 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     fun <S : IState> addState(state: S, init: StateBlock<S>? = null): S
 
     /**
-     * Currently initial state is mandatory, but if we add parallel states it might change.
+     * Initial child state is required if child mode is [ChildMode.EXCLUSIVE] and a state has children
      */
     fun setInitialState(state: IState)
 
@@ -80,6 +83,16 @@ interface IFinalState : IState {
 
 interface FinalState : IFinalState, State
 interface FinalDataState<out D> : IFinalState, DataState<D>
+
+/**
+ * Pseudo state is a state that machine passes automatically without explicit event.
+ * FIXME inheriting State is correct? dsl is not working otherwise
+ */
+interface PseudoState: State
+
+interface RedirectPseudoState: PseudoState {
+    fun resolveTargetState(): IState
+}
 
 typealias StateBlock<S> = S.() -> Unit
 
@@ -204,3 +217,6 @@ fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null
 
 fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
     addFinalState(DefaultFinalDataState(name), init)
+
+fun IState.choiceState(name: String? = null, joiceAction: () -> IState) =
+    addState(DefaultJoiceState(name, joiceAction))

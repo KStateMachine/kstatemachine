@@ -140,4 +140,35 @@ class ConditionalTransitionTest : StringSpec({
             callbacks.onEntryState(third)
         }
     }
+
+    "conditional transition by argument" {
+        val callbacks = mockkCallbacks()
+
+        val first = object : DefaultState("first") {}
+        val second = object : DefaultState("second") {}
+        val third = object : DefaultState("third") {}
+
+        val machine = createStateMachine {
+            addInitialState(first) {
+                callbacks.listen(this)
+
+                transitionConditionally<ConditionEvent> {
+                    direction = { if (it.data) targetState(second) else targetState(third) }
+                    callbacks.listen(this)
+                }
+            }
+            addState(second) { callbacks.listen(this) }
+            addState(third) { callbacks.listen(this) }
+        }
+
+        val event = ConditionEvent(false)
+        verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+
+        machine.processEvent(event)
+        verifySequence {
+            callbacks.onTriggeredTransition(event)
+            callbacks.onExitState(first)
+            callbacks.onEntryState(third)
+        }
+    }
 })
