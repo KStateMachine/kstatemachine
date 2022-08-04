@@ -192,11 +192,12 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 }
 
 internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) {
-    machineListeners.forEach {
-        try {
-            it.block()
-        } catch (e: Exception) {
-            delayListenerException(e)
-        }
-    }
+    machineListeners.forEach { runDelayingException { it.block() } }
 }
+
+internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =
+    try {
+        block()
+    } catch (e: Exception) {
+        delayListenerException(e)
+    }

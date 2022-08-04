@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
 
@@ -45,17 +46,17 @@ class ChoiceStateTest : StringSpec({
         verifySequence { callbacks.onEntryState(State2) }
     }
 
-    "initial choice state" {
+    "initial choice state currently not supported" {
         val callbacks = mockkCallbacks()
 
-        createStateMachine {
-            val choice = choiceState("choice") { State2 }
-            setInitialState(choice)
+        shouldThrow<IllegalStateException> {
+            createStateMachine {
+                val choice = choiceState("choice") { State2 }
+                setInitialState(choice)
 
-            addState(State2) { callbacks.listen(this) }
+                addState(State2) { callbacks.listen(this) }
+            }
         }
-
-        verifySequence { callbacks.onEntryState(State2) }
     }
 }) {
     private object State1 : DefaultState()
