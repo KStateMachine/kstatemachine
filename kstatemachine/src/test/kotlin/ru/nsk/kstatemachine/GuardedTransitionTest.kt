@@ -12,11 +12,15 @@ class GuardedTransitionTest : StringSpec({
         var value = "value1"
 
         val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
             val second = state("second")
 
             initialState("first") {
                 transition<SwitchEvent> {
-                    guard = { value == "value2" }
+                    guard = {
+                        this@initialState.machine.log { "$event $argument" }
+                        value == "value2" }
                     targetState = second
                     callbacks.listen(this)
                 }

@@ -102,6 +102,27 @@ class ListenerExceptionHandlerTest : StringSpec({
     }
 
     "machine is destroyed on unrecoverable exception and ListenerExceptionHandler is not called" {
-        // TODO
+        val handlerMock = mockk<StateMachine.ListenerExceptionHandler>(relaxed = true)
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            listenerExceptionHandler = handlerMock
+
+            val state2 = state()
+            initialState {
+                transition<SwitchEvent> {
+                    guard = { testError("test exception") }
+                    targetState = state2
+                }
+            }
+        }
+
+        shouldThrow<TestException> {
+            machine.processEvent(SwitchEvent)
+        }
+
+        machine.isDestroyed shouldBe true
+        verifySequence(inverse = true) { handlerMock.onException(ofType<TestException>()) }
     }
 })
