@@ -3,32 +3,28 @@ package ru.nsk.kstatemachine
 import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
 
-class JoiceStateTest: StringSpec({
+class ChoiceStateTest : StringSpec({
     "redirecting choice state" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
             logger = StateMachine.Logger { println(it) }
 
-            val choice = choiceState("choice") { State2 }
+            val choice = choiceState("choice") {
+                log { "$event $argument" }
+                State2
+            }
 
             addInitialState(State1) {
-                transition<SwitchEvent> {
-                    targetState = choice
-                    onTriggered { this@addInitialState.machine.log { it.toString() } }
-                }
+                transition<SwitchEvent> { targetState = choice }
             }
             addState(State2) { callbacks.listen(this) }
             onTransition { log { it.toString() } }
         }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent, false)
 
         verifySequence { callbacks.onEntryState(State2) }
-    }
-
-    "choice state with argument" {
-        TODO()
     }
 
     "redirecting choice states chain" {

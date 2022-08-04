@@ -26,11 +26,7 @@ open class DefaultTransition<E : Event>(
         sourceState: IState,
         targetState: IState?
     ) : this(name, eventMatcher, sourceState) {
-        targetStateDirectionProducer = if (targetState == null) {
-            { stay() }
-        } else {
-            { targetState(targetState) }
-        }
+        targetStateDirectionProducer = { it.targetStateOrStay(targetState) }
     }
 
     constructor(

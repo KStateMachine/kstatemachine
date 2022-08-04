@@ -122,7 +122,7 @@ class ConditionalTransitionTest : StringSpec({
                 callbacks.listen(this)
 
                 transitionConditionally<ConditionEvent> {
-                    direction = { if (it.event.data) targetState(second) else targetState(third) }
+                    direction = { if (event.data) targetState(second) else targetState(third) }
                     callbacks.listen(this)
                 }
             }
@@ -153,7 +153,7 @@ class ConditionalTransitionTest : StringSpec({
                 callbacks.listen(this)
 
                 transitionConditionally<SwitchEvent> {
-                    direction = { if (it.argument as Boolean) targetState(second) else targetState(third) }
+                    direction = { if (argument as Boolean) targetState(second) else targetState(third) }
                     callbacks.listen(this)
                 }
             }

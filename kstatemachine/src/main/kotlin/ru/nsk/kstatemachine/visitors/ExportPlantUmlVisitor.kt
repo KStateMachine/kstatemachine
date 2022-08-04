@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetState
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
- * Conditional transitions are not supported.
+ * Conditional transitions and [PseudoState] currently are not supported.
  */
 class ExportPlantUmlVisitor : Visitor {
     private val builder = StringBuilder()

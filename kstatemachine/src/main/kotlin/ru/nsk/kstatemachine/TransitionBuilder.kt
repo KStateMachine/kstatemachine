@@ -13,7 +13,7 @@ abstract class TransitionBuilder<E : Event>(protected val name: String?, protect
 
 abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    var guard: (EventAndArgument<E>) -> Boolean = { true }
+    var guard: EventAndArgument<E>.() -> Boolean = { true }
 }
 
 abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
@@ -24,16 +24,11 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
         val direction: TransitionDirectionProducer<E> = {
             when (it) {
                 is DefaultPolicy<E> ->
-                    if (guard(it.eventAndArgument)) {
-                        val target = targetState
-                        if (target == null) stay() else targetState(target)
-                    } else {
+                    if (it.eventAndArgument.guard())
+                        it.targetStateOrStay(targetState)
+                    else
                         noTransition()
-                    }
-                is CollectTargetStatesPolicy<E> -> {
-                    val target = targetState
-                    if (target == null) stay() else targetState(target)
-                }
+                is CollectTargetStatesPolicy<E> -> it.targetStateOrStay(targetState)
             }
         }
 
@@ -45,15 +40,16 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
 
 abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
-    lateinit var targetState: (EventAndArgument<E>) -> S
+    lateinit var targetState: EventAndArgument<E>.() -> S
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
             when (it) {
-                is DefaultPolicy<E> -> if (guard(it.eventAndArgument))
-                    targetState(targetState(it.eventAndArgument))
-                else
-                    noTransition()
+                is DefaultPolicy<E> ->
+                    if (it.eventAndArgument.guard())
+                        it.targetState(it.eventAndArgument.targetState())
+                    else
+                        noTransition()
                 is CollectTargetStatesPolicy<E> -> noTransition()
             }
         }
@@ -66,12 +62,12 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
 
 class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    lateinit var direction: (EventAndArgument<E>) -> TransitionDirection
+    lateinit var direction: EventAndArgument<E>.() -> TransitionDirection
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
             when (it) {
-                is DefaultPolicy<E> -> direction(it.eventAndArgument)
+                is DefaultPolicy<E> -> it.eventAndArgument.direction()
                 is CollectTargetStatesPolicy<E> -> noTransition()
             }
         }

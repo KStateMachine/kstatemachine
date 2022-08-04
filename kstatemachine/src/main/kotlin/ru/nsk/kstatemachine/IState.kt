@@ -91,7 +91,7 @@ interface FinalDataState<out D> : IFinalState, DataState<D>
 interface PseudoState : State
 
 interface RedirectPseudoState : PseudoState {
-    fun resolveTargetState(): IState
+    fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
 }
 
 typealias StateBlock<S> = S.() -> Unit
@@ -218,5 +218,5 @@ fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null
 fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
     addFinalState(DefaultFinalDataState(name), init)
 
-fun IState.choiceState(name: String? = null, joiceAction: () -> IState) =
-    addState(DefaultJoiceState(name, joiceAction))
+fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
+    addState(DefaultChoiceState(name, choiceAction))

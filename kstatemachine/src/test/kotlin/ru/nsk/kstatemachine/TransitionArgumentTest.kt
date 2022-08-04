@@ -2,10 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
-import io.mockk.verify
 import io.mockk.verifySequence
-import org.junit.jupiter.api.fail
 
 private const val ARGUMENT = 1
 

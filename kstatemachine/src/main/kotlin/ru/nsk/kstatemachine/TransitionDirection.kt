@@ -1,6 +1,9 @@
 package ru.nsk.kstatemachine
 
 sealed class TransitionDirection {
+    /**
+     * Already resolved target state of conditional transition or [PseudoState] computation
+     */
     open val targetState: IState? = null
 }
 
@@ -19,20 +22,27 @@ internal object NoTransition : TransitionDirection()
 fun noTransition(): TransitionDirection = NoTransition
 
 /**
- * [Transition] is triggered with a targetState, resolving it if possible
+ * [Transition] is triggered with a [targetState].
  */
-internal class TargetState(targetState: IState) : TransitionDirection() {
-    override val targetState = recursiveResolveTargetState(targetState)
+internal class TargetState(override val targetState: IState) : TransitionDirection()
 
-    private fun recursiveResolveTargetState(targetState: IState): IState {
-        return if (targetState is RedirectPseudoState)
-            recursiveResolveTargetState(targetState.resolveTargetState())
-        else
-            targetState
-    }
+/**
+ * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
+ */
+fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection =
+    TargetState(recursiveResolveTargetState(targetState))
+
+private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState {
+    return if (targetState is RedirectPseudoState)
+        recursiveResolveTargetState(targetState.resolveTargetState(this))
+    else
+        targetState
 }
 
-fun targetState(targetState: IState): TransitionDirection = TargetState(targetState)
+/**
+ * Internal use only. TODO remove it when possible
+ */
+internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(targetState)
 
 /**
  * Transition that matches event and has a meaningful direction (except [NoTransition])
@@ -42,10 +52,20 @@ typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirectio
 internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
 
 sealed class TransitionDirectionProducerPolicy<E : Event> {
-    class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) : TransitionDirectionProducerPolicy<E>()
+    internal class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) :
+        TransitionDirectionProducerPolicy<E>() {
+        override fun targetState(targetState: IState) = eventAndArgument.targetState(targetState)
+        override fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
+    }
 
     /**
      * TODO find the way to collect target states of conditional transitions
      */
-    class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>()
+    internal class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>() {
+        override fun targetState(targetState: IState) = unresolvedTargetState(targetState)
+        override fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
+    }
+
+    abstract fun targetState(targetState: IState): TransitionDirection
+    abstract fun targetStateOrStay(targetState: IState?): TransitionDirection
 }

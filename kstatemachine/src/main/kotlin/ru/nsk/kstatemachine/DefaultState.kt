@@ -39,10 +39,13 @@ open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }
 
-open class DefaultJoiceState(name: String? = null, private val joiceAction: () -> IState) :
+/**
+ * Currently it does not allow to target [DataState]
+ */
+open class DefaultChoiceState(name: String? = null, private val choiceAction: EventAndArgument<*>.() -> State) :
     BasePseudoState(name), RedirectPseudoState {
 
-    override fun resolveTargetState() = joiceAction()
+    override fun resolveTargetState(eventAndArgument: EventAndArgument<*>) = eventAndArgument.choiceAction()
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUSIVE), PseudoState {

@@ -143,7 +143,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         }
     }
 
-    private fun <E: Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
+    private fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
         val (event, argument) = eventAndArgument
         if (isFinished) {
             log { "$this is finished, skipping event ${event::class.simpleName}, with argument $argument" }
