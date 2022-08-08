@@ -22,7 +22,7 @@ fun main() {
 
         initialState("loginForm") {
             dataTransition<LoginEvent, LoginData> {
-                guard = { checkUserPassword(it.data) }
+                guard = { checkUserPassword(event.data) }
                 targetState = accountFormState
             }
         }
