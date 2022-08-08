@@ -45,7 +45,8 @@ open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState
 open class DefaultChoiceState(name: String? = null, private val choiceAction: EventAndArgument<*>.() -> State) :
     BasePseudoState(name), RedirectPseudoState {
 
-    override fun resolveTargetState(eventAndArgument: EventAndArgument<*>) = eventAndArgument.choiceAction()
+    override fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
+        eventAndArgument.choiceAction().also { machine.log { "$this resolved to $it" } }
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUSIVE), PseudoState {

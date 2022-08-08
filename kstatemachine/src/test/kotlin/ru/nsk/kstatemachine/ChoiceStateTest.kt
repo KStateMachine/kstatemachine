@@ -32,6 +32,8 @@ class ChoiceStateTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
             val choice2 = choiceState("choice2") { State2 }
             val choice1 = choiceState("choice1") { choice2 }
 
