@@ -1,6 +1,5 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
@@ -12,8 +11,12 @@ abstract class InternalStateMachine(name: String?, childMode: ChildMode) : State
     internal abstract fun delayListenerException(exception: Exception)
 }
 
-internal class StateMachineImpl(name: String?, childMode: ChildMode, override val autoDestroyOnStatesReuse: Boolean) :
-    InternalStateMachine(name, childMode) {
+internal class StateMachineImpl(
+    name: String?,
+    childMode: ChildMode,
+    override val autoDestroyOnStatesReuse: Boolean,
+    override val isUndoEnabled: Boolean,
+) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = NullLogger
@@ -22,6 +25,13 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
+
+    init {
+        if (isUndoEnabled) {
+            val undoState = addState(UndoState())
+            transition<UndoEvent>("undo transition", undoState)
+        }
+    }
 
     /**
      * Flag for event processing mechanism, which takes place in [processEvent] and during [start]/[startFrom].
@@ -159,6 +169,13 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         } finally {
             isProcessingEvent = false
         }
+    }
+
+    override fun undo() {
+        check(isUndoEnabled) {
+            "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
+        }
+        processEvent(UndoEvent)
     }
 
     /**

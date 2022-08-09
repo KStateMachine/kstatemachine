@@ -32,6 +32,8 @@ interface StateMachine : State {
     val autoDestroyOnStatesReuse: Boolean
     val isDestroyed: Boolean
 
+    val isUndoEnabled: Boolean
+
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
@@ -49,6 +51,12 @@ interface StateMachine : State {
      * Machine must be started to process events
      */
     fun processEvent(event: Event, argument: Any? = null)
+
+    /**
+     * Navigates machine to previous state.
+     * Previous states are stored in a stack, so this method mey be called multiple times if needed.
+     */
+    fun undo()
 
     /**
      * Destroys machine structure clearing all listeners, states etc.
@@ -139,8 +147,9 @@ fun createStateMachine(
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
+    enableUndo: Boolean = false,
     init: StateMachineBlock
-): StateMachine = StateMachineImpl(name, childMode, autoDestroyOnStatesReuse).apply {
+): StateMachine = StateMachineImpl(name, childMode, autoDestroyOnStatesReuse, enableUndo).apply {
     init()
     if (start) start()
 }

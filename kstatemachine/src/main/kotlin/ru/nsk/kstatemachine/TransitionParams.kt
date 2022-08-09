@@ -12,6 +12,11 @@ interface DataEvent<out D> : Event {
     val data: D
 }
 
+/**
+ * User may call processEvent() with [UndoEvent] as alternative to calling machine.undo()
+ */
+object UndoEvent : Event
+
 @StateMachineDslMarker
 data class TransitionParams<E : Event>(
     val transition: Transition<E>,

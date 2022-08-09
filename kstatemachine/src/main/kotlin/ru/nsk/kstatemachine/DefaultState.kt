@@ -112,16 +112,18 @@ open class DefaultHistoryState(
 
     override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
         _storedState = currentState
-        if (historyType == DEEP) // on transaction end I have to update storedValue on the active leaf. notification or intent from history?
+        if (historyType == DEEP)
             subPath.firstOrNull()?.let { _storedState = it }
     }
 
     override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         super.recursiveAfterTransitionComplete(transitionParams)
-        transitionParams.direction.targetState?.let { targetState ->
-            _storedState?.let {
-                if (targetState.isSubStateOf(it))
-                    _storedState = targetState
+        if (historyType == DEEP) {
+            transitionParams.direction.targetState?.let { targetState ->
+                _storedState?.let {
+                    if (targetState.isSubStateOf(it))
+                        _storedState = targetState
+                }
             }
         }
     }
