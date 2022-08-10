@@ -20,7 +20,8 @@ class GuardedTransitionTest : StringSpec({
                 transition<SwitchEvent> {
                     guard = {
                         this@initialState.machine.log { "$event $argument" }
-                        value == "value2" }
+                        value == "value2"
+                    }
                     targetState = second
                     callbacks.listen(this)
                 }

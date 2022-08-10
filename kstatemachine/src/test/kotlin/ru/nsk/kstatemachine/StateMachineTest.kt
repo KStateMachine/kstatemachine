@@ -167,29 +167,6 @@ class StateMachineTest : StringSpec({
         shouldThrowUnit<IllegalStateException> { machine.setInitialState(first) }
     }
 
-    "throwing PendingEventHandler does not destroy machine" {
-        val machine = createStateMachine {
-            logger = StateMachine.Logger { println(it) }
-
-            val second = state("second")
-            initialState("first") {
-                transition<SwitchEvent> {
-                    targetState = second
-                    onTriggered {
-                        shouldThrow<TestException> { this@createStateMachine.processEvent(SwitchEvent) }
-                    }
-                }
-            }
-
-            pendingEventHandler = StateMachine.PendingEventHandler { _, _ ->
-                testError("Already processing")
-            }
-        }
-
-        machine.processEvent(SwitchEvent)
-        machine.isDestroyed shouldBe false
-    }
-
     "process event before started" {
         createStateMachine {
             initialState("first")
@@ -273,36 +250,6 @@ class StateMachineTest : StringSpec({
         }
     }
 
-    "startFrom()" {
-        val callbacks = mockkCallbacks()
-
-        lateinit var state2: State
-        lateinit var state22: State
-
-        val machine = createStateMachine(start = false) {
-            callbacks.listen(this)
-
-            initialState("state1") { callbacks.listen(this) }
-            state2 = state("state2") {
-                callbacks.listen(this)
-
-                initialState("state2_1") { callbacks.listen(this) }
-                state22 = state("state2_2") { callbacks.listen(this) }
-            }
-
-            onStarted { callbacks.onStarted(this) }
-        }
-
-        machine.startFrom(state22)
-
-        verifySequence {
-            callbacks.onStarted(machine)
-            callbacks.onEntryState(machine)
-            callbacks.onEntryState(state2)
-            callbacks.onEntryState(state22)
-        }
-    }
-
     "restart machine" {
         val callbacks = mockkCallbacks()
 
@@ -329,6 +276,7 @@ class StateMachineTest : StringSpec({
         }
 
         machine.stop()
+        machine.stop() // does nothing
         verifySequenceAndClear(callbacks) { callbacks.onStopped(machine) }
 
         machine.start()

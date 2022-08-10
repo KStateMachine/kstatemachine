@@ -83,6 +83,7 @@ class ListenerExceptionHandlerTest : StringSpec({
         }
 
         shouldThrow<TestException> { machine.stop() }
+        machine.stop() // does nothing
         machine.isDestroyed shouldBe false
     }
 

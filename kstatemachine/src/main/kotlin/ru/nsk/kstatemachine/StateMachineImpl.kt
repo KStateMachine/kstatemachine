@@ -13,24 +13,18 @@ abstract class InternalStateMachine(name: String?, childMode: ChildMode) : State
 
 internal class StateMachineImpl(name: String?, childMode: ChildMode, override val autoDestroyOnStatesReuse: Boolean) :
     InternalStateMachine(name, childMode) {
-    /** Access to this field must be thread safe. */
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = NullLogger
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
-    override var pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
-        error(
-            "$this can not process pending $pendingEvent as event processing is already running. " +
-                    "Do not call processEvent() from notification listeners."
-        )
-    }
+    override var pendingEventHandler = queuePendingEventHandler()
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
 
     /**
-     * Help to check that [processEvent] is not called from state machine notification method.
-     * Access to this field must be thread safe.
+     * Flag for event processing mechanism, which takes place in [processEvent] and during [start]/[startFrom].
+     * It is not possible to process new event while previous processing is incomplete.
      */
     private var isProcessingEvent = false
 
@@ -61,25 +55,30 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         accept(CheckUniqueNamesVisitor())
         checkBeforeRunMachine()
 
-        runCheckingExceptions {
-            runMachine(makeStartTransitionParams(this, argument = argument))
-            recursiveEnterInitialStates(argument)
+        eventProcessingScope {
+            runCheckingExceptions {
+                runMachine(makeStartTransitionParams(this, argument = argument))
+                recursiveEnterInitialStates(argument)
+            }
         }
     }
 
     override fun startFrom(state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
-        runCheckingExceptions {
-            val transitionParams = makeStartTransitionParams(this, state, argument)
-            runMachine(transitionParams)
-            switchToTargetState(state as InternalState, this, transitionParams)
+        eventProcessingScope {
+            runCheckingExceptions {
+                val transitionParams = makeStartTransitionParams(this, state, argument)
+                runMachine(transitionParams)
+                switchToTargetState(state as InternalState, this, transitionParams)
+            }
         }
     }
 
     private fun checkBeforeRunMachine() {
         check(!isDestroyed) { "$this is already destroyed" }
         check(!isRunning) { "$this is already started" }
+        check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }
         if (childMode == ChildMode.EXCLUSIVE)
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
     }
@@ -93,6 +92,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
     override fun stop() {
         check(!isDestroyed) { "$this is already destroyed" }
+        if (!_isRunning) return
 
         runCheckingExceptions {
             _isRunning = false
@@ -109,26 +109,60 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         if (isProcessingEvent) {
             pendingEventHandler.onPendingEvent(event, argument)
             // pending event cannot be processed while previous event is still processing
-            // even if PendingEventHandler does not throw
+            // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
+            // to be processed later.
             return
         }
 
+        eventProcessingScope {
+            process(EventAndArgument(event, argument))
+        }
+    }
+
+    private fun process(eventAndArgument: EventAndArgument<*>) {
         var eventProcessed: Boolean? = null
+
+        runCheckingExceptions {
+            eventProcessed = doProcessEvent(eventAndArgument)
+        }
+
+        if (eventProcessed == false) {
+            log { "$this ignored ${eventAndArgument.event::class.simpleName}" }
+            ignoredEventHandler.onIgnoredEvent(eventAndArgument.event, eventAndArgument.argument)
+        }
+    }
+
+    /**
+     * Runs block of code that processes event, and processes all pending events from queue after it if
+     * [QueuePendingEventHandler] is used.
+     */
+    private fun eventProcessingScope(block: () -> Unit) {
+        val queue = pendingEventHandler as? QueuePendingEventHandler
+        queue?.checkEmpty()
+
         isProcessingEvent = true
         try {
-            runCheckingExceptions {
-                eventProcessed = doProcessEvent(EventAndArgument(event, argument))
-            }
+            block()
 
-            if (eventProcessed == false) {
-                log { "$this ignored ${event::class.simpleName}" }
-                ignoredEventHandler.onIgnoredEvent(event, argument)
+            queue?.let {
+                var eventAndArgument = it.nextEventAndArgument()
+                while (eventAndArgument != null) {
+                    process(eventAndArgument)
+
+                    eventAndArgument = it.nextEventAndArgument()
+                }
             }
+        } catch (e: Exception) {
+            queue?.clear()
+            throw e
         } finally {
             isProcessingEvent = false
         }
     }
 
+    /**
+     * Runs block of code that triggers notification listeners
+     */
     private fun runCheckingExceptions(block: () -> Unit) {
         try {
             block()
