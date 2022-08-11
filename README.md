@@ -1,4 +1,4 @@
-![KStateMachine](./doc/kstatemachine-logo.png)
+![KStateMachine](./docs/kstatemachine-logo.png)
 
 ![Build and test with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
@@ -46,7 +46,7 @@ _Don't forget to push the ⭐ if you like this project._
 
 ## Quick start sample (finishing traffic light)
 
-![Traffic light diagram](./doc/diagrams/finishing-traffic-light.png)
+![Traffic light diagram](./docs/diagrams/finishing-traffic-light.png)
 
 ```kotlin
 sealed class Events {
