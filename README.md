@@ -1,3 +1,5 @@
+![KStateMachine](./doc/kstatemachine-logo.png)
+
 # KStateMachine
 
 ![Build and test with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
@@ -39,8 +41,9 @@ Main features are:
 * Built-in [logging](https://github.com/nsk90/kstatemachine/wiki#logging) support
 
 _The library is currently in a development phase. You are welcome to propose useful features._
+_Don't forget to push the ⭐ if you like this project._
 
-## SEE [WIKI PAGE](https://github.com/nsk90/kstatemachine/wiki) FOR MORE INFO
+## SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
 
 ## Quick start sample (finishing traffic light)
 
