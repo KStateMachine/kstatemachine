@@ -29,6 +29,7 @@ Main features are:
   with [cross level transitions](https://github.com/nsk90/kstatemachine/wiki#cross-level-transitions) support
 * [Composed (nested) state machines.](https://github.com/nsk90/kstatemachine/wiki#composed-(nested)-state-machines) Use
   state machines as atomic child states
+* [Pseudo states](https://github.com/nsk90/kstatemachine/wiki#pseudo-states) for additional logic in machine behaviour
 * [Typesafe transitions](https://github.com/nsk90/kstatemachine/wiki#typesafe-transitions) to pass data in typesafe way
   from event to state
 * [Parallel states](https://github.com/nsk90/kstatemachine/wiki#parallel-states) to avoid a combinatorial explosion of
@@ -37,6 +38,7 @@ Main features are:
 * [Export state machine](https://github.com/nsk90/kstatemachine/wiki#export) structure
   to [PlantUML](https://plantuml.com/);
 * Built-in [logging](https://github.com/nsk90/kstatemachine/wiki#logging) support
+* Well tested. All features are covered by tests.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 
