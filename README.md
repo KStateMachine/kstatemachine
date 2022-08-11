@@ -39,6 +39,7 @@ Main features are:
 * Built-in [logging](https://github.com/nsk90/kstatemachine/wiki#logging) support
 
 _The library is currently in a development phase. You are welcome to propose useful features._
+
 _Don't forget to push the ⭐ if you like this project._
 
 ## SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
