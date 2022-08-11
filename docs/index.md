@@ -106,6 +106,17 @@ Or even shorter:
 state().onEntry { /*...*/ }
 ```
 
+### Listen group of states
+
+If you need to perform some actions depending on active statuses of two or more states use `onActiveAllOf()`
+and `onActiveAnyOf()` functions.
+
+```kotlin
+onActiveAllOf(State1, State2, State3) {
+    println("states active: $it")
+}
+```
+
 ## Setup transitions
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
@@ -384,6 +395,22 @@ createStateMachine(childMode = ChildMode.PARALLEL) {
 
 There is no way to process multiple transitions for one event by using parallel states, only one transition may be
 triggered for each event.
+
+## Pseudo states
+
+Pseudo states are special kind of states that machine cannot enter, but they are useful to describe additional
+logic in machine behaviour.
+
+### Choice state
+
+Choice state allows to select target state depending on some condition. When transition targeting a choice state is
+triggered, choice function is evaluated and machine goes to resulting state:
+
+```kotlin
+choiceState {
+    if (event.value > 3) State1 else State2
+}
+```
 
 ## Typesafe transitions
 
