@@ -6,7 +6,7 @@ Building blocks (main interfaces) of the library:
 
 * `StateMachine` - is a collection of states and transitions between them, processes events when started
 * `IState` - states where state machine can go to
-* `Event` - is a base interface for events or other words actions which are processed by state machine and may trigger
+* `Event` - is a base interface for events which are processed by state machine and may trigger
   transitions
 * `Transition` - is an operation of moving from one state to another
 * `TransitionParams` - information about current transition, passed to notification functions
