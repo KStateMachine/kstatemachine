@@ -18,9 +18,13 @@ Main features are:
 
 * Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
-* Backward compatible till Kotlin 1.4
-* Event based - transitions are performed by processing incoming events
-* [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states, state groups and transitions. Listener callbacks are shipped with information about
+* [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
+  till Kotlin 1.4
+* Event based - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
+  incoming events
+* [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states,
+  [state groups](https://nsk90.github.io/kstatemachine/#listen-group-of-states) and transitions. Listener callbacks are
+  shipped with information about
   current transition
 * [Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
   and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions) with dynamic target
