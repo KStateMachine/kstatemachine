@@ -39,9 +39,11 @@ Main features are:
 * [Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states) to avoid a combinatorial explosion of
   states
 * [Argument](https://nsk90.github.io/kstatemachine/#arguments) passing for events and transitions
+* Supports [pending events](https://nsk90.github.io/kstatemachine/#pending-events)
 * [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure
   to [PlantUML](https://plantuml.com/);
 * Built-in [logging](https://nsk90.github.io/kstatemachine/#logging) support
+* [Testable](https://nsk90.github.io/kstatemachine/#testing) - you can run state machine from specified state
 * Well tested. All features are covered by tests.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
