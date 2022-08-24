@@ -20,24 +20,24 @@ Main features are:
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * Backward compatible till Kotlin 1.4
 * Event based - transitions are performed by processing incoming events
-* Listeners for machine, states, state groups and transitions. Listener callbacks are shipped with information about
+* [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states, state groups and transitions. Listener callbacks are shipped with information about
   current transition
-* [Guarded](https://github.com/nsk90/kstatemachine/wiki#guarded-transitions)
-  and [Conditional transitions](https://github.com/nsk90/kstatemachine/wiki#conditional-transitions) with dynamic target
+* [Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
+  and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions) with dynamic target
   state which is calculated in a moment of event processing depending on application business logic
-* [Nested states](https://github.com/nsk90/kstatemachine/wiki#nested-states) - hierarchical state machines (HSMs)
-  with [cross level transitions](https://github.com/nsk90/kstatemachine/wiki#cross-level-transitions) support
-* [Composed (nested) state machines.](https://github.com/nsk90/kstatemachine/wiki#composed-(nested)-state-machines) Use
+* [Nested states](https://nsk90.github.io/kstatemachine/#nested-states) - hierarchical state machines (HSMs)
+  with [cross level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
+* [Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines) Use
   state machines as atomic child states
-* [Pseudo states](https://github.com/nsk90/kstatemachine/wiki#pseudo-states) for additional logic in machine behaviour
-* [Typesafe transitions](https://github.com/nsk90/kstatemachine/wiki#typesafe-transitions) to pass data in typesafe way
+* [Pseudo states](https://nsk90.github.io/kstatemachine/#pseudo-states) for additional logic in machine behaviour
+* [Typesafe transitions](https://nsk90.github.io/kstatemachine/#typesafe-transitions) to pass data in typesafe way
   from event to state
-* [Parallel states](https://github.com/nsk90/kstatemachine/wiki#parallel-states) to avoid a combinatorial explosion of
+* [Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states) to avoid a combinatorial explosion of
   states
-* [Argument](https://github.com/nsk90/kstatemachine/wiki#arguments) passing for events and transitions
-* [Export state machine](https://github.com/nsk90/kstatemachine/wiki#export) structure
+* [Argument](https://nsk90.github.io/kstatemachine/#arguments) passing for events and transitions
+* [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure
   to [PlantUML](https://plantuml.com/);
-* Built-in [logging](https://github.com/nsk90/kstatemachine/wiki#logging) support
+* Built-in [logging](https://nsk90.github.io/kstatemachine/#logging) support
 * Well tested. All features are covered by tests.
 
 _The library is currently in a development phase. You are welcome to propose useful features._
