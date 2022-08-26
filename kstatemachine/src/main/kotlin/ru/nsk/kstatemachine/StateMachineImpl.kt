@@ -190,8 +190,10 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
         val targetState = direction.targetState as? InternalState
 
-        val targetText = if (targetState != null) "to $targetState" else "[targetless]"
-        log { "${event::class.simpleName} triggers $transition from ${transition.sourceState} $targetText" }
+        log {
+            val targetText = if (targetState != null) "to $targetState" else "[targetless]"
+            "${event::class.simpleName} triggers $transition from ${transition.sourceState} $targetText"
+        }
 
         transition.transitionNotify { onTriggered(transitionParams) }
 
