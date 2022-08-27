@@ -110,8 +110,7 @@ interface HistoryState : PseudoState {
     val historyType: HistoryType
     /** Initial parent state if was not set explicitly */
     val defaultState: State
-    fun storeState(owner: IState, currentState: IState)
-    val storedState: IState
+    val storedState: State
 }
 
 typealias StateBlock<S> = S.() -> Unit
@@ -241,5 +240,5 @@ fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataSt
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
-fun IState.historyState(name: String? = null, historyType: HistoryType = HistoryType.SHALLOW) =
-    addState(DefaultHistoryState(name, historyType))
+fun IState.historyState(name: String? = null, defaultState: State? = null, historyType: HistoryType = HistoryType.SHALLOW) =
+    addState(DefaultHistoryState(name, defaultState, historyType))

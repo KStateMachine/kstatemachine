@@ -33,8 +33,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override val initialState get() = data.initialState
 
-    private val historyStates: List<HistoryState> get() = states.filterIsInstance<HistoryState>()
-
     override val machine get() = if (this is StateMachine) this else requireParent().machine
 
     override val transitions: Set<Transition<*>> get() = data.transitions
@@ -112,13 +110,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun asState() = this
 
-    protected open fun onDoEnter(transitionParams: TransitionParams<*>) {
-        /* default empty */
-    }
-
-    protected open fun onDoExit(transitionParams: TransitionParams<*>) {
-        /* default empty */
-    }
+    protected open fun onDoEnter(transitionParams: TransitionParams<*>) = Unit // default empty
+    protected open fun onDoExit(transitionParams: TransitionParams<*>) = Unit // default empty
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isActive) {
@@ -146,6 +139,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             stateNotify { onFinished(transitionParams) }
         }
     }
+
+    override fun onParentCurrentStateChanged(currentState: InternalState) = Unit // default empty
 
     override fun <E : Event> recursiveFindUniqueResolvedTransition(
         eventAndArgument: EventAndArgument<E>
@@ -214,16 +209,10 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         require(states.contains(state)) { "$state is not a child of $this" }
 
         if (data.currentState == state) return
-
-        // store history
-        data.currentState?.let { currentState ->
-            // FIXME only State is supported (not DataState), add some check?
-            historyStates.forEach { it.storeState(this, currentState) }
-        }
-
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
+        data.states.forEach { it.onParentCurrentStateChanged(state) }
         notifyStateEntry(state, transitionParams)
     }
 

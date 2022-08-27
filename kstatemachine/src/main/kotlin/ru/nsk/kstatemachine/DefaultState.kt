@@ -73,25 +73,31 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUS
  */
 open class DefaultHistoryState(
     name: String? = null,
-    override val historyType: HistoryType = HistoryType.SHALLOW,
-    private var _defaultState: State? = null
-) : BasePseudoState(name, ChildMode.EXCLUSIVE), HistoryState {
+    private var _defaultState: State? = null,
+    final override val historyType: HistoryType = HistoryType.SHALLOW
+) : BasePseudoState(name), HistoryState {
+    init {
+        if (historyType == HistoryType.DEEP)
+            TODO("deep history is not implemented yet")
+    }
+
+    override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
+
+    private var _storedState: State? = null
+    override val storedState
+        get() = (_storedState ?: defaultState).also { machine.log { "$this resolved to $it" } }
 
     override fun setParent(parent: InternalState) {
         super.setParent(parent)
 
-        if (_defaultState == null)
-            _defaultState = parent.initialState as State
+        if (_defaultState != null)
+            require(parent.states.contains(defaultState)) { "Default state $defaultState is not a neighbour of $this" }
         else
-            require(parent.states.contains(defaultState)) { "Default state is not a parent child" }
+            _defaultState = parent.initialState as State
     }
 
-    override val defaultState get() = checkNotNull(_defaultState) { "Default state is not set" }
-
-    private var _storedState: State? = null
-    val storedState: State
-
-    override fun storeState(owner: IState, currentState: IState) {
-        _storedState = currentState as State
+    override fun onParentCurrentStateChanged(currentState: InternalState) {
+        // FIXME only State is supported (not DataState), add some check?
+        (currentState as? State)?.let { _storedState = currentState }
     }
 }
