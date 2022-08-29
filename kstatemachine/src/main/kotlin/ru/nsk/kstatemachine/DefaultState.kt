@@ -100,4 +100,9 @@ open class DefaultHistoryState(
         // FIXME only State is supported (not DataState), add some check?
         (currentState as? State)?.let { _storedState = currentState }
     }
+
+    override fun onCleanup() {
+        _defaultState = null
+        _storedState = null
+    }
 }
