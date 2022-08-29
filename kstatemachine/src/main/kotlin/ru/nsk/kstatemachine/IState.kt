@@ -55,9 +55,18 @@ interface IState : TransitionStateApi, VisitorAcceptor {
 }
 
 enum class ChildMode { EXCLUSIVE, PARALLEL }
+enum class HistoryType {
+    /** Records only immediate child states */
+    SHALLOW,
+
+    /** Records nested states also */
+    DEEP
+}
 
 /**
- * Simple state without data field that is used by typesafe transitions
+ * Simple state in most cases equal to [IState].
+ * Using this interface explicitly says that the state does not have a data field that is used by typesafe transitions.
+ * Helps to break compilation if a user specifies [DataState] as a target of non-data transition.
  */
 interface State : IState
 
@@ -92,6 +101,16 @@ interface PseudoState : State
 
 interface RedirectPseudoState : PseudoState {
     fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
+}
+
+/**
+ * Pseudo-state that represents the child state that the parent state was in the last time before exited.
+ */
+interface HistoryState : PseudoState {
+    val historyType: HistoryType
+    /** Initial parent state if was not set explicitly */
+    val defaultState: State
+    val storedState: State
 }
 
 typealias StateBlock<S> = S.() -> Unit
@@ -220,3 +239,6 @@ fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataSt
 
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
+
+fun IState.historyState(name: String? = null, defaultState: State? = null, historyType: HistoryType = HistoryType.SHALLOW) =
+    addState(DefaultHistoryState(name, defaultState, historyType))
