@@ -106,7 +106,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         return transition
     }
 
-    override fun toString() = "${this::class.simpleName}${if (name != null) "($name)" else ""}"
+    override fun toString() = "${this::class.simpleName}(${if (name != null) "$name" else "$${hashCode()}"})"
 
     override fun asState() = this
 

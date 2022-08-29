@@ -97,7 +97,6 @@ open class DefaultHistoryState(
     }
 
     override fun onParentCurrentStateChanged(currentState: InternalState) {
-        // FIXME only State is supported (not DataState), add some check?
         (currentState as? State)?.let { _storedState = currentState }
     }
 
