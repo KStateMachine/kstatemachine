@@ -1,6 +1,5 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.visitors.CheckDataStatesNotUsedWithHistoryStatesVisitor
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
@@ -77,7 +76,6 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
 
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
-        accept(CheckDataStatesNotUsedWithHistoryStatesVisitor())
         check(!isDestroyed) { "$this is already destroyed" }
         check(!isRunning) { "$this is already started" }
         check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }

@@ -115,8 +115,8 @@ interface RedirectPseudoState : PseudoState {
 interface HistoryState : PseudoState {
     val historyType: HistoryType
     /** Initial parent state if was not set explicitly */
-    val defaultState: State
-    val storedState: State
+    val defaultState: IState
+    val storedState: IState
 }
 
 typealias StateBlock<S> = S.() -> Unit
@@ -247,5 +247,5 @@ fun <D> IState.finalDataState(name: String? = null, defaultData: D? = null, init
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
-fun IState.historyState(name: String? = null, defaultState: State? = null, historyType: HistoryType = HistoryType.SHALLOW) =
+fun IState.historyState(name: String? = null, defaultState: IState? = null, historyType: HistoryType = HistoryType.SHALLOW) =
     addState(DefaultHistoryState(name, defaultState, historyType))

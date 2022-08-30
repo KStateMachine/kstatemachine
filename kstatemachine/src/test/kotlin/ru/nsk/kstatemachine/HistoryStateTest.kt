@@ -154,14 +154,4 @@ class HistoryStateTest : StringSpec({
             }
         }
     }
-
-    "DataStates cannot be used with HistoryStates in same machine" {
-        shouldThrow<IllegalStateException> {
-            createStateMachine {
-                initialState()
-                dataState<Int>()
-                historyState()
-            }
-        }
-    }
 })

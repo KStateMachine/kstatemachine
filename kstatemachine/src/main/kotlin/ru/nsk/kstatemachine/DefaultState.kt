@@ -85,7 +85,7 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), Pseu
  */
 open class DefaultHistoryState(
     name: String? = null,
-    private var _defaultState: State? = null,
+    private var _defaultState: IState? = null,
     final override val historyType: HistoryType = HistoryType.SHALLOW
 ) : BasePseudoState(name), HistoryState {
     init {
@@ -95,7 +95,7 @@ open class DefaultHistoryState(
 
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
-    private var _storedState: State? = null
+    private var _storedState: IState? = null
     override val storedState
         get() = (_storedState ?: defaultState).also { machine.log { "$this resolved to $it" } }
 
@@ -105,11 +105,11 @@ open class DefaultHistoryState(
         if (_defaultState != null)
             require(parent.states.contains(defaultState)) { "Default state $defaultState is not a neighbour of $this" }
         else
-            _defaultState = parent.initialState as State
+            _defaultState = parent.initialState
     }
 
     override fun onParentCurrentStateChanged(currentState: InternalState) {
-        (currentState as? State)?.let { _storedState = currentState }
+        _storedState = currentState
     }
 
     override fun onCleanup() {
