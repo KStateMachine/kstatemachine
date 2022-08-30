@@ -74,10 +74,16 @@ interface State : IState
  * State which holds data while it is active
  */
 interface DataState<out D> : IState {
+    val defaultData: D?
     /**
      * This property might be accessed only while this state is active
      */
     val data: D
+
+    /**
+     * Similar to [data] but its value is not cleared when state finishes
+     */
+    val lastData: D
 }
 
 /**
@@ -202,9 +208,10 @@ fun IState.state(
 
 fun <D> IState.dataState(
     name: String? = null,
+    defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     init: StateBlock<DataState<D>>? = null
-) = addState(DefaultDataState(name, childMode), init)
+) = addState(DefaultDataState(name, defaultData, childMode), init)
 
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
@@ -234,8 +241,8 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
-    addFinalState(DefaultFinalDataState(name), init)
+fun <D> IState.finalDataState(name: String? = null, defaultData: D? = null, init: StateBlock<FinalDataState<D>>? = null) =
+    addFinalState(DefaultFinalDataState(name, defaultData), init)
 
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))

@@ -1,24 +1,34 @@
 package ru.nsk.kstatemachine
 
-open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+import ru.nsk.kstatemachine.ChildMode.*
+
+open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
 
-open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
-    BaseStateImpl(name, childMode), DataState<D> {
+open class DefaultDataState<out D>(
+    name: String? = null,
+    override val defaultData: D? = null,
+    childMode: ChildMode = EXCLUSIVE
+) : BaseStateImpl(name, childMode), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
+
+    private var _lastData: D? = null
+        get() = field ?: defaultData
+
+    override val lastData: D get() = checkNotNull(_lastData) { "Last data is not available yet, and default data not provided" }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
         if (this == transitionParams.direction.targetState) {
             @Suppress("UNCHECKED_CAST")
             val event = transitionParams.event as? DataEvent<D>
-            checkNotNull(event) { "${transitionParams.event} does not contain data required by $this" }
-            _data = event.data
-        } else {
-            error(
-                "$this is implicitly activated, this might be a result of a cross-level transition. " +
-                        "Currently there is no way to get data for this state."
-            )
+                ?: error("${transitionParams.event} does not contain data required by $this")
+            with(event.data) {
+                _data = this
+                _lastData = this
+            }
+        } else { // implicit activation
+            _data = lastData
         }
     }
 
@@ -28,6 +38,7 @@ open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = 
 
     override fun onCleanup() {
         _data = null
+        _lastData = null
     }
 }
 
@@ -35,7 +46,8 @@ open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalSt
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
 }
 
-open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
+open class DefaultFinalDataState<out D>(name: String? = null, defaultData: D? = null) :
+    DefaultDataState<D>(name, defaultData), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }
 
@@ -49,7 +61,7 @@ open class DefaultChoiceState(name: String? = null, private val choiceAction: Ev
         eventAndArgument.choiceAction().also { machine.log { "$this resolved to $it" } }
 }
 
-open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUSIVE), PseudoState {
+open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
     override fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
