@@ -18,10 +18,16 @@ class ParallelStatesTest : StringSpec({
         }
     }
 
-    "final state in parallel mode negative" {
+    "final or pseudo state in parallel mode negative" {
         createStateMachine(childMode = ChildMode.PARALLEL) {
             shouldThrow<IllegalArgumentException> {
                 finalState()
+            }
+            shouldThrow<IllegalArgumentException> {
+                choiceState { error("test") }
+            }
+            shouldThrow<IllegalArgumentException> {
+                historyState()
             }
         }
     }

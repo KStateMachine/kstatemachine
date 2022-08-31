@@ -70,10 +70,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         check(!machine.isRunning) { "Can not add state after state machine started" }
         if (childMode == ChildMode.PARALLEL) {
             require(state !is FinalState) { "Can not add FinalState in parallel child mode" }
-            if (state is HistoryState)
-                require(state.historyType != HistoryType.SHALLOW) {
-                    "Can not add Shallow HistoryState in parallel child mode"
-                }
+            require(state !is PseudoState) { "Can not add PseudoState in parallel child mode" }
         }
 
         state.name?.let {
@@ -166,7 +163,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 initialState.recursiveEnterInitialStates(argument)
             }
             ChildMode.PARALLEL -> data.states.forEach {
-                notifyStateEntry(it, makeStartTransitionParams(it, argument = argument))
+                handleStateEntry(it, makeStartTransitionParams(it, argument = argument))
                 it.recursiveEnterInitialStates(argument)
             }
         }
@@ -213,7 +210,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState = state
 
         data.states.forEach { it.onParentCurrentStateChanged(state) }
-        notifyStateEntry(state, transitionParams)
+        handleStateEntry(state, transitionParams)
     }
 
     override fun cleanup() {
@@ -221,7 +218,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         onCleanup()
     }
 
-    private fun notifyStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
+    private fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
         val finish = when (childMode) {
             ChildMode.EXCLUSIVE -> state is IFinalState
             ChildMode.PARALLEL -> states.all { it.isFinished }

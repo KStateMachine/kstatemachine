@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.ChildMode.*
+import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 
 open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
@@ -11,12 +11,13 @@ open class DefaultDataState<out D>(
     childMode: ChildMode = EXCLUSIVE
 ) : BaseStateImpl(name, childMode), DataState<D> {
     private var _data: D? = null
-    override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
+    override val data: D get() = checkNotNull(_data) { "Data is not set. Is $this state active?" }
 
     private var _lastData: D? = null
-        get() = field ?: defaultData
-
-    override val lastData: D get() = checkNotNull(_lastData) { "Last data is not available yet, and default data not provided" }
+    override val lastData: D
+        get() = checkNotNull(_lastData ?: defaultData) {
+            "Last data is not available yet in $this, and default data not provided"
+        }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
         if (this == transitionParams.direction.targetState) {
@@ -66,17 +67,17 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), Pseu
     override fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
     override fun <L : IState.Listener> addListener(listener: L) =
-        throw UnsupportedOperationException("PseudoState can not have listeners")
+        throw UnsupportedOperationException("PseudoState $this can not have listeners")
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?) =
-        throw UnsupportedOperationException("PseudoState can not have child states")
+        throw UnsupportedOperationException("PseudoState $this can not have child states")
 
 
     override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("PseudoState can not have transitions")
+        throw UnsupportedOperationException("PseudoState $this can not have transitions")
 
     private fun internalError(): Nothing =
-        error("Internal error PseudoState can not be entered or exited, looks that machine is purely configured")
+        error("Internal error, PseudoState $this can not be entered or exited, looks that machine is purely configured")
 
 }
 
