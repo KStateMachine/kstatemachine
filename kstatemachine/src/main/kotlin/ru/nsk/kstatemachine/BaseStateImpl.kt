@@ -137,8 +137,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun onParentCurrentStateChanged(currentState: InternalState) = Unit // default empty
-
     override fun <E : Event> recursiveFindUniqueResolvedTransition(
         eventAndArgument: EventAndArgument<E>
     ): ResolvedTransition<E>? {
@@ -174,7 +172,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             recursiveEnterInitialStates(transitionParams.argument)
         } else {
             val state = path.removeLast()
-            setCurrentState(state, transitionParams)
+            setCurrentState(state, transitionParams, path)
 
             if (state !is StateMachine) // inner state machine manages its internal state by its own
                 state.recursiveEnterStatePath(path, transitionParams)
@@ -201,7 +199,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         ChildMode.PARALLEL -> data.states.toList()
     }
 
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>, path: List<InternalState> = emptyList()) {
         require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
@@ -209,7 +207,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
-        data.states.forEach { it.onParentCurrentStateChanged(state) }
+        data.states.forEach { it.onParentCurrentStateChanged(state, path) }
         handleStateEntry(state, transitionParams)
     }
 

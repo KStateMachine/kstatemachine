@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
@@ -196,10 +197,18 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         }
 
         transition.transitionNotify { onTriggered(transitionParams) }
-
         machineNotify { onTransition(transitionParams) }
 
-        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
+        targetState?.let {
+            if (direction !is TargetStateWithSubPath) {
+                switchToTargetState(it, transition.sourceState, transitionParams)
+            } else { // direction contains path to enter (for example from deep history state)
+                val pathToTop = transition.sourceState.findPathFromTargetToLca(it)
+                val path = mutableListOf(*pathToTop.toTypedArray(), *direction.subPath.toTypedArray())
+                val lca = path.removeLast()
+                lca.recursiveEnterStatePath(path, transitionParams)
+            }
+        }
         return true
     }
 

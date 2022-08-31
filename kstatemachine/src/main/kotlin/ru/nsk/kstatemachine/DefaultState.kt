@@ -89,12 +89,9 @@ open class DefaultHistoryState(
     private var _defaultState: IState? = null,
     final override val historyType: HistoryType = HistoryType.SHALLOW
 ) : BasePseudoState(name), HistoryState {
-    init {
-        if (historyType == HistoryType.DEEP)
-            TODO("deep history is not implemented yet")
-    }
-
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
+
+    private var storedSubPath = emptyList<InternalState>()
 
     private var _storedState: IState? = null
     override val storedState
@@ -109,8 +106,17 @@ open class DefaultHistoryState(
             _defaultState = parent.initialState
     }
 
-    override fun onParentCurrentStateChanged(currentState: InternalState) {
+    override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
         _storedState = currentState
+        if (historyType == HistoryType.DEEP)
+            storedSubPath = subPath
+    }
+
+    override fun produceTransitionDirection(): TransitionDirection {
+        return when (historyType) {
+            HistoryType.SHALLOW -> TargetState(storedState)
+            HistoryType.DEEP -> TargetStateWithSubPath(storedState, storedSubPath)
+        }
     }
 
     override fun onCleanup() {

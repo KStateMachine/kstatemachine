@@ -117,6 +117,8 @@ interface HistoryState : PseudoState {
     /** Initial parent state if was not set explicitly */
     val defaultState: IState
     val storedState: IState
+
+    fun produceTransitionDirection(): TransitionDirection
 }
 
 typealias StateBlock<S> = S.() -> Unit

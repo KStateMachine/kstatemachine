@@ -146,12 +146,15 @@ class HistoryStateTest : StringSpec({
 
     "deep history" {
         createStateMachine {
-            initialState {
-                initialState()
-            }
-            shouldThrow<NotImplementedError> {
+            initialState("state1") {
+                initialState("state11") {
+                    initialState("state111")
+                    state("state112")
+                }
+
                 historyState(historyType = HistoryType.DEEP)
             }
+            state("2")
         }
     }
 })
