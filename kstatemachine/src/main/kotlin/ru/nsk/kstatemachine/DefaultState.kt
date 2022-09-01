@@ -1,6 +1,8 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
+import ru.nsk.kstatemachine.HistoryType.DEEP
+import ru.nsk.kstatemachine.HistoryType.SHALLOW
 
 open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
@@ -87,7 +89,7 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), Pseu
 open class DefaultHistoryState(
     name: String? = null,
     private var _defaultState: IState? = null,
-    final override val historyType: HistoryType = HistoryType.SHALLOW
+    final override val historyType: HistoryType = SHALLOW
 ) : BasePseudoState(name), HistoryState {
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
@@ -95,7 +97,15 @@ open class DefaultHistoryState(
 
     private var _storedState: IState? = null
     override val storedState
-        get() = (_storedState ?: defaultState).also { machine.log { "$this resolved to $it" } }
+        get() = (_storedState ?: defaultState).also {
+            machine.log {
+                val subPath = if (historyType == DEEP && storedSubPath.isNotEmpty())
+                    storedSubPath.joinToString(prefix = " subPath: ")
+                else ""
+
+                "$this resolved to $it$subPath"
+            }
+        }
 
     override fun setParent(parent: InternalState) {
         super.setParent(parent)
@@ -108,14 +118,14 @@ open class DefaultHistoryState(
 
     override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
         _storedState = currentState
-        if (historyType == HistoryType.DEEP)
-            storedSubPath = subPath
+        if (historyType == DEEP)
+            storedSubPath = subPath.toList() // defence copy
     }
 
     override fun produceTransitionDirection(): TransitionDirection {
         return when (historyType) {
-            HistoryType.SHALLOW -> TargetState(storedState)
-            HistoryType.DEEP -> TargetStateWithSubPath(storedState, storedSubPath)
+            SHALLOW -> TargetState(storedState)
+            DEEP -> TargetStateWithSubPath(storedState, storedSubPath)
         }
     }
 

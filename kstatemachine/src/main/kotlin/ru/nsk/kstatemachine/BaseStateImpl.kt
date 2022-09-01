@@ -241,9 +241,11 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     internal fun switchToTargetState(
         targetState: InternalState,
         fromState: InternalState,
-        transitionParams: TransitionParams<*>
+        transitionParams: TransitionParams<*>,
+        subPath: List<InternalState> = emptyList()
     ) {
         val path = fromState.findPathFromTargetToLca(targetState)
+        path.addAll(0, subPath)
         val lca = path.removeLast()
         lca.recursiveEnterStatePath(path, transitionParams)
     }

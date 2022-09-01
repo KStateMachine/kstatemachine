@@ -200,14 +200,8 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         machineNotify { onTransition(transitionParams) }
 
         targetState?.let {
-            if (direction !is TargetStateWithSubPath) {
-                switchToTargetState(it, transition.sourceState, transitionParams)
-            } else { // direction contains path to enter (for example from deep history state)
-                val pathToTop = transition.sourceState.findPathFromTargetToLca(it)
-                val path = mutableListOf(*pathToTop.toTypedArray(), *direction.subPath.toTypedArray())
-                val lca = path.removeLast()
-                lca.recursiveEnterStatePath(path, transitionParams)
-            }
+            val subPath = if (direction is TargetStateWithSubPath) direction.subPath else emptyList()
+            switchToTargetState(it, transition.sourceState, transitionParams, subPath)
         }
         return true
     }

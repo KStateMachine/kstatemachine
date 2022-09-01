@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.verify
@@ -144,17 +145,73 @@ class HistoryStateTest : StringSpec({
         history.storedState shouldBe state22
     }
 
-    "deep history" {
-        createStateMachine {
+    "deep history, entry neighbour state" {
+        lateinit var state2: State
+        lateinit var state1222: State
+        lateinit var history: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
             initialState("state1") {
                 initialState("state11") {
-                    initialState("state111")
-                    state("state112")
+                    transitionOn<SwitchEvent> { targetState = { state1222 } }
                 }
 
-                historyState(historyType = HistoryType.DEEP)
+                state("state12") {
+                    initialState("state121")
+                    state("state122") {
+
+                        initialState("state1221")
+                        state1222 = state("1222") {
+                            transitionOn<SwitchEvent> { targetState = { state2 } }
+                        }
+                    }
+                }
+
+                history = historyState(historyType = HistoryType.DEEP)
             }
-            state("2")
+            state2 = state("state2") {
+                transitionOn<SwitchEvent> { targetState = { history } }
+            }
         }
+
+        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) // exit history scope
+        machine.processEvent(SwitchEvent) // go back through history
+
+        machine.activeStates().shouldContain(state1222)
+    }
+
+    "deep history, switching inside neighbour state" {
+        lateinit var state2: State
+        lateinit var state112: State
+        lateinit var history: State
+
+        val machine = createStateMachine {
+            logger = StateMachine.Logger { println(it) }
+
+            initialState("state1") {
+                initialState("state11") {
+                    initialState("state111") {
+                        transitionOn<SwitchEvent> { targetState = { state112 } }
+                    }
+                    state112 = state("state112") {
+                        transitionOn<SwitchEvent> { targetState = { state2 } }
+                    }
+                }
+
+                history = historyState(historyType = HistoryType.DEEP)
+            }
+            state2 = state("state2") {
+                transitionOn<SwitchEvent> { targetState = { history } }
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) // exit history scope
+        machine.processEvent(SwitchEvent) // go back through history
+
+        machine.activeStates().shouldContain(state112)
     }
 })
