@@ -200,6 +200,8 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         machineNotify { onTransition(transitionParams) }
 
         targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
+
+        recursiveAfterTransitionComplete(transitionParams)
         return true
     }
 

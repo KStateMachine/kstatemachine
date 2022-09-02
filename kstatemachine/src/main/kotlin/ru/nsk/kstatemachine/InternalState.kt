@@ -30,6 +30,7 @@ abstract class InternalState : IState {
 
     internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
     internal abstract fun recursiveStop()
+    internal abstract fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>)
     internal abstract fun cleanup()
 }
 

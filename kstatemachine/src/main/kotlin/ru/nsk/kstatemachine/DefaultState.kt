@@ -116,6 +116,16 @@ open class DefaultHistoryState(
             subPath.firstOrNull()?.let { _storedState = it }
     }
 
+    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+        super.recursiveAfterTransitionComplete(transitionParams)
+        transitionParams.direction.targetState?.let { targetState ->
+            _storedState?.let {
+                if (targetState.isSubStateOf(it))
+                    _storedState = targetState
+            }
+        }
+    }
+
     override fun onStopped() {
         _storedState = null
     }

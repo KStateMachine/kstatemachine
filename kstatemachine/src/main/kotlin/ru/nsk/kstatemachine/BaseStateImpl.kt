@@ -180,8 +180,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun recursiveExit(transitionParams: TransitionParams<*>) {
-        for (currentState in getCurrentStates())
-            currentState.recursiveExit(transitionParams)
+        getCurrentStates().forEachState { it.recursiveExit(transitionParams) }
         doExit(transitionParams)
     }
 
@@ -190,7 +189,11 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.isActive = false
         data.isFinished = false
         onStopped()
-        data.states.forEach { it.recursiveStop() }
+        data.states.forEachState { it.recursiveStop() }
+    }
+
+    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+        data.states.forEachState { it.recursiveAfterTransitionComplete(transitionParams) }
     }
 
     private fun requireCurrentState() = requireNotNull(data.currentState) { "Current state is not set" }
@@ -208,7 +211,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
-        data.states.forEach { it.onParentCurrentStateChanged(state, path) }
+        data.states.forEachState { it.onParentCurrentStateChanged(state, path) }
         handleStateEntry(state, transitionParams)
     }
 
