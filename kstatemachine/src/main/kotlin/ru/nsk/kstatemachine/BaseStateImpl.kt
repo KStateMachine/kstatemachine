@@ -189,6 +189,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState = null
         data.isActive = false
         data.isFinished = false
+        onStopped()
         data.states.forEach { it.recursiveStop() }
     }
 
@@ -241,11 +242,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     internal fun switchToTargetState(
         targetState: InternalState,
         fromState: InternalState,
-        transitionParams: TransitionParams<*>,
-        subPath: List<InternalState> = emptyList()
+        transitionParams: TransitionParams<*>
     ) {
         val path = fromState.findPathFromTargetToLca(targetState)
-        path.addAll(0, subPath)
         val lca = path.removeLast()
         lca.recursiveEnterStatePath(path, transitionParams)
     }

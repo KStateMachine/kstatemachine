@@ -600,9 +600,9 @@ If you have your own `DefaultState` subclasses that are singletons and has data 
 
 ## Do not
 
-* State machine is a powerful tool to control states, so let it do its job. Do not try to rule it from outside
-  (selecting a target state) by sending different event types depending on business logic state. Let the state machine
-  to make decisions itself.
+State machine is a powerful tool to control states, so let it do its job. Do not try to rule it from outside
+(selecting a target state) by sending different event types depending on business logic state. Let the state machine
+to make decisions itself.
 
 Wrong - managing target state from outside:
 

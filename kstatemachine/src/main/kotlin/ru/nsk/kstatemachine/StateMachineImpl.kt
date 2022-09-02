@@ -199,10 +199,7 @@ internal class StateMachineImpl(name: String?, childMode: ChildMode, override va
         transition.transitionNotify { onTriggered(transitionParams) }
         machineNotify { onTransition(transitionParams) }
 
-        targetState?.let {
-            val subPath = if (direction is TargetStateWithSubPath) direction.subPath else emptyList()
-            switchToTargetState(it, transition.sourceState, transitionParams, subPath)
-        }
+        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
         return true
     }
 

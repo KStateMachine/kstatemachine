@@ -39,10 +39,12 @@ open class DefaultDataState<out D>(
         _data = null
     }
 
-    override fun onCleanup() {
+    override fun onStopped() {
         _data = null
         _lastData = null
     }
+
+    override fun onCleanup() = onStopped()
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
@@ -93,18 +95,10 @@ open class DefaultHistoryState(
 ) : BasePseudoState(name), HistoryState {
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
-    private var storedSubPath = emptyList<InternalState>()
-
     private var _storedState: IState? = null
     override val storedState
         get() = (_storedState ?: defaultState).also {
-            machine.log {
-                val subPath = if (historyType == DEEP && storedSubPath.isNotEmpty())
-                    storedSubPath.joinToString(prefix = " subPath: ")
-                else ""
-
-                "$this resolved to $it$subPath"
-            }
+            machine.log { "$this resolved to $it" }
         }
 
     override fun setParent(parent: InternalState) {
@@ -118,19 +112,16 @@ open class DefaultHistoryState(
 
     override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
         _storedState = currentState
-        if (historyType == DEEP)
-            storedSubPath = subPath.toList() // defence copy
+        if (historyType == DEEP) // on transaction end I have to update storedValue on the active leaf. notification or intent from history?
+            subPath.firstOrNull()?.let { _storedState = it }
     }
 
-    override fun produceTransitionDirection(): TransitionDirection {
-        return when (historyType) {
-            SHALLOW -> TargetState(storedState)
-            DEEP -> TargetStateWithSubPath(storedState, storedSubPath)
-        }
+    override fun onStopped() {
+        _storedState = null
     }
 
     override fun onCleanup() {
+        onStopped()
         _defaultState = null
-        _storedState = null
     }
 }

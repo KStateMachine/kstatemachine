@@ -38,7 +38,12 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     /**
-     * Called when state is sequentially used on multiple machine instances to perform cleanup steps here.
+     * Called when machine is stopped, to perform cleanup steps.
+     */
+    fun onStopped() = Unit
+
+    /**
+     * Called when state is sequentially used on multiple machine instances, to perform cleanup steps.
      */
     fun onCleanup() = Unit
 
@@ -93,15 +98,14 @@ interface DataState<out D> : IState {
  */
 interface IFinalState : IState {
     override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("FinalState can not have transitions")
+        throw UnsupportedOperationException("IFinalState can not have transitions")
 }
 
 interface FinalState : IFinalState, State
 interface FinalDataState<out D> : IFinalState, DataState<D>
 
 /**
- * Pseudo state is a state that machine passes automatically without explicit event.
- * FIXME inheriting State is correct? dsl is not working otherwise
+ * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
  */
 interface PseudoState : State
 
@@ -117,8 +121,6 @@ interface HistoryState : PseudoState {
     /** Initial parent state if was not set explicitly */
     val defaultState: IState
     val storedState: IState
-
-    fun produceTransitionDirection(): TransitionDirection
 }
 
 typealias StateBlock<S> = S.() -> Unit
