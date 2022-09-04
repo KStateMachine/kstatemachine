@@ -412,6 +412,28 @@ choiceState {
 }
 ```
 
+### History states
+
+There are two types of history states, shallow and deep. Shallow history state is used to represent the most recently
+active child (its neighbour) of a parent state. It does not recurse into this child's active configuration (sub states),
+initial states will be used. Deep history state in contrast reflects the most recent active configuration of the parent
+state (including all sub states).
+You can specify default state which will be used if history was not recorded yet (parent was not active).
+When default state is not specified, parent initial state will be entered on transition to history state.
+
+```kotlin
+val machine = createStateMachine {
+    state {
+        val state11 = initialState()
+        val state12 = state()
+        historyState(defultState = state12)
+    }
+    state {
+        // ...
+    }
+}
+```
+
 ## Typesafe transitions
 
 It is a common case when a state expects to receive some data from an event. Library provides typesafe API for such
