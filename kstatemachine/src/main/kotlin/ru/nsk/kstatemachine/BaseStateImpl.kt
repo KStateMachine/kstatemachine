@@ -70,10 +70,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         check(!machine.isRunning) { "Can not add state after state machine started" }
         if (childMode == ChildMode.PARALLEL) {
             require(state !is FinalState) { "Can not add FinalState in parallel child mode" }
-            if (state is HistoryState)
-                require(state.historyType != HistoryType.SHALLOW) {
-                    "Can not add Shallow HistoryState in parallel child mode"
-                }
+            require(state !is PseudoState) { "Can not add PseudoState in parallel child mode" }
         }
 
         state.name?.let {
@@ -140,8 +137,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun onParentCurrentStateChanged(currentState: InternalState) = Unit // default empty
-
     override fun <E : Event> recursiveFindUniqueResolvedTransition(
         eventAndArgument: EventAndArgument<E>
     ): ResolvedTransition<E>? {
@@ -166,7 +161,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 initialState.recursiveEnterInitialStates(argument)
             }
             ChildMode.PARALLEL -> data.states.forEach {
-                notifyStateEntry(it, makeStartTransitionParams(it, argument = argument))
+                handleStateEntry(it, makeStartTransitionParams(it, argument = argument))
                 it.recursiveEnterInitialStates(argument)
             }
         }
@@ -177,7 +172,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             recursiveEnterInitialStates(transitionParams.argument)
         } else {
             val state = path.removeLast()
-            setCurrentState(state, transitionParams)
+            setCurrentState(state, transitionParams, path)
 
             if (state !is StateMachine) // inner state machine manages its internal state by its own
                 state.recursiveEnterStatePath(path, transitionParams)
@@ -185,8 +180,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun recursiveExit(transitionParams: TransitionParams<*>) {
-        for (currentState in getCurrentStates())
-            currentState.recursiveExit(transitionParams)
+        getCurrentStates().forEachState { it.recursiveExit(transitionParams) }
         doExit(transitionParams)
     }
 
@@ -194,7 +188,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState = null
         data.isActive = false
         data.isFinished = false
-        data.states.forEach { it.recursiveStop() }
+        onStopped()
+        data.states.forEachState { it.recursiveStop() }
+    }
+
+    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+        data.states.forEachState { it.recursiveAfterTransitionComplete(transitionParams) }
     }
 
     private fun requireCurrentState() = requireNotNull(data.currentState) { "Current state is not set" }
@@ -204,7 +203,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         ChildMode.PARALLEL -> data.states.toList()
     }
 
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>, path: List<InternalState> = emptyList()) {
         require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
@@ -212,8 +211,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
-        data.states.forEach { it.onParentCurrentStateChanged(state) }
-        notifyStateEntry(state, transitionParams)
+        data.states.forEachState { it.onParentCurrentStateChanged(state, path) }
+        handleStateEntry(state, transitionParams)
     }
 
     override fun cleanup() {
@@ -221,7 +220,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         onCleanup()
     }
 
-    private fun notifyStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
+    private fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
         val finish = when (childMode) {
             ChildMode.EXCLUSIVE -> state is IFinalState
             ChildMode.PARALLEL -> states.all { it.isFinished }

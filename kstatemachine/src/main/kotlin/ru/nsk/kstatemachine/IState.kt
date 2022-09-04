@@ -38,7 +38,12 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     /**
-     * Called when state is sequentially used on multiple machine instances to perform cleanup steps here.
+     * Called when machine is stopped, to perform cleanup steps.
+     */
+    fun onStopped() = Unit
+
+    /**
+     * Called when state is sequentially used on multiple machine instances, to perform cleanup steps.
      */
     fun onCleanup() = Unit
 
@@ -74,10 +79,16 @@ interface State : IState
  * State which holds data while it is active
  */
 interface DataState<out D> : IState {
+    val defaultData: D?
     /**
      * This property might be accessed only while this state is active
      */
     val data: D
+
+    /**
+     * Similar to [data] but its value is not cleared when state finishes
+     */
+    val lastData: D
 }
 
 /**
@@ -87,15 +98,14 @@ interface DataState<out D> : IState {
  */
 interface IFinalState : IState {
     override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("FinalState can not have transitions")
+        throw UnsupportedOperationException("IFinalState can not have transitions")
 }
 
 interface FinalState : IFinalState, State
 interface FinalDataState<out D> : IFinalState, DataState<D>
 
 /**
- * Pseudo state is a state that machine passes automatically without explicit event.
- * FIXME inheriting State is correct? dsl is not working otherwise
+ * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
  */
 interface PseudoState : State
 
@@ -109,8 +119,8 @@ interface RedirectPseudoState : PseudoState {
 interface HistoryState : PseudoState {
     val historyType: HistoryType
     /** Initial parent state if was not set explicitly */
-    val defaultState: State
-    val storedState: State
+    val defaultState: IState
+    val storedState: IState
 }
 
 typealias StateBlock<S> = S.() -> Unit
@@ -202,9 +212,10 @@ fun IState.state(
 
 fun <D> IState.dataState(
     name: String? = null,
+    defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     init: StateBlock<DataState<D>>? = null
-) = addState(DefaultDataState(name, childMode), init)
+) = addState(DefaultDataState(name, defaultData, childMode), init)
 
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
@@ -234,11 +245,11 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D> IState.finalDataState(name: String? = null, init: StateBlock<FinalDataState<D>>? = null) =
-    addFinalState(DefaultFinalDataState(name), init)
+fun <D> IState.finalDataState(name: String? = null, defaultData: D? = null, init: StateBlock<FinalDataState<D>>? = null) =
+    addFinalState(DefaultFinalDataState(name, defaultData), init)
 
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
-fun IState.historyState(name: String? = null, defaultState: State? = null, historyType: HistoryType = HistoryType.SHALLOW) =
+fun IState.historyState(name: String? = null, defaultState: IState? = null, historyType: HistoryType = HistoryType.SHALLOW) =
     addState(DefaultHistoryState(name, defaultState, historyType))

@@ -24,19 +24,19 @@ fun noTransition(): TransitionDirection = NoTransition
 /**
  * [Transition] is triggered with a [targetState].
  */
-internal class TargetState(override val targetState: IState) : TransitionDirection()
+internal open class TargetState(override val targetState: IState) : TransitionDirection()
 
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
 fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection =
-    TargetState(recursiveResolveTargetState(targetState))
+    recursiveResolveTargetState(targetState)
 
-private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState {
+private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): TransitionDirection {
     return when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
-        is HistoryState -> recursiveResolveTargetState(targetState.storedState)
-        else -> targetState
+        is HistoryState -> TargetState(targetState.storedState)
+        else -> TargetState(targetState)
     }
 }
 

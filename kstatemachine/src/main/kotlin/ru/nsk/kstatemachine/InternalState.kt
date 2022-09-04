@@ -16,7 +16,7 @@ abstract class InternalState : IState {
     internal abstract fun doEnter(transitionParams: TransitionParams<*>)
     internal abstract fun doExit(transitionParams: TransitionParams<*>)
     internal abstract fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
-    internal abstract fun onParentCurrentStateChanged(currentState: InternalState)
+    internal open fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) = Unit
 
     internal abstract fun <E : Event> recursiveFindUniqueResolvedTransition(
         eventAndArgument: EventAndArgument<E>
@@ -30,6 +30,7 @@ abstract class InternalState : IState {
 
     internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
     internal abstract fun recursiveStop()
+    internal abstract fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>)
     internal abstract fun cleanup()
 }
 

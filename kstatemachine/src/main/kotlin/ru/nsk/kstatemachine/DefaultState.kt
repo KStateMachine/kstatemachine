@@ -1,24 +1,37 @@
 package ru.nsk.kstatemachine
 
-open class DefaultState(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
+import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
+import ru.nsk.kstatemachine.HistoryType.DEEP
+import ru.nsk.kstatemachine.HistoryType.SHALLOW
+
+open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
 
-open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = ChildMode.EXCLUSIVE) :
-    BaseStateImpl(name, childMode), DataState<D> {
+open class DefaultDataState<out D>(
+    name: String? = null,
+    override val defaultData: D? = null,
+    childMode: ChildMode = EXCLUSIVE
+) : BaseStateImpl(name, childMode), DataState<D> {
     private var _data: D? = null
-    override val data: D get() = checkNotNull(_data) { "Data is not set. Is the state active?" }
+    override val data: D get() = checkNotNull(_data) { "Data is not set. Is $this state active?" }
+
+    private var _lastData: D? = null
+    override val lastData: D
+        get() = checkNotNull(_lastData ?: defaultData) {
+            "Last data is not available yet in $this, and default data not provided"
+        }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
         if (this == transitionParams.direction.targetState) {
             @Suppress("UNCHECKED_CAST")
             val event = transitionParams.event as? DataEvent<D>
-            checkNotNull(event) { "${transitionParams.event} does not contain data required by $this" }
-            _data = event.data
-        } else {
-            error(
-                "$this is implicitly activated, this might be a result of a cross-level transition. " +
-                        "Currently there is no way to get data for this state."
-            )
+                ?: error("${transitionParams.event} does not contain data required by $this")
+            with(event.data) {
+                _data = this
+                _lastData = this
+            }
+        } else { // implicit activation
+            _data = lastData
         }
     }
 
@@ -26,16 +39,20 @@ open class DefaultDataState<out D>(name: String? = null, childMode: ChildMode = 
         _data = null
     }
 
-    override fun onCleanup() {
+    override fun onStopped() {
         _data = null
+        _lastData = null
     }
+
+    override fun onCleanup() = onStopped()
 }
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
 }
 
-open class DefaultFinalDataState<out D>(name: String? = null) : DefaultDataState<D>(name), FinalDataState<D> {
+open class DefaultFinalDataState<out D>(name: String? = null, defaultData: D? = null) :
+    DefaultDataState<D>(name, defaultData), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }
 
@@ -49,22 +66,22 @@ open class DefaultChoiceState(name: String? = null, private val choiceAction: Ev
         eventAndArgument.choiceAction().also { machine.log { "$this resolved to $it" } }
 }
 
-open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUSIVE), PseudoState {
+open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
     override fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
     override fun <L : IState.Listener> addListener(listener: L) =
-        throw UnsupportedOperationException("PseudoState can not have listeners")
+        throw UnsupportedOperationException("PseudoState $this can not have listeners")
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?) =
-        throw UnsupportedOperationException("PseudoState can not have child states")
+        throw UnsupportedOperationException("PseudoState $this can not have child states")
 
 
     override fun <E : Event> addTransition(transition: Transition<E>) =
-        throw UnsupportedOperationException("PseudoState can not have transitions")
+        throw UnsupportedOperationException("PseudoState $this can not have transitions")
 
     private fun internalError(): Nothing =
-        error("Internal error PseudoState can not be entered or exited, looks that machine is purely configured")
+        error("Internal error, PseudoState $this can not be entered or exited, looks that machine is purely configured")
 
 }
 
@@ -73,19 +90,16 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUS
  */
 open class DefaultHistoryState(
     name: String? = null,
-    private var _defaultState: State? = null,
-    final override val historyType: HistoryType = HistoryType.SHALLOW
+    private var _defaultState: IState? = null,
+    final override val historyType: HistoryType = SHALLOW
 ) : BasePseudoState(name), HistoryState {
-    init {
-        if (historyType == HistoryType.DEEP)
-            TODO("deep history is not implemented yet")
-    }
-
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
-    private var _storedState: State? = null
+    private var _storedState: IState? = null
     override val storedState
-        get() = (_storedState ?: defaultState).also { machine.log { "$this resolved to $it" } }
+        get() = (_storedState ?: defaultState).also {
+            machine.log { "$this resolved to $it" }
+        }
 
     override fun setParent(parent: InternalState) {
         super.setParent(parent)
@@ -93,15 +107,31 @@ open class DefaultHistoryState(
         if (_defaultState != null)
             require(parent.states.contains(defaultState)) { "Default state $defaultState is not a neighbour of $this" }
         else
-            _defaultState = parent.initialState as State
+            _defaultState = parent.initialState
     }
 
-    override fun onParentCurrentStateChanged(currentState: InternalState) {
-        (currentState as? State)?.let { _storedState = currentState }
+    override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
+        _storedState = currentState
+        if (historyType == DEEP) // on transaction end I have to update storedValue on the active leaf. notification or intent from history?
+            subPath.firstOrNull()?.let { _storedState = it }
+    }
+
+    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+        super.recursiveAfterTransitionComplete(transitionParams)
+        transitionParams.direction.targetState?.let { targetState ->
+            _storedState?.let {
+                if (targetState.isSubStateOf(it))
+                    _storedState = targetState
+            }
+        }
+    }
+
+    override fun onStopped() {
+        _storedState = null
     }
 
     override fun onCleanup() {
+        onStopped()
         _defaultState = null
-        _storedState = null
     }
 }

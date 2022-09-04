@@ -161,6 +161,23 @@ class TypesafeTransitionTest : StringSpec({
         shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
     }
 
+    "implicit data state activation by cross level transition with default value" {
+        val machine = createStateMachine {
+            lateinit var state21: State
+
+            initialState {
+                transitionOn<SwitchEvent> { targetState = { state21 } }
+            }
+            dataState(defaultData = 1) {
+                onEntry { println(data) }
+
+                state21 = initialState()
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+    }
+
     "transition with event super type" {
         lateinit var state2: DataState<Number>
 

@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
+import io.mockk.clearMocks
 import io.mockk.verify
 import io.mockk.verifyOrder
 
@@ -10,9 +11,8 @@ import io.mockk.verifyOrder
  * Inner machine is started automatically when outer one enters it.
  */
 class CompositionStateMachinesTest : StringSpec({
-    "composition inner auto start" { composition(false) }
-
-    "composition inner manual start" { composition(true) }
+    "composition, inner machine auto start on entry" { composition(false) }
+    "composition, inner machine already started" { composition(true) }
 })
 
 
@@ -67,16 +67,20 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         callbacks.onEntryState(machine)
         callbacks.onEntryState(outerState1)
     }
+    clearMocks(callbacks, answers = false)
 
     machine.processEvent(SwitchEvent)
 
     verify {
         callbacks.onTriggeredTransition(SwitchEvent)
         callbacks.onExitState(outerState1)
-        callbacks.onStarted(innerMachine)
-        callbacks.onEntryState(innerMachine)
-        callbacks.onEntryState(innerState1)
+        if (!startInnerMachineOnSetup) {
+            callbacks.onStarted(innerMachine)
+            callbacks.onEntryState(innerMachine)
+            callbacks.onEntryState(innerState1)
+        }
     }
+    clearMocks(callbacks, answers = false)
 
     innerMachine.processEvent(SwitchEvent)
 
@@ -85,4 +89,5 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         callbacks.onExitState(innerState1)
         callbacks.onEntryState(innerState2)
     }
+    clearMocks(callbacks, answers = false)
 }
