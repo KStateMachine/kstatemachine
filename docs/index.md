@@ -412,7 +412,7 @@ choiceState {
 }
 ```
 
-### History states
+### History state
 
 There are two types of history states, shallow and deep. Shallow history state is used to represent the most recently
 active child (its neighbour) of a parent state. It does not recurse into this child's active configuration (sub states),

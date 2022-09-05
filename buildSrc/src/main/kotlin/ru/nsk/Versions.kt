@@ -1,7 +1,7 @@
 object Versions {
     // library
     const val libraryGroup = "ru.nsk"
-    const val libraryVersion = "0.13.0"
+    const val libraryVersion = "0.14.0"
 
     // tools
     const val kotlin = "1.7.10"
@@ -13,6 +13,6 @@ object Versions {
     const val apiVersion = "1.4"
 
     // dependencies
-    const val mockk = "1.12.5"
-    const val kotest = "5.4.0"
+    const val mockk = "1.12.7"
+    const val kotest = "5.4.2"
 }
