@@ -365,7 +365,7 @@ the state hierarchy as the source state.
 `StateMachine` is a subclass of `IState`, this allows to use it as a child of another state machine like a simple state.
 The parent state machine treats the child machine as an atomic state. It is not possible to reference states of a child
 machine from parent transitions and vise versa. Child machine is automatically started when parent enters it. Events
-from parent machine are not passed to it child machines. Child machine receives events only from it own `processEvent()`
+from parent machine are not passed to it child machines. Child machine receives events only from its own `processEvent()`
 calls.
 
 ## Parallel states

@@ -110,10 +110,8 @@ open class DefaultHistoryState(
             _defaultState = parent.initialState
     }
 
-    override fun onParentCurrentStateChanged(currentState: InternalState, subPath: List<InternalState>) {
+    override fun onParentCurrentStateChanged(currentState: InternalState) {
         _storedState = currentState
-        if (historyType == DEEP)
-            subPath.firstOrNull()?.let { _storedState = it }
     }
 
     override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {

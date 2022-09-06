@@ -80,6 +80,7 @@ interface State : IState
  */
 interface DataState<out D> : IState {
     val defaultData: D?
+
     /**
      * This property might be accessed only while this state is active
      */
@@ -118,6 +119,7 @@ interface RedirectPseudoState : PseudoState {
  */
 interface HistoryState : PseudoState {
     val historyType: HistoryType
+
     /** Initial parent state if was not set explicitly */
     val defaultState: IState
     val storedState: IState
@@ -245,11 +247,18 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D> IState.finalDataState(name: String? = null, defaultData: D? = null, init: StateBlock<FinalDataState<D>>? = null) =
-    addFinalState(DefaultFinalDataState(name, defaultData), init)
+fun <D> IState.finalDataState(
+    name: String? = null,
+    defaultData: D? = null,
+    init: StateBlock<FinalDataState<D>>? = null
+) = addFinalState(DefaultFinalDataState(name, defaultData), init)
 
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
-fun IState.historyState(name: String? = null, defaultState: IState? = null, historyType: HistoryType = HistoryType.SHALLOW) =
+fun IState.historyState(
+    name: String? = null,
+    defaultState: IState? = null,
+    historyType: HistoryType = HistoryType.SHALLOW
+) =
     addState(DefaultHistoryState(name, defaultState, historyType))

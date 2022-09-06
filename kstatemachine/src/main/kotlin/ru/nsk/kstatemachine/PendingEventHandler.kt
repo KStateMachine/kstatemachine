@@ -1,7 +1,5 @@
 package ru.nsk.kstatemachine
 
-import kotlin.collections.ArrayDeque
-
 /**
  * Returns [StateMachine.PendingEventHandler] implementation that throws exception. This is an old default behaviour.
  */
@@ -14,7 +12,7 @@ fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandle
 
 fun StateMachine.queuePendingEventHandler(): StateMachine.PendingEventHandler = QueuePendingEventHandler(this)
 
-internal class QueuePendingEventHandler(private val machine: StateMachine): StateMachine.PendingEventHandler {
+internal class QueuePendingEventHandler(private val machine: StateMachine) : StateMachine.PendingEventHandler {
     private val queue = ArrayDeque<EventAndArgument<*>>()
 
     fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }

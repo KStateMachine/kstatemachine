@@ -12,7 +12,10 @@ internal class UndoState : BasePseudoState("undo") {
         }
     }
 
-    fun popState() = stack.removeLastOrNull()
+    fun popState(): IState? {
+        stack.removeLastOrNull()
+        return stack.lastOrNull()
+    }
 
     override fun onStopped() = stack.clear()
     override fun onCleanup() = onStopped()

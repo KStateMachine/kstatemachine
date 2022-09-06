@@ -99,6 +99,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
+        if (parent?.machine?.isRunning == true)
+            error("Can not add transition after state machine started")
         data.transitions += transition
         return transition
     }
@@ -141,6 +143,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         eventAndArgument: EventAndArgument<E>
     ): ResolvedTransition<E>? {
         val resolvedTransitions = getCurrentStates()
+            .filter { it !is StateMachine } // exclude nested machines
             .mapNotNull { it.recursiveFindUniqueResolvedTransition(eventAndArgument) }
             .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) }
         check(resolvedTransitions.size <= 1) {
@@ -149,7 +152,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         return resolvedTransitions.singleOrNull()
     }
 
-    override fun recursiveEnterInitialStates(argument: Any?) {
+    override fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>) {
         if (states.isEmpty()) return
 
         when (childMode) {
@@ -157,22 +160,24 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 val initialState = checkNotNull(initialState) {
                     "Initial state is not set, call setInitialState() first"
                 }
-                setCurrentState(initialState, makeStartTransitionParams(initialState, argument = argument))
-                initialState.recursiveEnterInitialStates(argument)
+                setCurrentState(initialState, transitionParams)
+                if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
+                    initialState.recursiveEnterInitialStates(transitionParams)
             }
             ChildMode.PARALLEL -> data.states.forEach {
-                handleStateEntry(it, makeStartTransitionParams(it, argument = argument))
-                it.recursiveEnterInitialStates(argument)
+                handleStateEntry(it, transitionParams)
+                if (it !is StateMachine) // inner state machine manages its internal state by its own
+                    it.recursiveEnterInitialStates(transitionParams)
             }
         }
     }
 
     override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
         if (path.isEmpty()) {
-            recursiveEnterInitialStates(transitionParams.argument)
+            recursiveEnterInitialStates(transitionParams)
         } else {
             val state = path.removeLast()
-            setCurrentState(state, transitionParams, path)
+            setCurrentState(state, transitionParams)
 
             if (state !is StateMachine) // inner state machine manages its internal state by its own
                 state.recursiveEnterStatePath(path, transitionParams)
@@ -203,7 +208,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         ChildMode.PARALLEL -> data.states.toList()
     }
 
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>, path: List<InternalState> = emptyList()) {
+    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
@@ -211,7 +216,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
-        data.states.forEachState { it.onParentCurrentStateChanged(state, path) }
+        data.states.forEachState { it.onParentCurrentStateChanged(state) }
         handleStateEntry(state, transitionParams)
     }
 

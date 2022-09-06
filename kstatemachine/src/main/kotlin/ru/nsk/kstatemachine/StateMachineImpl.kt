@@ -62,16 +62,7 @@ internal class StateMachineImpl(
         _machineListeners.remove(listener)
     }
 
-    override fun start(argument: Any?) {
-        checkBeforeRunMachine()
-
-        eventProcessingScope {
-            runCheckingExceptions {
-                runMachine(makeStartTransitionParams(this, argument = argument))
-                recursiveEnterInitialStates(argument)
-            }
-        }
-    }
+    override fun start(argument: Any?) = startFrom(this, argument)
 
     override fun startFrom(state: IState, argument: Any?) {
         checkBeforeRunMachine()
@@ -206,7 +197,11 @@ internal class StateMachineImpl(
 
         val transitionParams = TransitionParams(transition, direction, event, argument)
 
-        val targetState = direction.targetState as? InternalState
+        val targetState = (direction.targetState as? InternalState)?.also {
+            check(it === this || it.isSubStateOf(this)) {
+                "Transitioning to state $it from another state machine is not possible"
+            }
+        }
 
         log {
             val targetText = if (targetState != null) "to $targetState" else "[targetless]"

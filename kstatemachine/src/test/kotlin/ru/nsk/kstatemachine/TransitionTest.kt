@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -8,6 +9,14 @@ import io.mockk.verifySequence
 import org.junit.jupiter.api.fail
 
 class TransitionTest : StringSpec({
+    "transition add after machine start" {
+        lateinit var state1: State
+        createStateMachine {
+            state1 = initialState()
+        }
+        shouldThrow<IllegalStateException> { state1.transition<SwitchEvent>() }
+    }
+
     "transition direction" {
         val callbacks = mockkCallbacks()
 
@@ -15,10 +24,11 @@ class TransitionTest : StringSpec({
         lateinit var state2: State
 
         val machine = createStateMachine {
-            state1 = initialState("1") {
+            state1 = initialState("state1") {
                 onEntry {
                     callbacks.onEntryState(this)
-                    it.direction.targetState shouldBeSameInstanceAs this
+                    it.transition.sourceState shouldBeSameInstanceAs this@createStateMachine
+                    it.direction.targetState shouldBeSameInstanceAs this@createStateMachine
                 }
 
                 onExit {
@@ -34,7 +44,7 @@ class TransitionTest : StringSpec({
                 }
             }
 
-            state2 = state("2") { callbacks.listen(this) }
+            state2 = state("state2") { callbacks.listen(this) }
         }
 
         verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
@@ -99,5 +109,28 @@ class TransitionTest : StringSpec({
 
         machine.processEvent(SwitchEvent)
         finalState.isActive shouldBe true
+    }
+
+    "transition to free state, negative" {
+        val freeState = DefaultState()
+        val machine = createStateMachine("outer") {
+            initialState {
+                transitionOn<SwitchEvent> { targetState = { freeState } } // invalid
+            }
+        }
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
+
+    "transition to non machine state, negative" {
+        val otherMachine = createStateMachine {
+            initialState()
+        }
+        val machine = createStateMachine("outer") {
+            initialState {
+                transitionOn<SwitchEvent> { targetState = { otherMachine } } // invalid
+            }
+        }
+
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
     }
 })

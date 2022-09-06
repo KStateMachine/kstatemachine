@@ -36,7 +36,7 @@ private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState)
     return when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
         is HistoryState -> TargetState(targetState.storedState)
-        is UndoState -> targetState.popState()?.let { TargetState(it) } ?: noTransition()
+        is UndoState -> TargetState(targetState.popState() ?: targetState.machine)
         else -> TargetState(targetState)
     }
 }

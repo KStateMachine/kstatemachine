@@ -20,7 +20,7 @@ internal fun IState.isSubStateOf(state: IState): Boolean {
     state.states.forEach {
         if (it === this)
             return true
-        else if (this.isSubStateOf(it))
+        else if (it !is StateMachine && this.isSubStateOf(it)) // do not process sub-states of composed machines
             return true
     }
     return false
