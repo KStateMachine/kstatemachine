@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import ru.nsk.kstatemachine.HistoryType.DEEP
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
 private const val PLANTUML_NESTED_STATES_RESULT = """@startuml
@@ -53,7 +54,40 @@ state parallel_states {
 @enduml
 """
 
-class PlantUmlExportTest : StringSpec({
+private const val PLANTUML_PSEUDO_STATES_RESULT = """@startuml
+hide empty description
+state state1
+state state2 {
+    state state21 {
+        state state211
+        
+        [*] --> state211
+    }
+    state state22
+    
+    [*] --> state21
+}
+state state3
+state choice <<choice>>
+state final
+
+[*] --> state1
+final --> [*]
+state3 --> state2[H]
+state3 --> state2[H*]
+@enduml
+"""
+
+private const val PLANTUML_COMPOSED_MACHINES_RESULT = """@startuml
+hide empty description
+state outer_state1
+state inner_machine_StateMachine
+
+[*] --> outer_state1
+@enduml
+"""
+
+class ExportToPlantUmlTest : StringSpec({
     "export nested states" {
         val machine = createStateMachine("Nested states") {
             val state1 = initialState("State1")
@@ -108,5 +142,42 @@ class PlantUmlExportTest : StringSpec({
         }
 
         machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
+    }
+
+    "export with pseudo states" {
+        val machine = createStateMachine(enableUndo = true) {
+            val state1 = initialState("state1")
+
+            val state2 = state("state2") {
+                initialState("state21") {
+                    initialState("state211")
+                }
+                state("state22")
+            }
+            val shallowHistory = state2.historyState("shallow history")
+            val deepHistory = state2.historyState("deep history", historyType = DEEP)
+
+            state("state3") {
+                transition<FirstEvent>(targetState = shallowHistory)
+                transition<SecondEvent>(targetState = deepHistory)
+            }
+            choiceState("choice") { state1 }
+            finalState("final")
+        }
+
+        machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
+    }
+
+    "export composed machines" {
+        val inner = createStateMachine("inner machine") {
+            initialState("inner state1")
+            state("inner state2")
+        }
+        val outer = createStateMachine("outer machine") {
+            initialState("outer state1")
+            addState(inner)
+        }
+
+        outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
     }
 })

@@ -30,7 +30,7 @@ Main features are:
   and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions) with dynamic target
   state which is calculated in a moment of event processing depending on application business logic
 * [Nested states](https://nsk90.github.io/kstatemachine/#nested-states) - hierarchical state machines (HSMs)
-  with [cross level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
+  with [cross-level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
 * [Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines) Use
   state machines as atomic child states
 * [Pseudo states](https://nsk90.github.io/kstatemachine/#pseudo-states) for additional logic in machine behaviour
@@ -114,7 +114,7 @@ fun main() {
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
-* [Cross level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
+* [Cross-level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
 * [Typesafe transition sample](./samples/src/main/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)
 * [Complex syntax sample](./samples/src/main/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
   shows many syntax variants and library possibilities, so it looks messy

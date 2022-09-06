@@ -7,9 +7,9 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetState
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
- * Conditional transitions and [PseudoState] currently are not supported.
+ * Conditional transitions currently are not supported.
  */
-class ExportPlantUmlVisitor : Visitor {
+internal class ExportPlantUmlVisitor : Visitor {
     private val builder = StringBuilder()
     private var indent = 0
     private val crossLevelTransitions = mutableListOf<String>()
@@ -28,18 +28,26 @@ class ExportPlantUmlVisitor : Visitor {
 
     override fun visit(state: IState) {
         if (state.states.isEmpty()) {
-            line("state ${state.graphName()}")
+            when (state) {
+                is HistoryState, is UndoState -> return
+                is RedirectPseudoState -> line("state ${state.graphName()} $CHOICE")
+                else -> line("state ${state.graphName()}")
+            }
         } else {
-            line("state ${state.graphName()} {")
-            ++indent
-            processStateBody(state)
-            --indent
-            line("}")
+            if (state !is StateMachine) { // ignore composed machines
+                line("state ${state.graphName()} {")
+                ++indent
+                processStateBody(state)
+                --indent
+                line("}")
+            } else {
+                line("state ${state.graphName()}")
+            }
         }
     }
 
     /**
-     * PlantUML cannot show correctly cross level transitions to nested states.
+     * PlantUML cannot show correctly cross-level transitions to nested states.
      * It requires to see all states declarations first to provide correct rendering,
      * so we have to store them to print after state declaration.
      */
@@ -47,9 +55,19 @@ class ExportPlantUmlVisitor : Visitor {
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState as? InternalState ?: return
 
-        val transitionString = "$sourceState --> ${targetState.graphName()}${label(transition.name)}"
+        val graphName = if (targetState is HistoryState) {
+            val prefix = targetState.requireParent().graphName()
+            when (targetState.historyType) {
+                HistoryType.SHALLOW -> "$prefix$SHALLOW_HISTORY"
+                HistoryType.DEEP -> "$prefix$DEEP_HISTORY"
+            }
+        } else {
+            targetState.graphName()
+        }
+
+        val transitionString = "$sourceState --> $graphName${label(transition.name)}"
 
         if (transition.sourceState.isNeighbor(targetState))
             line(transitionString)
@@ -86,7 +104,13 @@ class ExportPlantUmlVisitor : Visitor {
         const val STAR = "[*]"
         const val SINGLE_INDENT = "    "
         const val PARALLEL = "--"
-        fun IState.graphName() = name?.replace(" ", "_") ?: "State${hashCode()}"
+        const val SHALLOW_HISTORY = "[H]"
+        const val DEEP_HISTORY = "[H*]"
+        const val CHOICE = "<<choice>>"
+        fun IState.graphName(): String {
+            val name = name?.replace(" ", "_") ?: "State${hashCode()}"
+            return if (this !is StateMachine) name else "${name}_StateMachine"
+        }
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
 }

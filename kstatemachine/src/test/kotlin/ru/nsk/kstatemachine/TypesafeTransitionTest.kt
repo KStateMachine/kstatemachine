@@ -144,7 +144,7 @@ class TypesafeTransitionTest : StringSpec({
         state22.data shouldBe id
     }
 
-    "implicit data state activation by cross level transition negative" {
+    "implicit data state activation by cross-level transition negative" {
         val machine = createStateMachine {
             lateinit var state21: State
 
@@ -161,7 +161,7 @@ class TypesafeTransitionTest : StringSpec({
         shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
     }
 
-    "implicit data state activation by cross level transition with default value" {
+    "implicit data state activation by cross-level transition with default value" {
         val machine = createStateMachine {
             lateinit var state21: State
 

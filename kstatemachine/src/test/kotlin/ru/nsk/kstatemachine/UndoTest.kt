@@ -72,4 +72,12 @@ class UndoTest : StringSpec({
         machine.undo()
         machine.activeStates() shouldContain state1
     }
+
+    "undo cross-level transition" {
+        TODO()
+    }
+
+    "undo with DataState" {
+        TODO()
+    }
 })

@@ -353,12 +353,12 @@ createStateMachine {
 }
 ```
 
-### Cross level transitions
+### Cross-level transitions
 
 A transition can have any state as its target. This means that the target state does not have to be on the same level in
 the state hierarchy as the source state.
 
-![Cross level transition diagram](./diagrams/cross-level-transition.png)
+![Cross-level transition diagram](./diagrams/cross-level-transition.png)
 
 ## Composed (nested) state machines
 

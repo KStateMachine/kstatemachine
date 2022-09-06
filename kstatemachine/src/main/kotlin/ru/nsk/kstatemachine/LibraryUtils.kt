@@ -16,6 +16,8 @@ internal fun Iterable<InternalState>.forEachState(block: (InternalState) -> Unit
     forEach { if (it !is StateMachine) block(it) }
 }
 
+internal fun IState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
+
 internal fun IState.isSubStateOf(state: IState): Boolean {
     state.states.forEach {
         if (it === this)

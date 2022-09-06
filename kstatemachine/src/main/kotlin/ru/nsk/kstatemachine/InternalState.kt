@@ -34,8 +34,6 @@ abstract class InternalState : IState {
     internal abstract fun cleanup()
 }
 
-internal fun InternalState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
-
 internal fun InternalState.requireParent() = requireNotNull(internalParent) { "$this parent is not set" }
 
 internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) {
