@@ -14,7 +14,16 @@ java {
     withJavadocJar()
 }
 
-// local configuration with credentials is stored in local.properties file that is not under vcs
+/**
+ * Local configuration with credentials is stored in local.properties file that is not under vcs.
+ * local.properties file structure sample:
+ *
+ * signing.gnupg.executable=gpg2
+ * signing.gnupg.keyName=AABBCCDD # last 8 digits of key ID (gpg2 --list-keys)
+ * signing.gnupg.passphrase=secret1
+ * mavenUsername=accountName
+ * mavenPassword=secret2
+ */
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) load(file.reader())
