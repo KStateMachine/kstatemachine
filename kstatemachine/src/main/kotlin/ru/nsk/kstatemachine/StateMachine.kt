@@ -55,6 +55,7 @@ interface StateMachine : State {
     /**
      * Navigates machine to previous state.
      * Previous states are stored in a stack, so this method mey be called multiple times if needed.
+     * Same effect as calling processEvent(UndoEvent).
      */
     fun undo()
 
