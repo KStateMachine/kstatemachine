@@ -90,13 +90,13 @@ class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: ISta
 /**
  * Type safe argument transition builder
  */
-class DataGuardedTransitionBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
+class DataGuardedTransitionBuilder<E : DataEvent<D>, D: Any>(name: String?, sourceState: IState) :
     GuardedTransitionBuilder<E, DataState<D>>(name, sourceState)
 
 /**
  * Type safe argument transitionOn builder
  */
-class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
+class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D: Any>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {

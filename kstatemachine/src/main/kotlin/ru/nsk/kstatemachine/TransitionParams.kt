@@ -8,7 +8,7 @@ interface Event
 /**
  * Event holding some data
  */
-interface DataEvent<out D> : Event {
+interface DataEvent<out D: Any> : Event {
     val data: D
 }
 
@@ -19,7 +19,7 @@ internal interface IUndoEvent : Event
  */
 object UndoEvent : IUndoEvent
 
-internal class UndoDataEvent<out D>(override val data: D) : DataEvent<D>, IUndoEvent
+internal class UndoDataEvent<out D: Any>(override val data: D) : DataEvent<D>, IUndoEvent
 
 @StateMachineDslMarker
 data class TransitionParams<E : Event>(

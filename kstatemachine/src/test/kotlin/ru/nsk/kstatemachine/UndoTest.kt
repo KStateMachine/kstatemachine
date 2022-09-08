@@ -10,7 +10,6 @@ class UndoTest : StringSpec({
         val machine = createStateMachine {
             initialState()
         }
-
         shouldThrow<IllegalStateException> { machine.undo() }
     }
 
@@ -96,7 +95,7 @@ class UndoTest : StringSpec({
         machine.activeStates().shouldContain(state12)
     }
 
-    "undo with DataState" {
+    "single undo with DataState" {
         lateinit var state12: DataState<Int>
         lateinit var state2: State
         val machine = createStateMachine(enableUndo = true) {
@@ -119,6 +118,10 @@ class UndoTest : StringSpec({
         machine.undo()
         machine.activeStates().shouldContain(state12)
         state12.data shouldBe 42
+    }
+
+    "multiple undo with DataState" {
+        //TODO
     }
 }) {
     private class SwitchDataEvent(override val data: Int) : DataEvent<Int>

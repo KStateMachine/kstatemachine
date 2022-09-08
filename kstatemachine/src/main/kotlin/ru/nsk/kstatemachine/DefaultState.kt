@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.HistoryType.SHALLOW
 open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
 
-open class DefaultDataState<out D>(
+open class DefaultDataState<out D: Any>(
     name: String? = null,
     override val defaultData: D? = null,
     childMode: ChildMode = EXCLUSIVE
@@ -22,13 +22,18 @@ open class DefaultDataState<out D>(
         }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
-        if (this == transitionParams.direction.targetState && transitionParams.event !is IUndoEvent) {
-            @Suppress("UNCHECKED_CAST")
-            val event = transitionParams.event as? DataEvent<D>
-                ?: error("${transitionParams.event} does not contain data required by $this")
-            with(event.data) {
-                _data = this
-                _lastData = this
+        if (this == transitionParams.direction.targetState) {
+            when (val event = transitionParams.event) {
+                is DataEvent<*> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    event as DataEvent<D>
+                    with(event.data) {
+                        _data = this
+                        _lastData = this
+                    }
+                }
+                is IUndoEvent -> _data = lastData
+                else -> error("$event does not contain data required by $this")
             }
         } else { // implicit activation
             _data = lastData
@@ -51,7 +56,7 @@ open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalSt
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
 }
 
-open class DefaultFinalDataState<out D>(name: String? = null, defaultData: D? = null) :
+open class DefaultFinalDataState<out D: Any>(name: String? = null, defaultData: D? = null) :
     DefaultDataState<D>(name, defaultData), FinalDataState<D> {
     override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
 }

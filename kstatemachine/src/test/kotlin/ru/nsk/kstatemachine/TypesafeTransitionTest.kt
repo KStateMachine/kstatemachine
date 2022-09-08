@@ -19,6 +19,14 @@ class TypesafeTransitionTest : StringSpec({
         }
     }
 
+    "initial DataState with defaultData" {
+        lateinit var state: DataState<String>
+        createStateMachine {
+            state = initialDataState("state1", defaultData = "test")
+        }
+        state.data shouldBe "test"
+    }
+
     "FinalDataState transition" {
         lateinit var final: DataState<Int>
 

@@ -78,7 +78,7 @@ interface State : IState
 /**
  * State which holds data while it is active
  */
-interface DataState<out D> : IState {
+interface DataState<out D: Any> : IState {
     val defaultData: D?
 
     /**
@@ -103,7 +103,7 @@ interface IFinalState : IState {
 }
 
 interface FinalState : IFinalState, State
-interface FinalDataState<out D> : IFinalState, DataState<D>
+interface FinalDataState<out D: Any> : IFinalState, DataState<D>
 
 /**
  * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
@@ -212,7 +212,7 @@ fun IState.state(
     init: StateBlock<State>? = null
 ) = addState(DefaultState(name, childMode), init)
 
-fun <D> IState.dataState(
+fun <D: Any> IState.dataState(
     name: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -227,6 +227,16 @@ fun IState.initialState(
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     init: StateBlock<State>? = null
 ) = addInitialState(DefaultState(name, childMode), init)
+
+/**
+ * @param defaultData is necessary for initial [DataState]
+ */
+fun <D: Any>  IState.initialDataState(
+    name: String? = null,
+    defaultData: D,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
+    init: StateBlock<DataState<D>>? = null
+) = addInitialState(DefaultDataState(name, defaultData, childMode), init)
 
 /**
  * A shortcut for [IState.addState] and [IState.setInitialState] calls
@@ -247,7 +257,7 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D> IState.finalDataState(
+fun <D: Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
     init: StateBlock<FinalDataState<D>>? = null
@@ -260,5 +270,4 @@ fun IState.historyState(
     name: String? = null,
     defaultState: IState? = null,
     historyType: HistoryType = HistoryType.SHALLOW
-) =
-    addState(DefaultHistoryState(name, defaultState, historyType))
+) = addState(DefaultHistoryState(name, defaultState, historyType))
