@@ -268,6 +268,13 @@ There are two predefined event matchers:
 
 You can define your own matchers by subclassing `EventMatcher` class.
 
+## Undo transition
+
+Transitions may be undone with `StateMachine::undo()` function or by sending special `UndoEvent` to machine
+like this `machine.processEvent(UndoEvent)`. State Machine will switch to previous state. To implement this feature
+library stores target states of transitions in a stack, it takes memory, so this feature is disabled by default and must
+be enabled explicitly using `createStateMachine(enableUndo = true)` argument.
+
 ## Logging
 
 You can enable internal state machine logging on your platform.
@@ -365,7 +372,8 @@ the state hierarchy as the source state.
 `StateMachine` is a subclass of `IState`, this allows to use it as a child of another state machine like a simple state.
 The parent state machine treats the child machine as an atomic state. It is not possible to reference states of a child
 machine from parent transitions and vise versa. Child machine is automatically started when parent enters it. Events
-from parent machine are not passed to it child machines. Child machine receives events only from its own `processEvent()`
+from parent machine are not passed to it child machines. Child machine receives events only from its
+own `processEvent()`
 calls.
 
 ## Parallel states

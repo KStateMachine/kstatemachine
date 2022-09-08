@@ -53,13 +53,6 @@ interface StateMachine : State {
     fun processEvent(event: Event, argument: Any? = null)
 
     /**
-     * Navigates machine to previous state.
-     * Previous states are stored in a stack, so this method mey be called multiple times if needed.
-     * Same effect as calling processEvent(UndoEvent).
-     */
-    fun undo()
-
-    /**
      * Destroys machine structure clearing all listeners, states etc.
      */
     fun destroy(stop: Boolean = true)
@@ -138,6 +131,18 @@ fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) 
     addListener(object : StateMachine.Listener {
         override fun onStateChanged(newState: IState) = block(newState)
     })
+}
+
+/**
+ * Navigates machine to previous state.
+ * Previous states are stored in a stack, so this method mey be called multiple times if needed.
+ * This function has same effect as calling processEvent(UndoEvent), but throws if undo feature is not enabled.
+ */
+fun StateMachine.undo() {
+    check(isUndoEnabled) {
+        "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
+    }
+    processEvent(UndoEvent)
 }
 
 /**

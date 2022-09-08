@@ -12,10 +12,14 @@ interface DataEvent<out D> : Event {
     val data: D
 }
 
+internal interface IUndoEvent : Event
+
 /**
  * User may call processEvent() with [UndoEvent] as alternative to calling machine.undo()
  */
-object UndoEvent : Event
+object UndoEvent : IUndoEvent
+
+internal class UndoDataEvent<out D>(override val data: D) : DataEvent<D>, IUndoEvent
 
 @StateMachineDslMarker
 data class TransitionParams<E : Event>(

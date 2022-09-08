@@ -162,13 +162,6 @@ internal class StateMachineImpl(
         }
     }
 
-    override fun undo() {
-        check(isUndoEnabled) {
-            "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
-        }
-        processEvent(UndoEvent)
-    }
-
     /**
      * Runs block of code that triggers notification listeners
      */
