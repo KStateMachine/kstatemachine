@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
 
 class UndoTest : StringSpec({
     "undo not enabled" {
@@ -74,10 +75,51 @@ class UndoTest : StringSpec({
     }
 
     "undo cross-level transition" {
-        TODO()
+        lateinit var state12: State
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            initialState("state1") {
+                initialState("state11") {
+                    transitionOn<SwitchEvent> { targetState = { state12 } }
+                }
+                state12 = state("state12") {
+                    transitionOn<SwitchEvent> { targetState = { state2 } }
+                }
+            }
+            state2 = state("state2")
+        }
+        machine.processEvent(SwitchEvent)
+        machine.activeStates().shouldContain(state12)
+        machine.processEvent(SwitchEvent)
+        machine.activeStates().shouldContain(state2)
+        machine.processEvent(UndoEvent) // alternative syntax
+        machine.activeStates().shouldContain(state12)
     }
 
     "undo with DataState" {
-        TODO()
+        lateinit var state12: DataState<Int>
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            initialState("state1") {
+                initialState("state11") {
+                    dataTransitionOn<SwitchDataEvent, Int> { targetState = { state12 } }
+                }
+                state12 = dataState("state12") {
+                    transitionOn<SwitchEvent> { targetState = { state2 } }
+                }
+            }
+            state2 = state("state2")
+        }
+
+        machine.processEvent(SwitchDataEvent(42))
+        state12.data shouldBe 42
+        machine.processEvent(SwitchEvent)
+        machine.activeStates().shouldContain(state2)
+        shouldThrow<IllegalStateException> { state12.data }
+        machine.undo()
+        machine.activeStates().shouldContain(state12)
+        state12.data shouldBe 42
     }
-})
+}) {
+    private class SwitchDataEvent(override val data: Int) : DataEvent<Int>
+}

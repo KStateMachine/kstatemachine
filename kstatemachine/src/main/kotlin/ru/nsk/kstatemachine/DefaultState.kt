@@ -22,7 +22,7 @@ open class DefaultDataState<out D>(
         }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
-        if (this == transitionParams.direction.targetState) {
+        if (this == transitionParams.direction.targetState && transitionParams.event !is UndoEvent) {
             @Suppress("UNCHECKED_CAST")
             val event = transitionParams.event as? DataEvent<D>
                 ?: error("${transitionParams.event} does not contain data required by $this")
