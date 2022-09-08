@@ -1,27 +1,35 @@
 package ru.nsk.kstatemachine
 
-private data class StateAndEvent(val state: IState, val event: Event)
+private data class StateAndEvent(val state: IState, val eventAndArgument: EventAndArgument<*>)
 
 internal class UndoState : BasePseudoState("undo") {
     private val stack = mutableListOf<StateAndEvent>()
 
     override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         super.recursiveAfterTransitionComplete(transitionParams)
-        if (transitionParams.event !is IUndoEvent) { // do not record self-made transition
-            transitionParams.direction.targetState?.let {
-                stack += StateAndEvent(it, transitionParams.event)
-            }
+        if (transitionParams.event !is WrappedEvent) { // do not record self-made transition
+            // check target-less transition
+            val targetState = transitionParams.direction.targetState ?: transitionParams.transition.sourceState
+            stack += StateAndEvent(targetState, EventAndArgument(transitionParams.event, transitionParams.argument))
         }
     }
 
-    fun popState(): IState? {
-        stack.removeLastOrNull()
-        return stack.lastOrNull()?.state
+    /**
+     * Called before [popState]
+     */
+    fun makeWrappedEvent(): WrappedEvent {
+        val element = stack.getOrNull(stack.size - 2)
+        return if (element != null)
+            WrappedEvent(element.eventAndArgument.event, element.eventAndArgument.argument)
+        else
+            WrappedEvent(UndoEvent, null)
     }
 
-    fun makeReachUndoEvent(): IUndoEvent {
-        val event = stack.getOrNull(stack.size - 2)?.event
-        return if (event is DataEvent<*>) UndoDataEvent(event.data) else UndoEvent
+    fun popState() = if (stack.size >= 2) {
+        stack.removeLast()
+        stack.last().state
+    } else {
+        null
     }
 
     override fun onStopped() = stack.clear()

@@ -55,7 +55,8 @@ internal class ExportPlantUmlVisitor : Visitor {
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
-        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState as? InternalState ?: return
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState
+                as? InternalState ?: return
 
         val graphName = if (targetState is HistoryState) {
             val prefix = targetState.requireParent().graphName()
@@ -111,6 +112,7 @@ internal class ExportPlantUmlVisitor : Visitor {
             val name = name?.replace(" ", "_") ?: "State${hashCode()}"
             return if (this !is StateMachine) name else "${name}_StateMachine"
         }
+
         fun label(name: String?) = if (name != null) " : $name" else ""
     }
 }

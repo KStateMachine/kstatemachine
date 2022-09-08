@@ -108,41 +108,37 @@ interface StateMachine : State {
 
 typealias StateMachineBlock = StateMachine.() -> Unit
 
-fun StateMachine.onStarted(block: StateMachine.() -> Unit) {
+fun StateMachine.onStarted(block: StateMachine.() -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStarted() = block()
     })
-}
 
-fun StateMachine.onStopped(block: StateMachine.() -> Unit) {
+fun StateMachine.onStopped(block: StateMachine.() -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStopped() = block()
     })
-}
 
-fun StateMachine.onTransition(block: StateMachine.(TransitionParams<*>) -> Unit) {
+fun StateMachine.onTransition(block: StateMachine.(TransitionParams<*>) -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onTransition(transitionParams: TransitionParams<*>) =
             block(transitionParams)
     })
-}
 
-fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) {
+fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStateChanged(newState: IState) = block(newState)
     })
-}
 
 /**
- * Navigates machine to previous state.
+ * Rolls back transition (usually it is navigating machine to previous state).
  * Previous states are stored in a stack, so this method mey be called multiple times if needed.
- * This function has same effect as calling processEvent(UndoEvent), but throws if undo feature is not enabled.
+ * This function has same effect as alternative syntax processEvent(UndoEvent), but throws if undo feature is not enabled.
  */
-fun StateMachine.undo() {
+fun StateMachine.undo(argument: Any? = null) {
     check(isUndoEnabled) {
         "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
     }
-    processEvent(UndoEvent)
+    processEvent(UndoEvent, argument)
 }
 
 /**

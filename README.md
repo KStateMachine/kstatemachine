@@ -38,6 +38,7 @@ Main features are:
   from event to state
 * [Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states) to avoid a combinatorial explosion of
   states
+* [Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions) for navigating back to previous state
 * [Argument](https://nsk90.github.io/kstatemachine/#arguments) passing for events and transitions
 * Supports [pending events](https://nsk90.github.io/kstatemachine/#pending-events)
 * [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure

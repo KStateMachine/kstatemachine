@@ -63,7 +63,7 @@ class StateTest : StringSpec({
         }
     }
 
-    // This code should not compile
+    /** This code should not compile */
     "dsl marker" {
 //        createStateMachine {
 //            val subclassState = addState(SubclassState())

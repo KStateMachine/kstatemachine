@@ -10,5 +10,5 @@ interface InternalTransition<E : Event> : Transition<E> {
 
 internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) {
     val machine = sourceState.machine as InternalStateMachine
-    listeners.forEach { machine.runDelayingException { it.block() } }
+    listeners.toList().forEach { machine.runDelayingException { it.block() } }
 }

@@ -30,6 +30,10 @@ abstract class InternalState : IState {
 
     internal abstract fun recursiveExit(transitionParams: TransitionParams<*>)
     internal abstract fun recursiveStop()
+
+    /**
+     * Called after each (including initial) transition completion.
+     */
     internal abstract fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>)
     internal abstract fun cleanup()
 }
@@ -38,7 +42,7 @@ internal fun InternalState.requireParent() = requireNotNull(internalParent) { "$
 
 internal fun InternalState.stateNotify(block: IState.Listener.() -> Unit) {
     val machine = machine as InternalStateMachine
-    listeners.forEach { machine.runDelayingException { it.block() } }
+    listeners.toList().forEach { machine.runDelayingException { it.block() } }
 }
 
 internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {

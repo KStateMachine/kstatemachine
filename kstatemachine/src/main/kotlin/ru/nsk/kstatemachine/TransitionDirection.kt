@@ -29,14 +29,13 @@ internal open class TargetState(override val targetState: IState) : TransitionDi
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
-fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection =
-    recursiveResolveTargetState(targetState)
+fun EventAndArgument<*>.targetState(targetState: IState) = recursiveResolveTargetState(targetState)
 
 private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): TransitionDirection {
     return when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
         is HistoryState -> TargetState(targetState.storedState)
-        is UndoState -> TargetState(targetState.popState() ?: targetState.machine)
+        is UndoState -> targetState.popState()?.let { TargetState(it) } ?: NoTransition
         else -> TargetState(targetState)
     }
 }

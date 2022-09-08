@@ -164,6 +164,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
                     initialState.recursiveEnterInitialStates(transitionParams)
             }
+
             ChildMode.PARALLEL -> data.states.forEach {
                 handleStateEntry(it, transitionParams)
                 if (it !is StateMachine) // inner state machine manages its internal state by its own

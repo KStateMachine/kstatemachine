@@ -78,7 +78,7 @@ interface State : IState
 /**
  * State which holds data while it is active
  */
-interface DataState<out D: Any> : IState {
+interface DataState<out D : Any> : IState {
     val defaultData: D?
 
     /**
@@ -103,7 +103,7 @@ interface IFinalState : IState {
 }
 
 interface FinalState : IFinalState, State
-interface FinalDataState<out D: Any> : IFinalState, DataState<D>
+interface FinalDataState<out D : Any> : IFinalState, DataState<D>
 
 /**
  * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
@@ -184,23 +184,32 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 
-fun <S : IState> S.onEntry(block: S.(TransitionParams<*>) -> Unit) {
+/**
+ * Most common methods [onEntry] and [onExit] are shipped with [once] argument, to remove listener
+ * after it is triggered the first time.
+ * Looks that it is not necessary in other similar methods.
+ */
+fun <S : IState> S.onEntry(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
     addListener(object : IState.Listener {
-        override fun onEntry(transitionParams: TransitionParams<*>) = block(transitionParams)
+        override fun onEntry(transitionParams: TransitionParams<*>) {
+            block(transitionParams)
+            if (once) removeListener(this)
+        }
     })
-}
 
-fun <S : IState> S.onExit(block: S.(TransitionParams<*>) -> Unit) {
+/** See [onEntry] */
+fun <S : IState> S.onExit(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
     addListener(object : IState.Listener {
-        override fun onExit(transitionParams: TransitionParams<*>) = block(transitionParams)
+        override fun onExit(transitionParams: TransitionParams<*>) {
+            block(transitionParams)
+            if (once) removeListener(this)
+        }
     })
-}
 
-fun <S : IState> S.onFinished(block: S.(TransitionParams<*>) -> Unit) {
+fun <S : IState> S.onFinished(block: S.(TransitionParams<*>) -> Unit) =
     addListener(object : IState.Listener {
         override fun onFinished(transitionParams: TransitionParams<*>) = block(transitionParams)
     })
-}
 
 /**
  * @param name is optional and is useful for getting state instance after state machine setup
@@ -212,7 +221,7 @@ fun IState.state(
     init: StateBlock<State>? = null
 ) = addState(DefaultState(name, childMode), init)
 
-fun <D: Any> IState.dataState(
+fun <D : Any> IState.dataState(
     name: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -231,7 +240,7 @@ fun IState.initialState(
 /**
  * @param defaultData is necessary for initial [DataState]
  */
-fun <D: Any>  IState.initialDataState(
+fun <D : Any> IState.initialDataState(
     name: String? = null,
     defaultData: D,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -257,7 +266,7 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D: Any> IState.finalDataState(
+fun <D : Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
     init: StateBlock<FinalDataState<D>>? = null

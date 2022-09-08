@@ -29,7 +29,7 @@ internal class StateMachineImpl(
     init {
         if (isUndoEnabled) {
             val undoState = addState(UndoState())
-            transition<UndoEvent>("undo transition", undoState)
+            transition<WrappedEvent>("undo transition", undoState)
         }
     }
 
@@ -72,6 +72,7 @@ internal class StateMachineImpl(
                 val transitionParams = makeStartTransitionParams(this, state, argument)
                 runMachine(transitionParams)
                 switchToTargetState(state as InternalState, this, transitionParams)
+                recursiveAfterTransitionComplete(transitionParams)
             }
         }
     }
@@ -108,8 +109,10 @@ internal class StateMachineImpl(
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
+        val eventAndArgument = wrapEvent(event, argument)
+
         if (isProcessingEvent) {
-            pendingEventHandler.onPendingEvent(event, argument)
+            pendingEventHandler.onPendingEvent(eventAndArgument.event, eventAndArgument.argument)
             // pending event cannot be processed while previous event is still processing
             // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
             // to be processed later.
@@ -117,7 +120,16 @@ internal class StateMachineImpl(
         }
 
         eventProcessingScope {
-            process(EventAndArgument(event, argument))
+            process(eventAndArgument)
+        }
+    }
+
+    private fun wrapEvent(event: Event, argument: Any?): EventAndArgument<*> {
+        return if (isUndoEnabled && event is UndoEvent) {
+            val wrapped = requireState<UndoState>().makeWrappedEvent()
+            EventAndArgument(wrapped, argument)
+        } else {
+            EventAndArgument(event, argument)
         }
     }
 
@@ -197,7 +209,7 @@ internal class StateMachineImpl(
         }
 
         log {
-            val targetText = if (targetState != null) "to $targetState" else "[targetless]"
+            val targetText = if (targetState != null) "to $targetState" else "[target-less]"
             "${event::class.simpleName} triggers $transition from ${transition.sourceState} $targetText"
         }
 
@@ -235,7 +247,7 @@ internal class StateMachineImpl(
 }
 
 internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) {
-    machineListeners.forEach { runDelayingException { it.block() } }
+    machineListeners.toList().forEach { runDelayingException { it.block() } }
 }
 
 internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =

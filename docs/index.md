@@ -103,8 +103,18 @@ state {
 Or even shorter:
 
 ```kotlin
-state().onEntry { /*...*/ }
+state().onEntry { /* ... */ }
 ```
+
+`onEntry` and `onExit` DSL methods provide `once` argument. If it is set to `true` the listener will be removed after
+the first triggering.
+
+```kotlin
+state().onEntry(once = true) { /* ... */ }
+```
+
+_Note: it is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
+modifications._
 
 ### Listen group of states
 
@@ -164,14 +174,16 @@ createStateMachine {
 }
 ```
 
-### Targetless transitions
+### Target-less transitions
 
 Transition may have no target state (`targetState` is null) which means that state machine stays in current state when
-such transition triggers:
+such transition triggers, it is useful to perform some actions without changing current state:
 
 ```kotlin
 greenState {
-    transition<YellowEvent>()
+    transition<YellowEvent> {
+        onTriggered { /* ... */ }
+    }
 }
 ```
 
@@ -268,12 +280,35 @@ There are two predefined event matchers:
 
 You can define your own matchers by subclassing `EventMatcher` class.
 
-## Undo transition
+## Undo transitions
 
-Transitions may be undone with `StateMachine::undo()` function or by sending special `UndoEvent` to machine
-like this `machine.processEvent(UndoEvent)`. State Machine will switch to previous state. To implement this feature
-library stores target states of transitions in a stack, it takes memory, so this feature is disabled by default and must
-be enabled explicitly using `createStateMachine(enableUndo = true)` argument.
+Transitions may be undone with `StateMachine.undo()` function or alternatively by sending special `UndoEvent` to machine
+like this `machine.processEvent(UndoEvent)`. State Machine will roll back last transition which is usually is switching
+to previous state (except target-less transitions).
+This API might be called as many times as needed.
+To implement this feature library stores transitions in a stack, it takes memory,
+so this feature is disabled by default and must be enabled explicitly using `createStateMachine(enableUndo = true)`
+argument.
+
+Undo functionality is implemented as `Event`, so it possible to call `undo()` from notification callbacks, if you use
+`QueuePendingEventHandler` (which is default) or its analog.
+
+For example if states of state machine represent UI screens, `undo()` acts like some kind of `navigateUp()` function.
+
+Internally every `UndoEvent` is transformed to `WrappedEvent` which stores original event and argument.
+When some state is entered as a result of undo operation you can access original event and argument with
+`unwrappedEvent` and `unwrappedArgument` extension properties of `TransitionParams` class.
+Original event is the event that triggered original transition to this state.
+
+```kotlin
+state {
+    onEntry { transitionParams -> // when called as result of undo() operation
+        transitionParams.event // is WrappedEvent
+        transitionParams.unwrappedEvent // is original event
+        (transitionParams.event as WrappedEvent).event // same as using unwrappedEvent extension
+    }
+}
+```
 
 ## Logging
 
@@ -582,7 +617,7 @@ Use `exportToPlantUml()` extension function to export state machine
 to [PlantUML state diagram](https://plantuml.com/en/state-diagram).
 
 ```kotlin
-val machine = createStateMachine { /*...*/ }
+val machine = createStateMachine { /* ... */ }
 println(machine.exportToPlantUml())
 ```
 

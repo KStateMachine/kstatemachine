@@ -203,7 +203,7 @@ class TypesafeTransitionTest : StringSpec({
         state2.data shouldBe id
     }
 
-    "targetless data transition negative" {
+    "target-less data transition negative" {
         shouldThrow<IllegalArgumentException> {
             createStateMachine {
                 initialState("state1") {
@@ -213,7 +213,7 @@ class TypesafeTransitionTest : StringSpec({
         }
     }
 
-    "targetless transition in data state" {
+    "target-less transition in data state" {
         val callbacks = mockkCallbacks()
 
         val machine = createStateMachine {
