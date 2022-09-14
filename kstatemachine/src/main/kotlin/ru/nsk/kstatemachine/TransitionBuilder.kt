@@ -28,6 +28,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
                         it.targetStateOrStay(targetState)
                     else
                         noTransition()
+
                 is CollectTargetStatesPolicy<E> -> it.targetStateOrStay(targetState)
             }
         }
@@ -50,6 +51,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
                         it.targetState(it.eventAndArgument.targetState())
                     else
                         noTransition()
+
                 is CollectTargetStatesPolicy<E> -> noTransition()
             }
         }
@@ -90,23 +92,23 @@ class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: ISta
 /**
  * Type safe argument transition builder
  */
-class DataGuardedTransitionBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
+class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
     GuardedTransitionBuilder<E, DataState<D>>(name, sourceState)
 
 /**
  * Type safe argument transitionOn builder
  */
-class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D>(name: String?, sourceState: IState) :
+class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
-inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit) {
+inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit): Transition.Listener {
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
 
-    listener = object : Transition.Listener {
+    return object : Transition.Listener {
         @Suppress("UNCHECKED_CAST")
         override fun onTriggered(transitionParams: TransitionParams<*>) =
             block(transitionParams as TransitionParams<E>)
-    }
+    }.also { listener = it }
 }
 
 /**

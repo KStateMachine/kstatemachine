@@ -8,14 +8,23 @@ interface Event
 /**
  * Event holding some data
  */
-interface DataEvent<out D> : Event {
+interface DataEvent<out D : Any> : Event {
     val data: D
 }
 
 /**
- * User may call processEvent() with [UndoEvent] as alternative to calling machine.undo()
+ * User may call [StateMachine.processEvent] with [UndoEvent] as alternative to calling machine.undo()
  */
 object UndoEvent : Event
+
+/**
+ * System event which is used by the library to wrap original event and argument,
+ * so user may access them, when this event is processed.
+ * Currently only [UndoEvent] is transformed to this event.
+ * @param event original event
+ * @param argument original argument
+ */
+class WrappedEvent(val event: Event, val argument: Any?) : Event
 
 @StateMachineDslMarker
 data class TransitionParams<E : Event>(
@@ -29,3 +38,15 @@ data class TransitionParams<E : Event>(
      */
     val argument: Any? = null,
 )
+
+/**
+ * Convenience property for unwrapping original event.
+ * If the event is not [WrappedEvent] this is same as [TransitionParams.event] property
+ */
+val TransitionParams<*>.unwrappedEvent get() = if (event is WrappedEvent) event.event else event
+
+/**
+ * Convenience property for unwrapping original argument.
+ * If the event is not [WrappedEvent] this is same as [TransitionParams.argument] property
+ */
+val TransitionParams<*>.unwrappedArgument get() = if (event is WrappedEvent) event.argument else argument

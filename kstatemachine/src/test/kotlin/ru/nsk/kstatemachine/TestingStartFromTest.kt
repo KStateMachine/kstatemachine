@@ -2,7 +2,6 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.mockk.verifySequence
 import ru.nsk.kstatemachine.Testing.startFrom
 
 class TestingStartFromTest : StringSpec({

@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
 
 class CrossLevelTransitionTest : StringSpec({
-    // Transition from self to self is same as targetless transition
+    // Transition from self to self is same as target-less transition
     "self to self" {
         val callbacks = mockkCallbacks()
 

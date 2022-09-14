@@ -99,9 +99,9 @@ inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
 
 /**
  * Shortcut function for type safe argument transition.
- * Data transition can not be targetless as it does not make sense.
+ * Data transition can not be target-less as it does not make sense.
  */
-inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
+inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
     targetState: DataState<D>
 ): Transition<E> {
@@ -114,7 +114,7 @@ inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
 /**
  * Creates type safe argument transition to [DataState].
  */
-inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
+inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
     block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
 ): Transition<E> {
@@ -123,7 +123,7 @@ inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
         block()
     }
     requireNotNull(builder.targetState) {
-        "data transition should no be targetless, specify targetState or use simple transition instead"
+        "data transition should no be target-less, specify targetState or use simple transition instead"
     }
     require(builder.targetState != asState()) {
         "data transition should no be self targeted, use simple transition instead"
@@ -134,7 +134,7 @@ inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransition(
 /**
  * Data transition, otherwise same as [transitionOn]
  */
-inline fun <reified E : DataEvent<D>, D> TransitionStateApi.dataTransitionOn(
+inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransitionOn(
     name: String? = null,
     block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
 ): Transition<E> {

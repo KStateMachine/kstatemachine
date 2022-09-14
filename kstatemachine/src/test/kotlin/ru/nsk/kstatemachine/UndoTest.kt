@@ -4,13 +4,13 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 
 class UndoTest : StringSpec({
     "undo not enabled" {
         val machine = createStateMachine {
             initialState()
         }
-
         shouldThrow<IllegalStateException> { machine.undo() }
     }
 
@@ -32,6 +32,21 @@ class UndoTest : StringSpec({
         machine.activeStates() shouldContain state2
     }
 
+    "undo with QueuePendingEventHandler" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2") {
+                onEntry { machine.undo() }
+            }
+        }
+        machine.processEvent(SwitchEvent)
+        machine.activeStates().shouldContain(state1)
+    }
+
     "undo to initial state" {
         lateinit var state1: State
         lateinit var state2: State
@@ -46,6 +61,75 @@ class UndoTest : StringSpec({
         machine.processEvent(SwitchEvent)
         machine.activeStates() shouldContain state2
         machine.undo()
+        machine.activeStates() shouldContain state1
+    }
+
+    "undo to initial state checking events and calling undo on initial state" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            state1 = initialState("state1") {
+                transitionOn<FirstEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2") {
+                transitionOn<SecondEvent> { targetState = { state1 } }
+            }
+        }
+        machine.undo() // does nothing, and should not break anything
+
+        machine.activeStates() shouldContain state1
+        machine.processEvent(FirstEvent)
+        machine.processEvent(SecondEvent)
+        machine.processEvent(FirstEvent)
+        machine.activeStates() shouldContain state2
+
+        state1.onEntry(once = true) { it.unwrappedEvent shouldBe SecondEvent }
+        machine.undo()
+        machine.activeStates() shouldContain state1
+
+        state2.onEntry(once = true) { it.unwrappedEvent shouldBe FirstEvent }
+        machine.undo()
+        machine.activeStates() shouldContain state2
+
+        state1.onEntry(once = true) { it.unwrappedEvent shouldBe BaseStateImpl.StartEvent }
+        machine.undo()
+        machine.activeStates() shouldContain state1
+    }
+
+    "undo mixed with processEvent()" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            state1 = initialState("state1") {
+                transitionOn<FirstEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2") {
+                transitionOn<SecondEvent> { targetState = { state1 } }
+            }
+        }
+
+        machine.activeStates() shouldContain state1
+        machine.processEvent(FirstEvent)
+        machine.activeStates() shouldContain state2
+
+        state1.onEntry(once = true) { it.unwrappedEvent shouldBe BaseStateImpl.StartEvent }
+        machine.undo()
+        machine.activeStates() shouldContain state1
+
+        // again
+        machine.processEvent(FirstEvent)
+        machine.activeStates() shouldContain state2
+        machine.processEvent(SecondEvent)
+        machine.activeStates() shouldContain state1
+
+        state2.onEntry { it.unwrappedEvent shouldBe FirstEvent }
+        machine.undo() // SecondEvent
+        machine.activeStates() shouldContain state2
+
+        state1.onEntry {
+            it.unwrappedEvent shouldBe BaseStateImpl.StartEvent
+        }
+        machine.undo() // FirstEvent
         machine.activeStates() shouldContain state1
     }
 
@@ -96,7 +180,7 @@ class UndoTest : StringSpec({
         machine.activeStates().shouldContain(state12)
     }
 
-    "undo with DataState" {
+    "single undo with DataState" {
         lateinit var state12: DataState<Int>
         lateinit var state2: State
         val machine = createStateMachine(enableUndo = true) {
@@ -119,6 +203,144 @@ class UndoTest : StringSpec({
         machine.undo()
         machine.activeStates().shouldContain(state12)
         state12.data shouldBe 42
+    }
+
+    "multiple undo with DataState" {
+        lateinit var state11: State
+        lateinit var state12: DataState<Int>
+        lateinit var state2: State
+        val machine = createStateMachine(enableUndo = true) {
+            logger = StateMachine.Logger { println(it) }
+            initialState("state1") {
+                state11 = initialState("state11") {
+                    dataTransitionOn<SwitchDataEvent, Int> { targetState = { state12 } }
+                    transitionOn<SecondEvent> { targetState = { state2 } }
+                }
+                state12 = dataState("state12") {
+                    transitionOn<FirstEvent> { targetState = { state11 } }
+                }
+            }
+            state2 = state("state2")
+        }
+
+        val iterations = 3
+        for (iteration in 1..iterations) {
+            machine.processEvent(SwitchDataEvent(iteration))
+            machine.processEvent(FirstEvent)
+        }
+        machine.processEvent(SecondEvent)
+
+        machine.undo()
+        machine.activeStates().shouldContain(state11)
+
+        for (iteration in 3 downTo iterations) {
+            machine.undo()
+            machine.activeStates().shouldContain(state12)
+            state12.data shouldBe iteration
+
+            machine.undo()
+            machine.activeStates().shouldContain(state11)
+        }
+    }
+
+    "undo self targeted transitions" {
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine(enableUndo = true) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2") {
+                transition<SwitchEvent>()
+            }
+            onTransition {
+                println("transition event: ${it.event}, argument: ${it.argument}")
+            }
+        }
+
+        state2.onEntry(once = true) { it.argument shouldBe 0 }
+        machine.processEvent(SwitchEvent, 0)
+        machine.activeStates().shouldContain(state2)
+
+        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent)
+        machine.activeStates().shouldContain(state2)
+        machine.undo()
+        machine.activeStates().shouldContain(state2)
+        machine.undo()
+        machine.activeStates().shouldContain(state2)
+        machine.undo()
+        machine.activeStates().shouldContain(state1)
+    }
+
+    "undo initial state" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(start = false, enableUndo = true) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2")
+        }
+
+        state1.onEntry(once = true) {
+            it.argument shouldBe 0
+            it.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+        }
+        machine.start(0)
+
+        machine.undo(1) // nothing
+        machine.processEvent(SwitchEvent)
+
+        state1.onEntry(once = true) {
+            it.argument shouldBe 2
+            it.unwrappedEvent.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+        }
+        machine.undo(2)
+    }
+
+    "undo with argument, and unwrapped properties" {
+        lateinit var state1: State
+        lateinit var state2: State
+
+        val machine = createStateMachine(enableUndo = true, start = false) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2")
+        }
+
+        state1.onEntry(once = true) {
+            it.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            it.argument shouldBe 1
+        }
+        machine.start(1)
+
+        machine.processEvent(SwitchEvent)
+
+        state1.onEntry(once = true) {
+            it.event.shouldBeInstanceOf<WrappedEvent>()
+            it.argument shouldBe 2
+            val wrappedEvent = it.event as WrappedEvent
+            wrappedEvent.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            it.unwrappedEvent shouldBe wrappedEvent.event
+            wrappedEvent.argument shouldBe 1
+            it.unwrappedArgument shouldBe wrappedEvent.argument
+        }
+        machine.processEvent(UndoEvent, 2)
+    }
+
+    "undo ignored event" {
+        val machine = createStateMachine(enableUndo = true) {
+            ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> throw TestException("test") }
+            initialState("state1") {
+                transition<SwitchEvent>()
+            }
+        }
+        machine.processEvent(SwitchEvent)
+        machine.undo()
+        shouldThrow<TestException> { machine.undo() }
     }
 }) {
     private class SwitchDataEvent(override val data: Int) : DataEvent<Int>
