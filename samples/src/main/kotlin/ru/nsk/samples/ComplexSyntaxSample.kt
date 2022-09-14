@@ -120,4 +120,7 @@ fun main() {
     // Process events, passing arguments optionally
     machine.processEvent(SwitchYellowEvent, "Get ready!")
     machine.processEvent(SwitchRedEvent("Stop!"))
+
+    // get list of currently active states
+    machine.activeStates()
 }
