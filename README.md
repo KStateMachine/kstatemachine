@@ -40,7 +40,7 @@ Main features are:
   states
 * [Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions) for navigating back to previous state
 * [Argument](https://nsk90.github.io/kstatemachine/#arguments) passing for events and transitions
-* Supports [pending events](https://nsk90.github.io/kstatemachine/#pending-events)
+* [Pending events](https://nsk90.github.io/kstatemachine/#pending-events) support
 * [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure
   to [PlantUML](https://plantuml.com/);
 * Built-in [logging](https://nsk90.github.io/kstatemachine/#logging) support
@@ -166,4 +166,4 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 To run tests from IDE download official [Kotest plugin](https://github.com/kotest/kotest-intellij-plugin).
 
-## Licensed under the [Boost Software License](./LICENSE)
+## Licensed under permissive [Boost Software License](./LICENSE)
