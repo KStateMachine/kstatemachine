@@ -8,9 +8,8 @@
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
 
-KStateMachine is a Kotlin DSL library for creating finite state
-machines ([FSM](https://en.wikipedia.org/wiki/Finite-state_machine)) and hierarchical state machines
-(HSM).
+KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
+and hierarchical state machines ([statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf)).
 
 ## Overview
 
