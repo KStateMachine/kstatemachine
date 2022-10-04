@@ -44,7 +44,8 @@ class IgnoredEventHandlerTest : StringSpec({
             onFinished { callbacks.onFinished(this) }
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-                callbacks.onIgnoredEvent(event)
+                if (event !is GeneratedEvent)
+                    callbacks.onIgnoredEvent(event)
             }
         }
 

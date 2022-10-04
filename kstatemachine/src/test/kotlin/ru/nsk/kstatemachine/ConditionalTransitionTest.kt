@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
-import io.mockk.Called
+import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
 
@@ -51,7 +51,7 @@ class ConditionalTransitionTest : StringSpec({
         verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
         machine.processEvent(SwitchEvent)
-        verify { callbacks wasNot Called }
+        verify { callbacks wasNot called }
     }
 
     "conditional transition targetState()" {

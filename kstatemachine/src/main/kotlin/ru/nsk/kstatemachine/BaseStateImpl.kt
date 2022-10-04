@@ -126,6 +126,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             machine.log { "Exiting $this" }
             onDoExit(transitionParams)
             data.currentState = null
+            data.isFinished = false
             data.isActive = false
             stateNotify { onExit(transitionParams) }
         }
@@ -134,8 +135,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
         if (childMode == ChildMode.PARALLEL && states.all { it.isFinished }) {
             data.isFinished = true
-            machine.log { "$this finishes" }
-            stateNotify { onFinished(transitionParams) }
+            notifyStateFinish(transitionParams)
         }
     }
 
@@ -145,7 +145,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         val resolvedTransitions = getCurrentStates()
             .filter { it !is StateMachine } // exclude nested machines
             .mapNotNull { it.recursiveFindUniqueResolvedTransition(eventAndArgument) }
-            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) }
+            .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) } // allow transition override
         check(resolvedTransitions.size <= 1) {
             "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
         }
@@ -227,25 +227,27 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     private fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
-        val finish = when (childMode) {
+        val finished = when (childMode) {
             ChildMode.EXCLUSIVE -> state is IFinalState
             ChildMode.PARALLEL -> states.all { it.isFinished }
         }
-
-        if (finish) {
-            data.isFinished = true
-            machine.log { "$this finishes" }
-        }
+        data.isFinished = finished
 
         state.doEnter(transitionParams)
 
         val machine = machine as InternalStateMachine
         machine.machineNotify { onStateEntry(state) }
 
-        if (finish) {
-            stateNotify { onFinished(transitionParams) }
+        if (finished) {
+            notifyStateFinish(transitionParams)
             internalParent?.afterChildFinished(this, transitionParams)
         }
+    }
+
+    private fun notifyStateFinish(transitionParams: TransitionParams<*>) {
+        machine.log { "$this finished" }
+        stateNotify { onFinished(transitionParams) }
+        machine.processEvent(FinishedEvent(this))
     }
 
     internal fun switchToTargetState(

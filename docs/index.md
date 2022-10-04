@@ -349,8 +349,6 @@ createStateMachine {
 }
 ```
 
-_Note: `FinalState` can not have its own transitions._
-
 ## Nested states
 
 With nested states you can build hierarchical state machines and inherit transitions by grouping states.

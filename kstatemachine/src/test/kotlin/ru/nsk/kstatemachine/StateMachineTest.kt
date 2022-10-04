@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.Called
+import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.Testing.startFrom
@@ -63,7 +63,7 @@ class StateMachineTest : StringSpec({
         }
 
         machine.processEvent(OnEvent)
-        verify { callbacks wasNot Called }
+        verify { callbacks wasNot called }
     }
 
     "non dsl usage" {
@@ -191,48 +191,6 @@ class StateMachineTest : StringSpec({
         }
     }
 
-    "finishing state machine" {
-        val callbacks = mockkCallbacks()
-
-        lateinit var final: State
-        val machine = createStateMachine {
-            final = finalState("final") { callbacks.listen(this) }
-            setInitialState(final)
-
-            onFinished { callbacks.onFinished(this) }
-        }
-
-        verifySequence {
-            callbacks.onEntryState(final)
-            callbacks.onFinished(machine)
-        }
-    }
-
-    "finished state machine ignores event" {
-        val callbacks = mockkCallbacks()
-
-        lateinit var final: State
-        val machine = createStateMachine {
-            final = finalState("final") { callbacks.listen(this) }
-            setInitialState(final)
-
-            onFinished { callbacks.onFinished(this) }
-
-            transition<SwitchEvent> {
-                targetState = final
-                callbacks.listen(this)
-            }
-        }
-
-        verifySequenceAndClear(callbacks) {
-            callbacks.onEntryState(final)
-            callbacks.onFinished(machine)
-        }
-
-        machine.processEvent(SwitchEvent)
-        verify { callbacks wasNot Called }
-    }
-
     "state machine entry exit" {
         val callbacks = mockkCallbacks()
 
@@ -252,7 +210,7 @@ class StateMachineTest : StringSpec({
         }
     }
 
-    "restart machine" {
+    "restart machine after stop" {
         val callbacks = mockkCallbacks()
 
         lateinit var state1: State

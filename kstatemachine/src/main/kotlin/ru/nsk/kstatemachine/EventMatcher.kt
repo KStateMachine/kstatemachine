@@ -23,3 +23,7 @@ inline fun <reified E : Event> TransitionBuilder<E>.isInstanceOf() = EventMatche
 inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = object : EventMatcher<E>(E::class) {
     override fun match(value: Event) = value::class == E::class
 }
+
+fun finishedEventMatcher(state: IState) = object : EventMatcher<FinishedEvent>(FinishedEvent::class) {
+    override fun match(value: Event) = if (value is FinishedEvent) value.state == state else false
+}

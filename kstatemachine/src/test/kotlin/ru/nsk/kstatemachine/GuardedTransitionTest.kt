@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
-import io.mockk.Called
+import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
 
@@ -29,7 +29,7 @@ class GuardedTransitionTest : StringSpec({
         }
 
         machine.processEvent(SwitchEvent)
-        verify { callbacks wasNot Called }
+        verify { callbacks wasNot called }
 
         value = "value2"
         machine.processEvent(SwitchEvent)
@@ -56,7 +56,7 @@ class GuardedTransitionTest : StringSpec({
         }
 
         machine.processEvent(SwitchEvent)
-        verify { callbacks wasNot Called }
+        verify { callbacks wasNot called }
 
         value = "value2"
         machine.processEvent(SwitchEvent)

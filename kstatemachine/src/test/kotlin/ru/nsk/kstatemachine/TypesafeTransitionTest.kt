@@ -41,15 +41,6 @@ class TypesafeTransitionTest : StringSpec({
         machine.activeStates().shouldContainExactly(final)
     }
 
-    "FinalDataState cannot have transition" {
-        createStateMachine {
-            initialState("initial")
-            finalDataState<Int>("final") {
-                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
-            }
-        }
-    }
-
     "single data state" {
         val testName = "testName"
 

@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 
 class SubclassState : DefaultState() {
     val dataField = 0
@@ -31,36 +32,24 @@ class StateTest : StringSpec({
         machine.processEvent(SwitchEvent)
     }
 
-    "final state transition" {
-        createStateMachine {
-            val final = finalState("final") {
-                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
-            }
-            setInitialState(final)
-        }
-    }
-
     "final state transition with explicit state" {
-        createStateMachine {
+        val machine = createStateMachine {
             val final = addFinalState(DefaultFinalState("final")) {
-                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
+                transition<SwitchEvent>() // does nothing in this case
             }
             setInitialState(final)
         }
+        machine.isFinished shouldBe true
     }
 
     "explicit final state marker usage" {
-        class MyState : DefaultState(), FinalState {
-            override fun <E : Event> addTransition(transition: Transition<E>) =
-                super<FinalState>.addTransition(transition)
-        }
+        class MyState : DefaultState(), FinalState
 
-        createStateMachine {
-            val final = addFinalState(MyState()) {
-                shouldThrow<UnsupportedOperationException> { transition<SwitchEvent>() }
-            }
+        val machine = createStateMachine {
+            val final = addFinalState(MyState())
             setInitialState(final)
         }
+        machine.isFinished shouldBe true
     }
 
     /** This code should not compile */

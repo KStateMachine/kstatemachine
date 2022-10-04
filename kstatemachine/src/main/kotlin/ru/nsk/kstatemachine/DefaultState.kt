@@ -54,14 +54,10 @@ open class DefaultDataState<out D : Any>(
     override fun onCleanup() = onStopped()
 }
 
-open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState {
-    override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalState>.addTransition(transition)
-}
+open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState
 
 open class DefaultFinalDataState<out D : Any>(name: String? = null, defaultData: D? = null) :
-    DefaultDataState<D>(name, defaultData), FinalDataState<D> {
-    override fun <E : Event> addTransition(transition: Transition<E>) = super<FinalDataState>.addTransition(transition)
-}
+    DefaultDataState<D>(name, defaultData), FinalDataState<D>
 
 /**
  * Currently it does not allow to target [DataState]

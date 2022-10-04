@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.mockk.called
 import io.mockk.verifySequence
 
 class NestedStateTest : StringSpec({
@@ -79,71 +80,6 @@ class NestedStateTest : StringSpec({
             callbacks.onExitState(firstL1)
             callbacks.onEntryState(secondL1)
             callbacks.onEntryState(secondL2)
-        }
-    }
-
-    "nested state finish L2" {
-        val callbacks = mockkCallbacks()
-
-        lateinit var initialL1: State
-        lateinit var finalL1: State
-        lateinit var initialL2: State
-        lateinit var finalL2: State
-
-        val machine = createStateMachine {
-            logger = StateMachine.Logger { println(it) }
-
-            finalL1 = finalState("finalL1") {
-                callbacks.listen(this)
-            }
-
-            initialL1 = initialState("initialL1") {
-                callbacks.listen(this)
-
-                transition<SwitchEventL1> {
-                    targetState = finalL1
-                    callbacks.listen(this)
-                }
-
-                finalL2 = finalState("finalL2") {
-                    callbacks.listen(this)
-                }
-
-                initialL2 = initialState("initialL2") {
-                    callbacks.listen(this)
-
-                    transition<SwitchEventL2> {
-                        targetState = finalL2
-                        callbacks.listen(this)
-                    }
-                }
-            }
-
-            onFinished { callbacks.onFinished(this) }
-        }
-
-        verifySequenceAndClear(callbacks) {
-            callbacks.onEntryState(initialL1)
-            callbacks.onEntryState(initialL2)
-        }
-
-        machine.processEvent(SwitchEventL2)
-
-        verifySequenceAndClear(callbacks) {
-            callbacks.onTriggeredTransition(SwitchEventL2)
-            callbacks.onExitState(initialL2)
-            callbacks.onEntryState(finalL2)
-            callbacks.onFinished(initialL1)
-        }
-
-        machine.processEvent(SwitchEventL1)
-
-        verifySequence {
-            callbacks.onTriggeredTransition(SwitchEventL1)
-            callbacks.onExitState(finalL2)
-            callbacks.onExitState(initialL1)
-            callbacks.onEntryState(finalL1)
-            callbacks.onFinished(machine)
         }
     }
 

@@ -105,7 +105,7 @@ fun main() {
             println("Transition from ${it.transition.sourceState} to ${it.direction.targetState} " +
                     "on ${it.event} with argument: ${it.argument}")
         }
-        onStateEntry { println("State changed to $it") }
+        onStateEntry { println("Entered state $it") }
         onFinished { println("$name finished") }
     }
 

@@ -111,6 +111,11 @@ interface StateMachine : State {
     }
 }
 
+fun StateMachine.restart(argument: Any? = null) {
+    stop()
+    start(argument)
+}
+
 typealias StateMachineBlock = StateMachine.() -> Unit
 
 fun StateMachine.onStarted(block: StateMachine.() -> Unit) =
