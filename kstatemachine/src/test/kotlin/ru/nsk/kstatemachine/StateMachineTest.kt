@@ -3,6 +3,8 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.verify
@@ -103,6 +105,31 @@ class StateMachineTest : StringSpec({
         machine.processEvent(SwitchEvent)
         verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
     }
+
+    "onTransitionComplete() notification" {
+        val callbacks = mockkCallbacks()
+
+        lateinit var state2: State
+        lateinit var state22: State
+        val machine = createStateMachine {
+            initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+
+            state2 = state("state2") {
+                state22 = initialState("state22")
+            }
+
+            onTransitionComplete { transitionParams, activeStates ->
+                callbacks.onTriggeredTransition(transitionParams.event)
+                activeStates.shouldContainExactlyInAnyOrder(state2, state22)
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
+        verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+    }
+
 
     "onStateChanged() notification" {
         val callbacks = mockkCallbacks()
