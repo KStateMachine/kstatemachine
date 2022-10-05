@@ -110,10 +110,10 @@ class StateMachineTest : StringSpec({
 
         createStateMachine {
             first = initialState("first")
-            onStateChanged { callbacks.onStateChanged(it) }
+            onStateEntry { callbacks.onEntryState(it) }
         }
 
-        verifySequence { callbacks.onStateChanged(first) }
+        verifySequence { callbacks.onEntryState(first) }
     }
 
     "add same state listener" {
@@ -303,7 +303,7 @@ class StateMachineTest : StringSpec({
             state2 = finalState("state2")
 
             onStarted { callbacks.onStarted(this) }
-            onStateChanged { callbacks.onStateChanged(it) }
+            onStateEntry { callbacks.onEntryState(it) }
             onFinished { callbacks.onFinished(this) }
         }
 
@@ -311,8 +311,8 @@ class StateMachineTest : StringSpec({
 
         verifySequence {
             callbacks.onStarted(machine)
-            callbacks.onStateChanged(state1)
-            callbacks.onStateChanged(state2)
+            callbacks.onEntryState(state1)
+            callbacks.onEntryState(state2)
             callbacks.onFinished(machine)
         }
     }

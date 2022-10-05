@@ -76,9 +76,14 @@ interface StateMachine : State {
         fun onTransition(transitionParams: TransitionParams<*>) = Unit
 
         /**
-         * Notifies about state changes.
+         * Same as [onTransition] but called after transition is complete and provides set of current active states.
          */
-        fun onStateChanged(newState: IState) = Unit
+        fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
+
+        /**
+         * Notifies about child state entry (including nested states).
+         */
+        fun onStateEntry(state: IState) = Unit
 
         /**
          * Notifies that state machine has stopped.
@@ -124,9 +129,15 @@ fun StateMachine.onTransition(block: StateMachine.(TransitionParams<*>) -> Unit)
             block(transitionParams)
     })
 
-fun StateMachine.onStateChanged(block: StateMachine.(newState: IState) -> Unit) =
+fun StateMachine.onTransitionComplete(block: StateMachine.(TransitionParams<*>, Set<IState>) -> Unit) =
     addListener(object : StateMachine.Listener {
-        override fun onStateChanged(newState: IState) = block(newState)
+        override fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
+            block(transitionParams, activeStates)
+    })
+
+fun StateMachine.onStateEntry(block: StateMachine.(state: IState) -> Unit) =
+    addListener(object : StateMachine.Listener {
+        override fun onStateEntry(state: IState) = block(state)
     })
 
 /**

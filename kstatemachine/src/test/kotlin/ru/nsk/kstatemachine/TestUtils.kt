@@ -17,7 +17,6 @@ object SecondEvent : Event
 interface Callbacks {
     fun onStarted(machine: StateMachine)
     fun onStopped(machine: StateMachine)
-    fun onStateChanged(state: IState)
     fun onFinished(state: IState)
     fun onIgnoredEvent(event: Event)
     fun onTriggeredTransition(event: Event)

@@ -240,7 +240,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         state.doEnter(transitionParams)
 
         val machine = machine as InternalStateMachine
-        machine.machineNotify { onStateChanged(state) }
+        machine.machineNotify { onStateEntry(state) }
 
         if (finish) {
             stateNotify { onFinished(transitionParams) }

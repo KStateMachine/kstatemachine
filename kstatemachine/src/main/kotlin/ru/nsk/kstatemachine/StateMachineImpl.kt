@@ -219,6 +219,10 @@ internal class StateMachineImpl(
         targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
 
         recursiveAfterTransitionComplete(transitionParams)
+
+        val activeStates = activeStates()
+        machineNotify { onTransitionComplete(transitionParams, activeStates) }
+
         return true
     }
 
