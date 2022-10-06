@@ -2,7 +2,6 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.mockk.called
 import io.mockk.verifySequence
 
 class NestedStateTest : StringSpec({

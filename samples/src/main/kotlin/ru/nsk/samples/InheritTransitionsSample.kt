@@ -2,18 +2,24 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
+import ru.nsk.samples.InheritTransitionsSample.Events.ExitEvent
+import ru.nsk.samples.InheritTransitionsSample.Events.NextEvent
 
-object ExitEvent : Event
-object NextEvent : Event
+private object InheritTransitionsSample {
+    sealed interface Events: Event {
+        object ExitEvent : Events
+        object NextEvent : Events
+    }
+}
 
 /**
- * Nested states allow us to group states and inherit its parent transitions
+ * Nested states allow grouping states and inherit their parent transitions
  */
 fun main() {
     val machine = createStateMachine("Nested states") {
         logger = StateMachine.Logger { println(it) }
 
-        val state2 = finalState("Finish")
+        val state2 = finalState("State2")
 
         initialState("State1") {
             transition<ExitEvent>("Exit") { targetState = state2 }
@@ -37,6 +43,8 @@ fun main() {
     machine.processEvent(NextEvent)
     machine.processEvent(NextEvent)
     machine.processEvent(ExitEvent)
+
+    check(machine.requireState("State2") in machine.activeStates())
 
     println("\n" + machine.exportToPlantUml())
 }

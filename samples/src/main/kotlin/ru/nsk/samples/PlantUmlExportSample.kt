@@ -2,8 +2,11 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
+import ru.nsk.samples.PlantUmlExportSample.SwitchEvent
 
-object SwitchEvent : Event
+private object PlantUmlExportSample {
+    object SwitchEvent : Event
+}
 
 fun main() {
     val machine = createStateMachine("Nested states") {
@@ -27,6 +30,5 @@ fun main() {
         }
     }
 
-    val plantUml = machine.exportToPlantUml()
-    println(plantUml)
+    println(machine.exportToPlantUml())
 }

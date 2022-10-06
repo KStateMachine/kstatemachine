@@ -2,9 +2,15 @@ package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
+import ru.nsk.samples.CrossLevelTransitionSample.SwitchEvent
 
-object SwitchEvent2 : Event
+private object CrossLevelTransitionSample {
+    object SwitchEvent : Event
+}
 
+/**
+ * Transition may target any states from state machine
+ */
 fun main() {
     val machine = createStateMachine {
         logger = StateMachine.Logger { println(it) }
@@ -14,7 +20,7 @@ fun main() {
         initialState("Top level 1") {
             initialState("Nested 11") {
                 // Target state is declared in another state
-                transitionOn<SwitchEvent2> { targetState = { nested22 } }
+                transitionOn<SwitchEvent> { targetState = { nested22 } }
             }
         }
 
@@ -24,7 +30,7 @@ fun main() {
         }
     }
 
-    machine.processEvent(SwitchEvent2)
+    machine.processEvent(SwitchEvent)
 
-    println(System.lineSeparator() + machine.exportToPlantUml())
+    println("\n" + machine.exportToPlantUml())
 }

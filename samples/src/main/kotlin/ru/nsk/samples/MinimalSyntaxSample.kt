@@ -1,9 +1,15 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.samples.MinimalSyntaxSample.NextEvent
 
-object NextEvent1 : Event
+private object MinimalSyntaxSample {
+    object NextEvent : Event
+}
 
+/**
+ * This sample uses factory functions to create states
+ */
 fun main() {
     // Create state machine and configure its states in a setup block
     val machine = createStateMachine {
@@ -12,7 +18,7 @@ fun main() {
 
         val yellowState = state {
             // Setup transition
-            transition<NextEvent1> {
+            transition<NextEvent> {
                 targetState = redState
                 // Add transition listener
                 onTriggered { println("Transition triggered") }
@@ -24,13 +30,15 @@ fun main() {
             onEntry { println("Enter $name") }
             onExit { println("Exit $name") }
 
-            transition<NextEvent1>(targetState = yellowState)
+            transition<NextEvent>(targetState = yellowState)
         }
 
         onFinished { println("Finished") }
     }
 
     // Now we can process events
-    machine.processEvent(NextEvent1)
-    machine.processEvent(NextEvent1)
+    machine.processEvent(NextEvent)
+    machine.processEvent(NextEvent)
+
+    check(machine.isFinished)
 }

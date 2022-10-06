@@ -57,14 +57,13 @@ _Don't forget to push the ⭐ if you like this project._
 ![Traffic light diagram](./docs/diagrams/finishing-traffic-light.png)
 
 ```kotlin
-sealed class Events {
-    object NextEvent : Event
-}
 
-sealed class States {
-    object GreenState : DefaultState()
-    object YellowState : DefaultState()
-    object RedState : DefaultFinalState() // Machine finishes when enters final state
+object NextEvent : Event
+
+sealed class States : DefaultState() {
+    object GreenState : States()
+    object YellowState : States()
+    object RedState : States(), FinalState // Machine finishes when enters final state
 }
 
 fun main() {
@@ -109,6 +108,7 @@ fun main() {
           alt="Android sample app" width="30%" height="30%"/>
   </p>
 
+* [Transition on FinishedEvent sample](./samples/src/main/kotlin/ru/nsk/samples/FinishedEventSample.kt)
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)

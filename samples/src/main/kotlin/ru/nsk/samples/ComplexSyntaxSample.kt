@@ -1,15 +1,20 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.samples.ComplexSyntaxSample.SwitchRedEvent
+import ru.nsk.samples.ComplexSyntaxSample.SwitchYellowEvent
+import ru.nsk.samples.ComplexSyntaxSample.YellowState
 
-// Define events
-object SwitchYellowEvent : Event
+private object ComplexSyntaxSample {
+    // Define events
+    object SwitchYellowEvent : Event
 
-// Events often hold some useful data
-class SwitchRedEvent(val info: String) : Event
+    // Events often hold some useful data
+    class SwitchRedEvent(val info: String) : Event
 
-// Subclass DefaultState if you need
-class YellowState(val info: Int) : DefaultState("Yellow")
+    // Subclass DefaultState if you need
+    class YellowState(val info: Int) : DefaultState("Yellow")
+}
 
 fun main() {
     val machine = createStateMachine(
@@ -102,8 +107,10 @@ fun main() {
         onTransition {
             // Listen to all transitions in one place
             // instead of listening to each transition separately
-            println("Transition from ${it.transition.sourceState} to ${it.direction.targetState} " +
-                    "on ${it.event} with argument: ${it.argument}")
+            println(
+                "Transition from ${it.transition.sourceState} to ${it.direction.targetState} " +
+                        "on ${it.event} with argument: ${it.argument}"
+            )
         }
         onStateEntry { println("Entered state $it") }
         onFinished { println("$name finished") }

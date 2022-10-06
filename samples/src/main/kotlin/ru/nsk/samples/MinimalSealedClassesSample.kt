@@ -1,20 +1,22 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.Events.NextEvent
-import ru.nsk.samples.States.*
-import ru.nsk.samples.States.YellowState
+import ru.nsk.samples.MinimalSealedClassesSample.NextEvent
+import ru.nsk.samples.MinimalSealedClassesSample.States.*
 
-sealed class Events {
+private object MinimalSealedClassesSample {
     object NextEvent : Event
+
+    sealed class States : DefaultState() {
+        object GreenState : States()
+        object YellowState : States()
+        object RedState : States(), FinalState // Machine finishes when enters final state
+    }
 }
 
-sealed class States {
-    object GreenState : DefaultState()
-    object YellowState : DefaultState()
-    object RedState : DefaultFinalState() // Machine finishes when enters final state
-}
-
+/**
+ * This sample uses states defined in sealed class
+ */
 fun main() {
     // Create state machine and configure its states in a setup block
     val machine = createStateMachine {
@@ -43,4 +45,6 @@ fun main() {
     // Now we can process events
     machine.processEvent(NextEvent)
     machine.processEvent(NextEvent)
+
+    check(machine.isFinished)
 }

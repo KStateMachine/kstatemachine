@@ -1,27 +1,34 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
+import ru.nsk.samples.GuardedTransitionSample.States.State1
+import ru.nsk.samples.GuardedTransitionSample.States.State2
+import ru.nsk.samples.GuardedTransitionSample.SwitchEvent
 
-object SwitchEvent1 : Event
+private object GuardedTransitionSample {
+    object SwitchEvent : Event
 
-sealed class States1 {
-    class InitialState(val value: Int) : DefaultState("State 1")
-    class FinalState : DefaultFinalState("State 2")
+    sealed class States : DefaultState() {
+        class State1(val value: Int) : States()
+        object State2 : States(), FinalState
+    }
 }
 
 fun main() {
     val machine = createStateMachine {
         logger = StateMachine.Logger { println(it) }
 
-        val finalState = addFinalState(States1.FinalState())
-
-        addInitialState(States1.InitialState(42)) {
-            transition<SwitchEvent1> {
+        addInitialState(State1(42)) {
+            transition<SwitchEvent> {
                 guard = { this@addInitialState.value > 10 }
-                targetState = finalState
+                targetState = State2
             }
         }
+
+        addFinalState(State2)
     }
 
-    machine.processEvent(SwitchEvent1)
+    machine.processEvent(SwitchEvent)
+
+    check(State2 in machine.activeStates())
 }
