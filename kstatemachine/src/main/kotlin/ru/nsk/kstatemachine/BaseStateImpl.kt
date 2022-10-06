@@ -247,7 +247,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     private fun notifyStateFinish(transitionParams: TransitionParams<*>) {
         machine.log { "$this finished" }
         stateNotify { onFinished(transitionParams) }
-        machine.processEvent(FinishedEvent(this))
+        // there is no sense to send event on state machine finish as it stops processing events in this case
+        if (this !is StateMachine)
+            machine.processEvent(FinishedEvent(this))
     }
 
     internal fun switchToTargetState(
