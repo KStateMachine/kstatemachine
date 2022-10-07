@@ -58,7 +58,7 @@ _Don't forget to push the ⭐ if you like this project._
 
 ```kotlin
 
-object NextEvent : Event
+object SwitchEvent : Event
 
 sealed class States : DefaultState() {
     object GreenState : States()
@@ -75,7 +75,7 @@ fun main() {
             onExit { println("Exit green") }
 
             // Setup transition
-            transition<NextEvent> {
+            transition<SwitchEvent> {
                 targetState = YellowState
                 // Add transition listener
                 onTriggered { println("Transition triggered") }
@@ -83,7 +83,7 @@ fun main() {
         }
 
         addState(YellowState) {
-            transition<NextEvent>(targetState = RedState)
+            transition<SwitchEvent>(targetState = RedState)
         }
 
         addFinalState(RedState)
@@ -92,8 +92,8 @@ fun main() {
     }
 
     // Now we can process events
-    machine.processEvent(NextEvent)
-    machine.processEvent(NextEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 }
 ```
 
@@ -109,6 +109,7 @@ fun main() {
   </p>
 
 * [Transition on FinishedEvent sample](./samples/src/main/kotlin/ru/nsk/samples/FinishedEventSample.kt)
+* [Undo transition sample](./samples/src/main/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)

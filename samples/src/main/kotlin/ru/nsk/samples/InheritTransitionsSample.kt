@@ -3,12 +3,12 @@ package ru.nsk.samples
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 import ru.nsk.samples.InheritTransitionsSample.Events.ExitEvent
-import ru.nsk.samples.InheritTransitionsSample.Events.NextEvent
+import ru.nsk.samples.InheritTransitionsSample.Events.SwitchEvent
 
 private object InheritTransitionsSample {
     sealed interface Events: Event {
         object ExitEvent : Events
-        object NextEvent : Events
+        object SwitchEvent : Events
     }
 }
 
@@ -29,19 +29,19 @@ fun main() {
             val state13 = state("State1_3")
 
             state11 {
-                transition<NextEvent> { targetState = state12 }
+                transition<SwitchEvent> { targetState = state12 }
             }
             state12 {
-                transition<NextEvent> { targetState = state13 }
+                transition<SwitchEvent> { targetState = state13 }
             }
             state13 {
-                transition<NextEvent> { targetState = state11 }
+                transition<SwitchEvent> { targetState = state11 }
             }
         }
     }
 
-    machine.processEvent(NextEvent)
-    machine.processEvent(NextEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
     machine.processEvent(ExitEvent)
 
     check(machine.requireState("State2") in machine.activeStates())

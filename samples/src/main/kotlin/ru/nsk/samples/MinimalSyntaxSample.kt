@@ -1,10 +1,10 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.MinimalSyntaxSample.NextEvent
+import ru.nsk.samples.MinimalSyntaxSample.SwitchEvent
 
 private object MinimalSyntaxSample {
-    object NextEvent : Event
+    object SwitchEvent : Event
 }
 
 /**
@@ -18,7 +18,7 @@ fun main() {
 
         val yellowState = state {
             // Setup transition
-            transition<NextEvent> {
+            transition<SwitchEvent> {
                 targetState = redState
                 // Add transition listener
                 onTriggered { println("Transition triggered") }
@@ -30,15 +30,15 @@ fun main() {
             onEntry { println("Enter $name") }
             onExit { println("Exit $name") }
 
-            transition<NextEvent>(targetState = yellowState)
+            transition<SwitchEvent>(targetState = yellowState)
         }
 
         onFinished { println("Finished") }
     }
 
     // Now we can process events
-    machine.processEvent(NextEvent)
-    machine.processEvent(NextEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
     check(machine.isFinished)
 }

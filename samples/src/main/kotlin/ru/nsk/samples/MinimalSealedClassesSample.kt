@@ -1,11 +1,11 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.MinimalSealedClassesSample.NextEvent
+import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
 import ru.nsk.samples.MinimalSealedClassesSample.States.*
 
 private object MinimalSealedClassesSample {
-    object NextEvent : Event
+    object SwitchEvent : Event
 
     sealed class States : DefaultState() {
         object GreenState : States()
@@ -26,7 +26,7 @@ fun main() {
             onExit { println("Exit $this") }
 
             // Setup transition
-            transition<NextEvent> {
+            transition<SwitchEvent> {
                 targetState = YellowState
                 // Add transition listener
                 onTriggered { println("Transition triggered") }
@@ -34,7 +34,7 @@ fun main() {
         }
 
         addState(YellowState) {
-            transition<NextEvent>(targetState = RedState)
+            transition<SwitchEvent>(targetState = RedState)
         }
 
         addFinalState(RedState)
@@ -43,8 +43,8 @@ fun main() {
     }
 
     // Now we can process events
-    machine.processEvent(NextEvent)
-    machine.processEvent(NextEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
     check(machine.isFinished)
 }
