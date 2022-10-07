@@ -97,9 +97,7 @@ fun main() {
         }
 
         // Listen to state machine start
-        onStarted {
-            println("$name started")
-        }
+        onStarted { println("$name started") }
     }
 
     // Listeners might be added in or after setup block
@@ -111,6 +109,9 @@ fun main() {
                 "Transition from ${it.transition.sourceState} to ${it.direction.targetState} " +
                         "on ${it.event} with argument: ${it.argument}"
             )
+        }
+        onTransitionComplete { transitionParams, activeStates ->
+            println("Transition from ${transitionParams.transition.sourceState}, active states: $activeStates")
         }
         onStateEntry { println("Entered state $it") }
         onFinished { println("$name finished") }
