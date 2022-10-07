@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="53px" preserveAspectRatio="none" style="width:622px;height:53px;background:#FFFFFF;" version="1.1" viewBox="0 0 622 53" width="622px" zoomAndPan="magnify"><defs/><g><ellipse cx="16" cy="27" fill="#222222" rx="10" ry="10" style="stroke:none;stroke-width:1.0;"/><rect fill="#F1F1F1" height="40" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:0.5;" width="94" x="61" y="7"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="84" x="66" y="31.8467">GreenState</text><rect fill="#F1F1F1" height="40" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:0.5;" width="96" x="271" y="7"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="86" x="276" y="31.8467">YellowState</text><rect fill="#F1F1F1" height="40" rx="12.5" ry="12.5" style="stroke:#181818;stroke-width:0.5;" width="78" x="483" y="7"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="68" x="488" y="31.8467">RedState</text><ellipse cx="606" cy="27" fill="none" rx="10" ry="10" style="stroke:#222222;stroke-width:1.0;"/><ellipse cx="606.5" cy="27.5" fill="#222222" rx="6" ry="6" style="stroke:none;stroke-width:1.0;"/><!--MD5=[b7612fa00c01d3128699045b8dac8d90]
+link *start to GreenState--><g id="link_*start_GreenState"><path d="M26.0625,27 C35.9654,27 45.8684,27 55.7713,27 " fill="none" id="*start-to-GreenState" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="60.95,27,51.95,23,55.95,27,51.95,31,60.95,27" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[1764a35a8783460dda3280dac65d6ebb]
+link GreenState to YellowState--><g id="link_GreenState_YellowState"><path d="M155.09,27 C187.832,27 231.535,27 265.58,27 " fill="none" id="GreenState-to-YellowState" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="270.958,27,261.958,23,265.958,27,261.958,31,270.958,27" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="79" x="173.5" y="20.0669">SwitchEvent</text></g><!--MD5=[2cac50ac00d0944f800d5510777cd501]
+link YellowState to RedState--><g id="link_YellowState_RedState"><path d="M367.108,27 C400.607,27 444.953,27 477.608,27 " fill="none" id="YellowState-to-RedState" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="482.745,27,473.745,23,477.745,27,473.745,31,482.745,27" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="79" x="385.5" y="20.0669">SwitchEvent</text></g><!--MD5=[c4d5154514d0dd207c1a9a1b12693d22]
+link RedState to *end--><g id="link_RedState_*end"><path d="M561.047,27 C570.916,27 580.785,27 590.654,27 " fill="none" id="RedState-to-*end" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="595.815,27,586.815,23,590.815,27,586.815,31,595.815,27" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[0a4e3ae43805d21e92cd5b71a9baf8e3]
+@startuml
+hide empty description
+[*] -> GreenState
+GreenState -> YellowState : SwitchEvent
+YellowState -> RedState : SwitchEvent
+RedState -> [*]
+@enduml
+
+PlantUML version 1.2022.10beta1(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

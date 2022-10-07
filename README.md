@@ -54,7 +54,7 @@ _Don't forget to push the ⭐ if you like this project._
 
 ## Quick start sample (finishing traffic light)
 
-![Traffic light diagram](./docs/diagrams/finishing-traffic-light.png)
+![Traffic light diagram](./docs/diagrams/finishing-traffic-light.svg)
 
 ```kotlin
 
