@@ -109,7 +109,7 @@ internal class StateMachineImpl(
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
-        val eventAndArgument = wrapEvent(event, argument)
+        val eventAndArgument = EventAndArgument(event, argument)
 
         if (isProcessingEvent) {
             pendingEventHandler.onPendingEvent(eventAndArgument.event, eventAndArgument.argument)
@@ -124,7 +124,7 @@ internal class StateMachineImpl(
         }
     }
 
-    private fun wrapEvent(event: Event, argument: Any?): EventAndArgument<*> {
+    private fun EventAndArgument<*>.wrap(): EventAndArgument<*> {
         return if (isUndoEnabled && event is UndoEvent) {
             val wrapped = requireState<UndoState>().makeWrappedEvent()
             EventAndArgument(wrapped, argument)
@@ -136,13 +136,15 @@ internal class StateMachineImpl(
     private fun process(eventAndArgument: EventAndArgument<*>) {
         var eventProcessed: Boolean? = null
 
+        val wrappedEventAndArgument = eventAndArgument.wrap()
+
         runCheckingExceptions {
-            eventProcessed = doProcessEvent(eventAndArgument)
+            eventProcessed = doProcessEvent(wrappedEventAndArgument)
         }
 
         if (eventProcessed == false) {
-            log { "$this ignored ${eventAndArgument.event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(eventAndArgument.event, eventAndArgument.argument)
+            log { "$this ignored ${wrappedEventAndArgument.event::class.simpleName}" }
+            ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument.event, wrappedEventAndArgument.argument)
         }
     }
 
