@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
 import ru.nsk.kstatemachine.visitors.Visitor
 
 @DslMarker
@@ -48,9 +49,13 @@ interface StateMachine : State {
     fun stop()
 
     /**
-     * Machine must be started to process events
+     * Processes [Event].
+     * Machine must be started to be able to process events.
+     * @return [ProcessingResult] for current event.
+     * If more events will be queued while this method is working, there results will not be taken to account.
+     * Their [processEvent] calls will return [ProcessingResult.PENDING] in this case.
      */
-    fun processEvent(event: Event, argument: Any? = null)
+    fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
     /**
      * Destroys machine structure clearing all listeners, states etc.
@@ -170,4 +175,15 @@ fun createStateMachine(
 ): StateMachine = StateMachineImpl(name, childMode, autoDestroyOnStatesReuse, enableUndo).apply {
     init()
     if (start) start()
+}
+
+enum class ProcessingResult {
+    /** Event was sent to [PendingEventHandler] */
+    PENDING,
+
+    /** Event was processed */
+    PROCESSED,
+
+    /** Event was ignored */
+    IGNORED,
 }

@@ -187,6 +187,8 @@ greenState {
 }
 ```
 
+_Note: Such transitions are also called internal._
+
 ### Listen to all transitions in one place
 
 There might be many transitions from one state to another. It is possible to listen to all of them in state machine

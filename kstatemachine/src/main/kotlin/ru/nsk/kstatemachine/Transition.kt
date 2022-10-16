@@ -40,3 +40,15 @@ inline fun <reified E : Event> Transition<E>.onTriggered(
     @Suppress("UNCHECKED_CAST")
     override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
 })
+
+/**
+ * Most of the cases external and local transition are functionally equivalent except in cases where transition
+ * is happening between super and sub states. Local transition doesn’t cause exit and entry to source state if
+ * target state is a substate of a source state.
+ * Other way around, local transition doesn’t cause exit and entry to target state if target is a superstate of a source state.
+ */
+enum class TransitionType {
+    /** Default */
+    LOCAL,
+    EXTERNAL
+}
