@@ -213,7 +213,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
-        if (data.currentState == state) return
+        if (data.currentState == state && transitionParams.transition.type != EXTERNAL) return
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 
