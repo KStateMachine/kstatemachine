@@ -7,6 +7,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.fail
+import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class TransitionTest : StringSpec({
     "transition add after machine start" {
@@ -49,7 +50,7 @@ class TransitionTest : StringSpec({
 
         verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
         verifySequence {
             callbacks.onTriggeredTransition(SwitchEvent)
@@ -73,7 +74,7 @@ class TransitionTest : StringSpec({
             state2 = state("state2") { callbacks.listen(this) }
         }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
         verifySequence {
             callbacks.onTriggeredTransition(SwitchEvent)

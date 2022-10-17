@@ -116,6 +116,9 @@ interface StateMachine : State {
     }
 }
 
+/**
+ * Shortcut for [StateMachine.stop] and [StateMachine.start] sequence calls
+ */
 fun StateMachine.restart(argument: Any? = null) {
     stop()
     start(argument)

@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
@@ -265,3 +266,22 @@ internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =
     } catch (e: Exception) {
         delayListenerException(e)
     }
+
+internal fun makeStartTransitionParams(sourceState: IState, targetState: IState = sourceState, argument: Any?):
+        TransitionParams<*> {
+    val transition = DefaultTransition(
+        "Starting",
+        EventMatcher.isInstanceOf<StartEvent>(),
+        TransitionType.LOCAL,
+        sourceState,
+        targetState,
+    )
+
+    val event = StartEvent()
+    return TransitionParams(
+        transition,
+        transition.produceTargetStateDirection(DefaultPolicy(EventAndArgument(event, argument))),
+        event,
+        argument,
+    )
+}

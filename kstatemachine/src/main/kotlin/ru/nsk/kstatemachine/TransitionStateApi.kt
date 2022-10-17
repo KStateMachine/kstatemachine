@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
+import ru.nsk.kstatemachine.TransitionType.LOCAL
 
 /**
  * Helper interface for [IState] to keep transitions logic separately.
@@ -43,8 +44,9 @@ inline fun <reified E : Event> TransitionStateApi.requireTransition() =
  */
 inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
-    targetState: State? = null
-): Transition<E> = addTransition(DefaultTransition(name, matcherForEvent(asState()), asState(), targetState))
+    targetState: State? = null,
+    type: TransitionType = LOCAL,
+): Transition<E> = addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
 
 /**
  * Creates transition.
@@ -103,12 +105,13 @@ inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
  */
 inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
-    targetState: DataState<D>
+    targetState: DataState<D>,
+    type: TransitionType = LOCAL,
 ): Transition<E> {
     require(targetState != asState()) {
         "data transition should no be self targeted, use simple transition instead"
     }
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), asState(), targetState))
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
 }
 
 /**
@@ -145,7 +148,7 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     return addTransition(builder.build())
 }
 
-inline fun <reified E : Event> matcherForEvent(state: IState) : EventMatcher<E> {
+inline fun <reified E : Event> matcherForEvent(state: IState): EventMatcher<E> {
     @Suppress("UNCHECKED_CAST")
     return if (E::class == FinishedEvent::class)
         finishedEventMatcher(state) as EventMatcher<E>

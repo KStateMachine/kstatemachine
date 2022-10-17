@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
+import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 
@@ -258,32 +258,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         transitionParams: TransitionParams<*>
     ) {
         val path = fromState.findPathFromTargetToLca(targetState)
+        if (transitionParams.transition.type == EXTERNAL)
+            path.last().internalParent?.let { path.add(it) }
         val lca = path.removeLast()
         lca.recursiveEnterStatePath(path, transitionParams)
-    }
-
-    /**
-     * Initial event which is processed on state machine start
-     */
-    internal object StartEvent : Event
-
-    internal fun makeStartTransitionParams(
-        sourceState: IState,
-        targetState: IState = sourceState,
-        argument: Any?
-    ): TransitionParams<*> {
-        val transition = DefaultTransition(
-            "Starting",
-            EventMatcher.isInstanceOf<StartEvent>(),
-            sourceState,
-            targetState,
-        )
-
-        return TransitionParams(
-            transition,
-            transition.produceTargetStateDirection(DefaultPolicy(EventAndArgument(StartEvent, argument))),
-            StartEvent,
-            argument,
-        )
     }
 }

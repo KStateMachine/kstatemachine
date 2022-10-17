@@ -3,7 +3,8 @@ package ru.nsk.kstatemachine
 open class DefaultTransition<E : Event>(
     override val name: String?,
     override val eventMatcher: EventMatcher<E>,
-    sourceState: IState
+    override val type: TransitionType,
+    sourceState: IState,
 ) : InternalTransition<E> {
     private val _listeners = mutableSetOf<Transition.Listener>()
     override val listeners: Collection<Transition.Listener> get() = _listeners
@@ -23,18 +24,20 @@ open class DefaultTransition<E : Event>(
     constructor(
         name: String?,
         eventMatcher: EventMatcher<E>,
+        type: TransitionType,
         sourceState: IState,
         targetState: IState?
-    ) : this(name, eventMatcher, sourceState) {
+    ) : this(name, eventMatcher, type, sourceState) {
         targetStateDirectionProducer = { it.targetStateOrStay(targetState) }
     }
 
     constructor(
         name: String?,
         eventMatcher: EventMatcher<E>,
+        type: TransitionType,
         sourceState: IState,
         targetStateDirectionProducer: TransitionDirectionProducer<E>
-    ) : this(name, eventMatcher, sourceState) {
+    ) : this(name, eventMatcher, type, sourceState) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
 

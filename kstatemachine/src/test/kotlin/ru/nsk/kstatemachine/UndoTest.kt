@@ -91,7 +91,7 @@ class UndoTest : StringSpec({
         machine.undo()
         machine.activeStates() shouldContain state2
 
-        state1.onEntry(once = true) { it.unwrappedEvent shouldBe BaseStateImpl.StartEvent }
+        state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
         machine.undo()
         machine.activeStates() shouldContain state1
     }
@@ -112,7 +112,7 @@ class UndoTest : StringSpec({
         machine.processEvent(FirstEvent)
         machine.activeStates() shouldContain state2
 
-        state1.onEntry(once = true) { it.unwrappedEvent shouldBe BaseStateImpl.StartEvent }
+        state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
         machine.undo()
         machine.activeStates() shouldContain state1
 
@@ -126,9 +126,7 @@ class UndoTest : StringSpec({
         machine.undo() // SecondEvent
         machine.activeStates() shouldContain state2
 
-        state1.onEntry {
-            it.unwrappedEvent shouldBe BaseStateImpl.StartEvent
-        }
+        state1.onEntry { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
         machine.undo() // FirstEvent
         machine.activeStates() shouldContain state1
     }
@@ -286,7 +284,7 @@ class UndoTest : StringSpec({
 
         state1.onEntry(once = true) {
             it.argument shouldBe 0
-            it.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            it.event.shouldBeInstanceOf<StartEvent>()
         }
         machine.start(0)
 
@@ -295,7 +293,7 @@ class UndoTest : StringSpec({
 
         state1.onEntry(once = true) {
             it.argument shouldBe 2
-            it.unwrappedEvent.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            it.unwrappedEvent.shouldBeInstanceOf<StartEvent>()
         }
         machine.undo(2)
     }
@@ -312,7 +310,7 @@ class UndoTest : StringSpec({
         }
 
         state1.onEntry(once = true) {
-            it.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            it.event.shouldBeInstanceOf<StartEvent>()
             it.argument shouldBe 1
         }
         machine.start(1)
@@ -323,7 +321,7 @@ class UndoTest : StringSpec({
             it.event.shouldBeInstanceOf<WrappedEvent>()
             it.argument shouldBe 2
             val wrappedEvent = it.event as WrappedEvent
-            wrappedEvent.event.shouldBeInstanceOf<BaseStateImpl.StartEvent>()
+            wrappedEvent.event.shouldBeInstanceOf<StartEvent>()
             it.unwrappedEvent shouldBe wrappedEvent.event
             wrappedEvent.argument shouldBe 1
             it.unwrappedArgument shouldBe wrappedEvent.argument

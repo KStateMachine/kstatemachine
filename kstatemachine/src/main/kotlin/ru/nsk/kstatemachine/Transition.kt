@@ -10,6 +10,7 @@ interface Transition<E : Event> : VisitorAcceptor {
     val name: String?
     val eventMatcher: EventMatcher<E>
     val sourceState: IState
+    val type: TransitionType
 
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
