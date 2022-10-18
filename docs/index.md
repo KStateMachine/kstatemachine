@@ -361,6 +361,7 @@ only notification is triggered and `isFinished` property set.
 Notifications about finishing are available in two forms:
 
 1) Triggering of `onFinished()` listener callback. This is the only option for `StateMachine`.
+
     ```kotlin
     val machine = createStateMachine {
         val final = finalState("final")
