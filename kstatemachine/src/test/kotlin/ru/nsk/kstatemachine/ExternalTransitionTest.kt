@@ -93,14 +93,6 @@ class ExternalTransitionTest : StringSpec({
                         targetState = { state11 }
                         type = EXTERNAL
                     }
-                    transition<SwitchEvent> {
-                        targetState = state11
-                        type = EXTERNAL
-                    }
-                    transition<SwitchEvent>(
-                        type = EXTERNAL,
-                        targetState = state11
-                    )
                 }
                 state("state12") {
                     callbacks.listen(this)

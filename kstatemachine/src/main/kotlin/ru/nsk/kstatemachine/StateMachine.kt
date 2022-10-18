@@ -35,6 +35,13 @@ interface StateMachine : State {
 
     val isUndoEnabled: Boolean
 
+    /**
+     * If set to true, when multiple transitions match event the first matching transition is selected.
+     * if set to false, when multiple transitions match event exception is thrown.
+     * Default if false.
+     */
+    val doNotThrowOnMultipleTransitionsMatch: Boolean
+
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
@@ -174,10 +181,13 @@ fun createStateMachine(
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
+    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
     init: StateMachineBlock
-): StateMachine = StateMachineImpl(name, childMode, autoDestroyOnStatesReuse, enableUndo).apply {
-    init()
-    if (start) start()
+): StateMachine {
+    return StateMachineImpl(name, childMode, autoDestroyOnStatesReuse, enableUndo, doNotThrowOnMultipleTransitionsMatch).apply {
+        init()
+        if (start) start()
+    }
 }
 
 enum class ProcessingResult {

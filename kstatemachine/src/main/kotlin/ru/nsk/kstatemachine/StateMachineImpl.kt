@@ -17,6 +17,7 @@ internal class StateMachineImpl(
     childMode: ChildMode,
     override val autoDestroyOnStatesReuse: Boolean,
     override val isUndoEnabled: Boolean,
+    override val doNotThrowOnMultipleTransitionsMatch: Boolean,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners

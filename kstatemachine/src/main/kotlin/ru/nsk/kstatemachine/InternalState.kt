@@ -56,6 +56,10 @@ internal fun <E : Event> InternalState.findUniqueResolvedTransition(eventAndArgu
     val transitions = findTransitionsByEvent(eventAndArgument.event)
         .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
-    check(transitions.size <= 1) { "Multiple transitions match ${eventAndArgument.event}, $transitions in $this" }
-    return transitions.singleOrNull()
+    return if (!machine.doNotThrowOnMultipleTransitionsMatch) {
+        check(transitions.size <= 1) { "Multiple transitions match ${eventAndArgument.event}, $transitions in $this" }
+        transitions.singleOrNull()
+    } else {
+        transitions.firstOrNull()
+    }
 }

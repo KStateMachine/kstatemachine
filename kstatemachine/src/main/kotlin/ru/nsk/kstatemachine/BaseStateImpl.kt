@@ -146,10 +146,14 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             .filter { it !is StateMachine } // exclude nested machines
             .mapNotNull { it.recursiveFindUniqueResolvedTransition(eventAndArgument) }
             .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) } // allow transition override
-        check(resolvedTransitions.size <= 1) {
-            "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
+        return if (!machine.doNotThrowOnMultipleTransitionsMatch) {
+            check(resolvedTransitions.size <= 1) {
+                "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
+            }
+            resolvedTransitions.singleOrNull()
+        } else {
+            resolvedTransitions.firstOrNull()
         }
-        return resolvedTransitions.singleOrNull()
     }
 
     override fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>) {
