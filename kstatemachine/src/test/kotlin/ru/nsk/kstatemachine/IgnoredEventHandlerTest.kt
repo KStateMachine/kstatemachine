@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
+import ru.nsk.kstatemachine.ProcessingResult.IGNORED
 
 class IgnoredEventHandlerTest : StringSpec({
     "ignored event handler" {
@@ -18,7 +19,7 @@ class IgnoredEventHandlerTest : StringSpec({
             }
         }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe IGNORED
         verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 
@@ -50,7 +51,7 @@ class IgnoredEventHandlerTest : StringSpec({
 
         verifySequenceAndClear(callbacks) { callbacks.onFinished(machine) }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe IGNORED
         verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 
@@ -67,8 +68,7 @@ class IgnoredEventHandlerTest : StringSpec({
             }
         }
 
-        machine.processEvent(SwitchEvent)
-
+        machine.processEvent(SwitchEvent) shouldBe IGNORED
         verify { callbacks.onIgnoredEvent(SwitchEvent) }
     }
 })

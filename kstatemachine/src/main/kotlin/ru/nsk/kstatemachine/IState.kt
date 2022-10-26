@@ -180,7 +180,7 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 
 /**
- * Most common methods [onEntry] and [onExit] are shipped with [once] argument, to remove listener
+ * The most commonly used methods [onEntry] and [onExit] are shipped with [once] argument, to remove listener
  * after it is triggered the first time.
  * Looks that it is not necessary in other similar methods.
  */

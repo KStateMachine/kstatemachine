@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 
@@ -16,6 +17,7 @@ internal class StateMachineImpl(
     childMode: ChildMode,
     override val autoDestroyOnStatesReuse: Boolean,
     override val isUndoEnabled: Boolean,
+    override val doNotThrowOnMultipleTransitionsMatch: Boolean,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
@@ -105,7 +107,7 @@ internal class StateMachineImpl(
         }
     }
 
-    override fun processEvent(event: Event, argument: Any?) {
+    override fun processEvent(event: Event, argument: Any?): ProcessingResult {
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
@@ -116,10 +118,10 @@ internal class StateMachineImpl(
             // pending event cannot be processed while previous event is still processing
             // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
             // to be processed later.
-            return
+            return ProcessingResult.PENDING
         }
 
-        eventProcessingScope {
+        return eventProcessingScope {
             process(eventAndArgument)
         }
     }
@@ -133,32 +135,32 @@ internal class StateMachineImpl(
         }
     }
 
-    private fun process(eventAndArgument: EventAndArgument<*>) {
-        var eventProcessed: Boolean? = null
-
+    private fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
         val wrappedEventAndArgument = eventAndArgument.wrap()
 
-        runCheckingExceptions {
-            eventProcessed = doProcessEvent(wrappedEventAndArgument)
+        val eventProcessed = runCheckingExceptions {
+            doProcessEvent(wrappedEventAndArgument)
         }
 
-        if (eventProcessed == false) {
+        if (!eventProcessed) {
             log { "$this ignored ${wrappedEventAndArgument.event::class.simpleName}" }
             ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument.event, wrappedEventAndArgument.argument)
         }
+        return if (eventProcessed) ProcessingResult.PROCESSED else ProcessingResult.IGNORED
     }
 
     /**
      * Runs block of code that processes event, and processes all pending events from queue after it if
      * [QueuePendingEventHandler] is used.
      */
-    private fun eventProcessingScope(block: () -> Unit) {
+    private fun <R> eventProcessingScope(block: () -> R): R {
         val queue = pendingEventHandler as? QueuePendingEventHandler
         queue?.checkEmpty()
 
+        val result: R
         isProcessingEvent = true
         try {
-            block()
+            result = block()
 
             queue?.let {
                 var eventAndArgument = it.nextEventAndArgument()
@@ -174,14 +176,16 @@ internal class StateMachineImpl(
         } finally {
             isProcessingEvent = false
         }
+        return result
     }
 
     /**
      * Runs block of code that triggers notification listeners
      */
-    private fun runCheckingExceptions(block: () -> Unit) {
+    private fun <R> runCheckingExceptions(block: () -> R): R {
+        val result: R
         try {
-            block()
+            result = block()
         } catch (e: Exception) {
             log { "Fatal exception happened, $this machine is in unpredictable state and will be destroyed: $e" }
             runCatching { destroy(false) }
@@ -191,6 +195,7 @@ internal class StateMachineImpl(
             delayedListenerException = null
             listenerExceptionHandler.onException(it)
         }
+        return result
     }
 
     private fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
@@ -262,3 +267,22 @@ internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =
     } catch (e: Exception) {
         delayListenerException(e)
     }
+
+internal fun makeStartTransitionParams(sourceState: IState, targetState: IState = sourceState, argument: Any?):
+        TransitionParams<*> {
+    val transition = DefaultTransition(
+        "Starting",
+        EventMatcher.isInstanceOf<StartEvent>(),
+        TransitionType.LOCAL,
+        sourceState,
+        targetState,
+    )
+
+    val event = StartEvent()
+    return TransitionParams(
+        transition,
+        transition.produceTargetStateDirection(DefaultPolicy(EventAndArgument(event, argument))),
+        event,
+        argument,
+    )
+}

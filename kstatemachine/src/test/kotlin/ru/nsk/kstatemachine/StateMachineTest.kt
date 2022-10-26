@@ -68,15 +68,15 @@ class StateMachineTest : StringSpec({
     }
 
     "non dsl usage" {
-        val machine = StateMachineImpl(
-            "machine", ChildMode.EXCLUSIVE, autoDestroyOnStatesReuse = true, isUndoEnabled = false
-        )
+        val machine = createStateMachine("machine", start = false) { /* empty */ }
         val first = DefaultState("first")
         val second = DefaultState("second")
 
         second.onEntry { println("$name entered") }
 
-        val transition = DefaultTransition<SwitchEvent>("transition", EventMatcher.isInstanceOf(), first, second)
+        val transition = DefaultTransition<SwitchEvent>(
+            "transition", EventMatcher.isInstanceOf(), TransitionType.LOCAL, first, second
+        )
         transition.onTriggered { println("${it.transition.name} triggered") }
 
         first.addTransition(transition)

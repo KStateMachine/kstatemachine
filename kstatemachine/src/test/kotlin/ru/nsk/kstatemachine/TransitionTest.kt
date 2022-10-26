@@ -7,6 +7,7 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.fail
+import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class TransitionTest : StringSpec({
     "transition add after machine start" {
@@ -49,7 +50,7 @@ class TransitionTest : StringSpec({
 
         verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
         verifySequence {
             callbacks.onTriggeredTransition(SwitchEvent)
@@ -73,7 +74,7 @@ class TransitionTest : StringSpec({
             state2 = state("state2") { callbacks.listen(this) }
         }
 
-        machine.processEvent(SwitchEvent)
+        machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
         verifySequence {
             callbacks.onTriggeredTransition(SwitchEvent)
@@ -132,5 +133,51 @@ class TransitionTest : StringSpec({
         }
 
         shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
+
+    "multiple matching transitions negative" {
+        val machine = createStateMachine {
+            transition<SwitchEvent>()
+            transition<SwitchEvent>()
+            initialState()
+        }
+
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
+
+    "multiple matching transitions" {
+        val machine = createStateMachine(doNotThrowOnMultipleTransitionsMatch = true) {
+            transition<SwitchEvent>()
+            transition<SwitchEvent>()
+            initialState()
+        }
+
+        machine.processEvent(SwitchEvent)
+    }
+
+    "parallel multiple matching transitions negative" {
+        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+            state {
+                transition<SwitchEvent>()
+            }
+            state {
+                transition<SwitchEvent>()
+            }
+        }
+
+        shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+    }
+
+    "parallel multiple matching transitions" {
+        val machine = createStateMachine(childMode = ChildMode.PARALLEL, doNotThrowOnMultipleTransitionsMatch = true) {
+            state {
+                transition<SwitchEvent>()
+            }
+            state {
+                transition<SwitchEvent>()
+            }
+        }
+
+        machine.processEvent(SwitchEvent)
     }
 })

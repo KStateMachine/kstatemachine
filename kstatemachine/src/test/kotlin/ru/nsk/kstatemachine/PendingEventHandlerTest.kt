@@ -4,6 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
+import ru.nsk.kstatemachine.ProcessingResult.PENDING
+import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class PendingEventHandlerTest : StringSpec({
     "queue event in QueuePendingEventHandler" {
@@ -17,12 +19,12 @@ class PendingEventHandlerTest : StringSpec({
             initialState("first") {
                 transition<FirstEvent> {
                     targetState = second
-                    onTriggered { this@createStateMachine.processEvent(SecondEvent) }
+                    onTriggered { this@createStateMachine.processEvent(SecondEvent) shouldBe PENDING }
                 }
             }
         }
 
-        machine.processEvent(FirstEvent)
+        machine.processEvent(FirstEvent) shouldBe PROCESSED
     }
 
     "queue event on machine start" {

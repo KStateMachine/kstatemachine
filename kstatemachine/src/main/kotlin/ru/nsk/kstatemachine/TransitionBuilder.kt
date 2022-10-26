@@ -7,6 +7,7 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: IState) {
     var listener: Transition.Listener? = null
     lateinit var eventMatcher: EventMatcher<E>
+    var type = TransitionType.LOCAL
 
     abstract fun build(): Transition<E>
 }
@@ -33,7 +34,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
         listener?.let { transition.addListener(it) }
         return transition
     }
@@ -56,7 +57,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
         listener?.let { transition.addListener(it) }
         return transition
     }
@@ -74,7 +75,7 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, sourceState, direction)
+        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
         listener?.let { transition.addListener(it) }
         return transition
     }
