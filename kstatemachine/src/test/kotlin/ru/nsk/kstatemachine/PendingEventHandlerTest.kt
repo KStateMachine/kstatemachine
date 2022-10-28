@@ -98,4 +98,39 @@ class PendingEventHandlerTest : StringSpec({
         machine.processEvent(SwitchEvent)
         machine.isDestroyed shouldBe false
     }
+
+    "pending events are cleared on stop() from notification callback" {
+        val machine = createStateMachine {
+            val state2 = state("state2") {
+                onEntry {
+                    machine.processEvent(SwitchEvent) shouldBe PENDING
+                    machine.processEvent(SwitchEvent) shouldBe PENDING
+                    machine.stop()
+                }
+            }
+            initialState("state1") {
+                transition<SwitchEvent>(targetState = state2)
+            }
+        }
+        machine.processEvent(SwitchEvent)
+        machine.isRunning shouldBe false
+        machine.start()
+    }
+
+    "pending events are cleared on destroy() from notification callback" {
+        val machine = createStateMachine {
+            val state2 = state("state2") {
+                onEntry {
+                    machine.processEvent(SwitchEvent) shouldBe PENDING
+                    machine.processEvent(SwitchEvent) shouldBe PENDING
+                    machine.destroy(false)
+                }
+            }
+            initialState("state1") {
+                transition<SwitchEvent>(targetState = state2)
+            }
+        }
+        machine.processEvent(SwitchEvent)
+        machine.isDestroyed shouldBe true
+    }
 })

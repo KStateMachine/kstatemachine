@@ -23,7 +23,7 @@ internal class StateMachineImpl(
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = NullLogger
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
-    override var pendingEventHandler = queuePendingEventHandler()
+    override var pendingEventHandler: StateMachine.PendingEventHandler = queuePendingEventHandler()
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
@@ -165,6 +165,10 @@ internal class StateMachineImpl(
             queue?.let {
                 var eventAndArgument = it.nextEventAndArgument()
                 while (eventAndArgument != null) {
+                    if (isDestroyed || !isRunning) { // if it happens while event processing
+                        it.clear()
+                        return result
+                    }
                     process(eventAndArgument)
 
                     eventAndArgument = it.nextEventAndArgument()
@@ -251,9 +255,11 @@ internal class StateMachineImpl(
     }
 
     override fun destroy(stop: Boolean) {
+        if (_isDestroyed) return
         if (stop) stop()
         accept(CleanupVisitor())
         _isDestroyed = true
+        log { "$this destroyed" }
     }
 }
 

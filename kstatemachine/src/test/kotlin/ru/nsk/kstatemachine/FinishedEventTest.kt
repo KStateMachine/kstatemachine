@@ -88,4 +88,25 @@ class FinishedEventTest : StringSpec({
             callbacks.onTriggeredTransition(ofType<FinishedDataEvent<Int>>())
         }
     }
+
+    "FinishedEvent in parallel child mode" {
+        val callbacks = mockkCallbacks()
+
+        createStateMachine {
+            initialState(childMode = ChildMode.PARALLEL) {
+                state("state1") {
+                    setInitialState(finalState("state11"))
+                }
+                state("state2") {
+                    setInitialState(finalState("state21"))
+                }
+                transition<FinishedEvent> {
+                    callbacks.listen(this)
+                }
+            }
+        }
+        verifySequence {
+            callbacks.onTriggeredTransition(ofType<FinishedEvent>())
+        }
+    }
 })

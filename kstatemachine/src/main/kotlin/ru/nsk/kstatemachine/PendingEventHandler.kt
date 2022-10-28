@@ -10,19 +10,25 @@ fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandle
     )
 }
 
-fun StateMachine.queuePendingEventHandler(): StateMachine.PendingEventHandler = QueuePendingEventHandler(this)
+fun StateMachine.queuePendingEventHandler(): QueuePendingEventHandler = QueuePendingEventHandlerImpl(this)
 
-internal class QueuePendingEventHandler(private val machine: StateMachine) : StateMachine.PendingEventHandler {
+interface QueuePendingEventHandler : StateMachine.PendingEventHandler {
+    fun checkEmpty()
+    fun nextEventAndArgument(): EventAndArgument<*>?
+    fun clear()
+}
+
+private class QueuePendingEventHandlerImpl(private val machine: StateMachine) : QueuePendingEventHandler {
     private val queue = ArrayDeque<EventAndArgument<*>>()
 
-    fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
+    override fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
 
     override fun onPendingEvent(pendingEvent: Event, argument: Any?) {
         machine.log { "$machine queued event $pendingEvent with argument $argument " }
         queue.add(EventAndArgument(pendingEvent, argument))
     }
 
-    fun nextEventAndArgument() = queue.removeFirstOrNull()
+    override fun nextEventAndArgument() = queue.removeFirstOrNull()
 
-    fun clear() = queue.clear()
+    override fun clear() = queue.clear()
 }
