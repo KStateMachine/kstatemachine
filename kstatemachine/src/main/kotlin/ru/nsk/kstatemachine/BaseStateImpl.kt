@@ -69,7 +69,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
         if (childMode == ChildMode.PARALLEL) {
-            require(state !is FinalState) { "Can not add FinalState in parallel child mode" }
+            require(state !is IFinalState) { "Can not add IFinalState in parallel child mode" }
             require(state !is PseudoState) { "Can not add PseudoState in parallel child mode" }
         }
 
@@ -114,10 +114,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isActive) {
+            val machine = machine as InternalStateMachine
             if (parent != null) machine.log { "Parent $parent entering child $this" }
             data.isActive = true
             onDoEnter(transitionParams)
             stateNotify { onEntry(transitionParams) }
+            machine.machineNotify { onStateEntry(this@BaseStateImpl) }
         }
     }
 
@@ -135,7 +137,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
         if (childMode == ChildMode.PARALLEL && states.all { it.isFinished }) {
             data.isFinished = true
-            notifyStateFinish(transitionParams)
+            notifyStateFinish(finishedChild, transitionParams)
         }
     }
 
@@ -239,21 +241,26 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         state.doEnter(transitionParams)
 
-        val machine = machine as InternalStateMachine
-        machine.machineNotify { onStateEntry(state) }
-
         if (finished) {
-            notifyStateFinish(transitionParams)
+            notifyStateFinish(state, transitionParams)
             internalParent?.afterChildFinished(this, transitionParams)
         }
     }
 
-    private fun notifyStateFinish(transitionParams: TransitionParams<*>) {
+    private fun notifyStateFinish(state: InternalState, transitionParams: TransitionParams<*>) {
         machine.log { "$this finished" }
         stateNotify { onFinished(transitionParams) }
         // there is no sense to send event on state machine finish as it stops processing events in this case
         if (this !is StateMachine)
-            machine.processEvent(FinishedEvent(this))
+            machine.processEvent(makeFinishedEvent(state))
+    }
+
+    private fun makeFinishedEvent(state: InternalState): FinishedEvent {
+        // check for both interfaces as client is not forced to use FinalDataState
+        return if (state is DataState<*> && state is IFinalState) // possible in exclusive child mode only
+            FinishedDataEventImpl(this, state.data)
+        else
+            FinishedEventImpl(this)
     }
 
     internal fun switchToTargetState(

@@ -130,16 +130,19 @@ class StateMachineTest : StringSpec({
     }
 
 
-    "onStateChanged() notification" {
+    "onEntryState() notification" {
         val callbacks = mockkCallbacks()
         lateinit var first: State
 
-        createStateMachine {
+        val machine = createStateMachine {
             first = initialState("first")
             onStateEntry { callbacks.onEntryState(it) }
         }
 
-        verifySequence { callbacks.onEntryState(first) }
+        verifySequence {
+            callbacks.onEntryState(machine)
+            callbacks.onEntryState(first)
+        }
     }
 
     "add same state listener" {
@@ -295,6 +298,7 @@ class StateMachineTest : StringSpec({
 
         verifySequence {
             callbacks.onStarted(machine)
+            callbacks.onEntryState(machine)
             callbacks.onEntryState(state1)
             callbacks.onEntryState(state2)
             callbacks.onFinished(machine)

@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 
 class FinishedEventTest : StringSpec({
-    "finished event in machine is not working as machine ignores events" {
+    "FinishedEvent in machine is not working as machine ignores events" {
         val callbacks = mockkCallbacks()
         lateinit var state2: State
         val machine = createStateMachine {
@@ -28,7 +28,7 @@ class FinishedEventTest : StringSpec({
         machine.isFinished shouldBe true
     }
 
-    "finished event in composite state" {
+    "FinishedEvent in composite state" {
         val callbacks = mockkCallbacks()
         lateinit var state1: State
         lateinit var state2: State
@@ -55,5 +55,37 @@ class FinishedEventTest : StringSpec({
         }
         state1.isFinished shouldBe false
         machine.isFinished shouldBe false
+    }
+
+    "FinishedDataEvent" {
+        val callbacks = mockkCallbacks()
+        data class IntEvent(override val data: Int) : DataEvent<Int>
+        val intData = 42
+
+        val machine = createStateMachine {
+            val state2 = state("state2")
+
+            initialState("state1") {
+                val childFinal = finalDataState<Int>("state11")
+
+                initialState("state12") {
+                    dataTransition<IntEvent, Int> {
+                        targetState = childFinal
+                    }
+                }
+
+                transitionOn<FinishedDataEvent<Int>> {
+                    targetState = {
+                        event.data shouldBe intData
+                        state2
+                    }
+                    callbacks.listen(this)
+                }
+            }
+        }
+        machine.processEvent(IntEvent(intData))
+        verifySequence {
+            callbacks.onTriggeredTransition(ofType<FinishedDataEvent<Int>>())
+        }
     }
 })
