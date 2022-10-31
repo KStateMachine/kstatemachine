@@ -57,7 +57,7 @@ class FinishedEventTest : StringSpec({
         machine.isFinished shouldBe false
     }
 
-    "FinishedDataEvent" {
+    "FinishedEvent with data" {
         val callbacks = mockkCallbacks()
         data class IntEvent(override val data: Int) : DataEvent<Int>
         val intData = 42
@@ -74,7 +74,7 @@ class FinishedEventTest : StringSpec({
                     }
                 }
 
-                transitionOn<FinishedDataEvent<Int>> {
+                transitionOn<FinishedEvent> {
                     targetState = {
                         event.data shouldBe intData
                         state2
@@ -85,7 +85,7 @@ class FinishedEventTest : StringSpec({
         }
         machine.processEvent(IntEvent(intData))
         verifySequence {
-            callbacks.onTriggeredTransition(ofType<FinishedDataEvent<Int>>())
+            callbacks.onTriggeredTransition(ofType<FinishedEvent>())
         }
     }
 
@@ -105,6 +105,26 @@ class FinishedEventTest : StringSpec({
                 }
             }
         }
+        verifySequence {
+            callbacks.onTriggeredTransition(ofType<FinishedEvent>())
+        }
+    }
+
+    "FinishedEvent from start" {
+        val callbacks = mockkCallbacks()
+
+        createStateMachine {
+            initialState {
+                setInitialState(finalState())
+                transition<FinishedEvent> {
+                    onTriggered {
+                        it.event.data shouldBe null
+                        callbacks.onTriggeredTransition(it.event)
+                    }
+                }
+            }
+        }
+
         verifySequence {
             callbacks.onTriggeredTransition(ofType<FinishedEvent>())
         }

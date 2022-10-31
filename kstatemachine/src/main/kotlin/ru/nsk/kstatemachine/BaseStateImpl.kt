@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.ChildMode.*
 import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
@@ -68,7 +69,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
         check(!machine.isRunning) { "Can not add state after state machine started" }
-        if (childMode == ChildMode.PARALLEL) {
+        if (childMode == PARALLEL) {
             require(state !is IFinalState) { "Can not add IFinalState in parallel child mode" }
             require(state !is PseudoState) { "Can not add PseudoState in parallel child mode" }
         }
@@ -87,7 +88,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun setInitialState(state: IState) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
-        check(childMode == ChildMode.EXCLUSIVE) { "Can not set initial state in parallel child mode" }
+        check(childMode == EXCLUSIVE) { "Can not set initial state in parallel child mode" }
         check(!machine.isRunning) { "Can not change initial state after state machine started" }
 
         data.initialState = state as InternalState
@@ -135,7 +136,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
-        if (childMode == ChildMode.PARALLEL && states.all { it.isFinished }) {
+        if (childMode == PARALLEL && states.all { it.isFinished }) {
             data.isFinished = true
             notifyStateFinish(finishedChild, transitionParams)
         }
@@ -162,7 +163,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         if (states.isEmpty()) return
 
         when (childMode) {
-            ChildMode.EXCLUSIVE -> {
+            EXCLUSIVE -> {
                 val initialState = checkNotNull(initialState) {
                     "Initial state is not set, call setInitialState() first"
                 }
@@ -171,7 +172,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                     initialState.recursiveEnterInitialStates(transitionParams)
             }
 
-            ChildMode.PARALLEL -> data.states.forEach {
+            PARALLEL -> data.states.forEach {
                 handleStateEntry(it, transitionParams)
                 if (it !is StateMachine) // inner state machine manages its internal state by its own
                     it.recursiveEnterInitialStates(transitionParams)
@@ -211,12 +212,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     private fun requireCurrentState() = requireNotNull(data.currentState) { "Current state is not set" }
 
     override fun getCurrentStates() = when (childMode) {
-        ChildMode.EXCLUSIVE -> listOfNotNull(data.currentState)
-        ChildMode.PARALLEL -> data.states.toList()
+        EXCLUSIVE -> listOfNotNull(data.currentState)
+        PARALLEL -> data.states.toList()
     }
 
     private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
-        require(childMode == ChildMode.EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
+        require(childMode == EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
         if (data.currentState == state && transitionParams.transition.type != EXTERNAL) return
@@ -234,8 +235,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     private fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
         val finished = when (childMode) {
-            ChildMode.EXCLUSIVE -> state is IFinalState
-            ChildMode.PARALLEL -> states.all { it.isFinished }
+            EXCLUSIVE -> state is IFinalState
+            PARALLEL -> states.all { it.isFinished }
         }
         data.isFinished = finished
 
@@ -257,10 +258,10 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     private fun makeFinishedEvent(state: InternalState): FinishedEvent {
         // check for both interfaces as client is not forced to use FinalDataState
-        return if (state is DataState<*> && state is IFinalState) // possible in exclusive child mode only
-            FinishedDataEventImpl(this, state.data)
+        return if (childMode == EXCLUSIVE && state is DataState<*> && state is IFinalState)
+            FinishedEvent(this, state.data)
         else
-            FinishedEventImpl(this)
+            FinishedEvent(this)
     }
 
     internal fun switchToTargetState(

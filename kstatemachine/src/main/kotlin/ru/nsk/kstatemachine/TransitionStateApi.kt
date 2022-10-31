@@ -148,10 +148,8 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     return addTransition(builder.build())
 }
 
-inline fun <reified E : Event> matcherForEvent(state: IState): EventMatcher<E> {
-    @Suppress("UNCHECKED_CAST")
-    return if (E::class == FinishedEvent::class)
-        finishedEventMatcher(state) as EventMatcher<E>
-    else
-        isInstanceOf()
+@Suppress("UNCHECKED_CAST")
+inline fun <reified E : Event> matcherForEvent(state: IState) = when {
+    E::class == FinishedEvent::class -> finishedEventMatcher(state) as EventMatcher<E>
+    else -> isInstanceOf()
 }
