@@ -14,7 +14,7 @@ class TypesafeTransitionTest : StringSpec({
     "initial DataState negative" {
         shouldThrow<Exception> {
             createStateMachine {
-                addInitialState(DefaultDataState<String>("state1"))
+                addInitialState(defaultDataState<String>("state1"))
             }
         }
     }
@@ -258,4 +258,43 @@ class TypesafeTransitionTest : StringSpec({
         machine.processEvent(IdEvent(2))
         dataState.data shouldBe 1
     }
-})
+
+    "targeting DataState by conditionalTransition()" {
+        lateinit var dataState: DataState<Int>
+        createStateMachine {
+            initialState {
+                setInitialState(finalDataState(defaultData = 0))
+
+                transitionConditionally<FinishedEvent> {
+                    direction = { targetState(dataState) }
+                }
+            }
+            dataState = dataState(defaultData = 42)
+        }
+        dataState.data shouldBe 0
+    }
+
+    "targeting DataState by conditionalTransition() with custom extractor" {
+        lateinit var dataState: DataState<Int>
+        val machine = createStateMachine {
+            initialState {
+                transitionConditionally<CustomDataEvent> {
+                    direction = { targetState(dataState) }
+                }
+            }
+            dataState = dataState(
+                "data state",
+                dataExtractor = object : DataExtractor<Int> {
+                    override fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) = event.data as? Int
+                    override fun extract(transitionParams: TransitionParams<*>): Int? {
+                        return (transitionParams.event as? CustomDataEvent)?.value
+                    }
+                }
+            )
+        }
+        machine.processEvent(CustomDataEvent(42))
+        dataState.data shouldBe 42
+    }
+}) {
+    class CustomDataEvent(val value: Int) : Event
+}

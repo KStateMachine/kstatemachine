@@ -78,7 +78,7 @@ interface State : IState
 /**
  * State which holds data while it is active
  */
-interface DataState<out D : Any> : IState {
+interface DataState<D : Any> : IState {
     val defaultData: D?
 
     /**
@@ -87,7 +87,8 @@ interface DataState<out D : Any> : IState {
     val data: D
 
     /**
-     * Similar to [data] but its value is not cleared when state finishes
+     * Similar to [data] but its value is not cleared when state finishes.
+     * If state was not entered this property falls back to [defaultData] if it was specified
      */
     val lastData: D
 }
@@ -98,7 +99,7 @@ interface DataState<out D : Any> : IState {
  */
 interface IFinalState : IState
 interface FinalState : IFinalState, State
-interface FinalDataState<out D : Any> : IFinalState, DataState<D>
+interface FinalDataState<D : Any> : IFinalState, DataState<D>
 
 /**
  * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
@@ -216,12 +217,13 @@ fun IState.state(
     init: StateBlock<State>? = null
 ) = addState(DefaultState(name, childMode), init)
 
-fun <D : Any> IState.dataState(
+inline fun <reified D : Any> IState.dataState(
     name: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
-    init: StateBlock<DataState<D>>? = null
-) = addState(DefaultDataState(name, defaultData, childMode), init)
+    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
+    noinline init: StateBlock<DataState<D>>? = null
+) = addState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
 
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
@@ -235,12 +237,13 @@ fun IState.initialState(
 /**
  * @param defaultData is necessary for initial [DataState]
  */
-fun <D : Any> IState.initialDataState(
+inline fun <reified D : Any> IState.initialDataState(
     name: String? = null,
     defaultData: D,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
-    init: StateBlock<DataState<D>>? = null
-) = addInitialState(DefaultDataState(name, defaultData, childMode), init)
+    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
+    noinline init: StateBlock<DataState<D>>? = null
+) = addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
 
 /**
  * A shortcut for [IState.addState] and [IState.setInitialState] calls
@@ -261,11 +264,12 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun <D : Any> IState.finalDataState(
+inline fun <reified D : Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
-    init: StateBlock<FinalDataState<D>>? = null
-) = addFinalState(DefaultFinalDataState(name, defaultData), init)
+    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
+    noinline init: StateBlock<FinalDataState<D>>? = null
+) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
 fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
