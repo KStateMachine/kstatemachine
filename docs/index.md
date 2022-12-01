@@ -771,7 +771,7 @@ function but in general it is wrong, as events are not commands.
 
 It is not recommended to use custom generic classes as events and as argument of `DataState`. JVM removes 
 difference between generic classes with different argument types, this is known as type erasure. 
-So library cannot separate such types from each other. When it is necessary to compare instance with some class such 
-comparison will be positive for class parameterized with different types. 
-So it's easier not to use generic types in such cases. Or you must use custom `EventMatcher`s and 'DataExtractor's that 
-will use some additional information to compare such types.
+So library cannot separate such types from each other at runtime. When it is necessary to check that some object is an instance of 
+a class, such check may be positive for class parameterized with any type.
+So it's easier aviod using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s that 
+will use some additional information to compare such types. Or be sure that such invalid comparison never happens.
