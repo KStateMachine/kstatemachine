@@ -9,6 +9,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
  */
 abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
     internal abstract fun startFrom(state: IState, argument: Any?)
+    internal abstract fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
 }
 
@@ -66,12 +67,18 @@ internal class StateMachineImpl(
 
     override fun start(argument: Any?) = startFrom(this, argument)
 
-    override fun startFrom(state: IState, argument: Any?) {
+    override fun startFrom(state: IState, argument: Any?) =
+        doStartFrom(StartEventImpl(), state, argument)
+
+    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
+        doStartFrom(StartDataEventImpl(data), state, argument)
+
+    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
         eventProcessingScope {
             runCheckingExceptions {
-                val transitionParams = makeStartTransitionParams(this, state, argument)
+                val transitionParams = makeStartTransitionParams(event, this, state, argument)
                 runMachine(transitionParams)
                 switchToTargetState(state as InternalState, this, transitionParams)
                 recursiveAfterTransitionComplete(transitionParams)
@@ -274,17 +281,20 @@ internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =
         delayListenerException(e)
     }
 
-internal fun makeStartTransitionParams(sourceState: IState, targetState: IState = sourceState, argument: Any?):
-        TransitionParams<*> {
+internal inline fun <reified E : StartEvent> makeStartTransitionParams(
+    event: E,
+    sourceState: IState,
+    targetState: IState = sourceState,
+    argument: Any?
+): TransitionParams<*> {
     val transition = DefaultTransition(
         "Starting",
-        EventMatcher.isInstanceOf<StartEvent>(),
+        EventMatcher.isInstanceOf<E>(),
         TransitionType.LOCAL,
         sourceState,
         targetState,
     )
 
-    val event = StartEvent()
     return TransitionParams(
         transition,
         transition.produceTargetStateDirection(DefaultPolicy(EventAndArgument(event, argument))),

@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.Testing.startFrom
 
 class TestingStartFromTest : StringSpec({
@@ -45,5 +46,20 @@ class TestingStartFromTest : StringSpec({
             callbacks.onEntryState(state2)
             callbacks.onEntryState(state22)
         }
+    }
+
+    "data startFrom()" {
+        val callbacks = mockkCallbacks()
+        lateinit var state2: DataState<Int>
+        val machine = createStateMachine(start = false) {
+            initialState("state1") {
+                callbacks.listen(this)
+            }
+            state2 = dataState("state2", 1) {
+                callbacks.listen(this)
+            }
+        }
+        machine.startFrom(state2, data = 42)
+        state2.data shouldBe 42
     }
 })

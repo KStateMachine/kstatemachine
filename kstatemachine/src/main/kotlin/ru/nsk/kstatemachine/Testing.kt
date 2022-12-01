@@ -9,4 +9,7 @@ object Testing {
 
     fun StateMachine.startFrom(stateName: String, argument: Any? = null) =
         startFrom(requireState(stateName), argument)
+
+    fun <D : Any> StateMachine.startFrom(state: DataState<D>, data: D, argument: Any? = null) =
+        (this as InternalStateMachine).startFrom(state, data, argument)
 }

@@ -33,7 +33,9 @@ class FinishedEvent internal constructor(val state: IState, val data: Any? = nul
 /**
  * Initial event which is processed on state machine start
  */
-class StartEvent internal constructor() : GeneratedEvent
+interface StartEvent : GeneratedEvent
+internal class StartEventImpl : StartEvent
+internal class StartDataEventImpl<out D : Any>(override val data: D) : StartEvent, DataEvent<D>
 
 /**
  * System event which is used by the library to wrap original event and argument,
