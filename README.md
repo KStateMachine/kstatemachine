@@ -134,6 +134,12 @@ dependencies {
 }
 ```
 
+```kotlin
+dependencies {
+    implementation("io.github.nsk90:kstatemachine:<Tag>")
+}
+```
+
 Where `<Tag>` is a library version.
 
 ### JitPack
@@ -142,6 +148,7 @@ Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to you
 root `build.gradle` at the end of repositories:
 
 ```groovy
+// groovy
 allprojects {
     repositories {
         //  ...
@@ -150,11 +157,27 @@ allprojects {
 }
 ```
 
+```kotlin
+// kotlin
+repositories {
+    //  ...
+    maven { url = uri("https://jitpack.io") }
+}
+```
+
 Add the dependency:
 
 ```groovy
+// groovy
 dependencies {
     implementation 'com.github.nsk90:kstatemachine:<Tag>'
+}
+```
+
+```kotlin
+// kotlin
+dependencies {
+    implementation("com.github.nsk90:kstatemachine:<Tag>")
 }
 ```
 

@@ -1,6 +1,6 @@
 object Versions {
     // library
-    const val libraryGroup = "ru.nsk"
+    const val libraryGroup = "io.github.nsk90"
     const val libraryVersion = "0.17.0"
 
     // tools

@@ -117,7 +117,6 @@ class ExternalTransitionTest : StringSpec({
             val callbacks = mockkCallbacks()
             lateinit var state1: State
             lateinit var state11: State
-            lateinit var state12: State
 
             val machine = createStateMachine {
                 callbacks.listen(this)

@@ -31,7 +31,7 @@ val localProperties = Properties().apply {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("mavenCentral") {
             groupId = "io.github.nsk90"
             artifactId = "kstatemachine"
             version = rootProject.version as String
@@ -83,6 +83,49 @@ publishing {
                 }
             }
         }
+
+        create<MavenPublication>("mavenJitpack") {
+            groupId = "com.github.nsk90"
+            artifactId = "kstatemachine"
+            version = rootProject.version as String
+
+            from(components["java"])
+
+            pom {
+                name.set(rootProject.name)
+                description.set(
+                    "KStateMachine is a Kotlin DSL library for creating finite state machines (FSM) " +
+                            "and hierarchical state machines (HSM)."
+                )
+                url.set("https://github.com/nsk90/kstatemachine")
+                inceptionYear.set("2020")
+
+                issueManagement {
+                    system.set("GitHub")
+                    url.set("https://github.com/nsk90/kstatemachine/issues")
+                }
+                licenses {
+                    license {
+                        name.set("Boost Software License 1.0")
+                        url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("nsk")
+                        name.set("Mikhail Fedotov")
+                        email.set("nosik90@gmail.com")
+                        url.set("https://github.com/nsk90")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/nsk90/kstatemachine")
+                    connection.set("scm:git:git://github.com/nsk90/kstatemachine.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
+                }
+            }
+        }
     }
 }
 
@@ -97,7 +140,7 @@ localProperties.getProperty("signing.gnupg.executable")?.let { executable ->
 
             signing {
                 useGpgCmd()
-                sign(publishing.publications["mavenJava"])
+                sign(publishing.publications["mavenCentral"])
             }
         }
     }
