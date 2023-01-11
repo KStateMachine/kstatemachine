@@ -1,7 +1,7 @@
 object Versions {
     // library
     const val libraryGroup = "io.github.nsk90"
-    const val libraryVersion = "0.17.0"
+    const val libraryVersion = "0.18.0"
 
     // tools
     const val kotlin = "1.7.10"
