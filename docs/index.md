@@ -565,22 +565,22 @@ createStateMachine {
 }
 ```
 
-`DataState`'s `data` field is set and might be accessed only while the state is active. When `DataState` is activated it
-requires data value from a `DataEvent`. You can use `lastData` field to access data after state exit, it falls back
+`DataState`'s `data` field is set and might be accessed only while the state is active. At the moment when `DataState`
+is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even after state exit, it falls back
 to `defaultData` if provided or throws.
 
 ### Corner cases of `DataState` activation
 
 1. Implicit activation. `DataState` might be activated by `Event` (not `DataEvent`) that is targeting its child state.
-   In this case `data` field of `DataState` is assigned by `lastData` field.
+   In this case `data` field of `DataState` is assigned with `lastData` field value.
    If state is activating the first time `lastData` falls back to `defaultData` if provided, otherwise exception is
    thrown.
-2. Activation by `undo()` of `UndoEvent`. This works same way as for transition that was undone.
+2. Activation by `undo()` of `UndoEvent`. This works same way as undone transition.
 3. Activation by `FinishedEvent`. `FinishedEvent` may contain non-null data field. `DataState` receives this data
    if its type matches. `DataExtractor` class is responsible for matching. Such transition might be created only by
    `transitionConditionally()` function.
-4. Activation by non data event. This should not be necessary, but it might be done same way as in case 3. Using
-   custom `DataExtractor` you can pass any data from any event type to `DataState`.
+4. Activation by non data event. This should not be necessary, but it might be done manually, same way as in case 3. 
+   Using custom `DataExtractor` you can pass any data from any event type to `DataState`.
 
 ## Arguments
 

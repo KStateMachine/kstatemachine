@@ -2,6 +2,9 @@ package ru.nsk.kstatemachine
 
 /**
  * Allows to extract data for [DataState] from any [Event]
+ *
+ * [FinishedEvent] handling is separated into special method as it is very easy to forget to handle it in single method
+ * when implementing custom [DataExtractor].
  */
 interface DataExtractor<D : Any> {
     fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent): D?
