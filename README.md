@@ -109,6 +109,7 @@ fun main() {
   </p>
 
 * [Transition on FinishedEvent sample](./samples/src/main/kotlin/ru/nsk/samples/FinishedEventSample.kt)
+* [FinishedEvent using with DataState sample](./samples/src/main/kotlin/ru/nsk/samples/FinishedEventDataStateSample.kt)
 * [Undo transition sample](./samples/src/main/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)

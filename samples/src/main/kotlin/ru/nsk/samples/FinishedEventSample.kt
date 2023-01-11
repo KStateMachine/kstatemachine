@@ -16,7 +16,7 @@ private object FinishedEventSample {
 }
 
 /**
- * FinishedEvent is generated when state enters its child final state
+ * [FinishedEvent] is generated when state enters its child final state
  */
 fun main() {
     val machine = createStateMachine {

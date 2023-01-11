@@ -272,6 +272,7 @@ class TypesafeTransitionTest : StringSpec({
             dataState = dataState(defaultData = 42)
         }
         dataState.data shouldBe 0
+        dataState.lastData shouldBe 0
     }
 
     "targeting DataState by conditionalTransition() with custom extractor" {
@@ -294,6 +295,7 @@ class TypesafeTransitionTest : StringSpec({
         }
         machine.processEvent(CustomDataEvent(42))
         dataState.data shouldBe 42
+        dataState.lastData shouldBe 42
     }
 }) {
     class CustomDataEvent(val value: Int) : Event

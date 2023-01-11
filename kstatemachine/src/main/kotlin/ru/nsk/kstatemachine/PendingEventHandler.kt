@@ -24,7 +24,7 @@ private class QueuePendingEventHandlerImpl(private val machine: StateMachine) : 
     override fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
 
     override fun onPendingEvent(pendingEvent: Event, argument: Any?) {
-        machine.log { "$machine queued event $pendingEvent with argument $argument " }
+        machine.log { "$machine queued event ${pendingEvent::class.simpleName} with argument $argument" }
         queue.add(EventAndArgument(pendingEvent, argument))
     }
 

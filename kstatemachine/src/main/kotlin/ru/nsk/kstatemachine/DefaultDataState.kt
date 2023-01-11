@@ -26,19 +26,28 @@ open class DefaultDataState<D : Any>(
         }
 
     override fun onDoEnter(transitionParams: TransitionParams<*>) {
+        fun assign(data: D?) {
+            if (data != null) {
+                _data = data
+                _lastData = data
+            } else {
+                _data = lastData
+            }
+        }
+
         if (this == transitionParams.direction.targetState) {
             when (val event = transitionParams.event) {
-                is DataEvent<*> -> assignEvent(event)
-                is WrappedEvent -> assignEvent(event.event)
-                is FinishedEvent -> _data = dataExtractor.extractFinishedEvent(transitionParams, event) ?: lastData
-                else -> _data = dataExtractor.extract(transitionParams) ?: lastData
+                is DataEvent<*> -> assignData(event)
+                is WrappedEvent -> assignData(event.event)
+                is FinishedEvent -> assign(dataExtractor.extractFinishedEvent(transitionParams, event))
+                else -> assign(dataExtractor.extract(transitionParams))
             }
         } else { // implicit activation
             _data = lastData
         }
     }
 
-    private fun assignEvent(event: Event) {
+    private fun assignData(event: Event) {
         @Suppress("UNCHECKED_CAST")
         event as DataEvent<D>
         with(event.data) {
