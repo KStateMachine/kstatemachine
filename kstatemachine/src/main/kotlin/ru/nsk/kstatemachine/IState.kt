@@ -163,7 +163,7 @@ fun <S : IState> IState.findState(`class`: KClass<S>, recursive: Boolean = true)
 
     if (!recursive) return filtered.singleOrNull() as S?
 
-    val nestedFiltered = states.mapNotNull { it.findState(`class`, recursive) }
+    val nestedFiltered = states.mapNotNull { it.findState(`class`, true) }
     requireSingleOrEmpty(nestedFiltered)
 
     val allFiltered = filtered + nestedFiltered

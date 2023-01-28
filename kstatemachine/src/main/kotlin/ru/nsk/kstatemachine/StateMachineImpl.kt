@@ -270,11 +270,11 @@ internal class StateMachineImpl(
     }
 }
 
-internal fun InternalStateMachine.machineNotify(block: StateMachine.Listener.() -> Unit) {
+internal inline fun InternalStateMachine.machineNotify(crossinline block: StateMachine.Listener.() -> Unit) {
     machineListeners.toList().forEach { runDelayingException { it.block() } }
 }
 
-internal fun InternalStateMachine.runDelayingException(block: () -> Unit) =
+internal inline fun InternalStateMachine.runDelayingException(block: () -> Unit) =
     try {
         block()
     } catch (e: Exception) {

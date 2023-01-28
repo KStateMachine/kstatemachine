@@ -133,29 +133,29 @@ fun StateMachine.restart(argument: Any? = null) {
 
 typealias StateMachineBlock = StateMachine.() -> Unit
 
-fun StateMachine.onStarted(block: StateMachine.() -> Unit) =
+inline fun StateMachine.onStarted(crossinline block: StateMachine.() -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStarted() = block()
     })
 
-fun StateMachine.onStopped(block: StateMachine.() -> Unit) =
+inline fun StateMachine.onStopped(crossinline block: StateMachine.() -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStopped() = block()
     })
 
-fun StateMachine.onTransition(block: StateMachine.(TransitionParams<*>) -> Unit) =
+inline fun StateMachine.onTransition(crossinline block: StateMachine.(TransitionParams<*>) -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onTransition(transitionParams: TransitionParams<*>) =
             block(transitionParams)
     })
 
-fun StateMachine.onTransitionComplete(block: StateMachine.(TransitionParams<*>, Set<IState>) -> Unit) =
+inline fun StateMachine.onTransitionComplete(crossinline block: StateMachine.(TransitionParams<*>, Set<IState>) -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
             block(transitionParams, activeStates)
     })
 
-fun StateMachine.onStateEntry(block: StateMachine.(state: IState) -> Unit) =
+inline fun StateMachine.onStateEntry(crossinline block: StateMachine.(state: IState) -> Unit) =
     addListener(object : StateMachine.Listener {
         override fun onStateEntry(state: IState) = block(state)
     })

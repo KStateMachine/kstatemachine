@@ -8,7 +8,7 @@ interface InternalTransition<E : Event> : Transition<E> {
     fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
 }
 
-internal fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) {
+internal inline fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) {
     val machine = sourceState.machine as InternalStateMachine
     listeners.toList().forEach { machine.runDelayingException { it.block() } }
 }
