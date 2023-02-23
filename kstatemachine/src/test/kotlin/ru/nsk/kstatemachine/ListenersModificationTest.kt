@@ -24,7 +24,7 @@ class ListenersModificationTest : StringSpec({
                     val checkListenerIsReturned = onTriggered { /* removing listener from DSL is very verbose */ }
                 }
                 transition.addListener(object : Transition.Listener {
-                    override fun onTriggered(transitionParams: TransitionParams<*>) {
+                    override suspend fun onTriggered(transitionParams: TransitionParams<*>) {
                         transition.removeListener(this)
                     }
                 })

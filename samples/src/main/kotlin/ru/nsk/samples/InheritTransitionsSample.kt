@@ -6,7 +6,7 @@ import ru.nsk.samples.InheritTransitionsSample.Events.ExitEvent
 import ru.nsk.samples.InheritTransitionsSample.Events.SwitchEvent
 
 private object InheritTransitionsSample {
-    sealed interface Events: Event {
+    sealed interface Events : Event {
         object ExitEvent : Events
         object SwitchEvent : Events
     }

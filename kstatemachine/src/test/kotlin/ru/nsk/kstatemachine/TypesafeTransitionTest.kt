@@ -286,7 +286,9 @@ class TypesafeTransitionTest : StringSpec({
             dataState = dataState(
                 "data state",
                 dataExtractor = object : DataExtractor<Int> {
-                    override fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) = event.data as? Int
+                    override fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) =
+                        event.data as? Int
+
                     override fun extract(transitionParams: TransitionParams<*>): Int? {
                         return (transitionParams.event as? CustomDataEvent)?.value
                     }

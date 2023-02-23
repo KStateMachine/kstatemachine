@@ -1,14 +1,10 @@
 plugins {
     kotlin("jvm")
-    application
+    `java-library`
 }
 
 group = rootProject.group
 version = rootProject.version
-
-application {
-    mainClass.set("FullSyntaxSample")
-}
 
 tasks {
     compileKotlin {
@@ -25,4 +21,5 @@ java {
 
 dependencies {
     implementation(project(":kstatemachine"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutinesCore}")
 }

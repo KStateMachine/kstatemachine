@@ -50,7 +50,7 @@ internal fun unresolvedTargetState(targetState: IState): TransitionDirection = T
  */
 typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirection>
 
-internal typealias TransitionDirectionProducer<E> = (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
+internal typealias TransitionDirectionProducer<E> = suspend (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
 
 sealed class TransitionDirectionProducerPolicy<E : Event> {
     internal class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) :

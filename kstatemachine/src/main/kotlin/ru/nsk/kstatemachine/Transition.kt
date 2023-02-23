@@ -31,16 +31,9 @@ interface Transition<E : Event> : VisitorAcceptor {
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
-        fun onTriggered(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onTriggered(transitionParams: TransitionParams<*>) = Unit
     }
 }
-
-inline fun <reified E : Event> Transition<E>.onTriggered(
-    crossinline block: (TransitionParams<E>) -> Unit
-) = addListener(object : Transition.Listener {
-    @Suppress("UNCHECKED_CAST")
-    override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
-})
 
 /**
  * Most of the cases external and local transition are functionally equivalent except in cases where transition

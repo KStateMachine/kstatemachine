@@ -566,7 +566,8 @@ createStateMachine {
 ```
 
 `DataState`'s `data` field is set and might be accessed only while the state is active. At the moment when `DataState`
-is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even after state exit, it falls back
+is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
+after state exit, it falls back
 to `defaultData` if provided or throws.
 
 ### Corner cases of `DataState` activation
@@ -579,7 +580,7 @@ to `defaultData` if provided or throws.
 3. Activation by `FinishedEvent`. `FinishedEvent` may contain non-null data field. `DataState` receives this data
    if its type matches. `DataExtractor` class is responsible for matching. Such transition might be created only by
    `transitionConditionally()` function.
-4. Activation by non data event. This should not be necessary, but it might be done manually, same way as in case 3. 
+4. Activation by non data event. This should not be necessary, but it might be done manually, same way as in case 3.
    Using custom `DataExtractor` you can pass any data from any event type to `DataState`.
 
 ## Arguments
@@ -769,9 +770,11 @@ function but in general it is wrong, as events are not commands.
 
 ## Known issues
 
-It is not recommended to use custom generic classes as events and as argument of `DataState`. JVM removes 
-difference between generic classes with different argument types, this is known as type erasure. 
-So library cannot separate such types from each other at runtime. When it is necessary to check that some object is an instance of 
+It is not recommended to use custom generic classes as events and as argument of `DataState`. JVM removes
+difference between generic classes with different argument types, this is known as type erasure.
+So library cannot separate such types from each other at runtime. When it is necessary to check that some object is an
+instance of
 a class, such check may be positive for class parameterized with any type.
-So it's easier aviod using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s that 
+So it's easier aviod using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s
+that
 will use some additional information to compare such types. Or be sure that such invalid comparison never happens.

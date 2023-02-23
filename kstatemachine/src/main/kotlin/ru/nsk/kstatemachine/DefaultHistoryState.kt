@@ -29,7 +29,7 @@ open class DefaultHistoryState(
         _storedState = currentState
     }
 
-    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         super.recursiveAfterTransitionComplete(transitionParams)
         if (historyType == HistoryType.DEEP) {
             transitionParams.direction.targetState?.let { targetState ->

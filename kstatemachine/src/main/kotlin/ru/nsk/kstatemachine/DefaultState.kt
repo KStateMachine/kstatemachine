@@ -18,8 +18,8 @@ open class DefaultChoiceState(name: String? = null, private val choiceAction: Ev
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
-    override fun doEnter(transitionParams: TransitionParams<*>) = internalError()
-    override fun doExit(transitionParams: TransitionParams<*>) = internalError()
+    override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
+    override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
     override fun <L : IState.Listener> addListener(listener: L) =
         throw UnsupportedOperationException("PseudoState $this can not have listeners")

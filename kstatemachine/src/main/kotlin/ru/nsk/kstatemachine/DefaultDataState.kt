@@ -75,5 +75,8 @@ inline fun <reified D : Any> defaultFinalDataState(
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
 ): DefaultFinalDataState<D> = DefaultFinalDataState(name, defaultData, dataExtractor)
 
-open class DefaultFinalDataState<D : Any>(name: String? = null, defaultData: D? = null, dataExtractor: DataExtractor<D>) :
-    DefaultDataState<D>(name, defaultData, EXCLUSIVE, dataExtractor), FinalDataState<D>
+open class DefaultFinalDataState<D : Any>(
+    name: String? = null,
+    defaultData: D? = null,
+    dataExtractor: DataExtractor<D>
+) : DefaultDataState<D>(name, defaultData, EXCLUSIVE, dataExtractor), FinalDataState<D>

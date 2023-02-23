@@ -18,7 +18,7 @@ Main features are:
 * Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
-  till Kotlin 1.4
+  till Kotlin 1.5
 * Event based - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
   incoming events
 * [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states,
@@ -44,7 +44,8 @@ Main features are:
   to [PlantUML](https://plantuml.com/);
 * Built-in [logging](https://nsk90.github.io/kstatemachine/#logging) support
 * [Testable](https://nsk90.github.io/kstatemachine/#testing) - you can run state machine from specified state
-* Well tested. All features are covered by tests.
+* Built-in support for Kotlin Coroutines
+* Well tested. All features are covered by tests
 
 _The library is currently in a development phase. You are welcome to propose useful features._
 

@@ -3,7 +3,7 @@ plugins {
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
-    id("org.jetbrains.dokka") version Versions.kotlin
+    id("org.jetbrains.dokka") version Versions.kotlinDokka
 }
 
 group = rootProject.group
@@ -24,8 +24,8 @@ tasks {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = Versions.javaCompatibilityVersion
+    targetCompatibility = Versions.javaCompatibilityVersion
 }
 
 dependencies {

@@ -12,7 +12,7 @@ internal inline fun <T, R : Any> Iterable<T>.firstNotNullOfOrNull(transform: (T)
 /**
  * [forEach] analog which ignores internal state machines
  */
-internal fun Iterable<InternalState>.forEachState(block: (InternalState) -> Unit) {
+internal suspend fun Iterable<InternalState>.forEachState(block: suspend (InternalState) -> Unit) {
     forEach { if (it !is StateMachine) block(it) }
 }
 

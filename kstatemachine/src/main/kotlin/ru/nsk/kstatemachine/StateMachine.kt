@@ -7,9 +7,9 @@ import ru.nsk.kstatemachine.visitors.Visitor
 annotation class StateMachineDslMarker
 
 interface StateMachine : State {
-    var logger: Logger
-    var ignoredEventHandler: IgnoredEventHandler
-    var pendingEventHandler: PendingEventHandler
+    val logger: Logger
+    val ignoredEventHandler: IgnoredEventHandler
+    val pendingEventHandler: PendingEventHandler
 
     /**
      * If machine catches exception from client code (listeners callbacks) it stores it until event processing
@@ -20,7 +20,7 @@ interface StateMachine : State {
      * Default implementation rethrows exception (only first one).
      * With your own handler you can mute or just log them for example.
      */
-    var listenerExceptionHandler: ListenerExceptionHandler
+    val listenerExceptionHandler: ListenerExceptionHandler
     val isRunning: Boolean
     val machineListeners: Collection<Listener>
 
@@ -41,6 +41,8 @@ interface StateMachine : State {
      * Default if false.
      */
     val doNotThrowOnMultipleTransitionsMatch: Boolean
+
+    val coroutineStarter: CoroutineStarter
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -77,7 +79,7 @@ interface StateMachine : State {
         /**
          * Notifies that state machine started (entered initial state).
          */
-        fun onStarted() = Unit
+        suspend fun onStarted() = Unit
 
         /**
          * This method is called when transition is performed.
@@ -85,22 +87,22 @@ interface StateMachine : State {
          * this method might be used to listen to all transitions in one place
          * instead of listening for each transition separately.
          */
-        fun onTransition(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onTransition(transitionParams: TransitionParams<*>) = Unit
 
         /**
          * Same as [onTransition] but called after transition is complete and provides set of current active states.
          */
-        fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
+        suspend fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
 
         /**
          * Notifies about child state entry (including nested states).
          */
-        fun onStateEntry(state: IState) = Unit
+        suspend fun onStateEntry(state: IState) = Unit
 
         /**
          * Notifies that state machine has stopped.
          */
-        fun onStopped() = Unit
+        suspend fun onStopped() = Unit
     }
 
     /**
@@ -124,41 +126,22 @@ interface StateMachine : State {
 }
 
 /**
+ * Allows to mutate some properties, which is necessary before machine is started
+ */
+interface BuildingStateMachine : StateMachine {
+    override var logger: StateMachine.Logger
+    override var ignoredEventHandler: StateMachine.IgnoredEventHandler
+    override var pendingEventHandler: PendingEventHandler
+    override var listenerExceptionHandler: StateMachine.ListenerExceptionHandler
+}
+
+/**
  * Shortcut for [StateMachine.stop] and [StateMachine.start] sequence calls
  */
 fun StateMachine.restart(argument: Any? = null) {
     stop()
     start(argument)
 }
-
-typealias StateMachineBlock = StateMachine.() -> Unit
-
-inline fun StateMachine.onStarted(crossinline block: StateMachine.() -> Unit) =
-    addListener(object : StateMachine.Listener {
-        override fun onStarted() = block()
-    })
-
-inline fun StateMachine.onStopped(crossinline block: StateMachine.() -> Unit) =
-    addListener(object : StateMachine.Listener {
-        override fun onStopped() = block()
-    })
-
-inline fun StateMachine.onTransition(crossinline block: StateMachine.(TransitionParams<*>) -> Unit) =
-    addListener(object : StateMachine.Listener {
-        override fun onTransition(transitionParams: TransitionParams<*>) =
-            block(transitionParams)
-    })
-
-inline fun StateMachine.onTransitionComplete(crossinline block: StateMachine.(TransitionParams<*>, Set<IState>) -> Unit) =
-    addListener(object : StateMachine.Listener {
-        override fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
-            block(transitionParams, activeStates)
-    })
-
-inline fun StateMachine.onStateEntry(crossinline block: StateMachine.(state: IState) -> Unit) =
-    addListener(object : StateMachine.Listener {
-        override fun onStateEntry(state: IState) = block(state)
-    })
 
 /**
  * Rolls back transition (usually it is navigating machine to previous state).
@@ -182,9 +165,17 @@ fun createStateMachine(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    init: StateMachineBlock
+    coroutineStarter: CoroutineStarter = StdLibCoroutineStarter(),
+    init: BuildingStateMachine.() -> Unit
 ): StateMachine {
-    return StateMachineImpl(name, childMode, autoDestroyOnStatesReuse, enableUndo, doNotThrowOnMultipleTransitionsMatch).apply {
+    return StateMachineImpl(
+        name,
+        childMode,
+        autoDestroyOnStatesReuse,
+        enableUndo,
+        doNotThrowOnMultipleTransitionsMatch,
+        coroutineStarter,
+    ).apply {
         init()
         if (start) start()
     }

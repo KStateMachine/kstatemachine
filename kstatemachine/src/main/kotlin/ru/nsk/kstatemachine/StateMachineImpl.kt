@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 /**
  * Defines state machine API for internal library usage.
  */
-abstract class InternalStateMachine(name: String?, childMode: ChildMode) : StateMachine, DefaultState(name, childMode) {
+abstract class InternalStateMachine(name: String?, childMode: ChildMode) : BuildingStateMachine, DefaultState(name, childMode) {
     internal abstract fun startFrom(state: IState, argument: Any?)
     internal abstract fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
@@ -19,6 +19,7 @@ internal class StateMachineImpl(
     override val autoDestroyOnStatesReuse: Boolean,
     override val isUndoEnabled: Boolean,
     override val doNotThrowOnMultipleTransitionsMatch: Boolean,
+    override val coroutineStarter: CoroutineStarter,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
@@ -67,13 +68,15 @@ internal class StateMachineImpl(
 
     override fun start(argument: Any?) = startFrom(this, argument)
 
-    override fun startFrom(state: IState, argument: Any?) =
+    override fun startFrom(state: IState, argument: Any?) = coroutineStarter.start {
         doStartFrom(StartEventImpl(), state, argument)
+    }
 
-    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
+    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) = coroutineStarter.start {
         doStartFrom(StartDataEventImpl(data), state, argument)
+    }
 
-    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
+    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
         eventProcessingScope {
@@ -95,16 +98,16 @@ internal class StateMachineImpl(
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
     }
 
-    private fun runMachine(transitionParams: TransitionParams<*>) {
+    private suspend fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
         log { "$this started" }
         machineNotify { onStarted() }
         doEnter(transitionParams)
     }
 
-    override fun stop() {
+    override fun stop() = coroutineStarter.start {
         check(!isDestroyed) { "$this is already destroyed" }
-        if (!_isRunning) return
+        if (!_isRunning) return@start
 
         runCheckingExceptions {
             _isRunning = false
@@ -114,7 +117,7 @@ internal class StateMachineImpl(
         }
     }
 
-    override fun processEvent(event: Event, argument: Any?): ProcessingResult {
+    override fun processEvent(event: Event, argument: Any?) = coroutineStarter.start {
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
@@ -125,10 +128,10 @@ internal class StateMachineImpl(
             // pending event cannot be processed while previous event is still processing
             // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
             // to be processed later.
-            return ProcessingResult.PENDING
+            return@start ProcessingResult.PENDING
         }
 
-        return eventProcessingScope {
+        return@start eventProcessingScope {
             process(eventAndArgument)
         }
     }
@@ -142,7 +145,7 @@ internal class StateMachineImpl(
         }
     }
 
-    private fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
+    private suspend fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
         val wrappedEventAndArgument = eventAndArgument.wrap()
 
         val eventProcessed = runCheckingExceptions {
@@ -160,7 +163,7 @@ internal class StateMachineImpl(
      * Runs block of code that processes event, and processes all pending events from queue after it if
      * [QueuePendingEventHandler] is used.
      */
-    private fun <R> eventProcessingScope(block: () -> R): R {
+    private suspend fun <R> eventProcessingScope(block: suspend () -> R): R {
         val queue = pendingEventHandler as? QueuePendingEventHandler
         queue?.checkEmpty()
 
@@ -193,7 +196,7 @@ internal class StateMachineImpl(
     /**
      * Runs block of code that triggers notification listeners
      */
-    private fun <R> runCheckingExceptions(block: () -> R): R {
+    private suspend fun <R> runCheckingExceptions(block: suspend () -> R): R {
         val result: R
         try {
             result = block()
@@ -209,7 +212,7 @@ internal class StateMachineImpl(
         return result
     }
 
-    private fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
+    private suspend fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
         val (event, argument) = eventAndArgument
         if (isFinished) {
             log { "$this is finished, skipping event ${event::class.simpleName}, with argument $argument" }
@@ -252,7 +255,7 @@ internal class StateMachineImpl(
     /**
      * Starts machine if it is inner state of another one machine
      */
-    override fun doEnter(transitionParams: TransitionParams<*>) =
+    override suspend fun doEnter(transitionParams: TransitionParams<*>) =
         if (!isRunning) start() else super.doEnter(transitionParams)
 
 
@@ -270,18 +273,14 @@ internal class StateMachineImpl(
     }
 }
 
-internal inline fun InternalStateMachine.machineNotify(crossinline block: StateMachine.Listener.() -> Unit) {
-    machineListeners.toList().forEach { runDelayingException { it.block() } }
-}
-
-internal inline fun InternalStateMachine.runDelayingException(block: () -> Unit) =
+internal suspend inline fun InternalStateMachine.runDelayingException(crossinline block: suspend () -> Unit) =
     try {
         block()
     } catch (e: Exception) {
         delayListenerException(e)
     }
 
-internal inline fun <reified E : StartEvent> makeStartTransitionParams(
+internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
     event: E,
     sourceState: IState,
     targetState: IState = sourceState,

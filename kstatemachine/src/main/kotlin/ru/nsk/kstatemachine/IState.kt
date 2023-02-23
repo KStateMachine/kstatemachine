@@ -48,14 +48,14 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     fun onCleanup() = Unit
 
     interface Listener {
-        fun onEntry(transitionParams: TransitionParams<*>) = Unit
-        fun onExit(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onEntry(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onExit(transitionParams: TransitionParams<*>) = Unit
 
         /**
          * If child mode is [ChildMode.EXCLUSIVE] notifies that child [IFinalState] is entered.
          * If child mode is [ChildMode.PARALLEL] notifies that all children has finished.
          */
-        fun onFinished(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onFinished(transitionParams: TransitionParams<*>) = Unit
     }
 }
 
@@ -136,7 +136,7 @@ fun IState.findState(name: String, recursive: Boolean = true): IState? {
         if (it is StateMachine) // do not go into nested state machines
             null
         else
-            it.findState(name, recursive)
+            it.findState(name, true)
     }
 }
 
@@ -179,33 +179,6 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
     requireNotNull(findState<S>(recursive)) { "State ${S::class.simpleName} not found" }
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
-
-/**
- * The most commonly used methods [onEntry] and [onExit] are shipped with [once] argument, to remove listener
- * after it is triggered the first time.
- * Looks that it is not necessary in other similar methods.
- */
-fun <S : IState> S.onEntry(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onEntry(transitionParams: TransitionParams<*>) {
-            block(transitionParams)
-            if (once) removeListener(this)
-        }
-    })
-
-/** See [onEntry] */
-fun <S : IState> S.onExit(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onExit(transitionParams: TransitionParams<*>) {
-            block(transitionParams)
-            if (once) removeListener(this)
-        }
-    })
-
-fun <S : IState> S.onFinished(block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onFinished(transitionParams: TransitionParams<*>) = block(transitionParams)
-    })
 
 /**
  * @param name is optional and is useful for getting state instance after state machine setup

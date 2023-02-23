@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.ChildMode.*
+import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
+import ru.nsk.kstatemachine.ChildMode.PARALLEL
 import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
@@ -9,6 +10,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     private class Data {
         val listeners = mutableSetOf<IState.Listener>()
+
         val states = mutableSetOf<InternalState>()
         var initialState: InternalState? = null
 
@@ -113,7 +115,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     protected open fun onDoEnter(transitionParams: TransitionParams<*>) = Unit // default empty
     protected open fun onDoExit(transitionParams: TransitionParams<*>) = Unit // default empty
 
-    override fun doEnter(transitionParams: TransitionParams<*>) {
+    override suspend fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isActive) {
             val machine = machine as InternalStateMachine
             if (parent != null) machine.log { "Parent $parent entering child $this" }
@@ -124,7 +126,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun doExit(transitionParams: TransitionParams<*>) {
+    override suspend fun doExit(transitionParams: TransitionParams<*>) {
         if (isActive) {
             machine.log { "Exiting $this" }
             onDoExit(transitionParams)
@@ -135,14 +137,14 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
+    override suspend fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>) {
         if (childMode == PARALLEL && states.all { it.isFinished }) {
             data.isFinished = true
             notifyStateFinish(finishedChild, transitionParams)
         }
     }
 
-    override fun <E : Event> recursiveFindUniqueResolvedTransition(
+    override suspend fun <E : Event> recursiveFindUniqueResolvedTransition(
         eventAndArgument: EventAndArgument<E>
     ): ResolvedTransition<E>? {
         val resolvedTransitions = getCurrentStates()
@@ -159,7 +161,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>) {
         if (states.isEmpty()) return
 
         when (childMode) {
@@ -180,7 +182,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
         if (path.isEmpty()) {
             recursiveEnterInitialStates(transitionParams)
         } else {
@@ -192,12 +194,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override fun recursiveExit(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveExit(transitionParams: TransitionParams<*>) {
         getCurrentStates().forEachState { it.recursiveExit(transitionParams) }
         doExit(transitionParams)
     }
 
-    override fun recursiveStop() {
+    override suspend fun recursiveStop() {
         data.currentState = null
         data.isActive = false
         data.isFinished = false
@@ -205,7 +207,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.states.forEachState { it.recursiveStop() }
     }
 
-    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         data.states.forEachState { it.recursiveAfterTransitionComplete(transitionParams) }
     }
 
@@ -216,7 +218,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         PARALLEL -> data.states.toList()
     }
 
-    private fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
+    private suspend fun setCurrentState(state: InternalState, transitionParams: TransitionParams<*>) {
         require(childMode == EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
@@ -233,7 +235,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         onCleanup()
     }
 
-    private fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
+    private suspend fun handleStateEntry(state: InternalState, transitionParams: TransitionParams<*>) {
         val finished = when (childMode) {
             EXCLUSIVE -> state is IFinalState
             PARALLEL -> states.all { it.isFinished }
@@ -248,7 +250,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    private fun notifyStateFinish(state: InternalState, transitionParams: TransitionParams<*>) {
+    private suspend fun notifyStateFinish(state: InternalState, transitionParams: TransitionParams<*>) {
         machine.log { "$this finished" }
         stateNotify { onFinished(transitionParams) }
         // there is no sense to send event on state machine finish as it stops processing events in this case
@@ -264,7 +266,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             FinishedEvent(this)
     }
 
-    internal fun switchToTargetState(
+    internal suspend fun switchToTargetState(
         targetState: InternalState,
         fromState: InternalState,
         transitionParams: TransitionParams<*>

@@ -1,8 +1,8 @@
 package ru.nsk.samples
 
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
 import ru.nsk.samples.MinimalSealedClassesSample.States.*
+import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
 
 private object MinimalSealedClassesSample {
     object SwitchEvent : Event

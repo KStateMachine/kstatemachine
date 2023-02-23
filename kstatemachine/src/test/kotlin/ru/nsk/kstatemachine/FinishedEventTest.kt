@@ -59,7 +59,9 @@ class FinishedEventTest : StringSpec({
 
     "FinishedEvent with data" {
         val callbacks = mockkCallbacks()
+
         data class IntEvent(override val data: Int) : DataEvent<Int>
+
         val intData = 42
 
         val machine = createStateMachine {
