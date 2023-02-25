@@ -37,6 +37,9 @@ interface StartEvent : GeneratedEvent
 internal class StartEventImpl : StartEvent
 internal class StartDataEventImpl<out D : Any>(override val data: D) : StartEvent, DataEvent<D>
 
+internal object StopEvent: GeneratedEvent
+internal class DestroyEvent(val stop: Boolean): GeneratedEvent
+
 /**
  * System event which is used by the library to wrap original event and argument,
  * so user may access them, when this event is processed.

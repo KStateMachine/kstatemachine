@@ -68,15 +68,13 @@ internal class StateMachineImpl(
 
     override fun start(argument: Any?) = startFrom(this, argument)
 
-    override fun startFrom(state: IState, argument: Any?) = coroutineStarter.start {
+    override fun startFrom(state: IState, argument: Any?) =
         doStartFrom(StartEventImpl(), state, argument)
-    }
 
-    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) = coroutineStarter.start {
+    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
         doStartFrom(StartDataEventImpl(data), state, argument)
-    }
 
-    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
+    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineStarter.start {
         checkBeforeRunMachine()
 
         eventProcessingScope {
@@ -105,16 +103,18 @@ internal class StateMachineImpl(
         doEnter(transitionParams)
     }
 
-    override fun stop() = coroutineStarter.start {
+    override fun stop() {
         check(!isDestroyed) { "$this is already destroyed" }
-        if (!_isRunning) return@start
+        if (!_isRunning) return
+        processEvent(StopEvent)
+    }
 
-        runCheckingExceptions {
-            _isRunning = false
-            recursiveStop()
-            log { "$this stopped" }
-            machineNotify { onStopped() }
-        }
+    /** To be called only from [runCheckingExceptions] */
+    private suspend fun doStop() {
+        _isRunning = false
+        recursiveStop()
+        log { "$this stopped" }
+        machineNotify { onStopped() }
     }
 
     override fun processEvent(event: Event, argument: Any?) = coroutineStarter.start {
@@ -141,7 +141,7 @@ internal class StateMachineImpl(
             val wrapped = requireState<UndoState>().makeWrappedEvent()
             EventAndArgument(wrapped, argument)
         } else {
-            EventAndArgument(event, argument)
+            this
         }
     }
 
@@ -149,7 +149,18 @@ internal class StateMachineImpl(
         val wrappedEventAndArgument = eventAndArgument.wrap()
 
         val eventProcessed = runCheckingExceptions {
-            doProcessEvent(wrappedEventAndArgument)
+            when (val event = wrappedEventAndArgument.event) {
+                is StopEvent -> {
+                    doStop()
+                    true
+                }
+                is DestroyEvent -> {
+                    if (event.stop) doStop()
+                    doDestroy()
+                    true
+                }
+                else -> doProcessEvent(wrappedEventAndArgument)
+            }
         }
 
         if (!eventProcessed) {
@@ -202,7 +213,7 @@ internal class StateMachineImpl(
             result = block()
         } catch (e: Exception) {
             log { "Fatal exception happened, $this machine is in unpredictable state and will be destroyed: $e" }
-            runCatching { destroy(false) }
+            runCatching { doDestroy() }
             throw e
         }
         delayedListenerException?.let {
@@ -266,7 +277,11 @@ internal class StateMachineImpl(
 
     override fun destroy(stop: Boolean) {
         if (_isDestroyed) return
-        if (stop) stop()
+        processEvent(DestroyEvent(stop))
+    }
+
+    /** To be called only from [runCheckingExceptions] */
+    private fun doDestroy() {
         accept(CleanupVisitor())
         _isDestroyed = true
         log { "$this destroyed" }

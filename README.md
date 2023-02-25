@@ -13,6 +13,11 @@ and hierarchical state machines ([statecharts](https://www.sciencedirect.com/sci
 
 ## Overview
 
+The library follows concepts from this two great and well known works:
+
+* [Statecharts: A visual formalism for complex systems](https://www.wisdom.weizmann.ac.il/~dharel/SCANNED.PAPERS/Statecharts.pdf)
+* [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
+
 Main features are:
 
 * Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK

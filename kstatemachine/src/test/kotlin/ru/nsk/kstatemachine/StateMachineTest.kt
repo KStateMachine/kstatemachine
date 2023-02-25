@@ -304,4 +304,18 @@ class StateMachineTest : StringSpec({
             callbacks.onFinished(machine)
         }
     }
+
+    "stop from onStart" {
+        createStateMachine {
+            initialState("initial")
+            onStarted { stop() }
+        }
+    }
+
+    "destroy from onStart" {
+        createStateMachine {
+            initialState("initial")
+            onStarted { destroy() }
+        }
+    }
 })

@@ -1,8 +1,16 @@
 package ru.nsk.kstatemachine
 
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 
-internal class CoroutineProcessingEngine(val scope: CoroutineScope) : CoroutineStarter
+internal class CoroutineProcessingEngine(private val scope: CoroutineScope) : CoroutineStarter {
+    override fun <R : Any> start(block: suspend () -> R): R {
+        return runBlocking {
+            withContext(scope.coroutineContext) {
+                block()
+            }
+        }
+    }
+}
 
 fun createCoStateMachine(
     scope: CoroutineScope,
