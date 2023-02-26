@@ -10,7 +10,7 @@ class ExternalTransitionTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             callbacks.listen(this)
             state1 = initialState("state1") {
                 callbacks.listen(this)
@@ -42,7 +42,7 @@ class ExternalTransitionTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             callbacks.listen(this)
 
             state1 = initialState("state1") {
@@ -81,7 +81,7 @@ class ExternalTransitionTest : StringSpec({
         lateinit var state1: State
         lateinit var state11: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             callbacks.listen(this)
 
             state1 = initialState("state1") {
@@ -118,7 +118,7 @@ class ExternalTransitionTest : StringSpec({
             lateinit var state1: State
             lateinit var state11: State
 
-            val machine = createStateMachine {
+            val machine = createTestStateMachine {
                 callbacks.listen(this)
 
                 state1 = initialState("state1") {

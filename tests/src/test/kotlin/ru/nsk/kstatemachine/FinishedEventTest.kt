@@ -8,7 +8,7 @@ class FinishedEventTest : StringSpec({
     "FinishedEvent in machine is not working as machine ignores events" {
         val callbacks = mockkCallbacks()
         lateinit var state2: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val final = finalState("final")
             initialState("state1") {
                 transition<SwitchEvent>(targetState = final)
@@ -32,7 +32,7 @@ class FinishedEventTest : StringSpec({
         val callbacks = mockkCallbacks()
         lateinit var state1: State
         lateinit var state2: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 val final = finalState("final")
                 initialState("state11") {
@@ -64,7 +64,7 @@ class FinishedEventTest : StringSpec({
 
         val intData = 42
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state2 = state("state2")
 
             initialState("state1") {
@@ -94,7 +94,7 @@ class FinishedEventTest : StringSpec({
     "FinishedEvent in parallel child mode" {
         val callbacks = mockkCallbacks()
 
-        createStateMachine {
+        createTestStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 state("state1") {
                     setInitialState(finalState("state11"))
@@ -115,7 +115,7 @@ class FinishedEventTest : StringSpec({
     "FinishedEvent from start" {
         val callbacks = mockkCallbacks()
 
-        createStateMachine {
+        createTestStateMachine {
             initialState {
                 setInitialState(finalState())
                 transition<FinishedEvent> {

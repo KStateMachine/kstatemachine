@@ -12,7 +12,7 @@ class AccessorsApiTest : StringSpec({
         lateinit var firstTransition: Transition<*>
         lateinit var secondTransition: Transition<*>
 
-        createStateMachine {
+        createTestStateMachine {
             addInitialState(state) {
                 firstTransition = transition<FirstEvent>("first transition")
                 secondTransition = transition<SecondEvent>()
@@ -28,7 +28,7 @@ class AccessorsApiTest : StringSpec({
     "requireState()" {
         lateinit var first: State
         lateinit var second: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = initialState("first")
             second = state("second")
         }
@@ -41,7 +41,7 @@ class AccessorsApiTest : StringSpec({
     "requireState() recursive" {
         lateinit var first: State
         lateinit var firstNested: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = initialState("first") {
                 firstNested = initialState("firstNested")
             }
@@ -65,7 +65,7 @@ class AccessorsApiTest : StringSpec({
         lateinit var first: FirstState
         lateinit var second: State
         lateinit var third: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = addInitialState(FirstState())
             second = addState(SecondState()) {
                 third = addState(ThirdInnerState())
@@ -85,9 +85,9 @@ class AccessorsApiTest : StringSpec({
     }
 
     "requireState() of nested machine not allowed" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState {
-                addInitialState(createStateMachine {
+                addInitialState(createTestStateMachine {
                     initialState("nested")
                     transition<SwitchEvent>("transition")
                 })

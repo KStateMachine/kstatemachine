@@ -9,7 +9,7 @@ class SubclassState : DefaultState() {
 
 class StateTest : StringSpec({
     "state subclass" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             // simple but little explicit, easy to forget addState() call
             val subclassState = addState(SubclassState()) {
                 onEntry { println("Enter state with data: ${this@addState.dataField}") }
@@ -32,7 +32,7 @@ class StateTest : StringSpec({
     }
 
     "final state transition with explicit state" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val final = addFinalState(DefaultFinalState("final")) {
                 transition<SwitchEvent>() // does nothing in this case
             }
@@ -44,7 +44,7 @@ class StateTest : StringSpec({
     "explicit final state marker usage" {
         class MyState : DefaultState(), FinalState
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val final = addFinalState(MyState())
             setInitialState(final)
         }
@@ -53,7 +53,7 @@ class StateTest : StringSpec({
 
     /** This code should not compile */
     "dsl marker" {
-//        createStateMachine {
+//        createTestStateMachine {
 //            val subclassState = addState(SubclassState())
 //
 //            subclassState {

@@ -13,7 +13,7 @@ class EventMatcherTest : StringSpec({
     "isEqual()" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 transition<HierarchyEventL1> {
                     eventMatcher = isEqual()
@@ -36,7 +36,7 @@ class EventMatcherTest : StringSpec({
     "isEqual() negative" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 transition<HierarchyEventL1> {
                     eventMatcher = isEqual()
@@ -55,7 +55,7 @@ class EventMatcherTest : StringSpec({
     "isInstanceOf()" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 transition<HierarchyEventL1> {
                     eventMatcher = isInstanceOf()
@@ -74,7 +74,7 @@ class EventMatcherTest : StringSpec({
     "isInstanceOf() negative" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 transition<HierarchyEventL1> {
                     eventMatcher = isInstanceOf()

@@ -11,7 +11,7 @@ class IgnoredEventHandlerTest : StringSpec({
     "ignored event handler" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ ->
@@ -24,7 +24,7 @@ class IgnoredEventHandlerTest : StringSpec({
     }
 
     "exceptional ignored event handler" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("first")
 
             ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
@@ -39,7 +39,7 @@ class IgnoredEventHandlerTest : StringSpec({
     "process event on finished state machine" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             setInitialState(finalState("final"))
 
             onFinished { callbacks.onFinished(this) }
@@ -58,7 +58,7 @@ class IgnoredEventHandlerTest : StringSpec({
     "ignored event on conditional noTransition()" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState {
                 transitionConditionally<SwitchEvent> { direction = { noTransition() } }
             }

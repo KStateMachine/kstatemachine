@@ -52,7 +52,7 @@ Main features are:
 * Built-in support for Kotlin Coroutines
 * Well tested. All features are covered by tests
 
-_The library is currently in a development phase. You are welcome to propose useful features._
+_The library is still in a development phase. You are welcome to propose useful features._
 
 _Don't forget to push the ⭐ if you like this project._
 

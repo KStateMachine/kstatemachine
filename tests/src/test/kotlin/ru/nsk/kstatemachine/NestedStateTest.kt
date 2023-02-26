@@ -12,7 +12,7 @@ class NestedStateTest : StringSpec({
         lateinit var firstL2: State
         val firstL3 = object : DefaultState("firstL3") {}
 
-        createStateMachine {
+        createTestStateMachine {
             firstL1 = initialState("firstL1") {
                 callbacks.listen(this)
 
@@ -41,7 +41,7 @@ class NestedStateTest : StringSpec({
         lateinit var firstL2: State
         lateinit var secondL2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             secondL1 = state("secondL1") {
@@ -83,7 +83,7 @@ class NestedStateTest : StringSpec({
     }
 
     "nested no initial state" {
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             initialState("firstL1") {
                 state("firstL2")
             }
@@ -99,7 +99,7 @@ class NestedStateTest : StringSpec({
         lateinit var state11: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("1") {
                 callbacks.listen(this)
 

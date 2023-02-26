@@ -21,13 +21,13 @@ class CompositionStateMachinesTest : StringSpec({
     "nested machine as initial state" {
         val callbacks = mockkCallbacks()
         lateinit var state1: IState
-        val inner = createStateMachine(start = false) {
+        val inner = createTestStateMachine(start = false) {
             state1 = initialState("state1") {
                 callbacks.listen(this)
             }
         }
 
-        createStateMachine {
+        createTestStateMachine {
             addInitialState(inner)
         }
 
@@ -38,13 +38,13 @@ class CompositionStateMachinesTest : StringSpec({
 
     "stop nested machines" {
         val callbacks = mockkCallbacks()
-        val inner = createStateMachine {
+        val inner = createTestStateMachine {
             initialState("state1") {
                 callbacks.listen(this)
             }
         }
 
-        val outer = createStateMachine {
+        val outer = createTestStateMachine {
             addInitialState(inner)
         }
 
@@ -58,13 +58,13 @@ class CompositionStateMachinesTest : StringSpec({
     "exit branch with nested machine" {
         val callbacks = mockkCallbacks()
 
-        val inner = createStateMachine {
+        val inner = createTestStateMachine {
             initialState { callbacks.listen(this) }
         }
 
         lateinit var state1: State
         lateinit var state2: State
-        val outer = createStateMachine {
+        val outer = createTestStateMachine {
             state1 = initialState {
                 addInitialState(inner)
                 transitionOn<SwitchEvent> { targetState = { state2 } }
@@ -82,13 +82,13 @@ class CompositionStateMachinesTest : StringSpec({
 
     "transition out from nested machine, negative" {
         lateinit var state1: State
-        val inner = createStateMachine("inner") {
+        val inner = createTestStateMachine("inner") {
             logger = StateMachine.Logger { println(it) }
             state1 = initialState("inner-state1")
         }
 
         lateinit var state2: State
-        val outer = createStateMachine("outer") {
+        val outer = createTestStateMachine("outer") {
             logger = StateMachine.Logger { println(it) }
 
             addInitialState(inner) {
@@ -106,13 +106,13 @@ class CompositionStateMachinesTest : StringSpec({
 
     "transition into nested machine sub-state, negative" {
         lateinit var innerState2: State
-        val inner = createStateMachine("inner") {
+        val inner = createTestStateMachine("inner") {
             logger = StateMachine.Logger { println(it) }
             initialState("inner-state1")
             innerState2 = state("inner-state2")
         }
 
-        val outer = createStateMachine("outer") {
+        val outer = createTestStateMachine("outer") {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -132,7 +132,7 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
     val innerState1 = DefaultState("Inner state1")
     val innerState2 = DefaultState("Inner state2")
 
-    val innerMachine = createStateMachine("Inner machine", start = startInnerMachineOnSetup) {
+    val innerMachine = createTestStateMachine("Inner machine", start = startInnerMachineOnSetup) {
         logger = StateMachine.Logger { println(it) }
 
         callbacks.listen(this)
@@ -156,7 +156,7 @@ private fun composition(startInnerMachineOnSetup: Boolean) {
         }
     }
 
-    val machine = createStateMachine {
+    val machine = createTestStateMachine {
         callbacks.listen(this)
 
         addInitialState(outerState1) {

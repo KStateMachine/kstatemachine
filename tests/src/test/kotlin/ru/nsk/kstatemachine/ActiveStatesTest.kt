@@ -12,7 +12,7 @@ class ActiveStatesTest : StringSpec({
         lateinit var state21: State
         lateinit var state211: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 transitionOn<SwitchEvent> {
                     targetState = { state2 }
@@ -20,7 +20,7 @@ class ActiveStatesTest : StringSpec({
             }
             state2 = state("state2") {
                 state21 = initialState("state21") {
-                    state211 = addInitialState(createStateMachine(start = false) {
+                    state211 = addInitialState(createTestStateMachine(start = false) {
                         // should not be included
                         initialState("state2111")
                     })
@@ -44,7 +44,7 @@ class ActiveStatesTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL) {
             state1 = state()
             state2 = state()
         }
@@ -56,9 +56,9 @@ class ActiveStatesTest : StringSpec({
     "activeStates() do not include nested machines states" {
         lateinit var initialState: State
         lateinit var nestedMachine: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState = initialState {
-                nestedMachine = addInitialState(createStateMachine {
+                nestedMachine = addInitialState(createTestStateMachine {
                     initialState()
                 })
             }

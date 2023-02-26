@@ -47,3 +47,21 @@ fun testError(message: String): Nothing {
 }
 
 class TestException(message: String) : RuntimeException(message)
+
+fun createTestStateMachine(
+    name: String? = null,
+    childMode: ChildMode = ChildMode.EXCLUSIVE,
+    start: Boolean = true,
+    autoDestroyOnStatesReuse: Boolean = true,
+    enableUndo: Boolean = false,
+    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    init: BuildingStateMachine.() -> Unit
+) = createStateMachine(
+    name,
+    childMode,
+    start,
+    autoDestroyOnStatesReuse,
+    enableUndo,
+    doNotThrowOnMultipleTransitionsMatch,
+    init = init
+)

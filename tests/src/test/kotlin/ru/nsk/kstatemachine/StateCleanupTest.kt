@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.StateMachineDestroyTestData.useInMachine
 private object StateMachineDestroyTestData {
     object State1 : DefaultState("state1")
 
-    fun useInMachine() = createStateMachine {
+    fun useInMachine() = createTestStateMachine {
         addInitialState(State1)
     }
 }

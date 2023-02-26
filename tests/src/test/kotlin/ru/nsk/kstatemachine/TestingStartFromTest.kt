@@ -12,7 +12,7 @@ class TestingStartFromTest : StringSpec({
         lateinit var state2: State
         lateinit var state22: State
 
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             callbacks.listen(this)
 
             initialState("state1") { callbacks.listen(this) }
@@ -51,7 +51,7 @@ class TestingStartFromTest : StringSpec({
     "data startFrom()" {
         val callbacks = mockkCallbacks()
         lateinit var state2: DataState<Int>
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             initialState("state1") {
                 callbacks.listen(this)
             }

@@ -11,7 +11,7 @@ class GuardedTransitionTest : StringSpec({
 
         var value = "value1"
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val second = state("second")
@@ -41,7 +41,7 @@ class GuardedTransitionTest : StringSpec({
 
         var value = "value1"
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             lateinit var second: State
 
             initialState("first") {
@@ -70,7 +70,7 @@ class GuardedTransitionTest : StringSpec({
         lateinit var state2: State
         lateinit var state3: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 callbacks.listen(this)
 

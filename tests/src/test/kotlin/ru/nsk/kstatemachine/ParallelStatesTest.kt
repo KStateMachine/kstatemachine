@@ -10,7 +10,7 @@ import io.mockk.verifySequence
 
 class ParallelStatesTest : StringSpec({
     "initial state in parallel mode negative" {
-        createStateMachine {
+        createTestStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 shouldThrow<IllegalStateException> { initialState() }
             }
@@ -18,7 +18,7 @@ class ParallelStatesTest : StringSpec({
     }
 
     "final or pseudo state in parallel mode negative" {
-        createStateMachine(childMode = ChildMode.PARALLEL) {
+        createTestStateMachine(childMode = ChildMode.PARALLEL) {
             shouldThrow<IllegalArgumentException> {
                 finalState()
             }
@@ -37,7 +37,7 @@ class ParallelStatesTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL) {
             callbacks.listen(this)
             state1 = state { callbacks.listen(this) }
             state2 = state { callbacks.listen(this) }
@@ -63,7 +63,7 @@ class ParallelStatesTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
         lateinit var state111: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState(childMode = ChildMode.PARALLEL) {
                 callbacks.listen(this)
 
@@ -94,7 +94,7 @@ class ParallelStatesTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1", childMode = ChildMode.PARALLEL) {
                 callbacks.listen(this)
 
@@ -125,7 +125,7 @@ class ParallelStatesTest : StringSpec({
     "process event by parallel states negative" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 state {
                     transition<SwitchEvent> {
@@ -148,7 +148,7 @@ class ParallelStatesTest : StringSpec({
     "process event by parallel states" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState(childMode = ChildMode.PARALLEL) {
                 state {
                     transition<FirstEvent> { callbacks.listen(this) }

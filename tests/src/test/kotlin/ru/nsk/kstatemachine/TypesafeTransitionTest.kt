@@ -13,7 +13,7 @@ private class IdEvent(override val data: Int) : DataEvent<Int>
 class TypesafeTransitionTest : StringSpec({
     "initial DataState negative" {
         shouldThrow<Exception> {
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(defaultDataState<String>("state1"))
             }
         }
@@ -21,7 +21,7 @@ class TypesafeTransitionTest : StringSpec({
 
     "initial DataState with defaultData" {
         lateinit var state: DataState<String>
-        createStateMachine {
+        createTestStateMachine {
             state = initialDataState("state1", defaultData = "test")
         }
         state.data shouldBe "test"
@@ -30,7 +30,7 @@ class TypesafeTransitionTest : StringSpec({
     "FinalDataState transition" {
         lateinit var final: DataState<Int>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("initial") {
                 dataTransitionOn<IdEvent, Int> { targetState = { final } }
             }
@@ -46,7 +46,7 @@ class TypesafeTransitionTest : StringSpec({
 
         lateinit var state2: DataState<String>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state3 = state("state3")
 
             state2 = dataState("state2") {
@@ -73,7 +73,7 @@ class TypesafeTransitionTest : StringSpec({
         lateinit var state2: DataState<String>
         lateinit var state3: DataState<Int>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 dataTransitionOn<NameEvent, String> { targetState = { state2 } }
             }
@@ -102,7 +102,7 @@ class TypesafeTransitionTest : StringSpec({
         lateinit var state21: State
         lateinit var state22: DataState<Int>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 callbacks.listen(this)
 
@@ -144,7 +144,7 @@ class TypesafeTransitionTest : StringSpec({
     }
 
     "implicit data state activation by cross-level transition negative" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             lateinit var state21: State
 
             initialState {
@@ -161,7 +161,7 @@ class TypesafeTransitionTest : StringSpec({
     }
 
     "implicit data state activation by cross-level transition with default value" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             lateinit var state21: State
 
             initialState {
@@ -180,7 +180,7 @@ class TypesafeTransitionTest : StringSpec({
     "transition with event super type" {
         lateinit var state2: DataState<Number>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state2 = dataState("state2")
 
             initialState("state1") {
@@ -196,7 +196,7 @@ class TypesafeTransitionTest : StringSpec({
 
     "target-less data transition negative" {
         shouldThrow<IllegalArgumentException> {
-            createStateMachine {
+            createTestStateMachine {
                 initialState("state1") {
                     dataTransition<IdEvent, Int> {}
                 }
@@ -207,7 +207,7 @@ class TypesafeTransitionTest : StringSpec({
     "target-less transition in data state" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val dataState = dataState<Int>("state2") {
@@ -227,7 +227,7 @@ class TypesafeTransitionTest : StringSpec({
 
     "self targeted transition in data state" {
         shouldThrow<IllegalArgumentException> {
-            createStateMachine {
+            createTestStateMachine {
                 initialState("state1")
 
                 dataState<Int>("state2") {
@@ -240,7 +240,7 @@ class TypesafeTransitionTest : StringSpec({
     "self targeted transitionOn() does not update data, cannot throw on construction" {
         lateinit var dataState: DataState<Int>
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -261,7 +261,7 @@ class TypesafeTransitionTest : StringSpec({
 
     "targeting DataState by conditionalTransition()" {
         lateinit var dataState: DataState<Int>
-        createStateMachine {
+        createTestStateMachine {
             initialState {
                 setInitialState(finalDataState(defaultData = 0))
 
@@ -277,7 +277,7 @@ class TypesafeTransitionTest : StringSpec({
 
     "targeting DataState by conditionalTransition() with custom extractor" {
         lateinit var dataState: DataState<Int>
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState {
                 transitionConditionally<CustomDataEvent> {
                     direction = { targetState(dataState) }

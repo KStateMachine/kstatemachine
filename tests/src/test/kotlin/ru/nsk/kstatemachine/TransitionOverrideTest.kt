@@ -38,7 +38,7 @@ class TransitionOverrideTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             transitionOn<SwitchEvent> {
                 targetState = { state2 }
                 onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
@@ -65,7 +65,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     lateinit var state2: State
     lateinit var state3: State
 
-    val machine = createStateMachine {
+    val machine = createTestStateMachine {
         transitionOn<SwitchEvent> {
             targetState = { state3 }
             onTriggered { callbacks.onTriggeredTransition(it.event, 3) }
@@ -90,7 +90,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType() {
     }
 }
 
-private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createStateMachine {
+private fun overrideWithDirection(callbacks: Callbacks, childDirection: TransitionDirection) = createTestStateMachine {
     lateinit var state2: State
     transitionOn<SwitchEvent> {
         targetState = { state2 }

@@ -89,7 +89,7 @@ state inner_machine_StateMachine
 
 class ExportToPlantUmlTest : StringSpec({
     "export nested states" {
-        val machine = createStateMachine("Nested states") {
+        val machine = createTestStateMachine("Nested states") {
             val state1 = initialState("State1")
             val state3 = finalState("State3")
 
@@ -114,7 +114,7 @@ class ExportToPlantUmlTest : StringSpec({
     }
 
     "export parallel states" {
-        val machine = createStateMachine("Parallel states") {
+        val machine = createTestStateMachine("Parallel states") {
             initialState("parallel states", ChildMode.PARALLEL) {
                 state("State1") {
                     val state11 = initialState("State11")
@@ -145,7 +145,7 @@ class ExportToPlantUmlTest : StringSpec({
     }
 
     "export with pseudo states" {
-        val machine = createStateMachine(enableUndo = true) {
+        val machine = createTestStateMachine(enableUndo = true) {
             val state1 = initialState("state1")
 
             val state2 = state("state2") {
@@ -169,11 +169,11 @@ class ExportToPlantUmlTest : StringSpec({
     }
 
     "export composed machines" {
-        val inner = createStateMachine("inner machine") {
+        val inner = createTestStateMachine("inner machine") {
             initialState("inner state1")
             state("inner state2")
         }
-        val outer = createStateMachine("outer machine") {
+        val outer = createTestStateMachine("outer machine") {
             initialState("outer state1")
             addState(inner)
         }

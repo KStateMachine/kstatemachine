@@ -8,7 +8,7 @@ class ChoiceStateTest : StringSpec({
     "redirecting choice state" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val choice = choiceState("choice") {
@@ -31,7 +31,7 @@ class ChoiceStateTest : StringSpec({
     "redirecting choice states chain" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val choice2 = choiceState("choice2") { State2 }
@@ -52,7 +52,7 @@ class ChoiceStateTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         shouldThrow<IllegalStateException> {
-            createStateMachine {
+            createTestStateMachine {
                 val choice = choiceState("choice") { State2 }
                 setInitialState(choice)
 

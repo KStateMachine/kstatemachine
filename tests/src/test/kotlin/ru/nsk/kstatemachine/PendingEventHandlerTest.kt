@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class PendingEventHandlerTest : StringSpec({
     "queue event in QueuePendingEventHandler" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val third = state("third")
@@ -19,7 +19,7 @@ class PendingEventHandlerTest : StringSpec({
             initialState("first") {
                 transition<FirstEvent> {
                     targetState = second
-                    onTriggered { this@createStateMachine.processEvent(SecondEvent) shouldBe PENDING }
+                    onTriggered { this@createTestStateMachine.processEvent(SecondEvent) shouldBe PENDING }
                 }
             }
         }
@@ -29,7 +29,7 @@ class PendingEventHandlerTest : StringSpec({
 
     "queue event on machine start" {
         val callbacks = mockkCallbacks()
-        createStateMachine {
+        createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val second = state("second")
@@ -49,7 +49,7 @@ class PendingEventHandlerTest : StringSpec({
     }
 
     "pending event queue is cleared on processing error" {
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             logger = StateMachine.Logger { println(it) }
 
             val second = state("second") {
@@ -77,7 +77,7 @@ class PendingEventHandlerTest : StringSpec({
     }
 
     "throwing PendingEventHandler does not destroy machine" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             val second = state("second")
@@ -85,7 +85,7 @@ class PendingEventHandlerTest : StringSpec({
                 transition<SwitchEvent> {
                     targetState = second
                     onTriggered {
-                        shouldThrow<TestException> { this@createStateMachine.processEvent(SwitchEvent) }
+                        shouldThrow<TestException> { this@createTestStateMachine.processEvent(SwitchEvent) }
                     }
                 }
             }
@@ -100,7 +100,7 @@ class PendingEventHandlerTest : StringSpec({
     }
 
     "pending events are cleared on stop() from notification callback" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state2 = state("state2") {
                 onEntry {
                     machine.processEvent(SwitchEvent) shouldBe PENDING
@@ -118,7 +118,7 @@ class PendingEventHandlerTest : StringSpec({
     }
 
     "pending events are cleared on destroy() from notification callback" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state2 = state("state2") {
                 onEntry {
                     machine.processEvent(SwitchEvent) shouldBe PENDING

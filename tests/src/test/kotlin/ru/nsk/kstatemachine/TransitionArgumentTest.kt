@@ -12,7 +12,7 @@ class TransitionArgumentTest : StringSpec({
 
         val second = object : DefaultState("second") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addState(second) {
                 callbacks.listen(this)
                 onEntry { it.transition.argument shouldBe ARGUMENT }
@@ -33,7 +33,7 @@ class TransitionArgumentTest : StringSpec({
         val callbacks = mockkCallbacks()
         lateinit var state1: State
 
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             state1 = initialState("first") {
                 callbacks.listen(this)
                 onEntry { it.argument shouldBe ARGUMENT }

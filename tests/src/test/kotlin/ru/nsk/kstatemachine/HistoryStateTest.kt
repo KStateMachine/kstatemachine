@@ -9,7 +9,7 @@ import io.mockk.verify
 
 class HistoryStateTest : StringSpec({
     "history state cannot have listeners" {
-        createStateMachine {
+        createTestStateMachine {
             initialState()
             val history = historyState()
             shouldThrow<UnsupportedOperationException> {
@@ -22,7 +22,7 @@ class HistoryStateTest : StringSpec({
     }
 
     "history default state should be a neighbour state" {
-        createStateMachine {
+        createTestStateMachine {
             lateinit var innerState: State
             initialState {
                 innerState = initialState()
@@ -39,7 +39,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("state1") {
@@ -74,7 +74,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state2: State
         lateinit var history: HistoryState
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -117,7 +117,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state22: State
         lateinit var history: HistoryState
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -150,7 +150,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state1222: State
         lateinit var history: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -188,7 +188,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state112: State
         lateinit var history: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {
@@ -220,7 +220,7 @@ class HistoryStateTest : StringSpec({
         lateinit var state112: State
         lateinit var history: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             initialState("state1") {

@@ -10,7 +10,7 @@ class CrossLevelTransitionTest : StringSpec({
 
         lateinit var state1: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("1") {
@@ -37,7 +37,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("1") {
@@ -92,7 +92,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("1") {
@@ -133,7 +133,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state21: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
@@ -171,7 +171,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state2: State
         lateinit var state22: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
@@ -220,7 +220,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state11: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("1") {
                 callbacks.listen(this)
 
@@ -261,7 +261,7 @@ class CrossLevelTransitionTest : StringSpec({
         lateinit var state11: State
         lateinit var state12: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("1") {

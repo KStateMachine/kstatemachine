@@ -10,7 +10,7 @@ import ru.nsk.kstatemachine.Testing.startFrom
 class ListenerExceptionHandlerTest : StringSpec({
     "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
         shouldThrow<TestException> {
-            createStateMachine {
+            createTestStateMachine {
                 logger = StateMachine.Logger { println(it) }
 
                 initialState {
@@ -21,7 +21,7 @@ class ListenerExceptionHandlerTest : StringSpec({
     }
 
     "default ListenerExceptionHandler rethrows exception from state onEntry() on manual start() call" {
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             initialState {
                 onEntry { testError("test exception") }
             }
@@ -35,7 +35,7 @@ class ListenerExceptionHandlerTest : StringSpec({
         val callbacks = mockkCallbacks()
         lateinit var state1: State
 
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             onStarted { callbacks.onStarted(this) }
             callbacks.listen(this)
             onEntry { testError("test exception") }
@@ -55,7 +55,7 @@ class ListenerExceptionHandlerTest : StringSpec({
 
     "default ListenerExceptionHandler rethrows exception from onStarted() on start() call" {
         shouldThrow<TestException> {
-            createStateMachine {
+            createTestStateMachine {
                 onStarted { testError("test exception") }
 
                 initialState()
@@ -65,7 +65,7 @@ class ListenerExceptionHandlerTest : StringSpec({
 
     "default ListenerExceptionHandler rethrows exception from startFrom()" {
         lateinit var state2: State
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             initialState()
             state2 = state {
                 onEntry { testError("test exception") }
@@ -77,7 +77,7 @@ class ListenerExceptionHandlerTest : StringSpec({
     }
 
     "default ListenerExceptionHandler rethrows exception from stop()" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState()
             onStopped { testError("test exception") }
         }
@@ -90,7 +90,7 @@ class ListenerExceptionHandlerTest : StringSpec({
     "silent ListenerExceptionHandler is called" {
         val handlerMock = mockk<StateMachine.ListenerExceptionHandler>(relaxed = true)
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             listenerExceptionHandler = handlerMock
 
             initialState {
@@ -105,7 +105,7 @@ class ListenerExceptionHandlerTest : StringSpec({
     "machine is destroyed on unrecoverable exception and ListenerExceptionHandler is not called" {
         val handlerMock = mockk<StateMachine.ListenerExceptionHandler>(relaxed = true)
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             listenerExceptionHandler = handlerMock

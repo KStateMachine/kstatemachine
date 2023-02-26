@@ -41,7 +41,7 @@ class ObjectStatesTest : StringSpec({
 })
 
 private fun useInMachine(autoDestroyOnStatesReuse: Boolean): StateMachine {
-    val machine = createStateMachine(autoDestroyOnStatesReuse = autoDestroyOnStatesReuse) {
+    val machine = createTestStateMachine(autoDestroyOnStatesReuse = autoDestroyOnStatesReuse) {
         addInitialState(State1) {
             transition<SwitchEvent> {
                 targetState = State2

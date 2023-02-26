@@ -15,7 +15,7 @@ class StateGroupListenerTest : FreeSpec({
         ) { notifyOnSubscribe ->
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State1)
                 addState(State2)
                 addState(State3)
@@ -29,7 +29,7 @@ class StateGroupListenerTest : FreeSpec({
         "all active on subscribe" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            createStateMachine(childMode = ChildMode.PARALLEL) {
+            createTestStateMachine(childMode = ChildMode.PARALLEL) {
                 addState(State1)
                 addState(State2)
                 addState(State3)
@@ -43,7 +43,7 @@ class StateGroupListenerTest : FreeSpec({
         "callback called on isActive changes" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            val machine = createStateMachine {
+            val machine = createTestStateMachine {
                 addInitialState(State1) {
                     transition<SwitchEvent>(targetState = State2)
                 }
@@ -67,10 +67,10 @@ class StateGroupListenerTest : FreeSpec({
         "use with states of different machines" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State1)
             }
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State2)
             }
 
@@ -82,7 +82,7 @@ class StateGroupListenerTest : FreeSpec({
         "unsubscribe" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            val machine = createStateMachine(start = false) {
+            val machine = createTestStateMachine(start = false) {
                 addInitialState(State1) {
                     transition<SwitchEvent>(targetState = State2)
                 }
@@ -108,7 +108,7 @@ class StateGroupListenerTest : FreeSpec({
         ) { notifyOnSubscribe ->
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State1)
                 addState(State2)
                 addState(State3)
@@ -122,7 +122,7 @@ class StateGroupListenerTest : FreeSpec({
         "callback called on isActive changes" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            val machine = createStateMachine {
+            val machine = createTestStateMachine {
                 addInitialState(State1) {
                     transition<SwitchEvent>(targetState = State2)
                 }
@@ -146,7 +146,7 @@ class StateGroupListenerTest : FreeSpec({
         "callback is called on switching between active states, as switching is not atomic" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            val machine = createStateMachine {
+            val machine = createTestStateMachine {
                 addInitialState(State1) {
                     transition<SwitchEvent>(targetState = State2)
                 }
@@ -166,10 +166,10 @@ class StateGroupListenerTest : FreeSpec({
         "use with states of different machines" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State1)
             }
-            createStateMachine {
+            createTestStateMachine {
                 addInitialState(State2)
             }
 
@@ -181,7 +181,7 @@ class StateGroupListenerTest : FreeSpec({
         "unsubscribe" {
             val callback = mockk<Callback<Boolean>>(relaxed = true)
 
-            val machine = createStateMachine(start = false) {
+            val machine = createTestStateMachine(start = false) {
                 addInitialState(State1) {
                     transition<SwitchEvent>(targetState = State2)
                 }
@@ -202,7 +202,7 @@ class StateGroupListenerTest : FreeSpec({
     }
 
     "onActiveAllOf()/onActiveAnyOf() invalid set of states" {
-        createStateMachine {
+        createTestStateMachine {
             addInitialState(State1)
             addState(State2)
         }

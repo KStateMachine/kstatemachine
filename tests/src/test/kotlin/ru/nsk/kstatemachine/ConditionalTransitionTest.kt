@@ -13,7 +13,7 @@ class ConditionalTransitionTest : StringSpec({
 
         val first = object : DefaultState("first") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 
@@ -36,7 +36,7 @@ class ConditionalTransitionTest : StringSpec({
 
         val first = object : DefaultState("first") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 
@@ -60,7 +60,7 @@ class ConditionalTransitionTest : StringSpec({
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 
@@ -88,7 +88,7 @@ class ConditionalTransitionTest : StringSpec({
         val first = object : DefaultState("first") {}
         val second = object : DefaultState("second") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 
@@ -117,7 +117,7 @@ class ConditionalTransitionTest : StringSpec({
         val second = object : DefaultState("second") {}
         val third = object : DefaultState("third") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 
@@ -148,7 +148,7 @@ class ConditionalTransitionTest : StringSpec({
         val second = object : DefaultState("second") {}
         val third = object : DefaultState("third") {}
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             addInitialState(first) {
                 callbacks.listen(this)
 

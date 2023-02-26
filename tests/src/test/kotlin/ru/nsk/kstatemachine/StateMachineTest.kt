@@ -16,7 +16,7 @@ private object OffEvent : Event
 class StateMachineTest : StringSpec({
     "no initial state" {
         shouldThrow<IllegalStateException> {
-            createStateMachine {}
+            createTestStateMachine {}
         }
     }
 
@@ -26,7 +26,7 @@ class StateMachineTest : StringSpec({
         lateinit var on: State
         lateinit var off: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             on = initialState("on") {
                 callbacks.listen(this)
             }
@@ -68,7 +68,7 @@ class StateMachineTest : StringSpec({
     }
 
     "non dsl usage" {
-        val machine = createStateMachine("machine", start = false) { /* empty */ }
+        val machine = createTestStateMachine("machine", start = false) { /* empty */ }
         val first = DefaultState("first")
         val second = DefaultState("second")
 
@@ -93,7 +93,7 @@ class StateMachineTest : StringSpec({
     "onTransition() notification" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
             }
@@ -110,7 +110,7 @@ class StateMachineTest : StringSpec({
 
         lateinit var state2: State
         lateinit var state22: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 transitionOn<SwitchEvent> { targetState = { state2 } }
             }
@@ -134,7 +134,7 @@ class StateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
         lateinit var first: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = initialState("first")
             onStateEntry { callbacks.onEntryState(it) }
         }
@@ -146,7 +146,7 @@ class StateMachineTest : StringSpec({
     }
 
     "add same state listener" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
                 val listener = object : IState.Listener {}
@@ -158,7 +158,7 @@ class StateMachineTest : StringSpec({
     }
 
     "add same state machine listener" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("first") {
                 transition<SwitchEvent>()
             }
@@ -171,7 +171,7 @@ class StateMachineTest : StringSpec({
     }
 
     "add same transition listener" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("first") {
                 val transition = transition<SwitchEvent>()
                 val listener = object : Transition.Listener {}
@@ -183,7 +183,7 @@ class StateMachineTest : StringSpec({
     }
 
     "add state after start" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("first")
         }
         shouldThrow<IllegalStateException> { machine.state() }
@@ -191,7 +191,7 @@ class StateMachineTest : StringSpec({
 
     "set initial state after start" {
         lateinit var first: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = initialState("first")
         }
 
@@ -199,7 +199,7 @@ class StateMachineTest : StringSpec({
     }
 
     "process event before started" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("first")
             shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
         }
@@ -209,7 +209,7 @@ class StateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         lateinit var first: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             first = initialState { callbacks.listen(this) }
             onStarted { callbacks.onStarted(this) }
         }
@@ -225,7 +225,7 @@ class StateMachineTest : StringSpec({
 
         lateinit var initialState: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             callbacks.listen(this)
 
             initialState = initialState("initial") {
@@ -245,7 +245,7 @@ class StateMachineTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine(start = false) {
+        val machine = createTestStateMachine(start = false) {
             logger = StateMachine.Logger { println(it) }
             callbacks.listen(this)
 
@@ -281,7 +281,7 @@ class StateMachineTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             state1 = initialState("state1") {
@@ -306,14 +306,14 @@ class StateMachineTest : StringSpec({
     }
 
     "stop from onStart" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("initial")
             onStarted { stop() }
         }
     }
 
     "destroy from onStart" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("initial")
             onStarted { destroy() }
         }

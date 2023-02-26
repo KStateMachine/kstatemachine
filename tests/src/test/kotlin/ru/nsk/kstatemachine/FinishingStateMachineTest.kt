@@ -14,7 +14,7 @@ class FinishingStateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         lateinit var final: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             final = finalState("final") { callbacks.listen(this) }
             setInitialState(final)
 
@@ -29,7 +29,7 @@ class FinishingStateMachineTest : StringSpec({
 
     "restart machine after finish" {
         val callbacks = mockkCallbacks()
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val final = finalState("final")
             setInitialState(final)
             transition<SwitchEvent> { callbacks.listen(this) }
@@ -49,7 +49,7 @@ class FinishingStateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         lateinit var final: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             final = finalState("final") { callbacks.listen(this) }
             setInitialState(final)
 
@@ -72,7 +72,7 @@ class FinishingStateMachineTest : StringSpec({
 
     "finished state machine ignores event from deep transition" {
         lateinit var final: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             final = finalState("final") {
                 initialState("nested state") {
                     transition<SwitchEvent> {
@@ -96,7 +96,7 @@ class FinishingStateMachineTest : StringSpec({
         lateinit var state11: IState
         lateinit var state12: IState
         lateinit var state2: IState
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL) {
             state1 = state("State1", childMode = ChildMode.PARALLEL) {
                 state11 = state("State11") {
                     addInitialState(DefaultFinalState("Final state111"))
@@ -139,7 +139,7 @@ class FinishingStateMachineTest : StringSpec({
         val callbacks = mockkCallbacks()
 
         lateinit var state1: IState
-        createStateMachine(childMode = ChildMode.PARALLEL) {
+        createTestStateMachine(childMode = ChildMode.PARALLEL) {
             state1 = state("State1") {
                 addInitialState(DefaultFinalState("Final state11"))
                 onFinished { callbacks.onFinished(this) }
@@ -157,7 +157,7 @@ class FinishingStateMachineTest : StringSpec({
     "finished parallel branch handles events" {
         val callbacks = mockkCallbacks()
         lateinit var state1: IState
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL) {
             state1 = state("state1") {
                 addInitialState(DefaultFinalState("finalState11"))
                 transition<SwitchEvent> {
@@ -178,7 +178,7 @@ class FinishingStateMachineTest : StringSpec({
         lateinit var state1: State
         lateinit var state11: State
         lateinit var state112: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 state11 = initialState("state11") {
                     val final = finalState("finalState111") {
@@ -207,7 +207,7 @@ class FinishingStateMachineTest : StringSpec({
         lateinit var initialL2: State
         lateinit var finalL2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             logger = StateMachine.Logger { println(it) }
 
             finalL1 = finalState("finalL1") {
@@ -268,7 +268,7 @@ class FinishingStateMachineTest : StringSpec({
 
     "composite state isFinished is reset on leaving final state" {
         lateinit var state11: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 state11 = initialState("state11") {
                     val state112 = state("state112")
@@ -291,7 +291,7 @@ class FinishingStateMachineTest : StringSpec({
     "composite state isFinished is reset on leaving this state" {
         lateinit var state11: State
         lateinit var state12: State
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("state1") {
                 state11 = initialState("state11") {
                     val final = finalState("finalState111") {

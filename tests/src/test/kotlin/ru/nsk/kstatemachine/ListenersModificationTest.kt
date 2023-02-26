@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 
 class ListenersModificationTest : StringSpec({
     "remove state listener from callback" {
-        createStateMachine {
+        createTestStateMachine {
             initialState {
                 onEntry(once = true) {
 
@@ -15,7 +15,7 @@ class ListenersModificationTest : StringSpec({
     }
 
     "remove transition listener from callback" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state2 = state()
             initialState {
                 val transition = transition<SwitchEvent> {
@@ -35,7 +35,7 @@ class ListenersModificationTest : StringSpec({
     }
 
     "remove machine listener from callback" {
-        createStateMachine {
+        createTestStateMachine {
             initialState()
             lateinit var listener: StateMachine.Listener
             listener = onStarted { removeListener(listener) }

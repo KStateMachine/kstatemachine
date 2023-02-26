@@ -12,7 +12,7 @@ import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 class TransitionTest : StringSpec({
     "transition add after machine start" {
         lateinit var state1: State
-        createStateMachine {
+        createTestStateMachine {
             state1 = initialState()
         }
         shouldThrow<IllegalStateException> { state1.transition<SwitchEvent>() }
@@ -24,12 +24,12 @@ class TransitionTest : StringSpec({
         lateinit var state1: State
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState("state1") {
                 onEntry {
                     callbacks.onEntryState(this)
-                    it.transition.sourceState shouldBeSameInstanceAs this@createStateMachine
-                    it.direction.targetState shouldBeSameInstanceAs this@createStateMachine
+                    it.transition.sourceState shouldBeSameInstanceAs this@createTestStateMachine
+                    it.direction.targetState shouldBeSameInstanceAs this@createTestStateMachine
                 }
 
                 onExit {
@@ -64,7 +64,7 @@ class TransitionTest : StringSpec({
 
         lateinit var state2: State
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             transitionOn<SwitchEvent> {
                 targetState = { state2 }
                 callbacks.listen(this)
@@ -85,7 +85,7 @@ class TransitionTest : StringSpec({
     "transition to null target state" {
         val callbacks = mockkCallbacks()
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             initialState("initial") {
                 transition<SwitchEvent> {
                     targetState = null
@@ -101,7 +101,7 @@ class TransitionTest : StringSpec({
     "transition with shortcut method" {
         lateinit var finalState: FinalState
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             finalState = finalState()
             initialState {
                 transition<SwitchEvent>("transition1", finalState)
@@ -114,7 +114,7 @@ class TransitionTest : StringSpec({
 
     "transition to free state, negative" {
         val freeState = DefaultState()
-        val machine = createStateMachine("outer") {
+        val machine = createTestStateMachine("outer") {
             initialState {
                 transitionOn<SwitchEvent> { targetState = { freeState } } // invalid
             }
@@ -123,10 +123,10 @@ class TransitionTest : StringSpec({
     }
 
     "transition to non machine state, negative" {
-        val otherMachine = createStateMachine {
+        val otherMachine = createTestStateMachine {
             initialState()
         }
-        val machine = createStateMachine("outer") {
+        val machine = createTestStateMachine("outer") {
             initialState {
                 transitionOn<SwitchEvent> { targetState = { otherMachine } } // invalid
             }
@@ -136,7 +136,7 @@ class TransitionTest : StringSpec({
     }
 
     "multiple matching transitions negative" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             transition<SwitchEvent>()
             transition<SwitchEvent>()
             initialState()
@@ -146,7 +146,7 @@ class TransitionTest : StringSpec({
     }
 
     "multiple matching transitions" {
-        val machine = createStateMachine(doNotThrowOnMultipleTransitionsMatch = true) {
+        val machine = createTestStateMachine(doNotThrowOnMultipleTransitionsMatch = true) {
             transition<SwitchEvent>()
             transition<SwitchEvent>()
             initialState()
@@ -156,7 +156,7 @@ class TransitionTest : StringSpec({
     }
 
     "parallel multiple matching transitions negative" {
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL) {
             state {
                 transition<SwitchEvent>()
             }
@@ -169,7 +169,7 @@ class TransitionTest : StringSpec({
     }
 
     "parallel multiple matching transitions" {
-        val machine = createStateMachine(childMode = ChildMode.PARALLEL, doNotThrowOnMultipleTransitionsMatch = true) {
+        val machine = createTestStateMachine(childMode = ChildMode.PARALLEL, doNotThrowOnMultipleTransitionsMatch = true) {
             state {
                 transition<SwitchEvent>()
             }

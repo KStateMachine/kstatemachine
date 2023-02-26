@@ -6,7 +6,7 @@ import kotlinx.coroutines.*
 class StdLibCoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
     "call suspend functions from major listeners and callbacks" {
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             onStarted {
                 delay(0)
                 Thread.sleep(10)

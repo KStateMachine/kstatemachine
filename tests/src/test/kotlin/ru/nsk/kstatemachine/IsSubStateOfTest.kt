@@ -8,7 +8,7 @@ class IsSubStateOfTest : StringSpec({
         lateinit var state1: IState
         lateinit var state12: IState
         lateinit var state2: IState
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             state1 = initialState {
                 state12 = initialState()
             }
@@ -27,10 +27,10 @@ class IsSubStateOfTest : StringSpec({
 
     "isSubStateOf() composed machines" {
         lateinit var innerState1: IState
-        val inner = createStateMachine {
+        val inner = createTestStateMachine {
             innerState1 = initialState()
         }
-        val outer = createStateMachine {
+        val outer = createTestStateMachine {
             addInitialState(inner)
         }
         inner.isSubStateOf(outer) shouldBe true

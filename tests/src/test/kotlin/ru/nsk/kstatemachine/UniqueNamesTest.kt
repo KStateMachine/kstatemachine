@@ -6,7 +6,7 @@ import io.kotest.core.spec.style.StringSpec
 class UniqueNamesTest : StringSpec({
     "do not allow transitions with same name" {
         shouldThrow<IllegalStateException> {
-            createStateMachine {
+            createTestStateMachine {
                 initialState {
                     transition<SwitchEvent>("transition")
                     transition<SwitchEvent>("transition")
@@ -17,7 +17,7 @@ class UniqueNamesTest : StringSpec({
 
     "do not allow nested states with same name" {
         shouldThrow<IllegalStateException> {
-            createStateMachine("first") {
+            createTestStateMachine("first") {
                 initialState("first")
             }
         }
@@ -25,9 +25,9 @@ class UniqueNamesTest : StringSpec({
 
     "do not allow same names in machine as atomic state" {
         shouldThrow<IllegalStateException> {
-            createStateMachine("first") {
+            createTestStateMachine("first") {
                 initialState {
-                    addInitialState(createStateMachine("first") {
+                    addInitialState(createTestStateMachine("first") {
                         initialState()
                     })
                 }
@@ -36,9 +36,9 @@ class UniqueNamesTest : StringSpec({
     }
 
     "allow same names in nested machines" {
-        createStateMachine {
+        createTestStateMachine {
             initialState("first") {
-                addInitialState(createStateMachine {
+                addInitialState(createTestStateMachine {
                     initialState("first")
                 })
             }

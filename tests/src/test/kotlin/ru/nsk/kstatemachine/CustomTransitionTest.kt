@@ -24,7 +24,7 @@ class CustomTransitionTest : StringSpec({
 
         val event = CustomEvent(42)
 
-        val machine = createStateMachine {
+        val machine = createTestStateMachine {
             val state2 = state("state2")
 
             initialState("state1") {
