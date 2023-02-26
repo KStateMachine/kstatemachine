@@ -74,15 +74,17 @@ internal class StateMachineImpl(
     override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
         doStartFrom(StartDataEventImpl(data), state, argument)
 
-    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineStarter.start {
+    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
-        eventProcessingScope {
-            runCheckingExceptions {
-                val transitionParams = makeStartTransitionParams(event, this, state, argument)
-                runMachine(transitionParams)
-                switchToTargetState(state as InternalState, this, transitionParams)
-                recursiveAfterTransitionComplete(transitionParams)
+        coroutineStarter.start {
+            eventProcessingScope {
+                runCheckingExceptions {
+                    val transitionParams = makeStartTransitionParams(event, this, state, argument)
+                    runMachine(transitionParams)
+                    switchToTargetState(state as InternalState, this, transitionParams)
+                    recursiveAfterTransitionComplete(transitionParams)
+                }
             }
         }
     }
@@ -117,22 +119,24 @@ internal class StateMachineImpl(
         machineNotify { onStopped() }
     }
 
-    override fun processEvent(event: Event, argument: Any?) = coroutineStarter.start {
+    override fun processEvent(event: Event, argument: Any?): ProcessingResult {
         check(!isDestroyed) { "$this is already destroyed" }
         check(isRunning) { "$this is not started, call start() first" }
 
-        val eventAndArgument = EventAndArgument(event, argument)
+        return coroutineStarter.start {
+            val eventAndArgument = EventAndArgument(event, argument)
 
-        if (isProcessingEvent) {
-            pendingEventHandler.onPendingEvent(eventAndArgument.event, eventAndArgument.argument)
-            // pending event cannot be processed while previous event is still processing
-            // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
-            // to be processed later.
-            return@start ProcessingResult.PENDING
-        }
+            if (isProcessingEvent) {
+                pendingEventHandler.onPendingEvent(eventAndArgument.event, eventAndArgument.argument)
+                // pending event cannot be processed while previous event is still processing
+                // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
+                // to be processed later.
+                return@start ProcessingResult.PENDING
+            }
 
-        return@start eventProcessingScope {
-            process(eventAndArgument)
+            return@start eventProcessingScope {
+                process(eventAndArgument)
+            }
         }
     }
 
