@@ -88,96 +88,98 @@ state inner_machine_StateMachine
 """
 
 class ExportToPlantUmlTest : StringSpec({
-    "export nested states" {
-        val machine = createTestStateMachine("Nested states") {
-            val state1 = initialState("State1")
-            val state3 = finalState("State3")
+    CoroutineStarterType.values().forEach { coroutineStarterType ->
+        "export nested states" {
+            val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
+                val state1 = initialState("State1")
+                val state3 = finalState("State3")
 
-            val state2 = state("State2") {
-                transition<SwitchEvent> { targetState = state3 }
-                transition<SwitchEvent>("back") { targetState = state1 }
+                val state2 = state("State2") {
+                    transition<SwitchEvent> { targetState = state3 }
+                    transition<SwitchEvent>("back") { targetState = state1 }
 
-                val finalSubState = finalState("Final subState")
-                initialState("Initial subState") {
-                    transition<SwitchEvent> { targetState = finalSubState }
+                    val finalSubState = finalState("Final subState")
+                    initialState("Initial subState") {
+                        transition<SwitchEvent> { targetState = finalSubState }
+                    }
+                }
+
+                state1 {
+                    transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
+                    transition<SwitchEvent> { targetState = this@state1 }
+                    transition<SwitchEvent>()
                 }
             }
 
-            state1 {
-                transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
-                transition<SwitchEvent> { targetState = this@state1 }
-                transition<SwitchEvent>()
-            }
+            machine.exportToPlantUml() shouldBe PLANTUML_NESTED_STATES_RESULT
         }
 
-        machine.exportToPlantUml() shouldBe PLANTUML_NESTED_STATES_RESULT
-    }
+        "export parallel states" {
+            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
+                initialState("parallel states", ChildMode.PARALLEL) {
+                    state("State1") {
+                        val state11 = initialState("State11")
+                        val state12 = state("State12")
 
-    "export parallel states" {
-        val machine = createTestStateMachine("Parallel states") {
-            initialState("parallel states", ChildMode.PARALLEL) {
-                state("State1") {
-                    val state11 = initialState("State11")
-                    val state12 = state("State12")
+                        state11 {
+                            transition<SwitchEvent> { targetState = state12 }
+                        }
+                        state12 {
+                            transition<SwitchEvent> { targetState = state11 }
+                        }
+                    }
+                    state("State2") {
+                        val state21 = initialState("State21")
+                        val state22 = state("State22")
 
-                    state11 {
-                        transition<SwitchEvent> { targetState = state12 }
-                    }
-                    state12 {
-                        transition<SwitchEvent> { targetState = state11 }
-                    }
-                }
-                state("State2") {
-                    val state21 = initialState("State21")
-                    val state22 = state("State22")
-
-                    state21 {
-                        transition<SwitchEvent> { targetState = state22 }
-                    }
-                    state22 {
-                        transition<SwitchEvent> { targetState = state21 }
+                        state21 {
+                            transition<SwitchEvent> { targetState = state22 }
+                        }
+                        state22 {
+                            transition<SwitchEvent> { targetState = state21 }
+                        }
                     }
                 }
             }
+
+            machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
         }
 
-        machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
-    }
+        "export with pseudo states" {
+            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+                val state1 = initialState("state1")
 
-    "export with pseudo states" {
-        val machine = createTestStateMachine(enableUndo = true) {
-            val state1 = initialState("state1")
-
-            val state2 = state("state2") {
-                initialState("state21") {
-                    initialState("state211")
+                val state2 = state("state2") {
+                    initialState("state21") {
+                        initialState("state211")
+                    }
+                    state("state22")
                 }
-                state("state22")
+                val shallowHistory = state2.historyState("shallow history")
+                val deepHistory = state2.historyState("deep history", historyType = DEEP)
+
+                state("state3") {
+                    transition<FirstEvent>(targetState = shallowHistory)
+                    transition<SecondEvent>(targetState = deepHistory)
+                }
+                choiceState("choice") { state1 }
+                finalState("final")
             }
-            val shallowHistory = state2.historyState("shallow history")
-            val deepHistory = state2.historyState("deep history", historyType = DEEP)
 
-            state("state3") {
-                transition<FirstEvent>(targetState = shallowHistory)
-                transition<SecondEvent>(targetState = deepHistory)
+            machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
+        }
+
+        "export composed machines" {
+            val inner = createTestStateMachine(coroutineStarterType, name = "inner machine") {
+                initialState("inner state1")
+                state("inner state2")
             }
-            choiceState("choice") { state1 }
-            finalState("final")
-        }
+            val outer = createTestStateMachine(coroutineStarterType, name = "outer machine") {
+                initialState("outer state1")
+                addState(inner)
+            }
 
-        machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
-    }
-
-    "export composed machines" {
-        val inner = createTestStateMachine("inner machine") {
-            initialState("inner state1")
-            state("inner state2")
+            outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
         }
-        val outer = createTestStateMachine("outer machine") {
-            initialState("outer state1")
-            addState(inner)
-        }
-
-        outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
     }
 })

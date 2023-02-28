@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 import kotlinx.coroutines.*
 
-internal class CoroutineProcessingEngine(private val scope: CoroutineScope) : CoroutineStarter {
+internal class CoroutinesLibCoroutineStarter(private val scope: CoroutineScope) : CoroutineStarter {
     override fun <R : Any> start(block: suspend () -> R): R {
         return runBlocking {
             withContext(scope.coroutineContext) {
@@ -28,6 +28,6 @@ fun createCoStateMachine(
     autoDestroyOnStatesReuse,
     enableUndo,
     doNotThrowOnMultipleTransitionsMatch,
-    CoroutineProcessingEngine(scope),
+    CoroutinesLibCoroutineStarter(scope),
     init
 )

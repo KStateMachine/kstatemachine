@@ -4,6 +4,8 @@ import io.mockk.MockKVerificationScope
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 typealias Callback<T> = (T) -> Unit
 
@@ -39,7 +41,7 @@ fun mockkCallbacks() = mockk<Callbacks>(relaxUnitFun = true)
 
 fun verifySequenceAndClear(mock: Any, verifyBlock: MockKVerificationScope.() -> Unit) {
     verifySequence(verifyBlock = verifyBlock)
-    clearMocks(mock)
+    clearMocks(mock, answers = false)
 }
 
 fun testError(message: String): Nothing {
@@ -48,7 +50,13 @@ fun testError(message: String): Nothing {
 
 class TestException(message: String) : RuntimeException(message)
 
+enum class CoroutineStarterType { STD_LIB, COROUTINES_LIB }
+
+/**
+ * Wraps [createStateMachine] so it can be easily switched to [createCoStateMachine]
+ */
 fun createTestStateMachine(
+    coroutineStarterType: CoroutineStarterType,
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
@@ -56,12 +64,25 @@ fun createTestStateMachine(
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
     init: BuildingStateMachine.() -> Unit
-) = createStateMachine(
-    name,
-    childMode,
-    start,
-    autoDestroyOnStatesReuse,
-    enableUndo,
-    doNotThrowOnMultipleTransitionsMatch,
-    init = init
-)
+) = when (coroutineStarterType) {
+    CoroutineStarterType.STD_LIB -> createStateMachine(
+        name,
+        childMode,
+        start,
+        autoDestroyOnStatesReuse,
+        enableUndo,
+        doNotThrowOnMultipleTransitionsMatch,
+        init = init
+    )
+
+    CoroutineStarterType.COROUTINES_LIB -> createCoStateMachine(
+        CoroutineScope(Dispatchers.Default),
+        name,
+        childMode,
+        start,
+        autoDestroyOnStatesReuse,
+        enableUndo,
+        doNotThrowOnMultipleTransitionsMatch,
+        init = init
+    )
+}

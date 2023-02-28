@@ -1,45 +1,40 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
-import io.mockk.mockkObject
-import io.mockk.verify
-import ru.nsk.kstatemachine.StateMachineDestroyTestData.State1
-import ru.nsk.kstatemachine.StateMachineDestroyTestData.useInMachine
+import io.kotest.matchers.shouldBe
+import io.mockk.*
+import ru.nsk.kstatemachine.StateCleanupTestData.State1
 
-private object StateMachineDestroyTestData {
-    object State1 : DefaultState("state1")
-
-    fun useInMachine() = createTestStateMachine {
-        addInitialState(State1)
-    }
+private object StateCleanupTestData {
+    class State1 : DefaultState("state1")
 }
 
 class StateCleanupTest : StringSpec({
-    "cleanup is not called" {
-        mockkObject(State1) {
-            val machine = useInMachine()
-            try {
-                verify(inverse = true) { State1.onCleanup() }
-            } finally {
-                machine.destroy()
-            }
+    CoroutineStarterType.values().forEach { coroutineStarterType ->
+        "cleanup is not called" {
+            val state = spyk<State1>()
+            useInMachine(coroutineStarterType, state)
+            verify(inverse = true) { state.onCleanup() }
         }
-    }
 
-    "cleanup is called on machine manual destruction" {
-        mockkObject(State1) {
-            useInMachine().destroy()
-
-            verify(exactly = 1) { State1.onCleanup() }
+        "cleanup is called on machine manual destruction" {
+            val state = spyk<State1>()
+            useInMachine(coroutineStarterType, state).destroy()
+            verify(exactly = 1) { state.onCleanup() }
         }
-    }
 
-    "cleanup is called on machine auto destruction" {
-        mockkObject(State1) {
-            useInMachine()
-            useInMachine()
+        "cleanup is called on machine auto destruction" {
+            val state = spyk<State1>()
+            val machine1 = useInMachine(coroutineStarterType, state)
+            val machine2 = useInMachine(coroutineStarterType, state)
 
-            verify(exactly = 1) { State1.onCleanup() }
+            verify(exactly = 1) { state.onCleanup() }
+            machine1.isDestroyed shouldBe true
+            machine2.isDestroyed shouldBe false
         }
     }
 })
+
+private fun useInMachine(coroutineStarterType: CoroutineStarterType, state: IState) = createTestStateMachine(coroutineStarterType) {
+    addInitialState(state)
+}

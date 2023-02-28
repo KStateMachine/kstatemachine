@@ -15,33 +15,35 @@ private object ObjectStatesTestData {
  * autoDestroyOnStatesReuse argument is false.
  */
 class ObjectStatesTest : StringSpec({
-    "multiple usage of object states throws" {
-        val machine = useInMachine(false)
-        shouldThrow<IllegalStateException> { useInMachine(false) }
-        shouldThrow<IllegalStateException> { useInMachine(true) }
-        machine.destroy()
-    }
+    CoroutineStarterType.values().forEach { coroutineStarterType ->
+        "multiple usage of object states throws" {
+            val machine = useInMachine(coroutineStarterType, false)
+            shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, false) }
+            shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
+            machine.destroy()
+        }
 
-    "multiple usage of object states allowed" {
-        useInMachine(true)
-        useInMachine(true).destroy()
-    }
+        "multiple usage of object states allowed" {
+            useInMachine(coroutineStarterType, true)
+            useInMachine(coroutineStarterType, true).destroy()
+        }
 
-    "multiple usage of object states throws if current machine forbids auto destroy" {
-        useInMachine(true)
-        val machine = useInMachine(false)
-        shouldThrow<IllegalStateException> { useInMachine(true) }
-        machine.destroy()
-    }
+        "multiple usage of object states throws if current machine forbids auto destroy" {
+            useInMachine(coroutineStarterType, true)
+            val machine = useInMachine(coroutineStarterType, false)
+            shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
+            machine.destroy()
+        }
 
-    "multiple usage of object states allowed with manual calling destroy()" {
-        useInMachine(false).destroy()
-        useInMachine(false).destroy()
+        "multiple usage of object states allowed with manual calling destroy()" {
+            useInMachine(coroutineStarterType, false).destroy()
+            useInMachine(coroutineStarterType, false).destroy()
+        }
     }
 })
 
-private fun useInMachine(autoDestroyOnStatesReuse: Boolean): StateMachine {
-    val machine = createTestStateMachine(autoDestroyOnStatesReuse = autoDestroyOnStatesReuse) {
+private fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroyOnStatesReuse: Boolean): StateMachine {
+    val machine = createTestStateMachine(coroutineStarterType, autoDestroyOnStatesReuse = autoDestroyOnStatesReuse) {
         addInitialState(State1) {
             transition<SwitchEvent> {
                 targetState = State2

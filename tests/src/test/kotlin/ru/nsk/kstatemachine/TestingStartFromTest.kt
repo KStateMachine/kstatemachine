@@ -6,60 +6,62 @@ import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.Testing.startFrom
 
 class TestingStartFromTest : StringSpec({
-    "startFrom()" {
-        val callbacks = mockkCallbacks()
+    CoroutineStarterType.values().forEach { coroutineStarterType ->
+        "startFrom()" {
+            val callbacks = mockkCallbacks()
 
-        lateinit var state2: State
-        lateinit var state22: State
+            lateinit var state2: State
+            lateinit var state22: State
 
-        val machine = createTestStateMachine(start = false) {
-            callbacks.listen(this)
-
-            initialState("state1") { callbacks.listen(this) }
-            state2 = state("state2") {
+            val machine = createTestStateMachine(coroutineStarterType, start = false) {
                 callbacks.listen(this)
 
-                initialState("state21") { callbacks.listen(this) }
-                state22 = state("state22") { callbacks.listen(this) }
+                initialState("state1") { callbacks.listen(this) }
+                state2 = state("state2") {
+                    callbacks.listen(this)
+
+                    initialState("state21") { callbacks.listen(this) }
+                    state22 = state("state22") { callbacks.listen(this) }
+                }
+
+                onStarted { callbacks.onStarted(this) }
             }
 
-            onStarted { callbacks.onStarted(this) }
-        }
+            machine.startFrom(state22)
 
-        machine.startFrom(state22)
-
-        verifySequenceAndClear(callbacks) {
-            callbacks.onStarted(machine)
-            callbacks.onEntryState(machine)
-            callbacks.onEntryState(state2)
-            callbacks.onEntryState(state22)
-        }
-
-        machine.stop()
-        machine.activeStates().shouldBeEmpty()
-
-        machine.startFrom("state22")
-
-        verifySequenceAndClear(callbacks) {
-            callbacks.onStarted(machine)
-            callbacks.onEntryState(machine)
-            callbacks.onEntryState(state2)
-            callbacks.onEntryState(state22)
-        }
-    }
-
-    "data startFrom()" {
-        val callbacks = mockkCallbacks()
-        lateinit var state2: DataState<Int>
-        val machine = createTestStateMachine(start = false) {
-            initialState("state1") {
-                callbacks.listen(this)
+            verifySequenceAndClear(callbacks) {
+                callbacks.onStarted(machine)
+                callbacks.onEntryState(machine)
+                callbacks.onEntryState(state2)
+                callbacks.onEntryState(state22)
             }
-            state2 = dataState("state2", 1) {
-                callbacks.listen(this)
+
+            machine.stop()
+            machine.activeStates().shouldBeEmpty()
+
+            machine.startFrom("state22")
+
+            verifySequenceAndClear(callbacks) {
+                callbacks.onStarted(machine)
+                callbacks.onEntryState(machine)
+                callbacks.onEntryState(state2)
+                callbacks.onEntryState(state22)
             }
         }
-        machine.startFrom(state2, data = 42)
-        state2.data shouldBe 42
+
+        "data startFrom()" {
+            val callbacks = mockkCallbacks()
+            lateinit var state2: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType, start = false) {
+                initialState("state1") {
+                    callbacks.listen(this)
+                }
+                state2 = dataState("state2", 1) {
+                    callbacks.listen(this)
+                }
+            }
+            machine.startFrom(state2, data = 42)
+            state2.data shouldBe 42
+        }
     }
 })

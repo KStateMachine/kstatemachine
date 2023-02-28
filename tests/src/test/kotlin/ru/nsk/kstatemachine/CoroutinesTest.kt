@@ -3,17 +3,17 @@ package ru.nsk.kstatemachine
 import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
 
-class StdLibCoroutinesTest : StringSpec({
+class CoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
     "call suspend functions from major listeners and callbacks" {
-        val machine = createTestStateMachine {
+        val machine = createStateMachine {
             onStarted {
                 delay(0)
                 Thread.sleep(10)
             }
             onStopped { delay(0) }
             onTransition { delay(0) }
-            onTransitionComplete { _ ,_ -> delay(0) }
+            onTransitionComplete { _, _ -> delay(0) }
             onStateEntry { delay(0) }
             initialState("first") {
                 onEntry { delay(0) }
@@ -38,5 +38,22 @@ class StdLibCoroutinesTest : StringSpec({
             }
         }
         machine.processEvent(SwitchEvent)
+    }
+
+    "test coroutines called from machine callbacks" {
+        createCoStateMachine(GlobalScope) {
+            onStarted { delay(1) }
+            initialState("first") {
+                onEntry {
+                    coroutineScope {
+                        launch { delay(1) }
+                        launch { delay(1) }
+                    }
+                    withContext(Dispatchers.Default) {
+                        delay(1)
+                    }
+                }
+            }
+        }
     }
 })
