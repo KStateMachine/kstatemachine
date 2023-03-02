@@ -51,7 +51,7 @@ open class DefaultTransition<E : Event>(
         _listeners.remove(listener)
     }
 
-    override fun isMatchingEvent(event: Event) = eventMatcher.match(event)
+    override suspend fun isMatchingEvent(event: Event) = eventMatcher.match(event)
 
     override suspend fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>) =
         targetStateDirectionProducer(policy)

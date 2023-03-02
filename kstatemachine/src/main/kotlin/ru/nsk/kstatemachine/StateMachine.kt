@@ -67,9 +67,9 @@ interface StateMachine : State {
     fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
     /**
-     * Same as [processEvent] but works in non-blocking manner if it is possible.
-     * This method only makes sense when machine is created with kotlin coroutines library support.
-     * [createCoStateMachine]
+     * Same as [processEvent] but works in non-blocking manner.
+     * This method only makes sense when machine is created with kotlin coroutines library support,
+     * by [createCoStateMachine] function.
      */
     fun processEventAsync(event: Event, argument: Any? = null)
 

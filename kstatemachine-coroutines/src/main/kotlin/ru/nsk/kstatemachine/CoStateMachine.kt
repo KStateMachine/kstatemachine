@@ -5,6 +5,8 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * Analog of [createStateMachine] function, with kotlin coroutines support.
  * Use this one if you are going to use kotlin coroutines library from KStateMachine callbacks.
+ *
+ * @param scope be careful while working with threaded scopes as KStateMachine classes are not thread-safe.
  */
 fun createCoStateMachine(
     scope: CoroutineScope,

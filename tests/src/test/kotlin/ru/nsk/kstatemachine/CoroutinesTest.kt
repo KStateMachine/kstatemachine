@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
 import java.lang.UnsupportedOperationException
+import kotlin.coroutines.EmptyCoroutineContext
 
 class CoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
@@ -11,7 +12,6 @@ class CoroutinesTest : StringSpec({
         val machine = createStateMachine {
             onStarted {
                 delay(0)
-                Thread.sleep(10)
             }
             onStopped { delay(0) }
             onTransition { delay(0) }
@@ -65,19 +65,24 @@ class CoroutinesTest : StringSpec({
     }
 
     "test coroutines called from machine callbacks" {
-        createCoStateMachine(GlobalScope) {
-            onStarted { delay(1) }
-            initialState("first") {
-                onEntry {
-                    coroutineScope {
-                        launch { delay(1) }
-                        launch { delay(1) }
-                    }
-                    withContext(Dispatchers.Default) {
-                        delay(1)
+        val scope = CoroutineScope(EmptyCoroutineContext)
+        try {
+            createCoStateMachine(scope) {
+                onStarted { delay(1) }
+                initialState("first") {
+                    onEntry {
+                        coroutineScope {
+                            launch { delay(1) }
+                            launch { delay(1) }
+                        }
+                        withContext(Dispatchers.Default) {
+                            delay(1)
+                        }
                     }
                 }
             }
+        } finally {
+            scope.cancel()
         }
     }
 })

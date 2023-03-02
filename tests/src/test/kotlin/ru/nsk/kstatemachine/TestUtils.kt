@@ -4,8 +4,11 @@ import io.mockk.MockKVerificationScope
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.newSingleThreadContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 typealias Callback<T> = (T) -> Unit
 
@@ -50,7 +53,12 @@ fun testError(message: String): Nothing {
 
 class TestException(message: String) : RuntimeException(message)
 
-enum class CoroutineStarterType { STD_LIB, COROUTINES_LIB }
+enum class CoroutineStarterType {
+    STD_LIB,
+    COROUTINES_LIB_EMPTY_CONTEXT,
+    COROUTINES_LIB_UNCONFINED_DISPATCHER,
+    COROUTINES_LIB_DEFAULT_DISPATCHER, // dangerous
+}
 
 /**
  * Wraps [createStateMachine] so it can be easily switched to [createCoStateMachine]
@@ -75,7 +83,29 @@ fun createTestStateMachine(
         init = init
     )
 
-    CoroutineStarterType.COROUTINES_LIB -> createCoStateMachine(
+    CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createCoStateMachine(
+        CoroutineScope(EmptyCoroutineContext),
+        name,
+        childMode,
+        start,
+        autoDestroyOnStatesReuse,
+        enableUndo,
+        doNotThrowOnMultipleTransitionsMatch,
+        init = init
+    )
+
+    CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createCoStateMachine(
+        CoroutineScope(Dispatchers.Unconfined),
+        name,
+        childMode,
+        start,
+        autoDestroyOnStatesReuse,
+        enableUndo,
+        doNotThrowOnMultipleTransitionsMatch,
+        init = init
+    )
+
+    CoroutineStarterType.COROUTINES_LIB_DEFAULT_DISPATCHER -> createCoStateMachine(
         CoroutineScope(Dispatchers.Default),
         name,
         childMode,

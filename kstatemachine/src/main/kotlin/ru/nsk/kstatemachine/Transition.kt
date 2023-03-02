@@ -26,7 +26,7 @@ interface Transition<E : Event> : VisitorAcceptor {
     /**
      * Checks if the [event] matches this [Transition]
      */
-    fun isMatchingEvent(event: Event): Boolean
+    suspend fun isMatchingEvent(event: Event): Boolean
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 

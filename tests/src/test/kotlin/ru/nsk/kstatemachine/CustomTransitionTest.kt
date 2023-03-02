@@ -11,7 +11,7 @@ private object CustomTransitionTestData {
 
     class CustomTransition(name: String, sourceState: IState, targetState: IState) :
         DefaultTransition<Event>(name, isInstanceOf(), TransitionType.LOCAL, sourceState, targetState) {
-        override fun isMatchingEvent(event: Event): Boolean {
+        override suspend fun isMatchingEvent(event: Event): Boolean {
             return super.isMatchingEvent(event) && event is CustomEvent && event.value == 42
         }
     }

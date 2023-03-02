@@ -40,7 +40,7 @@ abstract class InternalState : IState {
 
 internal fun InternalState.requireParent() = requireNotNull(internalParent) { "$this parent is not set" }
 
-internal fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
+internal suspend fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }
     @Suppress("UNCHECKED_CAST")
     return triggeringTransitions as List<InternalTransition<E>>
