@@ -1,17 +1,11 @@
 package ru.nsk.kstatemachine
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
 
-internal class CoroutinesLibCoroutineStarter(private val scope: CoroutineScope) : CoroutineStarter {
-    override fun <R : Any> start(block: suspend () -> R): R {
-        return runBlocking {
-            withContext(scope.coroutineContext) {
-                block()
-            }
-        }
-    }
-}
-
+/**
+ * Analog of [createStateMachine] function, with kotlin coroutines support.
+ * Use this one if you are going to use kotlin coroutines library from KStateMachine callbacks.
+ */
 fun createCoStateMachine(
     scope: CoroutineScope,
     name: String? = null,

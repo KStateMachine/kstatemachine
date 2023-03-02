@@ -1,7 +1,9 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import kotlinx.coroutines.*
+import java.lang.UnsupportedOperationException
 
 class CoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
@@ -15,7 +17,7 @@ class CoroutinesTest : StringSpec({
             onTransition { delay(0) }
             onTransitionComplete { _, _ -> delay(0) }
             onStateEntry { delay(0) }
-            initialState("first") {
+            val first = initialState("first") {
                 onEntry { delay(0) }
                 onExit { delay(0) }
                 onFinished { delay(0) }
@@ -36,8 +38,30 @@ class CoroutinesTest : StringSpec({
                     }
                 }
             }
+            choiceState {
+                delay(0)
+                first
+            }
         }
         machine.processEvent(SwitchEvent)
+    }
+
+    "using coroutines with std lib throws" {
+        shouldThrow<UnsupportedOperationException> {
+            createStateMachine {
+                initialState()
+                onStarted { delay(1) }
+            }
+        }
+    }
+
+    "processEventAsync should throw with std lib implementation" {
+        val machine = createStateMachine {
+            initialState()
+        }
+        shouldThrow<UnsupportedOperationException> {
+            machine.processEventAsync(SwitchEvent)
+        }
     }
 
     "test coroutines called from machine callbacks" {

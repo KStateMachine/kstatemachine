@@ -107,7 +107,7 @@ interface FinalDataState<D : Any> : IFinalState, DataState<D>
 interface PseudoState : State
 
 interface RedirectPseudoState : PseudoState {
-    fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
+    suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
 }
 
 /**
@@ -244,7 +244,7 @@ inline fun <reified D : Any> IState.finalDataState(
     noinline init: StateBlock<FinalDataState<D>>? = null
 ) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
-fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
+fun IState.choiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
 fun IState.historyState(

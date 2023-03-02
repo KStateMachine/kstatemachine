@@ -3,9 +3,9 @@ package ru.nsk.kstatemachine
 /**
  * Returns [StateMachine.PendingEventHandler] implementation that throws exception. This is an old default behaviour.
  */
-fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandler { pendingEvent, _ ->
+fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandler {
     error(
-        "$this can not process pending $pendingEvent as event processing is already running. " +
+        "$this can not process pending ${it.event} as event processing is already running. " +
                 "Do not call processEvent() from notification listeners or use queuePendingEventHandler()"
     )
 }
@@ -23,9 +23,11 @@ private class QueuePendingEventHandlerImpl(private val machine: StateMachine) : 
 
     override fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
 
-    override fun onPendingEvent(pendingEvent: Event, argument: Any?) {
-        machine.log { "$machine queued event ${pendingEvent::class.simpleName} with argument $argument" }
-        queue.add(EventAndArgument(pendingEvent, argument))
+    override fun onPendingEvent(eventAndArgument: EventAndArgument<*>) {
+        machine.log {
+            "$machine queued event ${eventAndArgument.event::class.simpleName} with argument ${eventAndArgument.argument}"
+        }
+        queue.add(eventAndArgument)
     }
 
     override fun nextEventAndArgument() = queue.removeFirstOrNull()

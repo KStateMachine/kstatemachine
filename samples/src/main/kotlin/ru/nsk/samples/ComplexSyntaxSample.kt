@@ -82,15 +82,15 @@ fun main() {
         // Set custom IgnoredEventHandler
         // for event that does not match any transition,
         // for example to throw exceptions on ignored events
-        ignoredEventHandler = StateMachine.IgnoredEventHandler { event, argument ->
-            error("Ignored $event, argument: $argument")
+        ignoredEventHandler = StateMachine.IgnoredEventHandler {
+            error("Ignored ${it.event}, argument: ${it.argument}")
         }
 
         // Set custom PendingEventHandler which is triggered
         // if processEvent() is called while previous processEvent() is still processing
-        pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
+        pendingEventHandler = StateMachine.PendingEventHandler {
             error(
-                "$this can not process pending $pendingEvent " +
+                "$this can not process pending ${it.event} " +
                         "as event processing is already running. " +
                         "Do not call processEvent() from notification listeners."
             )

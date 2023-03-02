@@ -25,7 +25,7 @@ open class DefaultDataState<D : Any>(
             "Last data is not available yet in $this, and default data not provided"
         }
 
-    override fun onDoEnter(transitionParams: TransitionParams<*>) {
+    override suspend fun onDoEnter(transitionParams: TransitionParams<*>) {
         fun assign(data: D?) {
             if (data != null) {
                 _data = data
@@ -56,7 +56,7 @@ open class DefaultDataState<D : Any>(
         }
     }
 
-    override fun onDoExit(transitionParams: TransitionParams<*>) {
+    override suspend fun onDoExit(transitionParams: TransitionParams<*>) {
         _data = null
     }
 

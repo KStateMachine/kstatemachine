@@ -67,7 +67,7 @@ class PendingEventHandlerTest : StringSpec({
 
                     transition<FirstEvent>(targetState = second)
                 }
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ ->
+                ignoredEventHandler = StateMachine.IgnoredEventHandler {
                     throw TestException("test")
                 }
             }
@@ -91,7 +91,7 @@ class PendingEventHandlerTest : StringSpec({
                     }
                 }
 
-                pendingEventHandler = StateMachine.PendingEventHandler { _, _ ->
+                pendingEventHandler = StateMachine.PendingEventHandler {
                     testError("Already processing")
                 }
             }

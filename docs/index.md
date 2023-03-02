@@ -633,8 +633,8 @@ logging is enabled or use custom `IgnoredEventHandler` for example to throw erro
 ```kotlin
 createStateMachine {
     // ...
-    ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-        error("unexpected $event")
+    ignoredEventHandler = StateMachine.IgnoredEventHandler {
+        error("unexpected ${it.event}")
     }
 }
 ```

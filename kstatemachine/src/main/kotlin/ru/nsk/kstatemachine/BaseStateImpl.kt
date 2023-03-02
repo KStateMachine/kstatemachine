@@ -112,8 +112,8 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override fun asState() = this
 
-    protected open fun onDoEnter(transitionParams: TransitionParams<*>) = Unit // default empty
-    protected open fun onDoExit(transitionParams: TransitionParams<*>) = Unit // default empty
+    protected open suspend fun onDoEnter(transitionParams: TransitionParams<*>) = Unit // default empty
+    protected open suspend fun onDoExit(transitionParams: TransitionParams<*>) = Unit // default empty
 
     override suspend fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isActive) {

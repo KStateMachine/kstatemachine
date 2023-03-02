@@ -67,6 +67,13 @@ interface StateMachine : State {
     fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
     /**
+     * Same as [processEvent] but works in non-blocking manner if it is possible.
+     * This method only makes sense when machine is created with kotlin coroutines library support.
+     * [createCoStateMachine]
+     */
+    fun processEventAsync(event: Event, argument: Any? = null)
+
+    /**
      * Destroys machine structure clearing all listeners, states etc.
      */
     fun destroy(stop: Boolean = true)
@@ -113,11 +120,11 @@ interface StateMachine : State {
     }
 
     fun interface IgnoredEventHandler {
-        fun onIgnoredEvent(event: Event, argument: Any?)
+        fun onIgnoredEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface PendingEventHandler {
-        fun onPendingEvent(pendingEvent: Event, argument: Any?)
+        fun onPendingEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface ListenerExceptionHandler {

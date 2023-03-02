@@ -24,7 +24,7 @@ internal class StateMachineImpl(
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = NullLogger
-    override var ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> }
+    override var ignoredEventHandler = StateMachine.IgnoredEventHandler {}
     override var pendingEventHandler: StateMachine.PendingEventHandler = queuePendingEventHandler()
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
@@ -77,7 +77,7 @@ internal class StateMachineImpl(
     private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
-        coroutineStarter.start {
+        coroutineStarter.startBlocking {
             eventProcessingScope {
                 runCheckingExceptions {
                     val transitionParams = makeStartTransitionParams(event, this, state, argument)
@@ -91,7 +91,7 @@ internal class StateMachineImpl(
 
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
-        check(!isDestroyed) { "$this is already destroyed" }
+        checkNotDestroyed()
         check(!isRunning) { "$this is already started" }
         check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }
         if (childMode == ChildMode.EXCLUSIVE)
@@ -106,7 +106,7 @@ internal class StateMachineImpl(
     }
 
     override fun stop() {
-        check(!isDestroyed) { "$this is already destroyed" }
+        checkNotDestroyed()
         if (!_isRunning) return
         processEvent(StopEvent)
     }
@@ -120,21 +120,42 @@ internal class StateMachineImpl(
     }
 
     override fun processEvent(event: Event, argument: Any?): ProcessingResult {
-        check(!isDestroyed) { "$this is already destroyed" }
+        checkNotDestroyed()
         check(isRunning) { "$this is not started, call start() first" }
 
-        return coroutineStarter.start {
+        return coroutineStarter.startBlocking {
             val eventAndArgument = EventAndArgument(event, argument)
 
             if (isProcessingEvent) {
-                pendingEventHandler.onPendingEvent(eventAndArgument.event, eventAndArgument.argument)
+                pendingEventHandler.onPendingEvent(eventAndArgument)
                 // pending event cannot be processed while previous event is still processing
                 // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
                 // to be processed later.
-                return@start ProcessingResult.PENDING
+                return@startBlocking ProcessingResult.PENDING
             }
 
-            return@start eventProcessingScope {
+            return@startBlocking eventProcessingScope {
+                process(eventAndArgument)
+            }
+        }
+    }
+
+    override fun processEventAsync(event: Event, argument: Any?) {
+        checkNotDestroyed()
+        check(isRunning) { "$this is not started, call start() first" }
+
+        coroutineStarter.startAsync {
+            val eventAndArgument = EventAndArgument(event, argument)
+
+            if (isProcessingEvent) {
+                pendingEventHandler.onPendingEvent(eventAndArgument)
+                // pending event cannot be processed while previous event is still processing
+                // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
+                // to be processed later.
+                return@startAsync
+            }
+
+            eventProcessingScope {
                 process(eventAndArgument)
             }
         }
@@ -169,7 +190,7 @@ internal class StateMachineImpl(
 
         if (!eventProcessed) {
             log { "$this ignored ${wrappedEventAndArgument.event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument.event, wrappedEventAndArgument.argument)
+            ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument)
         }
         return if (eventProcessed) ProcessingResult.PROCESSED else ProcessingResult.IGNORED
     }
@@ -291,6 +312,8 @@ internal class StateMachineImpl(
         log { "$this destroyed" }
     }
 }
+
+private fun StateMachine.checkNotDestroyed() = check(!isDestroyed) { "$this is already destroyed" }
 
 internal suspend inline fun InternalStateMachine.runDelayingException(crossinline block: suspend () -> Unit) =
     try {

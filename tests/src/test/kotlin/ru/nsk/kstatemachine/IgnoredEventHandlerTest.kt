@@ -15,7 +15,7 @@ class IgnoredEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState("first")
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ ->
+                ignoredEventHandler = StateMachine.IgnoredEventHandler {
                     callbacks.onIgnoredEvent(SwitchEvent)
                 }
             }
@@ -28,8 +28,8 @@ class IgnoredEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState("first")
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-                    testError("unexpected $event")
+                ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                    testError("unexpected ${it.event}")
                 }
             }
 
@@ -45,8 +45,8 @@ class IgnoredEventHandlerTest : StringSpec({
 
                 onFinished { callbacks.onFinished(this) }
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-                    callbacks.onIgnoredEvent(event)
+                ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                    callbacks.onIgnoredEvent(it.event)
                 }
             }
 
@@ -64,8 +64,8 @@ class IgnoredEventHandlerTest : StringSpec({
                     transitionConditionally<SwitchEvent> { direction = { noTransition() } }
                 }
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { event, _ ->
-                    callbacks.onIgnoredEvent(event)
+                ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                    callbacks.onIgnoredEvent(it.event)
                 }
             }
 

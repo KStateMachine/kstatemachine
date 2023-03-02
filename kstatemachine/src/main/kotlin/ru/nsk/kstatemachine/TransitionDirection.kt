@@ -29,9 +29,9 @@ internal open class TargetState(override val targetState: IState) : TransitionDi
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
-fun EventAndArgument<*>.targetState(targetState: IState) = recursiveResolveTargetState(targetState)
+suspend fun EventAndArgument<*>.targetState(targetState: IState) = recursiveResolveTargetState(targetState)
 
-private fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): TransitionDirection {
+private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): TransitionDirection {
     return when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
         is HistoryState -> TargetState(targetState.storedState)
@@ -55,18 +55,18 @@ internal typealias TransitionDirectionProducer<E> = suspend (TransitionDirection
 sealed class TransitionDirectionProducerPolicy<E : Event> {
     internal class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) :
         TransitionDirectionProducerPolicy<E>() {
-        override fun targetState(targetState: IState) = eventAndArgument.targetState(targetState)
-        override fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
+        override suspend fun targetState(targetState: IState) = eventAndArgument.targetState(targetState)
+        override suspend fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
     }
 
     /**
      * TODO find the way to collect target states of conditional transitions
      */
     internal class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>() {
-        override fun targetState(targetState: IState) = unresolvedTargetState(targetState)
-        override fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
+        override suspend fun targetState(targetState: IState) = unresolvedTargetState(targetState)
+        override suspend fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
     }
 
-    abstract fun targetState(targetState: IState): TransitionDirection
-    abstract fun targetStateOrStay(targetState: IState?): TransitionDirection
+    abstract suspend fun targetState(targetState: IState): TransitionDirection
+    abstract suspend fun targetStateOrStay(targetState: IState?): TransitionDirection
 }

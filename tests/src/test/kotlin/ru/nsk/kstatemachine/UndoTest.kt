@@ -337,7 +337,7 @@ class UndoTest : StringSpec({
 
         "undo ignored event" {
             val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { _, _ -> throw TestException("test") }
+                ignoredEventHandler = StateMachine.IgnoredEventHandler { throw TestException("test") }
                 initialState("state1") {
                     transition<SwitchEvent>()
                 }
