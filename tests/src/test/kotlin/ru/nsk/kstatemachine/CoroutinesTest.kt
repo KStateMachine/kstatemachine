@@ -55,15 +55,6 @@ class CoroutinesTest : StringSpec({
         }
     }
 
-    "processEventAsync should throw with std lib implementation" {
-        val machine = createStateMachine {
-            initialState()
-        }
-        shouldThrow<UnsupportedOperationException> {
-            machine.processEventAsync(SwitchEvent)
-        }
-    }
-
     "test coroutines called from machine callbacks" {
         val scope = CoroutineScope(EmptyCoroutineContext)
         try {

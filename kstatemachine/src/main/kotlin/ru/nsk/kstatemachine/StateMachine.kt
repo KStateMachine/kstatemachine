@@ -42,7 +42,7 @@ interface StateMachine : State {
      */
     val doNotThrowOnMultipleTransitionsMatch: Boolean
 
-    val coroutineStarter: CoroutineStarter
+    val coroutineAbstraction: CoroutineAbstraction
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -51,11 +51,6 @@ interface StateMachine : State {
      * Starts state machine
      */
     fun start(argument: Any? = null)
-
-    /**
-     * Forces state machine to stop
-     */
-    fun stop()
 
     /**
      * Processes [Event].
@@ -67,16 +62,10 @@ interface StateMachine : State {
     fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
     /**
-     * Same as [processEvent] but works in non-blocking manner.
-     * This method only makes sense when machine is created with kotlin coroutines library support,
-     * by [createCoStateMachine] function.
+     * Same as [processEvent] but suspendable, so user may easily call it in blocking and non-blocking way.
+     * This method is based on [CoroutineAbstraction.withContext] internally.
      */
-    fun processEventAsync(event: Event, argument: Any? = null)
-
-    /**
-     * Destroys machine structure clearing all listeners, states etc.
-     */
-    fun destroy(stop: Boolean = true)
+    suspend fun processEventCo(event: Event, argument: Any? = null): ProcessingResult
 
     fun log(lazyMessage: () -> String)
 
@@ -133,16 +122,6 @@ interface StateMachine : State {
 }
 
 /**
- * Allows to mutate some properties, which is necessary before machine is started
- */
-interface BuildingStateMachine : StateMachine {
-    override var logger: StateMachine.Logger
-    override var ignoredEventHandler: StateMachine.IgnoredEventHandler
-    override var pendingEventHandler: PendingEventHandler
-    override var listenerExceptionHandler: StateMachine.ListenerExceptionHandler
-}
-
-/**
  * Shortcut for [StateMachine.stop] and [StateMachine.start] sequence calls
  */
 fun StateMachine.restart(argument: Any? = null) {
@@ -155,11 +134,45 @@ fun StateMachine.restart(argument: Any? = null) {
  * Previous states are stored in a stack, so this method mey be called multiple times if needed.
  * This function has same effect as alternative syntax processEvent(UndoEvent), but throws if undo feature is not enabled.
  */
-fun StateMachine.undo(argument: Any? = null) {
+fun StateMachine.undo(argument: Any? = null) = coroutineAbstraction.runBlocking { undoCo(argument) }
+
+suspend fun StateMachine.undoCo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
     check(isUndoEnabled) {
         "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
     }
-    processEvent(UndoEvent, argument)
+    return@withContext processEventCo(UndoEvent, argument)
+}
+
+/**
+ * Forces state machine to stop
+ */
+fun StateMachine.stop() = coroutineAbstraction.runBlocking { stopCo() }
+
+suspend fun StateMachine.stopCo() = coroutineAbstraction.withContext {
+    checkNotDestroyed()
+    if (!isRunning) return@withContext
+    processEventCo(StopEvent)
+}
+
+
+/**
+ * Destroys machine structure clearing all listeners, states etc.
+ */
+fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroyCo(stop) }
+
+suspend fun StateMachine.destroyCo(stop: Boolean = true) = coroutineAbstraction.withContext {
+    if (isDestroyed) return@withContext
+    processEventCo(DestroyEvent(stop))
+}
+
+/**
+ * Allows to mutate some properties, which is necessary during setup, before machine is started
+ */
+interface BuildingStateMachine : StateMachine {
+    override var logger: StateMachine.Logger
+    override var ignoredEventHandler: StateMachine.IgnoredEventHandler
+    override var pendingEventHandler: PendingEventHandler
+    override var listenerExceptionHandler: StateMachine.ListenerExceptionHandler
 }
 
 /**
@@ -172,7 +185,7 @@ fun createStateMachine(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    coroutineStarter: CoroutineStarter = StdLibCoroutineStarter(),
+    coroutineAbstraction: CoroutineAbstraction = StdLibCoroutineAbstraction(),
     init: BuildingStateMachine.() -> Unit
 ): StateMachine {
     return StateMachineImpl(
@@ -181,7 +194,7 @@ fun createStateMachine(
         autoDestroyOnStatesReuse,
         enableUndo,
         doNotThrowOnMultipleTransitionsMatch,
-        coroutineStarter,
+        coroutineAbstraction,
     ).apply {
         init()
         if (start) start()

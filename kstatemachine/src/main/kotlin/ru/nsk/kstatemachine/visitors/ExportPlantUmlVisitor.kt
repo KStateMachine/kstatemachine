@@ -56,7 +56,7 @@ internal class ExportPlantUmlVisitor : Visitor {
 
         val sourceState = transition.sourceState.graphName()
 
-        val targetState = transition.sourceState.machine.coroutineStarter.startBlocking {
+        val targetState = transition.sourceState.machine.coroutineAbstraction.runBlocking {
             val state = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState as? InternalState
             if (state != null) Result.success(state) else Result.failure(NullPointerException("state is null"))
         }.getOrElse { return }

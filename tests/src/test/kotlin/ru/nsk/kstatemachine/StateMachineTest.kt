@@ -313,14 +313,14 @@ class StateMachineTest : StringSpec({
         "stop from onStart" {
             createTestStateMachine(coroutineStarterType) {
                 initialState("initial")
-                onStarted { stop() }
+                onStarted { stopCo() }
             }
         }
 
         "destroy from onStart" {
             createTestStateMachine(coroutineStarterType) {
                 initialState("initial")
-                onStarted { destroy() }
+                onStarted { destroyCo() }
             }
         }
     }

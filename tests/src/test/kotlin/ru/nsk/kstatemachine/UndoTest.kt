@@ -17,7 +17,7 @@ class UndoTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()
             }
-            shouldThrow<IllegalStateException> { machine.undo() }
+            shouldThrow<IllegalStateException> { machine.undoCo() }
         }
 
         "undo throws with throwing PendingEventHandler" {
@@ -29,7 +29,7 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
                 state2 = state("state2") {
-                    onEntry { shouldThrow<IllegalStateException> { machine.undo() } }
+                    onEntry { shouldThrow<IllegalStateException> { machine.undoCo() } }
                 }
             }
 
@@ -46,7 +46,7 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
                 state2 = state("state2") {
-                    onEntry { machine.undo() }
+                    onEntry { machine.undoCo() }
                 }
             }
             machine.processEvent(SwitchEvent)
@@ -364,7 +364,7 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state3 } }
                 }
                 state3 = state("state3") {
-                    onEntry { machine.undo() }
+                    onEntry { machine.undoCo() }
                 }
             }
 

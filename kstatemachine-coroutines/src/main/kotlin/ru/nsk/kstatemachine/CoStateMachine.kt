@@ -3,10 +3,15 @@ package ru.nsk.kstatemachine
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * Analog of [createStateMachine] function, with kotlin coroutines support.
- * Use this one if you are going to use kotlin coroutines library from KStateMachine callbacks.
+ * Analog of [createStateMachine] function, with Kotlin Coroutines support.
+ * Use this one if you are going to use Kotlin Coroutines library from KStateMachine callbacks.
  *
  * @param scope be careful while working with threaded scopes as KStateMachine classes are not thread-safe.
+ * Usually you should use only single threaded scopes, for example:
+ * 
+ *     CoroutineScope(Dispatchers.Default.limitedParallelism(1))
+ *
+ * Note that all calls to this machine instance should be done only from that thread.
  */
 fun createCoStateMachine(
     scope: CoroutineScope,
@@ -24,6 +29,6 @@ fun createCoStateMachine(
     autoDestroyOnStatesReuse,
     enableUndo,
     doNotThrowOnMultipleTransitionsMatch,
-    CoroutinesLibCoroutineStarter(scope),
+    CoroutinesLibCoroutineAbstraction(scope),
     init
 )

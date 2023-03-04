@@ -19,7 +19,7 @@ internal class StateMachineImpl(
     override val autoDestroyOnStatesReuse: Boolean,
     override val isUndoEnabled: Boolean,
     override val doNotThrowOnMultipleTransitionsMatch: Boolean,
-    override val coroutineStarter: CoroutineStarter,
+    override val coroutineAbstraction: CoroutineAbstraction,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
@@ -77,7 +77,7 @@ internal class StateMachineImpl(
     private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
         checkBeforeRunMachine()
 
-        coroutineStarter.startBlocking {
+        coroutineAbstraction.runBlocking {
             eventProcessingScope {
                 runCheckingExceptions {
                     val transitionParams = makeStartTransitionParams(event, this, state, argument)
@@ -105,12 +105,6 @@ internal class StateMachineImpl(
         doEnter(transitionParams)
     }
 
-    override fun stop() {
-        checkNotDestroyed()
-        if (!_isRunning) return
-        processEvent(StopEvent)
-    }
-
     /** To be called only from [runCheckingExceptions] */
     private suspend fun doStop() {
         _isRunning = false
@@ -119,32 +113,15 @@ internal class StateMachineImpl(
         machineNotify { onStopped() }
     }
 
-    override fun processEvent(event: Event, argument: Any?): ProcessingResult {
-        checkNotDestroyed()
-        check(isRunning) { "$this is not started, call start() first" }
-
-        return coroutineStarter.startBlocking {
-            val eventAndArgument = EventAndArgument(event, argument)
-
-            if (isProcessingEvent) {
-                pendingEventHandler.onPendingEvent(eventAndArgument)
-                // pending event cannot be processed while previous event is still processing
-                // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
-                // to be processed later.
-                return@startBlocking ProcessingResult.PENDING
-            }
-
-            return@startBlocking eventProcessingScope {
-                process(eventAndArgument)
-            }
-        }
+    override fun processEvent(event: Event, argument: Any?) = coroutineAbstraction.runBlocking {
+        processEventCo(event, argument)
     }
 
-    override fun processEventAsync(event: Event, argument: Any?) {
-        checkNotDestroyed()
-        check(isRunning) { "$this is not started, call start() first" }
+    override suspend fun processEventCo(event: Event, argument: Any?): ProcessingResult {
+        return coroutineAbstraction.withContext {
+            checkNotDestroyed()
+            check(isRunning) { "$this is not started, call start() first" }
 
-        coroutineStarter.startAsync {
             val eventAndArgument = EventAndArgument(event, argument)
 
             if (isProcessingEvent) {
@@ -152,7 +129,7 @@ internal class StateMachineImpl(
                 // pending event cannot be processed while previous event is still processing
                 // even if PendingEventHandler does not throw. QueuePendingEventHandler implementation stores such events
                 // to be processed later.
-                return@startAsync
+                return@withContext ProcessingResult.PENDING
             }
 
             eventProcessingScope {
@@ -300,11 +277,6 @@ internal class StateMachineImpl(
         super.cleanup()
     }
 
-    override fun destroy(stop: Boolean) {
-        if (_isDestroyed) return
-        processEvent(DestroyEvent(stop))
-    }
-
     /** To be called only from [runCheckingExceptions] */
     private fun doDestroy() {
         accept(CleanupVisitor())
@@ -313,7 +285,7 @@ internal class StateMachineImpl(
     }
 }
 
-private fun StateMachine.checkNotDestroyed() = check(!isDestroyed) { "$this is already destroyed" }
+internal fun StateMachine.checkNotDestroyed() = check(!isDestroyed) { "$this is already destroyed" }
 
 internal suspend inline fun InternalStateMachine.runDelayingException(crossinline block: suspend () -> Unit) =
     try {

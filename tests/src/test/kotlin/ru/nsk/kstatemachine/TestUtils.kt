@@ -4,10 +4,8 @@ import io.mockk.MockKVerificationScope
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias Callback<T> = (T) -> Unit
@@ -57,7 +55,12 @@ enum class CoroutineStarterType {
     STD_LIB,
     COROUTINES_LIB_EMPTY_CONTEXT,
     COROUTINES_LIB_UNCONFINED_DISPATCHER,
-    COROUTINES_LIB_DEFAULT_DISPATCHER, // dangerous
+
+    /**
+     * Tests touch machines from 2 threads this way (main and coroutine worker),
+     * but it should be ok as it happens sequentially.
+     */
+    COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER,
 }
 
 /**
@@ -105,8 +108,8 @@ fun createTestStateMachine(
         init = init
     )
 
-    CoroutineStarterType.COROUTINES_LIB_DEFAULT_DISPATCHER -> createCoStateMachine(
-        CoroutineScope(Dispatchers.Default),
+    CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createCoStateMachine(
+        CoroutineScope(Dispatchers.Default.limitedParallelism(1)),
         name,
         childMode,
         start,

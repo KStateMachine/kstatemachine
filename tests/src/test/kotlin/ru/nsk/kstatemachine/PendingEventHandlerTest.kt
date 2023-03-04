@@ -20,7 +20,7 @@ class PendingEventHandlerTest : StringSpec({
                 initialState("first") {
                     transition<FirstEvent> {
                         targetState = second
-                        onTriggered { this@createTestStateMachine.processEvent(SecondEvent) shouldBe PENDING }
+                        onTriggered { this@createTestStateMachine.processEventCo(SecondEvent) shouldBe PENDING }
                     }
                 }
             }
@@ -36,7 +36,7 @@ class PendingEventHandlerTest : StringSpec({
                 val second = state("second")
 
                 initialState("first") {
-                    onEntry { machine.processEvent(SwitchEvent) }
+                    onEntry { machine.processEventCo(SwitchEvent) }
                     initialState("first internal")
 
                     transition<SwitchEvent> {
@@ -59,9 +59,9 @@ class PendingEventHandlerTest : StringSpec({
 
                 initialState("first") {
                     onEntry {
-                        machine.processEvent(FirstEvent)
-                        machine.processEvent(FirstEvent)
-                        machine.processEvent(FirstEvent)
+                        machine.processEventCo(FirstEvent)
+                        machine.processEventCo(FirstEvent)
+                        machine.processEventCo(FirstEvent)
                     }
                     initialState("first internal")
 
@@ -86,7 +86,7 @@ class PendingEventHandlerTest : StringSpec({
                     transition<SwitchEvent> {
                         targetState = second
                         onTriggered {
-                            shouldThrow<TestException> { this@createTestStateMachine.processEvent(SwitchEvent) }
+                            shouldThrow<TestException> { this@createTestStateMachine.processEventCo(SwitchEvent) }
                         }
                     }
                 }
@@ -104,9 +104,9 @@ class PendingEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 val state2 = state("state2") {
                     onEntry {
-                        machine.processEvent(SwitchEvent) shouldBe PENDING
-                        machine.processEvent(SwitchEvent) shouldBe PENDING
-                        machine.stop()
+                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.stopCo()
                     }
                 }
                 initialState("state1") {
@@ -122,9 +122,9 @@ class PendingEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 val state2 = state("state2") {
                     onEntry {
-                        machine.processEvent(SwitchEvent) shouldBe PENDING
-                        machine.processEvent(SwitchEvent) shouldBe PENDING
-                        machine.destroy(false)
+                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.destroyCo(false)
                     }
                 }
                 initialState("state1") {
