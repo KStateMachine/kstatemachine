@@ -106,7 +106,7 @@ class PendingEventHandlerTest : StringSpec({
                     onEntry {
                         machine.processEventCo(SwitchEvent) shouldBe PENDING
                         machine.processEventCo(SwitchEvent) shouldBe PENDING
-                        machine.stopCo()
+                        machine.stop()
                     }
                 }
                 initialState("state1") {
@@ -124,7 +124,7 @@ class PendingEventHandlerTest : StringSpec({
                     onEntry {
                         machine.processEventCo(SwitchEvent) shouldBe PENDING
                         machine.processEventCo(SwitchEvent) shouldBe PENDING
-                        machine.destroyCo(false)
+                        machine.destroy(false)
                     }
                 }
                 initialState("state1") {

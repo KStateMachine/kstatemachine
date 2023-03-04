@@ -19,7 +19,7 @@ class StateCleanupTest : StringSpec({
 
         "cleanup is called on machine manual destruction" {
             val state = spyk<State1>()
-            useInMachine(coroutineStarterType, state).destroy()
+            useInMachine(coroutineStarterType, state).destroyBlocking()
             verify(exactly = 1) { state.onCleanup() }
         }
 

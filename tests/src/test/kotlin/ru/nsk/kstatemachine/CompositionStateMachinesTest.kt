@@ -51,7 +51,7 @@ class CompositionStateMachinesTest : StringSpec({
 
             outer.isActive shouldBe true
             inner.isActive shouldBe true
-            outer.stop()
+            outer.stopBlocking()
             outer.isActive shouldBe false
             inner.isActive shouldBe true
         }

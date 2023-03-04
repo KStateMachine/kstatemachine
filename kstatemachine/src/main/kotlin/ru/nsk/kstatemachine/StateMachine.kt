@@ -122,10 +122,10 @@ interface StateMachine : State {
 }
 
 /**
- * Shortcut for [StateMachine.stop] and [StateMachine.start] sequence calls
+ * Shortcut for [StateMachine.stopBlocking] and [StateMachine.start] sequence calls
  */
 fun StateMachine.restart(argument: Any? = null) {
-    stop()
+    stopBlocking()
     start(argument)
 }
 
@@ -134,9 +134,9 @@ fun StateMachine.restart(argument: Any? = null) {
  * Previous states are stored in a stack, so this method mey be called multiple times if needed.
  * This function has same effect as alternative syntax processEvent(UndoEvent), but throws if undo feature is not enabled.
  */
-fun StateMachine.undo(argument: Any? = null) = coroutineAbstraction.runBlocking { undoCo(argument) }
+fun StateMachine.undoBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { undo(argument) }
 
-suspend fun StateMachine.undoCo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
+suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
     check(isUndoEnabled) {
         "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
     }
@@ -145,10 +145,15 @@ suspend fun StateMachine.undoCo(argument: Any? = null): ProcessingResult = corou
 
 /**
  * Forces state machine to stop
+ * Warning: calling this function from notification callback may cause deadlock
+ * if you are using single threaded coroutineContext, so [stop] should be preferred.
  */
-fun StateMachine.stop() = coroutineAbstraction.runBlocking { stopCo() }
+fun StateMachine.stopBlocking() = coroutineAbstraction.runBlocking { stop() }
 
-suspend fun StateMachine.stopCo() = coroutineAbstraction.withContext {
+/**
+ * Suspendable [stopBlocking] analog. Should be preferred especially if called from machine notifications.
+ */
+suspend fun StateMachine.stop() = coroutineAbstraction.withContext {
     checkNotDestroyed()
     if (!isRunning) return@withContext
     processEventCo(StopEvent)
@@ -158,9 +163,9 @@ suspend fun StateMachine.stopCo() = coroutineAbstraction.withContext {
 /**
  * Destroys machine structure clearing all listeners, states etc.
  */
-fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroyCo(stop) }
+fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
 
-suspend fun StateMachine.destroyCo(stop: Boolean = true) = coroutineAbstraction.withContext {
+suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.withContext {
     if (isDestroyed) return@withContext
     processEventCo(DestroyEvent(stop))
 }

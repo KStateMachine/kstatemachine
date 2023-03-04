@@ -8,7 +8,7 @@ private object UndoTransitionSample {
 }
 
 /**
- * Undo transitions with [StateMachine.undo] method or [UndoEvent]
+ * Undo transitions with [StateMachine.undoBlocking] method or [UndoEvent]
  */
 fun main() {
     lateinit var state1: State
@@ -35,7 +35,7 @@ fun main() {
     machine.processEvent(SwitchEvent)
     machine.processEvent(SwitchEvent)
 
-    machine.undo() // same as machine.processEvent(UndoEvent)
+    machine.undoBlocking() // same as machine.processEvent(UndoEvent)
 
     check(state1 in machine.activeStates())
 }

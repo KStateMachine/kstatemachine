@@ -17,7 +17,7 @@ class UndoTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()
             }
-            shouldThrow<IllegalStateException> { machine.undoCo() }
+            shouldThrow<IllegalStateException> { machine.undo() }
         }
 
         "undo throws with throwing PendingEventHandler" {
@@ -29,7 +29,7 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
                 state2 = state("state2") {
-                    onEntry { shouldThrow<IllegalStateException> { machine.undoCo() } }
+                    onEntry { shouldThrow<IllegalStateException> { machine.undo() } }
                 }
             }
 
@@ -46,7 +46,7 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
                 state2 = state("state2") {
-                    onEntry { machine.undoCo() }
+                    onEntry { machine.undo() }
                 }
             }
             machine.processEvent(SwitchEvent)
@@ -66,7 +66,7 @@ class UndoTest : StringSpec({
             machine.activeStates() shouldContain state1
             machine.processEvent(SwitchEvent)
             machine.activeStates() shouldContain state2
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state1
         }
 
@@ -81,7 +81,7 @@ class UndoTest : StringSpec({
                     transitionOn<SecondEvent> { targetState = { state1 } }
                 }
             }
-            machine.undo() // does nothing, and should not break anything
+            machine.undoBlocking() // does nothing, and should not break anything
 
             machine.activeStates() shouldContain state1
             machine.processEvent(FirstEvent)
@@ -90,15 +90,15 @@ class UndoTest : StringSpec({
             machine.activeStates() shouldContain state2
 
             state1.onEntry(once = true) { it.unwrappedEvent shouldBe SecondEvent }
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state1
 
             state2.onEntry(once = true) { it.unwrappedEvent shouldBe FirstEvent }
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state2
 
             state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state1
         }
 
@@ -119,7 +119,7 @@ class UndoTest : StringSpec({
             machine.activeStates() shouldContain state2
 
             state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state1
 
             // again
@@ -129,11 +129,11 @@ class UndoTest : StringSpec({
             machine.activeStates() shouldContain state1
 
             state2.onEntry { it.unwrappedEvent shouldBe FirstEvent }
-            machine.undo() // SecondEvent
+            machine.undoBlocking() // SecondEvent
             machine.activeStates() shouldContain state2
 
             state1.onEntry { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-            machine.undo() // FirstEvent
+            machine.undoBlocking() // FirstEvent
             machine.activeStates() shouldContain state1
         }
 
@@ -156,9 +156,9 @@ class UndoTest : StringSpec({
             machine.activeStates() shouldContain state2
             machine.processEvent(SwitchEvent)
             machine.activeStates() shouldContain state3
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state2
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates() shouldContain state1
         }
 
@@ -204,7 +204,7 @@ class UndoTest : StringSpec({
             machine.processEvent(SwitchEvent)
             machine.activeStates().shouldContain(state2)
             shouldThrow<IllegalStateException> { state12.data }
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates().shouldContain(state12)
             state12.data shouldBe 42
         }
@@ -234,15 +234,15 @@ class UndoTest : StringSpec({
             }
             machine.processEvent(SecondEvent)
 
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates().shouldContain(state11)
 
             for (iteration in 3 downTo iterations) {
-                machine.undo()
+                machine.undoBlocking()
                 machine.activeStates().shouldContain(state12)
                 state12.data shouldBe iteration
 
-                machine.undo()
+                machine.undoBlocking()
                 machine.activeStates().shouldContain(state11)
             }
         }
@@ -270,11 +270,11 @@ class UndoTest : StringSpec({
             machine.processEvent(SwitchEvent)
             machine.processEvent(SwitchEvent)
             machine.activeStates().shouldContain(state2)
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates().shouldContain(state2)
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates().shouldContain(state2)
-            machine.undo()
+            machine.undoBlocking()
             machine.activeStates().shouldContain(state1)
         }
 
@@ -294,14 +294,14 @@ class UndoTest : StringSpec({
             }
             machine.start(0)
 
-            machine.undo(1) // nothing
+            machine.undoBlocking(1) // nothing
             machine.processEvent(SwitchEvent)
 
             state1.onEntry(once = true) {
                 it.argument shouldBe 2
                 it.unwrappedEvent.shouldBeInstanceOf<StartEvent>()
             }
-            machine.undo(2)
+            machine.undoBlocking(2)
         }
 
         "undo with argument, and unwrapped properties" {
@@ -343,8 +343,8 @@ class UndoTest : StringSpec({
                 }
             }
             machine.processEvent(SwitchEvent)
-            machine.undo()
-            shouldThrow<TestException> { machine.undo() }
+            machine.undoBlocking()
+            shouldThrow<TestException> { machine.undoBlocking() }
         }
 
         "undo from onEntry(), this uses event queue" {
@@ -364,14 +364,14 @@ class UndoTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { state3 } }
                 }
                 state3 = state("state3") {
-                    onEntry { machine.undoCo() }
+                    onEntry { machine.undo() }
                 }
             }
 
             machine.processEvent(SwitchEvent)
             machine.processEvent(SwitchEvent)
 
-            machine.undo() // same as machine.processEvent(UndoEvent)
+            machine.undoBlocking() // same as machine.processEvent(UndoEvent)
 
             machine.activeStates() shouldContain state1
         }

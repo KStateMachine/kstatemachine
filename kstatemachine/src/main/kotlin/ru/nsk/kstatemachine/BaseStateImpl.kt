@@ -55,7 +55,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     private fun onStateReuseDetected() {
         if (machine.autoDestroyOnStatesReuse)
-            machine.destroy()
+            machine.destroyBlocking()
         else
             error("State $this is already used in another machine instance")
     }

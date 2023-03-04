@@ -36,7 +36,7 @@ class TestingStartFromTest : StringSpec({
                 callbacks.onEntryState(state22)
             }
 
-            machine.stop()
+            machine.stopBlocking()
             machine.activeStates().shouldBeEmpty()
 
             machine.startFrom("state22")

@@ -74,17 +74,15 @@ internal class StateMachineImpl(
     override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
         doStartFrom(StartDataEventImpl(data), state, argument)
 
-    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) {
+    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineAbstraction.runBlocking {
         checkBeforeRunMachine()
 
-        coroutineAbstraction.runBlocking {
-            eventProcessingScope {
-                runCheckingExceptions {
-                    val transitionParams = makeStartTransitionParams(event, this, state, argument)
-                    runMachine(transitionParams)
-                    switchToTargetState(state as InternalState, this, transitionParams)
-                    recursiveAfterTransitionComplete(transitionParams)
-                }
+        eventProcessingScope {
+            runCheckingExceptions {
+                val transitionParams = makeStartTransitionParams(event, this, state, argument)
+                runMachine(transitionParams)
+                switchToTargetState(state as InternalState, this, transitionParams)
+                recursiveAfterTransitionComplete(transitionParams)
             }
         }
     }

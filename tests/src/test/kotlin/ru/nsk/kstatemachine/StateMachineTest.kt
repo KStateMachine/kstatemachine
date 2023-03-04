@@ -269,8 +269,8 @@ class StateMachineTest : StringSpec({
                 callbacks.onEntryState(state2)
             }
 
-            machine.stop()
-            machine.stop() // does nothing
+            machine.stopBlocking()
+            machine.stopBlocking() // does nothing
             verifySequenceAndClear(callbacks) { callbacks.onStopped(machine) }
 
             machine.start()
@@ -313,14 +313,14 @@ class StateMachineTest : StringSpec({
         "stop from onStart" {
             createTestStateMachine(coroutineStarterType) {
                 initialState("initial")
-                onStarted { stopCo() }
+                onStarted { stop() }
             }
         }
 
         "destroy from onStart" {
             createTestStateMachine(coroutineStarterType) {
                 initialState("initial")
-                onStarted { destroyCo() }
+                onStarted { destroy() }
             }
         }
     }

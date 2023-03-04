@@ -85,8 +85,8 @@ class ListenerExceptionHandlerTest : StringSpec({
                 onStopped { testError("test exception") }
             }
 
-            shouldThrow<TestException> { machine.stop() }
-            machine.stop() // does nothing
+            shouldThrow<TestException> { machine.stopBlocking() }
+            machine.stopBlocking() // does nothing
             machine.isDestroyed shouldBe false
         }
 

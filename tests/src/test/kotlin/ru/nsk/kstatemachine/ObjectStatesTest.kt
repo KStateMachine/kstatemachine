@@ -20,24 +20,24 @@ class ObjectStatesTest : StringSpec({
             val machine = useInMachine(coroutineStarterType, false)
             shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, false) }
             shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
-            machine.destroy()
+            machine.destroyBlocking()
         }
 
         "multiple usage of object states allowed" {
             useInMachine(coroutineStarterType, true)
-            useInMachine(coroutineStarterType, true).destroy()
+            useInMachine(coroutineStarterType, true).destroyBlocking()
         }
 
         "multiple usage of object states throws if current machine forbids auto destroy" {
             useInMachine(coroutineStarterType, true)
             val machine = useInMachine(coroutineStarterType, false)
             shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
-            machine.destroy()
+            machine.destroyBlocking()
         }
 
         "multiple usage of object states allowed with manual calling destroy()" {
-            useInMachine(coroutineStarterType, false).destroy()
-            useInMachine(coroutineStarterType, false).destroy()
+            useInMachine(coroutineStarterType, false).destroyBlocking()
+            useInMachine(coroutineStarterType, false).destroyBlocking()
         }
     }
 })
