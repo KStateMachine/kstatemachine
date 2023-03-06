@@ -35,10 +35,10 @@ class FinishingStateMachineTest : StringSpec({
                 transition<SwitchEvent> { callbacks.listen(this) }
             }
             machine.isFinished shouldBe true
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             confirmVerified(callbacks)
-            shouldThrow<IllegalStateException> { machine.start() }
-            machine.restart()
+            shouldThrow<IllegalStateException> { machine.startBlocking() }
+            machine.restartBlocking()
         }
 
         "reenter finished branch" {
@@ -66,7 +66,7 @@ class FinishingStateMachineTest : StringSpec({
                 callbacks.onFinished(machine)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }
         }
 
@@ -84,7 +84,7 @@ class FinishingStateMachineTest : StringSpec({
             }
 
             machine.isFinished shouldBe true
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
 
         // FIXME add sample code and readme refs
@@ -118,7 +118,7 @@ class FinishingStateMachineTest : StringSpec({
                 onFinished { callbacks.onFinished(this) }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onFinished(state11)
@@ -169,7 +169,7 @@ class FinishingStateMachineTest : StringSpec({
 
             state1.isFinished shouldBe true
             machine.isFinished shouldBe false
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
@@ -195,7 +195,7 @@ class FinishingStateMachineTest : StringSpec({
             state1.isFinished shouldBe false
             machine.isFinished shouldBe false
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             state112.isActive shouldBe true
         }
 
@@ -244,7 +244,7 @@ class FinishingStateMachineTest : StringSpec({
                 callbacks.onEntryState(initialL2)
             }
 
-            machine.processEvent(SwitchEventL2)
+            machine.processEventBlocking(SwitchEventL2)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(SwitchEventL2)
@@ -254,7 +254,7 @@ class FinishingStateMachineTest : StringSpec({
             }
             initialL1.isFinished shouldBe true
 
-            machine.processEvent(SwitchEventL1)
+            machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEventL1)
@@ -284,7 +284,7 @@ class FinishingStateMachineTest : StringSpec({
             state11.isFinished shouldBe true
             machine.isFinished shouldBe false
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             state11.isFinished shouldBe false
         }
 
@@ -306,7 +306,7 @@ class FinishingStateMachineTest : StringSpec({
             state11.isFinished shouldBe true
             machine.isFinished shouldBe false
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             state11.isFinished shouldBe false
         }
     }

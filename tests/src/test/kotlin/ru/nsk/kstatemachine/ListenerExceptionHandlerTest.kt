@@ -30,7 +30,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                 }
             }
 
-            shouldThrow<TestException> { machine.start() }
+            shouldThrow<TestException> { machine.startBlocking() }
             machine.isDestroyed shouldBe false
         }
 
@@ -47,7 +47,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                     callbacks.listen(this)
                 }
             }
-            shouldThrow<TestException> { machine.start() }
+            shouldThrow<TestException> { machine.startBlocking() }
 
             verifySequence {
                 callbacks.onStarted(machine)
@@ -123,7 +123,7 @@ class ListenerExceptionHandlerTest : StringSpec({
             }
 
             shouldThrow<TestException> {
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
             }
 
             machine.isDestroyed shouldBe true

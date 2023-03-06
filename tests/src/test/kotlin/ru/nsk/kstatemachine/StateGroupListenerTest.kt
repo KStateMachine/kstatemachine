@@ -65,8 +65,8 @@ class StateGroupListenerTest : FreeSpec({
 
                     onActiveAllOf(machine, State2, notifyOnSubscribe = true) { callback(it) }
                 }
-                machine.processEvent(SwitchEvent)
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
                 verifySequence {
                     callback(false)
@@ -101,12 +101,12 @@ class StateGroupListenerTest : FreeSpec({
                 }
 
                 val listener = onActiveAllOf(machine, State1) { callback(it) }
-                machine.start()
+                machine.startBlocking()
 
                 verifySequenceAndClear(callback) { callback(true) }
 
                 listener.unsubscribe()
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
                 verify { callback wasNot called }
             }
@@ -144,8 +144,8 @@ class StateGroupListenerTest : FreeSpec({
 
                     onActiveAnyOf(State1, State3) { callback(it) }
                 }
-                machine.processEvent(SwitchEvent)
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
                 verifySequence {
                     callback(true)
@@ -165,7 +165,7 @@ class StateGroupListenerTest : FreeSpec({
 
                     onActiveAnyOf(State1, State2) { callback(it) }
                 }
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
                 verifySequence {
                     callback(true)
@@ -201,12 +201,12 @@ class StateGroupListenerTest : FreeSpec({
                 }
 
                 val listener = onActiveAnyOf(State1, State3) { callback(it) }
-                machine.start()
+                machine.startBlocking()
 
                 verifySequenceAndClear(callback) { callback(true) }
 
                 listener.unsubscribe()
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
                 verify { callback wasNot called }
             }

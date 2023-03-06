@@ -13,7 +13,7 @@ interface DataEvent<out D : Any> : Event {
 }
 
 /**
- * User may call [StateMachine.processEvent] with [UndoEvent] as alternative to calling machine.undo()
+ * User may call [StateMachine.processEventBlocking] with [UndoEvent] as alternative to calling machine.undo()
  */
 object UndoEvent : Event
 

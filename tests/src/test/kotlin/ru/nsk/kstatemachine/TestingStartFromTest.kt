@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.Testing.startFrom
+import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 class TestingStartFromTest : StringSpec({
     CoroutineStarterType.values().forEach { coroutineStarterType ->
@@ -27,7 +28,7 @@ class TestingStartFromTest : StringSpec({
                 onStarted { callbacks.onStarted(this) }
             }
 
-            machine.startFrom(state22)
+            machine.startFromBlocking(state22)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)

@@ -20,12 +20,12 @@ class PendingEventHandlerTest : StringSpec({
                 initialState("first") {
                     transition<FirstEvent> {
                         targetState = second
-                        onTriggered { this@createTestStateMachine.processEventCo(SecondEvent) shouldBe PENDING }
+                        onTriggered { this@createTestStateMachine.processEvent(SecondEvent) shouldBe PENDING }
                     }
                 }
             }
 
-            machine.processEvent(FirstEvent) shouldBe PROCESSED
+            machine.processEventBlocking(FirstEvent) shouldBe PROCESSED
         }
 
         "queue event on machine start" {
@@ -36,7 +36,7 @@ class PendingEventHandlerTest : StringSpec({
                 val second = state("second")
 
                 initialState("first") {
-                    onEntry { machine.processEventCo(SwitchEvent) }
+                    onEntry { machine.processEvent(SwitchEvent) }
                     initialState("first internal")
 
                     transition<SwitchEvent> {
@@ -59,9 +59,9 @@ class PendingEventHandlerTest : StringSpec({
 
                 initialState("first") {
                     onEntry {
-                        machine.processEventCo(FirstEvent)
-                        machine.processEventCo(FirstEvent)
-                        machine.processEventCo(FirstEvent)
+                        machine.processEvent(FirstEvent)
+                        machine.processEvent(FirstEvent)
+                        machine.processEvent(FirstEvent)
                     }
                     initialState("first internal")
 
@@ -72,9 +72,9 @@ class PendingEventHandlerTest : StringSpec({
                 }
             }
 
-            shouldThrow<TestException> { machine.start() }
+            shouldThrow<TestException> { machine.startBlocking() }
 
-            machine.processEvent(SecondEvent)
+            machine.processEventBlocking(SecondEvent)
         }
 
         "throwing PendingEventHandler does not destroy machine" {
@@ -86,7 +86,7 @@ class PendingEventHandlerTest : StringSpec({
                     transition<SwitchEvent> {
                         targetState = second
                         onTriggered {
-                            shouldThrow<TestException> { this@createTestStateMachine.processEventCo(SwitchEvent) }
+                            shouldThrow<TestException> { this@createTestStateMachine.processEvent(SwitchEvent) }
                         }
                     }
                 }
@@ -96,7 +96,7 @@ class PendingEventHandlerTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             machine.isDestroyed shouldBe false
         }
 
@@ -104,8 +104,8 @@ class PendingEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 val state2 = state("state2") {
                     onEntry {
-                        machine.processEventCo(SwitchEvent) shouldBe PENDING
-                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.processEvent(SwitchEvent) shouldBe PENDING
+                        machine.processEvent(SwitchEvent) shouldBe PENDING
                         machine.stop()
                     }
                 }
@@ -113,17 +113,17 @@ class PendingEventHandlerTest : StringSpec({
                     transition<SwitchEvent>(targetState = state2)
                 }
             }
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             machine.isRunning shouldBe false
-            machine.start()
+            machine.startBlocking()
         }
 
         "pending events are cleared on destroy() from notification callback" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 val state2 = state("state2") {
                     onEntry {
-                        machine.processEventCo(SwitchEvent) shouldBe PENDING
-                        machine.processEventCo(SwitchEvent) shouldBe PENDING
+                        machine.processEvent(SwitchEvent) shouldBe PENDING
+                        machine.processEvent(SwitchEvent) shouldBe PENDING
                         machine.destroy(false)
                     }
                 }
@@ -131,7 +131,7 @@ class PendingEventHandlerTest : StringSpec({
                     transition<SwitchEvent>(targetState = state2)
                 }
             }
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             machine.isDestroyed shouldBe true
         }
     }

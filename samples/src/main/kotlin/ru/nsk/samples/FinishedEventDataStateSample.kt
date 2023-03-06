@@ -41,7 +41,7 @@ fun main() {
         addState(State2)
     }
 
-    machine.processEvent(IntEvent(DATA))
+    machine.processEventBlocking(IntEvent(DATA))
 
     check(State2 in machine.activeStates())
     check(State2.lastData == DATA)

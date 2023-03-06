@@ -32,7 +32,7 @@ class ListenersModificationTest : StringSpec({
                     transition.onTriggered { /* nothing, just fill listeners collection */ }
                 }
             }
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
 
         "remove machine listener from callback" {

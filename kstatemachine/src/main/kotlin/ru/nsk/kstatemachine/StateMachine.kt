@@ -50,22 +50,16 @@ interface StateMachine : State {
     /**
      * Starts state machine
      */
-    fun start(argument: Any? = null)
+    suspend fun start(argument: Any? = null)
 
     /**
      * Processes [Event].
      * Machine must be started to be able to process events.
      * @return [ProcessingResult] for current event.
      * If more events will be queued while this method is working, there results will not be taken to account.
-     * Their [processEvent] calls will return [ProcessingResult.PENDING] in this case.
+     * Their [processEventBlocking] calls will return [ProcessingResult.PENDING] in this case.
      */
-    fun processEvent(event: Event, argument: Any? = null): ProcessingResult
-
-    /**
-     * Same as [processEvent] but suspendable, so user may easily call it in blocking and non-blocking way.
-     * This method is based on [CoroutineAbstraction.withContext] internally.
-     */
-    suspend fun processEventCo(event: Event, argument: Any? = null): ProcessingResult
+    suspend fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
     fun log(lazyMessage: () -> String)
 
@@ -121,11 +115,22 @@ interface StateMachine : State {
     }
 }
 
+fun StateMachine.startBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { start(argument) }
+
+/**
+ * Blocking analog of [StateMachine.processEvent] which can be called from usual (not suspendable) code.
+ */
+fun StateMachine.processEventBlocking(event: Event, argument: Any? = null) = coroutineAbstraction.runBlocking {
+    processEvent(event, argument)
+}
+
+fun StateMachine.restartBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { restart(argument) }
+
 /**
  * Shortcut for [StateMachine.stopBlocking] and [StateMachine.start] sequence calls
  */
-fun StateMachine.restart(argument: Any? = null) {
-    stopBlocking()
+suspend fun StateMachine.restart(argument: Any? = null) {
+    stop()
     start(argument)
 }
 
@@ -140,7 +145,7 @@ suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = corouti
     check(isUndoEnabled) {
         "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
     }
-    return@withContext processEventCo(UndoEvent, argument)
+    return@withContext processEvent(UndoEvent, argument)
 }
 
 /**
@@ -156,7 +161,7 @@ fun StateMachine.stopBlocking() = coroutineAbstraction.runBlocking { stop() }
 suspend fun StateMachine.stop() = coroutineAbstraction.withContext {
     checkNotDestroyed()
     if (!isRunning) return@withContext
-    processEventCo(StopEvent)
+    processEvent(StopEvent)
 }
 
 
@@ -167,7 +172,7 @@ fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.ru
 
 suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.withContext {
     if (isDestroyed) return@withContext
-    processEventCo(DestroyEvent(stop))
+    processEvent(DestroyEvent(stop))
 }
 
 /**
@@ -202,7 +207,7 @@ fun createStateMachine(
         coroutineAbstraction,
     ).apply {
         init()
-        if (start) start()
+        if (start) startBlocking()
     }
 }
 

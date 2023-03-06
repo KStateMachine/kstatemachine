@@ -30,7 +30,7 @@ class ConditionalTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
@@ -54,7 +54,7 @@ class ConditionalTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }
         }
 
@@ -78,7 +78,7 @@ class ConditionalTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
                 callbacks.onExitState(first)
@@ -106,7 +106,7 @@ class ConditionalTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
                 callbacks.onExitState(first)
@@ -137,7 +137,7 @@ class ConditionalTransitionTest : StringSpec({
             val event = ConditionEvent(false)
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(event)
+            machine.processEventBlocking(event)
             verifySequence {
                 callbacks.onTriggeredTransition(event)
                 callbacks.onExitState(first)
@@ -167,7 +167,7 @@ class ConditionalTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
 
-            machine.processEvent(SwitchEvent, false)
+            machine.processEventBlocking(SwitchEvent, false)
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
                 callbacks.onExitState(first)

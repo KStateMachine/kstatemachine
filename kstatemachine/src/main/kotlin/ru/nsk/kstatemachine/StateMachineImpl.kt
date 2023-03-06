@@ -8,8 +8,8 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
  * Defines state machine API for internal library usage.
  */
 abstract class InternalStateMachine(name: String?, childMode: ChildMode) : BuildingStateMachine, DefaultState(name, childMode) {
-    internal abstract fun startFrom(state: IState, argument: Any?)
-    internal abstract fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
+    internal abstract suspend fun startFrom(state: IState, argument: Any?)
+    internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
 }
 
@@ -38,7 +38,7 @@ internal class StateMachineImpl(
     }
 
     /**
-     * Flag for event processing mechanism, which takes place in [processEvent] and during [start]/[startFrom].
+     * Flag for event processing mechanism, which takes place in [processEventBlocking] and during [startBlocking]/[startFrom].
      * It is not possible to process new event while previous processing is incomplete.
      */
     private var isProcessingEvent = false
@@ -66,15 +66,15 @@ internal class StateMachineImpl(
         _machineListeners.remove(listener)
     }
 
-    override fun start(argument: Any?) = startFrom(this, argument)
+    override suspend fun start(argument: Any?) = startFrom(this, argument)
 
-    override fun startFrom(state: IState, argument: Any?) =
+    override suspend fun startFrom(state: IState, argument: Any?) =
         doStartFrom(StartEventImpl(), state, argument)
 
-    override fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
+    override suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
         doStartFrom(StartDataEventImpl(data), state, argument)
 
-    private fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineAbstraction.runBlocking {
+    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineAbstraction.withContext {
         checkBeforeRunMachine()
 
         eventProcessingScope {
@@ -111,11 +111,7 @@ internal class StateMachineImpl(
         machineNotify { onStopped() }
     }
 
-    override fun processEvent(event: Event, argument: Any?) = coroutineAbstraction.runBlocking {
-        processEventCo(event, argument)
-    }
-
-    override suspend fun processEventCo(event: Event, argument: Any?): ProcessingResult {
+    override suspend fun processEvent(event: Event, argument: Any?): ProcessingResult {
         return coroutineAbstraction.withContext {
             checkNotDestroyed()
             check(isRunning) { "$this is not started, call start() first" }
@@ -267,7 +263,7 @@ internal class StateMachineImpl(
      * Starts machine if it is inner state of another one machine
      */
     override suspend fun doEnter(transitionParams: TransitionParams<*>) =
-        if (!isRunning) start() else super.doEnter(transitionParams)
+        if (!isRunning) startBlocking() else super.doEnter(transitionParams)
 
 
     override fun cleanup() {

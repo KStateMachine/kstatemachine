@@ -29,7 +29,7 @@ class ExternalTransitionTest : StringSpec({
                 callbacks.onEntryState(state1)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state1)
@@ -67,7 +67,7 @@ class ExternalTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state11)
@@ -106,7 +106,7 @@ class ExternalTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state11)
                 callbacks.onEntryState(state11)
@@ -143,7 +143,7 @@ class ExternalTransitionTest : StringSpec({
                     callbacks.onEntryState(state11)
                 }
 
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
                 verifySequenceAndClear(callbacks) {
                     callbacks.onTriggeredTransition(SwitchEvent)
                 }

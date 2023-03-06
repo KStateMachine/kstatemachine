@@ -31,7 +31,7 @@ class ChoiceStateTest : StringSpec({
                 onTransition { log { it.toString() } }
             }
 
-            machine.processEvent(SwitchEvent, false)
+            machine.processEventBlocking(SwitchEvent, false)
 
             verifySequence { callbacks.onEntryState(State2) }
         }
@@ -51,7 +51,7 @@ class ChoiceStateTest : StringSpec({
                 addState(State2) { callbacks.listen(this) }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onEntryState(State2) }
         }

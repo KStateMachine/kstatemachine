@@ -57,14 +57,14 @@ class HistoryStateTest : StringSpec({
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
             history.storedState shouldBe state1
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state1)
                 callbacks.onEntryState(state2)
             }
             history.storedState shouldBe state2
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             // switching to history state in this case does nothing
             verify { callbacks wasNot called }
         }
@@ -95,19 +95,19 @@ class HistoryStateTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onEntryState(state12)
             }
             history.storedState shouldBe state12
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state12)
             }
             history.storedState shouldBe state12
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onEntryState(state12)
             }
@@ -139,7 +139,7 @@ class HistoryStateTest : StringSpec({
 
             history.storedState shouldBe state22
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onEntryState(state22)
             }
@@ -176,9 +176,9 @@ class HistoryStateTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
-            machine.processEvent(SwitchEvent) // exit history scope
-            machine.processEvent(SwitchEvent) // go back through history
+            machine.processEventBlocking(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent) // exit history scope
+            machine.processEventBlocking(SwitchEvent) // go back through history
 
             machine.activeStates().shouldContain(state1222)
         }
@@ -209,9 +209,9 @@ class HistoryStateTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
-            machine.processEvent(SwitchEvent) // exit history scope
-            machine.processEvent(SwitchEvent) // go back through history
+            machine.processEventBlocking(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent) // exit history scope
+            machine.processEventBlocking(SwitchEvent) // go back through history
 
             machine.activeStates().shouldContain(state111)
         }
@@ -241,9 +241,9 @@ class HistoryStateTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
-            machine.processEvent(SwitchEvent) // exit history scope
-            machine.processEvent(SwitchEvent) // go back through history
+            machine.processEventBlocking(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent) // exit history scope
+            machine.processEventBlocking(SwitchEvent) // go back through history
 
             machine.activeStates().shouldContain(state112)
         }

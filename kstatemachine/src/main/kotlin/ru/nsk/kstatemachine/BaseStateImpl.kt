@@ -255,7 +255,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         stateNotify { onFinished(transitionParams) }
         // there is no sense to send event on state machine finish as it stops processing events in this case
         if (this !is StateMachine)
-            machine.processEventCo(makeFinishedEvent(state))
+            machine.processEvent(makeFinishedEvent(state))
     }
 
     private fun makeFinishedEvent(state: InternalState): FinishedEvent {

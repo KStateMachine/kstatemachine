@@ -51,7 +51,7 @@ class TransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-            machine.processEvent(SwitchEvent) shouldBe PROCESSED
+            machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -75,7 +75,7 @@ class TransitionTest : StringSpec({
                 state2 = state("state2") { callbacks.listen(this) }
             }
 
-            machine.processEvent(SwitchEvent) shouldBe PROCESSED
+            machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -95,7 +95,7 @@ class TransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks.onTriggeredTransition(SwitchEvent) }
         }
 
@@ -109,7 +109,7 @@ class TransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             finalState.isActive shouldBe true
         }
 
@@ -120,7 +120,7 @@ class TransitionTest : StringSpec({
                     transitionOn<SwitchEvent> { targetState = { freeState } } // invalid
                 }
             }
-            shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
         }
 
         "transition to non machine state, negative" {
@@ -133,7 +133,7 @@ class TransitionTest : StringSpec({
                 }
             }
 
-            shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
         }
 
         "multiple matching transitions negative" {
@@ -143,7 +143,7 @@ class TransitionTest : StringSpec({
                 initialState()
             }
 
-            shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
         }
 
         "multiple matching transitions" {
@@ -153,7 +153,7 @@ class TransitionTest : StringSpec({
                 initialState()
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
 
         "parallel multiple matching transitions negative" {
@@ -162,7 +162,7 @@ class TransitionTest : StringSpec({
                 state { transition<SwitchEvent>() }
             }
 
-            shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
         }
 
         "parallel multiple matching transitions" {
@@ -175,7 +175,7 @@ class TransitionTest : StringSpec({
                 state { transition<SwitchEvent>() }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
     }
 })

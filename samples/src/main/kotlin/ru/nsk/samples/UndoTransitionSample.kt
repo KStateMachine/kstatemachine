@@ -32,10 +32,10 @@ fun main() {
         }
     }
 
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
-    machine.undoBlocking() // same as machine.processEvent(UndoEvent)
+    machine.undoBlocking() // same as machine.processEventBlocking(UndoEvent)
 
     check(state1 in machine.activeStates())
 }

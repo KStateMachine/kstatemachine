@@ -75,7 +75,7 @@ class CompositionStateMachinesTest : StringSpec({
 
             outer.activeStates().shouldContainExactly(state1, inner)
 
-            outer.processEvent(SwitchEvent)
+            outer.processEventBlocking(SwitchEvent)
             outer.isActive shouldBe true
             inner.isActive shouldBe true
             outer.activeStates().shouldContainExactly(state2)
@@ -100,7 +100,7 @@ class CompositionStateMachinesTest : StringSpec({
 
             inner.activeStates().shouldContainExactly(state1)
 
-            outer.processEvent(SwitchEvent) // ignored
+            outer.processEventBlocking(SwitchEvent) // ignored
             inner.activeStates().shouldContainExactly(state1)
             outer.activeStates().shouldContainExactly(inner)
         }
@@ -122,7 +122,7 @@ class CompositionStateMachinesTest : StringSpec({
                 addState(inner)
             }
 
-            shouldThrow<IllegalStateException> { outer.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { outer.processEventBlocking(SwitchEvent) }
         }
     }
 })
@@ -184,7 +184,7 @@ private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMa
     }
     clearMocks(callbacks, answers = false)
 
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     verify {
         callbacks.onTriggeredTransition(SwitchEvent)
@@ -197,7 +197,7 @@ private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMa
     }
     clearMocks(callbacks, answers = false)
 
-    innerMachine.processEvent(SwitchEvent)
+    innerMachine.processEventBlocking(SwitchEvent)
 
     verifyOrder {
         callbacks.onTriggeredTransition(SwitchEvent)

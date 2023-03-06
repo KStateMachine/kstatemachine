@@ -113,7 +113,7 @@ class ParallelStatesTest : StringSpec({
                 callbacks.onEntryState(state12)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onExitState(state11)
@@ -142,7 +142,7 @@ class ParallelStatesTest : StringSpec({
             }
 
             shouldThrow<IllegalStateException> {
-                machine.processEvent(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
             }
         }
 
@@ -160,10 +160,10 @@ class ParallelStatesTest : StringSpec({
                 }
             }
 
-            machine.processEvent(FirstEvent)
+            machine.processEventBlocking(FirstEvent)
             verify { callbacks.onTriggeredTransition(FirstEvent) }
 
-            machine.processEvent(SecondEvent)
+            machine.processEventBlocking(SecondEvent)
             verify { callbacks.onTriggeredTransition(SecondEvent) }
         }
     }

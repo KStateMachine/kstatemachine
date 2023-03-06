@@ -72,7 +72,7 @@ class NestedStateTest : StringSpec({
                 callbacks.onEntryState(firstL2)
             }
 
-            machine.processEvent(SwitchEventL1)
+            machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEventL1)
@@ -90,7 +90,7 @@ class NestedStateTest : StringSpec({
                 }
             }
 
-            shouldThrow<IllegalStateException> { machine.start() }
+            shouldThrow<IllegalStateException> { machine.startBlocking() }
         }
 
         "reenter initial nested state" {
@@ -128,7 +128,7 @@ class NestedStateTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(SwitchEvent)
                 callbacks.onExitState(state11)
@@ -136,7 +136,7 @@ class NestedStateTest : StringSpec({
                 callbacks.onEntryState(state2)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(SwitchEvent)
                 callbacks.onExitState(state2)

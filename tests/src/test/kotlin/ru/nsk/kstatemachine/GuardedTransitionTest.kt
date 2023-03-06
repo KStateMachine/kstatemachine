@@ -29,11 +29,11 @@ class GuardedTransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }
 
             value = "value2"
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks.onTriggeredTransition(SwitchEvent) }
         }
 
@@ -56,11 +56,11 @@ class GuardedTransitionTest : StringSpec({
                 second = state("second")
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }
 
             value = "value2"
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verify { callbacks.onTriggeredTransition(SwitchEvent) }
         }
 
@@ -94,7 +94,7 @@ class GuardedTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)

@@ -37,8 +37,8 @@ fun main() {
     }
 
     // Now we can process events
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     check(machine.isFinished)
 }

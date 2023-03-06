@@ -43,7 +43,7 @@ class CoroutinesTest : StringSpec({
                 first
             }
         }
-        machine.processEvent(SwitchEvent)
+        machine.processEventBlocking(SwitchEvent)
     }
 
     "using coroutines with std lib throws" {
@@ -58,7 +58,7 @@ class CoroutinesTest : StringSpec({
     "test coroutines called from machine callbacks" {
         val scope = CoroutineScope(EmptyCoroutineContext)
         try {
-            createCoStateMachine(scope) {
+            createStateMachine(scope) {
                 onStarted { delay(1) }
                 initialState("first") {
                     onEntry {

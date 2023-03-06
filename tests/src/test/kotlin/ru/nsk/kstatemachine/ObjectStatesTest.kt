@@ -52,6 +52,6 @@ private fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroy
         addState(State2)
     }
 
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
     return machine
 }

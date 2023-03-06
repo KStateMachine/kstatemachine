@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
  *
  * Note that all calls to this machine instance should be done only from that thread.
  */
-fun createCoStateMachine(
+fun createStateMachine(
     scope: CoroutineScope,
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,

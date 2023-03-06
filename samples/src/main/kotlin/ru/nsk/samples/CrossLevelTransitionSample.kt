@@ -30,7 +30,7 @@ fun main() {
         }
     }
 
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     println("\n" + machine.exportToPlantUml())
 }

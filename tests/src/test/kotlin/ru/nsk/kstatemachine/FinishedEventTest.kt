@@ -23,7 +23,7 @@ class FinishedEventTest : StringSpec({
                 transitionOn<FinishedEvent> { targetState = { state2 } }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onFinished(machine) }
             machine.isFinished shouldBe true
@@ -48,7 +48,7 @@ class FinishedEventTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onFinished(state1)
@@ -86,7 +86,7 @@ class FinishedEventTest : StringSpec({
                     }
                 }
             }
-            machine.processEvent(IntEvent(intData))
+            machine.processEventBlocking(IntEvent(intData))
             verifySequence {
                 callbacks.onTriggeredTransition(ofType<FinishedEvent>())
             }

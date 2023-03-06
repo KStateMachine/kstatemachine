@@ -33,8 +33,7 @@ internal class StdLibCoroutineAbstraction : CoroutineAbstraction {
         } catch (e: UninitializedPropertyAccessException) {
             throw UnsupportedOperationException(
                 "Seems that you are trying to use Kotlin Coroutines library from KStateMachine callbacks, " +
-                        "use kstatemachine-coroutines support library to make that work, " +
-                        "and use createCoStateMachine() function for machine creation", e
+                        "use kstatemachine-coroutines support library to make that work", e
             )
         }
     }

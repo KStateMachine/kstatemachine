@@ -41,7 +41,7 @@ class CustomTransitionTest : StringSpec({
 
             }
 
-            machine.processEvent(event)
+            machine.processEventBlocking(event)
 
             verifySequence { callbacks.onTriggeredTransition(event) }
         }

@@ -20,7 +20,7 @@ class IgnoredEventHandlerTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent) shouldBe IGNORED
+            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
             verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
         }
 
@@ -33,7 +33,7 @@ class IgnoredEventHandlerTest : StringSpec({
                 }
             }
 
-            shouldThrow<TestException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<TestException> { machine.processEventBlocking(SwitchEvent) }
             machine.isDestroyed shouldBe false
         }
 
@@ -52,7 +52,7 @@ class IgnoredEventHandlerTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onFinished(machine) }
 
-            machine.processEvent(SwitchEvent) shouldBe IGNORED
+            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
             verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
         }
 
@@ -69,7 +69,7 @@ class IgnoredEventHandlerTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent) shouldBe IGNORED
+            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
             verify { callbacks.onIgnoredEvent(SwitchEvent) }
         }
     }

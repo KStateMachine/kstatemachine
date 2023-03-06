@@ -26,7 +26,7 @@ class CrossLevelTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
@@ -69,7 +69,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEventL2)
+            machine.processEventBlocking(SwitchEventL2)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(SwitchEventL2)
@@ -77,7 +77,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state12)
             }
 
-            machine.processEvent(SwitchEventL1)
+            machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEventL1)
@@ -118,7 +118,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -154,7 +154,7 @@ class CrossLevelTransitionTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -203,7 +203,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -245,7 +245,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -292,7 +292,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state11)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(SwitchEvent)
@@ -300,7 +300,7 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onEntryState(state12)
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onTriggeredTransition(SwitchEvent)

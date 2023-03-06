@@ -33,7 +33,7 @@ class EventMatcherTest : StringSpec({
 
             val event = HierarchyEventL2()
 
-            machine.processEvent(event)
+            machine.processEventBlocking(event)
 
             verifySequence { callbacks.onTriggeredTransition(event) }
         }
@@ -52,7 +52,7 @@ class EventMatcherTest : StringSpec({
 
             val event = HierarchyEventL2()
 
-            machine.processEvent(event)
+            machine.processEventBlocking(event)
 
             verify { callbacks wasNot called }
         }
@@ -71,7 +71,7 @@ class EventMatcherTest : StringSpec({
 
             val event = HierarchyEventL2()
 
-            machine.processEvent(event)
+            machine.processEventBlocking(event)
 
             verifySequence { callbacks.onTriggeredTransition(event) }
         }
@@ -93,7 +93,7 @@ class EventMatcherTest : StringSpec({
             }
 
             shouldThrow<IllegalStateException> {
-                machine.processEvent(HierarchyEventL2())
+                machine.processEventBlocking(HierarchyEventL2())
             }
         }
     }

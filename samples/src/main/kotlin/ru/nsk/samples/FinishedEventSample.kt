@@ -34,7 +34,7 @@ fun main() {
         addState(State2)
     }
 
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     check(State2 in machine.activeStates())
 }

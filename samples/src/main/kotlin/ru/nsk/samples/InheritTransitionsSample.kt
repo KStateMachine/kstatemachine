@@ -40,9 +40,9 @@ fun main() {
         }
     }
 
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(ExitEvent)
+    machine.processEventBlocking(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
+    machine.processEventBlocking(ExitEvent)
 
     check(machine.requireState("State2") in machine.activeStates())
 

@@ -44,7 +44,7 @@ class TypesafeTransitionTest : StringSpec({
                 final = finalDataState("final")
             }
 
-            machine.processEvent(IdEvent(42))
+            machine.processEventBlocking(IdEvent(42))
             machine.activeStates().shouldContainExactly(final)
         }
 
@@ -69,10 +69,10 @@ class TypesafeTransitionTest : StringSpec({
 
             shouldThrow<IllegalStateException> { state2.data }
 
-            machine.processEvent(NameEvent(testName))
+            machine.processEventBlocking(NameEvent(testName))
             state2.data shouldBe testName
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             shouldThrow<IllegalStateException> { state2.data }
         }
 
@@ -91,12 +91,12 @@ class TypesafeTransitionTest : StringSpec({
             }
 
             val name = "testName"
-            machine.processEvent(NameEvent(name))
+            machine.processEventBlocking(NameEvent(name))
 
             state2.data shouldBe name
 
             val id = 42
-            machine.processEvent(IdEvent(id))
+            machine.processEventBlocking(IdEvent(id))
 
             shouldThrow<IllegalStateException> { state2.data }
             state3.data shouldBe id
@@ -130,7 +130,7 @@ class TypesafeTransitionTest : StringSpec({
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
             val name = "testName"
-            machine.processEvent(NameEvent(name))
+            machine.processEventBlocking(NameEvent(name))
             verifySequenceAndClear(callbacks) {
                 callbacks.onExitState(state1)
                 callbacks.onEntryState(state2)
@@ -140,7 +140,7 @@ class TypesafeTransitionTest : StringSpec({
             state2.data shouldBe name
 
             val id = 42
-            machine.processEvent(IdEvent(id))
+            machine.processEventBlocking(IdEvent(id))
             verifySequence {
                 callbacks.onExitState(state21)
                 callbacks.onEntryState(state22)
@@ -164,7 +164,7 @@ class TypesafeTransitionTest : StringSpec({
                 }
             }
 
-            shouldThrow<IllegalStateException> { machine.processEvent(SwitchEvent) }
+            shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
         }
 
         "implicit data state activation by cross-level transition with default value" {
@@ -181,7 +181,7 @@ class TypesafeTransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
 
         "transition with event super type" {
@@ -196,7 +196,7 @@ class TypesafeTransitionTest : StringSpec({
             }
 
             val id = 42
-            machine.processEvent(IdEvent(id))
+            machine.processEventBlocking(IdEvent(id))
 
             state2.data shouldBe id
         }
@@ -226,8 +226,8 @@ class TypesafeTransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(IdEvent(13))
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(IdEvent(13))
+            machine.processEventBlocking(SwitchEvent)
 
             verify { callbacks.onTriggeredTransition(SwitchEvent) }
         }
@@ -259,10 +259,10 @@ class TypesafeTransitionTest : StringSpec({
                 }
             }
 
-            machine.processEvent(IdEvent(1))
+            machine.processEventBlocking(IdEvent(1))
             dataState.data shouldBe 1
 
-            machine.processEvent(IdEvent(2))
+            machine.processEventBlocking(IdEvent(2))
             dataState.data shouldBe 1
         }
 
@@ -302,7 +302,7 @@ class TypesafeTransitionTest : StringSpec({
                     }
                 )
             }
-            machine.processEvent(CustomDataEvent(42))
+            machine.processEventBlocking(CustomDataEvent(42))
             dataState.data shouldBe 42
             dataState.lastData shouldBe 42
         }

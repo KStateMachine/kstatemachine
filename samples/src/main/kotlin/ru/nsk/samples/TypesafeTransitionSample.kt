@@ -36,7 +36,7 @@ fun main() {
     }
 
     val loginData = LoginData("test@email.com", "qwerty")
-    machine.processEvent(LoginEvent(loginData))
+    machine.processEventBlocking(LoginEvent(loginData))
 
     check(accountFormState.data === loginData)
 }

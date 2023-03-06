@@ -32,7 +32,7 @@ class ActiveStatesTest : StringSpec({
             machine.activeStates(true) should containExactly(machine, state1)
             machine.activeStates() should containExactly(state1)
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             machine.activeStates(true) should containExactly(machine, state2, state21, state211)
             machine.activeStates() should containExactly(state2, state21, state211)

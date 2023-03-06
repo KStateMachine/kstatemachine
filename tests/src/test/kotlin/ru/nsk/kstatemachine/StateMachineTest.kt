@@ -54,21 +54,21 @@ class StateMachineTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(on) }
 
-            machine.processEvent(OffEvent)
+            machine.processEventBlocking(OffEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(OffEvent)
                 callbacks.onExitState(on)
                 callbacks.onEntryState(off)
             }
 
-            machine.processEvent(OnEvent)
+            machine.processEventBlocking(OnEvent)
             verifySequenceAndClear(callbacks) {
                 callbacks.onTriggeredTransition(OnEvent)
                 callbacks.onExitState(off)
                 callbacks.onEntryState(on)
             }
 
-            machine.processEvent(OnEvent)
+            machine.processEventBlocking(OnEvent)
             verify { callbacks wasNot called }
         }
 
@@ -88,9 +88,9 @@ class StateMachineTest : StringSpec({
 
             machine.addInitialState(first)
             machine.addState(second)
-            machine.start()
+            machine.startBlocking()
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             second.isActive shouldBe true
         }
@@ -106,7 +106,7 @@ class StateMachineTest : StringSpec({
                 onTransition { callbacks.onTriggeredTransition(it.event) }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
 
@@ -130,7 +130,7 @@ class StateMachineTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
 
@@ -206,7 +206,7 @@ class StateMachineTest : StringSpec({
         "process event before started" {
             createTestStateMachine(coroutineStarterType) {
                 initialState("first")
-                shouldThrow<IllegalStateException> { processEvent(SwitchEvent) }
+                shouldThrow<IllegalStateException> { processEventBlocking(SwitchEvent) }
             }
         }
 
@@ -273,7 +273,7 @@ class StateMachineTest : StringSpec({
             machine.stopBlocking() // does nothing
             verifySequenceAndClear(callbacks) { callbacks.onStopped(machine) }
 
-            machine.start()
+            machine.startBlocking()
             verifySequence {
                 callbacks.onStarted(machine)
                 callbacks.onEntryState(machine)
@@ -299,7 +299,7 @@ class StateMachineTest : StringSpec({
                 onFinished { callbacks.onFinished(this) }
             }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onStarted(machine)

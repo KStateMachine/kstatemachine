@@ -31,8 +31,8 @@ class StateTest : StringSpec({
                 }
             }
 
-            machine.processEvent(SwitchEvent)
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
         }
 
         "final state transition with explicit state" {

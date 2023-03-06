@@ -22,7 +22,7 @@ class TransitionOverrideTest : StringSpec({
 
             val machine = overrideWithDirection(coroutineStarterType, callbacks, noTransition())
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent, 2) }
         }
@@ -32,7 +32,7 @@ class TransitionOverrideTest : StringSpec({
 
             val machine = overrideWithDirection(coroutineStarterType, callbacks, stay())
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
 
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
@@ -59,7 +59,7 @@ class TransitionOverrideTest : StringSpec({
 
             verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
 
-            machine.processEvent(SwitchEvent)
+            machine.processEventBlocking(SwitchEvent)
             verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
         }
     }
@@ -88,7 +88,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType(cor
         state3 = state("state3") { callbacks.listen(this) }
     }
 
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     verifySequence {
         callbacks.onTriggeredTransition(SwitchEvent, 2)
