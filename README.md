@@ -20,8 +20,9 @@ The library follows concepts from this two great and well known works:
 
 Main features are:
 
-* Zero dependency. It is written in pure Kotlin, it does not depend on any other libraries or Android SDK
-* Built-in support for Kotlin Coroutines. But you can fully use KStateMachine without Kotlin Coroutines dependency.
+* Zero dependency. It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK
+* [Built-in support for Kotlin Coroutines.](https://nsk90.github.io/kstatemachine/#cotlin-coroutines) 
+  But you can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
   till Kotlin 1.5
@@ -72,9 +73,9 @@ sealed class States : DefaultState() {
     object RedState : States(), FinalState // Machine finishes when enters final state
 }
 
-fun main() {
+fun main() = runBlocking {
     // Create state machine and configure its states in a setup block
-    val machine = createStateMachine {
+    val machine = createStateMachine(this) {
         addInitialState(GreenState) {
             // Add state listeners
             onEntry { println("Enter green") }
@@ -129,7 +130,12 @@ fun main() {
 
 ## Install
 
-KStateMachine is available on Maven Central and JitPack repositories.
+KStateMachine is available on `Maven Central` and `JitPack` repositories.
+
+The library consists of 2 artifacts:
+
+* `kstatemachine` - state machine implementation (depends only on Kotlin Standard library)
+* `kstatemachine-coroutines` - add-ons for working with coroutines (depends on Kotlin Coroutines library)
 
 ### Maven Central
 

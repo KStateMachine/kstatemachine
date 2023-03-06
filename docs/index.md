@@ -683,10 +683,41 @@ Calling `processEvent()` on destroyed machine will throw also.
 
 ## Multithreading and concurrency
 
-State machine is designed to work in single thread. Concurrent access to library classes must be controled by
-external synchronization.
-If you need to process events from different threads you can post them to some thread safe queue and start a single
-thread which will pull events from that queue in a loop and call `processEvent()` function.
+KStateMachine is designed to work in single thread. 
+Concurrent modification of library classes will lead to race conditions.
+
+## Kotlin Coroutines
+
+Starting from `KStateMachine v0.20.0` the library has built-in coroutines support.
+All its callbacks and other APIs were marked with `suspend` modifier, allowing to use coroutines from them.
+You can still use all KStateMachine features without Kotlin Coroutines library dependency as `suspend` keyword 
+is implemented at compiler level and Coroutines library is not really necessary to start coroutines.
+
+TODO work in progress
+
+### Migration guide from versions older than v0.20.0
+
+#### If you can add or already have Kotlin Coroutines dependency
+
+* Add both `kstatemachine` and `kstatemachine-coroutines` artifacts to your build system
+* Use `createStateMachine` from `kstatemachine-coroutines` artifact to create state machines
+  and provide `CoroutineScope` as argument
+* Use suspendable versions of functions (`start`/`stop`/`processEvent` etc.) when possible
+* Avoid using function analogs with `Blocking` suffix **(especially recursively)** as this may easily lead to deadlocks
+or race conditions depending on your use case and machine configuration
+
+TODO work in progress
+
+#### If you do not want to use Kotlin Coroutines or do not have dependency on this library
+
+* Use only `kstatemachine` artifact in your build system
+* Use `createStdLibStateMachine` to create state machines
+* Use suspendable versions of functions (`start`/`stop`/`processEvent` etc.) when possible (from KStateMachine callbacks)
+* In other cases use their analogs with `Blocking` suffix, it is ok
+* If you try to use Kotlin Coroutines library from machine created by `createStdLibStateMachine` you will probably get
+  an exception. 
+* Using suspendable code without calls to Kotlin Coroutines library is ok, as `suspend` keyword is a compiler feature, 
+  not library one.
 
 ## Export
 
@@ -696,7 +727,7 @@ may touch application data that is not valid when export is running._
 
 ### PlantUML
 
-Use `exportToPlantUml()` extension function to export state machine
+Use `exportToPlantUml()/exportToPlantUmlBlocking()` extension function to export state machine
 to [PlantUML state diagram](https://plantuml.com/en/state-diagram).
 
 ```kotlin
@@ -711,7 +742,7 @@ See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachin
 ## Testing
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
-is `Testing.startFrom()` function which allows starting the machine from a specified state:
+are several `Testing.startFrom()` overloaded functions which allow starting the machine from a specified state:
 
 ```kotlin
 lateinit var state2: State
@@ -774,11 +805,11 @@ function but in general it is wrong, as events are not commands.
 
 ## Known issues
 
-It is not recommended to use custom generic classes as events and as argument of `DataState`. JVM removes
+It is not recommended to use generic classes as events and as argument of `DataState`. JVM removes
 difference between generic classes with different argument types, this is known as type erasure.
 So library cannot separate such types from each other at runtime. When it is necessary to check that some object is an
 instance of
 a class, such check may be positive for class parameterized with any type.
 So it's easier aviod using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s
 that
-will use some additional information to compare such types. Or be sure that such invalid comparison never happens.
+will use some additional information to compare such types, or be sure that such invalid comparison never happens.
