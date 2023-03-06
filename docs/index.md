@@ -17,7 +17,7 @@ Working with state machine consists of two major steps:
 2. Processing events, on which state machine can switch its states and notify about changes
 
 ```kotlin
-val machine = createStateMachine {
+val machine = createStateMachine(scope) {
     // Setup is made in this block ...
 }
 // After setup and start, it is ready to process events
@@ -28,10 +28,14 @@ machine.processEvent(YellowEvent)
 
 ## Create state machine
 
-First we create a state machine with `createStateMachine()` function:
+First we create a state machine with one of those factory functions:
+* `createStateMachine()` suspendable version (from `kstatemachine-coroutines` artifact)
+* `createStateMachineBlocking()` blocking version (from `kstatemachine-coroutines` artifact)
+* `createStdLibStateMachine()` - creates machine without Kotlin Coroutines support (from `kstatemachine` artifact)
 
 ```kotlin
 val machine = createStateMachine(
+    scope, // 
     "Traffic lights" // Optional name is convenient for logging debugging and export
 ) {
     // Set up state machine ...
@@ -697,18 +701,16 @@ TODO work in progress
 
 ### Migration guide from versions older than v0.20.0
 
-#### If you can add or already have Kotlin Coroutines dependency
+#### If you already have or ready to add Kotlin Coroutines dependency
 
 * Add both `kstatemachine` and `kstatemachine-coroutines` artifacts to your build system
 * Use `createStateMachine` from `kstatemachine-coroutines` artifact to create state machines
-  and provide `CoroutineScope` as argument
+  providing `CoroutineScope` as argument
 * Use suspendable versions of functions (`start`/`stop`/`processEvent` etc.) when possible
 * Avoid using function analogs with `Blocking` suffix **(especially recursively)** as this may easily lead to deadlocks
 or race conditions depending on your use case and machine configuration
 
-TODO work in progress
-
-#### If you do not want to use Kotlin Coroutines or do not have dependency on this library
+#### If you can not have dependency on Kotlin Coroutines or just do not want to use it
 
 * Use only `kstatemachine` artifact in your build system
 * Use `createStdLibStateMachine` to create state machines
@@ -800,8 +802,8 @@ Correct - let the state machine to make decisions on an event:
 machine.processEvent(SomethingHappenedEvent)
 ```
 
-In certain scenarios (maybe like state pattern) it is fine to use events like some kind of _setState() / goToState()_
-function but in general it is wrong, as events are not commands.
+In certain scenarios (like a `state pattern` maybe) it is fine to use events like some kind of _setState() / goToState()_
+functions but in general it is wrong, as events are not commands.
 
 ## Known issues
 

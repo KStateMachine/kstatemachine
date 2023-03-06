@@ -21,7 +21,7 @@ The library follows concepts from this two great and well known works:
 Main features are:
 
 * Zero dependency. It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK
-* [Built-in support for Kotlin Coroutines.](https://nsk90.github.io/kstatemachine/#cotlin-coroutines) 
+* [Built-in support for Kotlin Coroutines.](https://nsk90.github.io/kstatemachine/#kotlin-coroutines)
   But you can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
@@ -121,6 +121,7 @@ fun main() = runBlocking {
 * [PlantUML nested states export sample](./samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/main/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
+* [Usage without Kotlin Coroutines sample](./samples/src/main/kotlin/ru/nsk/samples/StdLibMinimalSealedClassesSample.kt)
 * [Minimal syntax sample](./samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 * [Guarded transition sample](./samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross-level transition sample](./samples/src/main/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
