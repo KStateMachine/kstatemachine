@@ -8,3 +8,10 @@ internal interface RecursiveVisitor : Visitor {
         states.forEach { visit(it) }
     }
 }
+
+internal interface RecursiveCoVisitor : CoVisitor {
+    suspend fun IState.visitChildren() {
+        transitions.forEach { visit(it) }
+        states.forEach { visit(it) }
+    }
+}

@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.TypesafeTransitionSample.LoginData
 import ru.nsk.samples.TypesafeTransitionSample.LoginEvent
@@ -17,11 +18,11 @@ private object TypesafeTransitionSample {
  * Shows API for typesafe arguments for transitions.
  * Only [DataEvent] holding special data can lead to [DataState] expecting the same data.
  */
-fun main() {
+fun main() = runBlocking {
     lateinit var accountFormState: DataState<LoginData>
 
-    val machine = createStateMachine("Data states") {
-        logger = StateMachine.Logger { println(it) }
+    val machine = createStateMachine(this, "Data states") {
+        logger = StateMachine.Logger { println(it()) }
 
         accountFormState = dataState("accountForm") {
             onEntry { println("login with: $data") }

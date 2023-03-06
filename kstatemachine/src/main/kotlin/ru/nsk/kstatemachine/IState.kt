@@ -1,11 +1,14 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.CoVisitor
+import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 import kotlin.reflect.KClass
 
 /**
- * Base interface for all kind of states
+ * Base interface for all kind of states.
+ * Many additional methods implemented like extensions to keep this interface clean and minimalistic.
  */
 @StateMachineDslMarker
 interface IState : TransitionStateApi, VisitorAcceptor {
@@ -29,33 +32,31 @@ interface IState : TransitionStateApi, VisitorAcceptor {
      */
     fun setInitialState(state: IState)
 
-    /**
-     * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
-     * Internal states of nested machines are not included.
-     */
-    fun activeStates(selfIncluding: Boolean = false): Set<IState>
+    override suspend fun accept(visitor: CoVisitor) = machine.coroutineAbstraction.withContext {
+        visitor.visit(this)
+    }
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     /**
      * Called when machine is stopped, to perform cleanup steps.
      */
-    fun onStopped() = Unit
+    suspend fun onStopped() = Unit
 
     /**
      * Called when state is sequentially used on multiple machine instances, to perform cleanup steps.
      */
-    fun onCleanup() = Unit
+    suspend fun onCleanup() = Unit
 
     interface Listener {
-        fun onEntry(transitionParams: TransitionParams<*>) = Unit
-        fun onExit(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onEntry(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onExit(transitionParams: TransitionParams<*>) = Unit
 
         /**
          * If child mode is [ChildMode.EXCLUSIVE] notifies that child [IFinalState] is entered.
          * If child mode is [ChildMode.PARALLEL] notifies that all children has finished.
          */
-        fun onFinished(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onFinished(transitionParams: TransitionParams<*>) = Unit
     }
 }
 
@@ -107,7 +108,7 @@ interface FinalDataState<D : Any> : IFinalState, DataState<D>
 interface PseudoState : State
 
 interface RedirectPseudoState : PseudoState {
-    fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
+    suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
 }
 
 /**
@@ -124,6 +125,16 @@ interface HistoryState : PseudoState {
 typealias StateBlock<S> = S.() -> Unit
 
 /**
+ * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
+ * Internal states of nested machines are not included.
+ */
+fun IState.activeStates(selfIncluding: Boolean = false): Set<IState> {
+    val visitor = GetActiveStatesVisitor(selfIncluding)
+    accept(visitor)
+    return visitor.activeStates
+}
+
+/**
  * Get state by name. This might be used to start listening to state after state machine setup.
  */
 fun IState.findState(name: String, recursive: Boolean = true): IState? {
@@ -136,7 +147,7 @@ fun IState.findState(name: String, recursive: Boolean = true): IState? {
         if (it is StateMachine) // do not go into nested state machines
             null
         else
-            it.findState(name, recursive)
+            it.findState(name, true)
     }
 }
 
@@ -180,32 +191,7 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 
-/**
- * The most commonly used methods [onEntry] and [onExit] are shipped with [once] argument, to remove listener
- * after it is triggered the first time.
- * Looks that it is not necessary in other similar methods.
- */
-fun <S : IState> S.onEntry(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onEntry(transitionParams: TransitionParams<*>) {
-            block(transitionParams)
-            if (once) removeListener(this)
-        }
-    })
-
-/** See [onEntry] */
-fun <S : IState> S.onExit(once: Boolean = false, block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onExit(transitionParams: TransitionParams<*>) {
-            block(transitionParams)
-            if (once) removeListener(this)
-        }
-    })
-
-fun <S : IState> S.onFinished(block: S.(TransitionParams<*>) -> Unit) =
-    addListener(object : IState.Listener {
-        override fun onFinished(transitionParams: TransitionParams<*>) = block(transitionParams)
-    })
+fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else parent?.machineOrNull()
 
 /**
  * @param name is optional and is useful for getting state instance after state machine setup
@@ -271,7 +257,7 @@ inline fun <reified D : Any> IState.finalDataState(
     noinline init: StateBlock<FinalDataState<D>>? = null
 ) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
-fun IState.choiceState(name: String? = null, choiceAction: EventAndArgument<*>.() -> State) =
+fun IState.choiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
 fun IState.historyState(

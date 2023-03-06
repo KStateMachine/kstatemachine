@@ -3,9 +3,9 @@ package ru.nsk.kstatemachine
 /**
  * Returns [StateMachine.PendingEventHandler] implementation that throws exception. This is an old default behaviour.
  */
-fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandler { pendingEvent, _ ->
+fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandler {
     error(
-        "$this can not process pending $pendingEvent as event processing is already running. " +
+        "$this can not process pending ${it.event} as event processing is already running. " +
                 "Do not call processEvent() from notification listeners or use queuePendingEventHandler()"
     )
 }
@@ -13,22 +13,24 @@ fun StateMachine.throwingPendingEventHandler() = StateMachine.PendingEventHandle
 fun StateMachine.queuePendingEventHandler(): QueuePendingEventHandler = QueuePendingEventHandlerImpl(this)
 
 interface QueuePendingEventHandler : StateMachine.PendingEventHandler {
-    fun checkEmpty()
-    fun nextEventAndArgument(): EventAndArgument<*>?
-    fun clear()
+    suspend fun checkEmpty()
+    suspend fun nextEventAndArgument(): EventAndArgument<*>?
+    suspend fun clear()
 }
 
 private class QueuePendingEventHandlerImpl(private val machine: StateMachine) : QueuePendingEventHandler {
     private val queue = ArrayDeque<EventAndArgument<*>>()
 
-    override fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
+    override suspend fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
 
-    override fun onPendingEvent(pendingEvent: Event, argument: Any?) {
-        machine.log { "$machine queued event ${pendingEvent::class.simpleName} with argument $argument" }
-        queue.add(EventAndArgument(pendingEvent, argument))
+    override suspend fun onPendingEvent(eventAndArgument: EventAndArgument<*>) {
+        machine.log {
+            "$machine queued event ${eventAndArgument.event::class.simpleName} with argument ${eventAndArgument.argument}"
+        }
+        queue.add(eventAndArgument)
     }
 
-    override fun nextEventAndArgument() = queue.removeFirstOrNull()
+    override suspend fun nextEventAndArgument() = queue.removeFirstOrNull()
 
-    override fun clear() = queue.clear()
+    override suspend fun clear() = queue.clear()
 }

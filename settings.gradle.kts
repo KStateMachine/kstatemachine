@@ -1,3 +1,8 @@
 rootProject.name = "KStateMachine"
 
-include("kstatemachine", "samples")
+include(
+    "kstatemachine",
+    "kstatemachine-coroutines",
+    "samples",
+    "tests"
+)

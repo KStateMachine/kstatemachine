@@ -14,7 +14,7 @@ abstract class TransitionBuilder<E : Event>(protected val name: String?, protect
 
 abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    var guard: EventAndArgument<E>.() -> Boolean = { true }
+    var guard: suspend EventAndArgument<E>.() -> Boolean = { true }
 }
 
 abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
@@ -42,7 +42,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
 
 abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
-    lateinit var targetState: EventAndArgument<E>.() -> S
+    lateinit var targetState: suspend EventAndArgument<E>.() -> S
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
@@ -65,7 +65,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
 
 class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
-    lateinit var direction: EventAndArgument<E>.() -> TransitionDirection
+    lateinit var direction: suspend EventAndArgument<E>.() -> TransitionDirection
 
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
@@ -102,12 +102,14 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
 class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
-inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(crossinline block: (TransitionParams<E>) -> Unit): Transition.Listener {
+inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(
+    crossinline block: suspend (TransitionParams<E>) -> Unit
+): Transition.Listener {
     require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
 
     return object : Transition.Listener {
         @Suppress("UNCHECKED_CAST")
-        override fun onTriggered(transitionParams: TransitionParams<*>) =
+        override suspend fun onTriggered(transitionParams: TransitionParams<*>) =
             block(transitionParams as TransitionParams<E>)
     }.also { listener = it }
 }

@@ -1,24 +1,15 @@
 package ru.nsk.kstatemachine
 
-internal inline fun <T, R : Any> Iterable<T>.firstNotNullOfOrNull(transform: (T) -> R?): R? {
-    for (element in this) {
-        val result = transform(element)
-        if (result != null)
-            return result
-    }
-    return null
-}
-
 /**
  * [forEach] analog which ignores internal state machines
  */
-internal fun Iterable<InternalState>.forEachState(block: (InternalState) -> Unit) {
+internal suspend fun Iterable<InternalState>.forEachState(block: suspend (InternalState) -> Unit) {
     forEach { if (it !is StateMachine) block(it) }
 }
 
-internal fun IState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
+fun IState.isNeighbor(state: IState) = parent?.states?.contains(state) == true
 
-internal fun IState.isSubStateOf(state: IState): Boolean {
+fun IState.isSubStateOf(state: IState): Boolean {
     state.states.forEach {
         if (it === this)
             return true

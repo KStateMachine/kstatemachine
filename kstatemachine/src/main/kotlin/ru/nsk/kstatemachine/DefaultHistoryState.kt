@@ -11,10 +11,7 @@ open class DefaultHistoryState(
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
     private var _storedState: IState? = null
-    override val storedState
-        get() = (_storedState ?: defaultState).also {
-            machine.log { "$this resolved to $it" }
-        }
+    override val storedState get() = _storedState ?: defaultState
 
     override fun setParent(parent: InternalState) {
         super.setParent(parent)
@@ -29,7 +26,7 @@ open class DefaultHistoryState(
         _storedState = currentState
     }
 
-    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         super.recursiveAfterTransitionComplete(transitionParams)
         if (historyType == HistoryType.DEEP) {
             transitionParams.direction.targetState?.let { targetState ->
@@ -41,12 +38,12 @@ open class DefaultHistoryState(
         }
     }
 
-    override fun onStopped() {
+    override suspend fun onStopped() {
         _storedState = null
     }
 
-    override fun onCleanup() {
-        onStopped()
+    override suspend fun onCleanup() {
+        _storedState = null
         _defaultState = null
     }
 }

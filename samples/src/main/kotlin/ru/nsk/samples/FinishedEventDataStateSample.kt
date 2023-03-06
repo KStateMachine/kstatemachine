@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.FinishedEventDataStateSample.IntEvent
 import ru.nsk.samples.FinishedEventDataStateSample.States.*
@@ -22,9 +23,9 @@ private const val DATA = 42
  * If final state is [DataState] the event will receive its data field value.
  * This data may be passed to another [DataState]
  */
-fun main() {
-    val machine = createStateMachine {
-        logger = StateMachine.Logger { println(it) }
+fun main() = runBlocking {
+    val machine = createStateMachine(this) {
+        logger = StateMachine.Logger { println(it()) }
 
         addInitialState(State1) {
             addInitialState(State11) {

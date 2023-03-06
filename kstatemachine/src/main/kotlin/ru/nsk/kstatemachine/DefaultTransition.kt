@@ -8,6 +8,7 @@ open class DefaultTransition<E : Event>(
 ) : InternalTransition<E> {
     private val _listeners = mutableSetOf<Transition.Listener>()
     override val listeners: Collection<Transition.Listener> get() = _listeners
+
     override val sourceState = sourceState as InternalState
 
     /**
@@ -50,9 +51,9 @@ open class DefaultTransition<E : Event>(
         _listeners.remove(listener)
     }
 
-    override fun isMatchingEvent(event: Event) = eventMatcher.match(event)
+    override suspend fun isMatchingEvent(event: Event) = eventMatcher.match(event)
 
-    override fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>) =
+    override suspend fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>) =
         targetStateDirectionProducer(policy)
 
     override fun toString() = "${this::class.simpleName}${if (name != null) "($name)" else ""}"

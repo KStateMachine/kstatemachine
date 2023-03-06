@@ -2,7 +2,7 @@ package ru.nsk
 
 plugins {
     java
-	jacoco
+    jacoco
 }
 
 jacoco {

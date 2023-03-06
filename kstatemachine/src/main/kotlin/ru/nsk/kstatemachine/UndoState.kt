@@ -5,7 +5,7 @@ private data class StateAndEvent(val state: IState, val eventAndArgument: EventA
 internal class UndoState : BasePseudoState("undo") {
     private val stack = mutableListOf<StateAndEvent>()
 
-    override fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         super.recursiveAfterTransitionComplete(transitionParams)
         if (transitionParams.event !is WrappedEvent) { // do not record self-made transition
             // check target-less transition
@@ -32,6 +32,6 @@ internal class UndoState : BasePseudoState("undo") {
         null
     }
 
-    override fun onStopped() = stack.clear()
-    override fun onCleanup() = onStopped()
+    override suspend fun onStopped() = stack.clear()
+    override suspend fun onCleanup() = stack.clear()
 }

@@ -1,8 +1,9 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
 import ru.nsk.samples.MinimalSealedClassesSample.States.*
+import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
 
 private object MinimalSealedClassesSample {
     object SwitchEvent : Event
@@ -17,9 +18,9 @@ private object MinimalSealedClassesSample {
 /**
  * This sample uses states defined in sealed class
  */
-fun main() {
+fun main() = runBlocking {
     // Create state machine and configure its states in a setup block
-    val machine = createStateMachine {
+    val machine = createStateMachine(this) {
         addInitialState(GreenState) {
             // Add state listeners
             onEntry { println("Enter $this") }

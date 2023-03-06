@@ -6,7 +6,17 @@ import ru.nsk.kstatemachine.StateMachine
 import ru.nsk.kstatemachine.Transition
 
 /**
- * Interface for visiting state machine components
+ * Suspendable interface for visiting state machine components
+ * Visitor must is used instead of extension functions to preserve virtual behaviour, which is missing with extensions.
+ */
+interface CoVisitor {
+    suspend fun visit(machine: StateMachine)
+    suspend fun visit(state: IState)
+    suspend fun <E : Event> visit(transition: Transition<E>)
+}
+
+/**
+ * Interface for visiting state machine components without suspension
  */
 interface Visitor {
     fun visit(machine: StateMachine)
@@ -15,5 +25,6 @@ interface Visitor {
 }
 
 interface VisitorAcceptor {
+    suspend fun accept(visitor: CoVisitor)
     fun accept(visitor: Visitor)
 }

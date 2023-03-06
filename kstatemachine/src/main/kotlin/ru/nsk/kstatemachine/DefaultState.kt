@@ -2,6 +2,9 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 
+/**
+ * The most common state
+ */
 open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
 
@@ -10,16 +13,16 @@ open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalSt
 /**
  * Currently it does not allow to target [DataState]
  */
-open class DefaultChoiceState(name: String? = null, private val choiceAction: EventAndArgument<*>.() -> State) :
+open class DefaultChoiceState(name: String? = null, private val choiceAction: suspend EventAndArgument<*>.() -> State) :
     BasePseudoState(name), RedirectPseudoState {
 
-    override fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
-        eventAndArgument.choiceAction().also { machine.log { "$this resolved to $it" } }
+    override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
+        eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
-    override fun doEnter(transitionParams: TransitionParams<*>) = internalError()
-    override fun doExit(transitionParams: TransitionParams<*>) = internalError()
+    override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
+    override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
     override fun <L : IState.Listener> addListener(listener: L) =
         throw UnsupportedOperationException("PseudoState $this can not have listeners")
@@ -33,5 +36,4 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), Pseu
 
     private fun internalError(): Nothing =
         error("Internal error, PseudoState $this can not be entered or exited, looks that machine is purely configured")
-
 }

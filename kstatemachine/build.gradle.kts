@@ -3,15 +3,11 @@ plugins {
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
-    id("org.jetbrains.dokka") version Versions.kotlin
+    id("org.jetbrains.dokka") version Versions.kotlinDokka
 }
 
 group = rootProject.group
 version = rootProject.version
-
-tasks.test {
-    useJUnitPlatform()
-}
 
 tasks {
     compileKotlin {
@@ -24,13 +20,6 @@ tasks {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-dependencies {
-    testImplementation("io.kotest:kotest-assertions-core:${Versions.kotest}")
-    testImplementation("io.kotest:kotest-framework-datatest:${Versions.kotest}")
-    testImplementation("io.kotest:kotest-runner-junit5:${Versions.kotest}")
-    testImplementation("io.mockk:mockk:${Versions.mockk}")
+    sourceCompatibility = Versions.javaCompatibilityVersion
+    targetCompatibility = Versions.javaCompatibilityVersion
 }

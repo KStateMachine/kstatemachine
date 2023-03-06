@@ -5,10 +5,5 @@ package ru.nsk.kstatemachine
  */
 interface InternalTransition<E : Event> : Transition<E> {
     override val sourceState: InternalState
-    fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
-}
-
-internal inline fun InternalTransition<*>.transitionNotify(block: Transition.Listener.() -> Unit) {
-    val machine = sourceState.machine as InternalStateMachine
-    listeners.toList().forEach { machine.runDelayingException { it.block() } }
+    suspend fun produceTargetStateDirection(policy: TransitionDirectionProducerPolicy<E>): TransitionDirection
 }

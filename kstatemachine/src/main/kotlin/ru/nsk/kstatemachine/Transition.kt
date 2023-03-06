@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 
@@ -26,21 +27,18 @@ interface Transition<E : Event> : VisitorAcceptor {
     /**
      * Checks if the [event] matches this [Transition]
      */
-    fun isMatchingEvent(event: Event): Boolean
+    suspend fun isMatchingEvent(event: Event): Boolean
+
+    override suspend fun accept(visitor: CoVisitor) = sourceState.machine.coroutineAbstraction.withContext {
+        visitor.visit(this)
+    }
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
-        fun onTriggered(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onTriggered(transitionParams: TransitionParams<*>) = Unit
     }
 }
-
-inline fun <reified E : Event> Transition<E>.onTriggered(
-    crossinline block: (TransitionParams<E>) -> Unit
-) = addListener(object : Transition.Listener {
-    @Suppress("UNCHECKED_CAST")
-    override fun onTriggered(transitionParams: TransitionParams<*>) = block(transitionParams as TransitionParams<E>)
-})
 
 /**
  * Most of the cases external and local transition are functionally equivalent except in cases where transition

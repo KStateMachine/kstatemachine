@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.ComplexSyntaxSample.SwitchRedEvent
 import ru.nsk.samples.ComplexSyntaxSample.SwitchYellowEvent
@@ -16,8 +17,9 @@ private object ComplexSyntaxSample {
     class YellowState(val info: Int) : DefaultState("Yellow")
 }
 
-fun main() {
+fun main() = runBlocking {
     val machine = createStateMachine(
+        this, // coroutine scope used for this machine
         "Traffic lights" // StateMachine name is optional
     ) {
         // Create and setup states
@@ -77,20 +79,20 @@ fun main() {
         }
 
         // Set Logger to enable internal state machine logging on your platform
-        logger = StateMachine.Logger { println(it) }
+        logger = StateMachine.Logger { println(it()) }
 
         // Set custom IgnoredEventHandler
         // for event that does not match any transition,
         // for example to throw exceptions on ignored events
-        ignoredEventHandler = StateMachine.IgnoredEventHandler { event, argument ->
-            error("Ignored $event, argument: $argument")
+        ignoredEventHandler = StateMachine.IgnoredEventHandler {
+            error("Ignored ${it.event}, argument: ${it.argument}")
         }
 
         // Set custom PendingEventHandler which is triggered
         // if processEvent() is called while previous processEvent() is still processing
-        pendingEventHandler = StateMachine.PendingEventHandler { pendingEvent, _ ->
+        pendingEventHandler = StateMachine.PendingEventHandler {
             error(
-                "$this can not process pending $pendingEvent " +
+                "$this can not process pending ${it.event} " +
                         "as event processing is already running. " +
                         "Do not call processEvent() from notification listeners."
             )
@@ -130,5 +132,5 @@ fun main() {
     machine.processEvent(SwitchRedEvent("Stop!"))
 
     // get list of currently active states
-    machine.activeStates()
+    val states = machine.activeStates()
 }

@@ -39,11 +39,11 @@ fun onActiveAllOf(
             if (notifyOnSubscribe) onChanged(status)
         }
 
-        override fun onEntry(transitionParams: TransitionParams<*>) {
+        override suspend fun onEntry(transitionParams: TransitionParams<*>) {
             ++activeCount
         }
 
-        override fun onExit(transitionParams: TransitionParams<*>) {
+        override suspend fun onExit(transitionParams: TransitionParams<*>) {
             --activeCount
         }
 
@@ -88,8 +88,8 @@ fun onActiveAnyOf(
 
         private fun calculateStatus() = allStates.firstOrNull { it.isActive } != null
 
-        override fun onEntry(transitionParams: TransitionParams<*>) = updateStatus()
-        override fun onExit(transitionParams: TransitionParams<*>) = updateStatus()
+        override suspend fun onEntry(transitionParams: TransitionParams<*>) = updateStatus()
+        override suspend fun onExit(transitionParams: TransitionParams<*>) = updateStatus()
 
         override fun unsubscribe() {
             allStates.forEach { it.removeListener(this) }

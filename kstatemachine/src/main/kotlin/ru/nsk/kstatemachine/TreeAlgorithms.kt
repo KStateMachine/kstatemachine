@@ -14,21 +14,21 @@ internal object TreeAlgorithms {
 
         while (thisDepth != targetDepth) {
             if (thisDepth > targetDepth) {
-                thisNode = thisNode.requireParent()
+                thisNode = thisNode.requireInternalParent()
                 thisDepth--
             } else {
                 targetPath.add(targetNode)
 
-                targetNode = targetNode.requireParent()
+                targetNode = targetNode.requireInternalParent()
                 targetDepth--
             }
         }
 
         while (thisNode !== targetNode) {
-            thisNode = thisNode.requireParent()
+            thisNode = thisNode.requireInternalParent()
 
             targetPath.add(targetNode)
-            targetNode = targetNode.requireParent()
+            targetNode = targetNode.requireInternalParent()
         }
 
         targetPath.add(thisNode) // add lca

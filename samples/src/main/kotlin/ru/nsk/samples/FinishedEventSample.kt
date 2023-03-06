@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.FinishedEventSample.States.*
 import ru.nsk.samples.FinishedEventSample.SwitchEvent
@@ -18,9 +19,9 @@ private object FinishedEventSample {
 /**
  * [FinishedEvent] is generated when state enters its child final state
  */
-fun main() {
-    val machine = createStateMachine {
-        logger = StateMachine.Logger { println(it) }
+fun main() = runBlocking {
+    val machine = createStateMachine(this) {
+        logger = StateMachine.Logger { println(it()) }
 
         addInitialState(State1) {
             addInitialState(State11) {
