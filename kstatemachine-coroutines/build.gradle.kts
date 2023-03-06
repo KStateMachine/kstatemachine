@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm")
     `java-library`
+    ru.nsk.`maven-publish`
+    id("org.jetbrains.dokka") version Versions.kotlinDokka
 }
 
 group = rootProject.group
@@ -10,6 +12,8 @@ tasks {
     compileKotlin {
         kotlinOptions {
             jvmTarget = Versions.jvmTarget
+            languageVersion = Versions.languageVersion
+            apiVersion = Versions.apiVersion
         }
     }
 }

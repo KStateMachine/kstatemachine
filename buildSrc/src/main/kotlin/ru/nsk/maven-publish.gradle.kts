@@ -33,7 +33,7 @@ publishing {
     publications {
         create<MavenPublication>("mavenCentral") {
             groupId = "io.github.nsk90"
-            artifactId = "kstatemachine"
+            artifactId = project.name
             version = rootProject.version as String
 
             from(components["java"])
@@ -41,8 +41,8 @@ publishing {
             pom {
                 name.set(rootProject.name)
                 description.set(
-                    "KStateMachine is a Kotlin DSL library for creating finite state machines (FSM) " +
-                            "and hierarchical state machines (HSM)."
+                    "KStateMachine is a Kotlin DSL library for creating state machines and " +
+                            "hierarchical state machines (statecharts)."
                 )
                 url.set("https://github.com/nsk90/kstatemachine")
                 inceptionYear.set("2020")
@@ -86,7 +86,7 @@ publishing {
 
         create<MavenPublication>("mavenJitpack") {
             groupId = "com.github.nsk90"
-            artifactId = "kstatemachine"
+            artifactId = project.name
             version = rootProject.version as String
 
             from(components["java"])
@@ -94,8 +94,8 @@ publishing {
             pom {
                 name.set(rootProject.name)
                 description.set(
-                    "KStateMachine is a Kotlin DSL library for creating finite state machines (FSM) " +
-                            "and hierarchical state machines (HSM)."
+                    "KStateMachine is a Kotlin DSL library for creating state machines and " +
+                            "hierarchical state machines (statecharts)."
                 )
                 url.set("https://github.com/nsk90/kstatemachine")
                 inceptionYear.set("2020")

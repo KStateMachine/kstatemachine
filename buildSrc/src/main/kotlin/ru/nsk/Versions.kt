@@ -17,7 +17,7 @@ object Versions {
     const val apiVersion = "1.5"
 
     // dependencies
-    const val coroutinesCore = "1.6.3"
+    const val coroutinesCore = "1.6.4"
 
     // test dependencies   
     const val mockk = "1.13.4"
