@@ -73,7 +73,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
-        check(!machine.isRunning) { "Can not add state after state machine started" }
+        if (machineOrNull()?.isRunning == true) error("Can not add state after state machine started")
         if (childMode == PARALLEL) {
             require(state !is IFinalState) { "Can not add IFinalState in parallel child mode" }
             require(state !is PseudoState) { "Can not add PseudoState in parallel child mode" }
@@ -94,14 +94,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override fun setInitialState(state: IState) {
         require(states.contains(state)) { "$state is not part of $this machine, use addState() first" }
         check(childMode == EXCLUSIVE) { "Can not set initial state in parallel child mode" }
-        check(!machine.isRunning) { "Can not change initial state after state machine started" }
+        if (machineOrNull()?.isRunning == true) error("Can not change initial state after state machine started")
 
         data.initialState = state as InternalState
     }
 
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
-        if (parent?.machine?.isRunning == true)
-            error("Can not add transition after state machine started")
+        if (machineOrNull()?.isRunning == true) error("Can not add transition after state machine started")
         data.transitions += transition
         return transition
     }
