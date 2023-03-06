@@ -3,7 +3,7 @@ import org.gradle.api.JavaVersion
 object Versions {
     // library
     const val libraryGroup = "io.github.nsk90"
-    const val libraryVersion = "0.18.1"
+    const val libraryVersion = "0.20.0"
 
     // tools
     const val kotlin = "1.8.10"
