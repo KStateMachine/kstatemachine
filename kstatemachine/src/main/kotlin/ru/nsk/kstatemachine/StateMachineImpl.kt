@@ -7,7 +7,8 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 /**
  * Defines state machine API for internal library usage.
  */
-abstract class InternalStateMachine(name: String?, childMode: ChildMode) : BuildingStateMachine, DefaultState(name, childMode) {
+abstract class InternalStateMachine(name: String?, childMode: ChildMode) :
+    BuildingStateMachine, DefaultState(name, childMode) {
     internal abstract suspend fun startFrom(state: IState, argument: Any?)
     internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
@@ -23,7 +24,7 @@ internal class StateMachineImpl(
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
-    override var logger: StateMachine.Logger = NullLogger
+    override var logger: StateMachine.Logger = StateMachine.Logger {}
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler {}
     override var pendingEventHandler: StateMachine.PendingEventHandler = queuePendingEventHandler()
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
@@ -53,10 +54,6 @@ internal class StateMachineImpl(
             delayedListenerException = exception
     }
 
-    private object NullLogger : StateMachine.Logger {
-        override fun log(message: String) {}
-    }
-
     override fun <L : StateMachine.Listener> addListener(listener: L): L {
         require(_machineListeners.add(listener)) { "$listener is already added" }
         return listener
@@ -74,18 +71,19 @@ internal class StateMachineImpl(
     override suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
         doStartFrom(StartDataEventImpl(data), state, argument)
 
-    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) = coroutineAbstraction.withContext {
-        checkBeforeRunMachine()
+    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) =
+        coroutineAbstraction.withContext {
+            checkBeforeRunMachine()
 
-        eventProcessingScope {
-            runCheckingExceptions {
-                val transitionParams = makeStartTransitionParams(event, this, state, argument)
-                runMachine(transitionParams)
-                switchToTargetState(state as InternalState, this, transitionParams)
-                recursiveAfterTransitionComplete(transitionParams)
+            eventProcessingScope {
+                runCheckingExceptions {
+                    val transitionParams = makeStartTransitionParams(event, this, state, argument)
+                    runMachine(transitionParams)
+                    switchToTargetState(state as InternalState, this, transitionParams)
+                    recursiveAfterTransitionComplete(transitionParams)
+                }
             }
         }
-    }
 
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
@@ -150,11 +148,13 @@ internal class StateMachineImpl(
                     doStop()
                     true
                 }
+
                 is DestroyEvent -> {
                     if (event.stop) doStop()
                     doDestroy()
                     true
                 }
+
                 else -> doProcessEvent(wrappedEventAndArgument)
             }
         }
@@ -254,11 +254,6 @@ internal class StateMachineImpl(
         return true
     }
 
-    override fun log(lazyMessage: () -> String) {
-        if (logger != NullLogger)
-            logger.log(lazyMessage())
-    }
-
     /**
      * Starts machine if it is inner state of another one machine
      */
@@ -266,13 +261,13 @@ internal class StateMachineImpl(
         if (!isRunning) startBlocking() else super.doEnter(transitionParams)
 
 
-    override fun cleanup() {
+    override suspend fun cleanup() {
         _machineListeners.clear()
         super.cleanup()
     }
 
     /** To be called only from [runCheckingExceptions] */
-    private fun doDestroy() {
+    private suspend fun doDestroy() {
         accept(CleanupVisitor())
         _isDestroyed = true
         log { "$this destroyed" }

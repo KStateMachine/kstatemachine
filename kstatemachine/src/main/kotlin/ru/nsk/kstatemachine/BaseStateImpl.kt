@@ -6,6 +6,9 @@ import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 
+/**
+ * Base [IState] implementation for all states
+ */
 open class BaseStateImpl(override val name: String?, override val childMode: ChildMode) : InternalState() {
 
     private class Data {
@@ -36,7 +39,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override val initialState get() = data.initialState
 
-    override val machine get() = if (this is StateMachine) this else requireParent().machine
+    override val machine get() = if (this is StateMachine) this else requireInternalParent().machine
 
     override val transitions: Set<Transition<*>> get() = data.transitions
 
@@ -96,11 +99,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         data.initialState = state as InternalState
     }
 
-    override fun activeStates(selfIncluding: Boolean) = with(GetActiveStatesVisitor(selfIncluding)) {
-        accept(this)
-        return@with activeStates
-    }
-
     override fun <E : Event> addTransition(transition: Transition<E>): Transition<E> {
         if (parent?.machine?.isRunning == true)
             error("Can not add transition after state machine started")
@@ -128,7 +126,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override suspend fun doExit(transitionParams: TransitionParams<*>) {
         if (isActive) {
-            machine.log { "Exiting $this" }
+            log { "Exiting $this" }
             onDoExit(transitionParams)
             data.currentState = null
             data.isFinished = false
@@ -230,7 +228,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         handleStateEntry(state, transitionParams)
     }
 
-    override fun cleanup() {
+    override suspend fun cleanup() {
         data = Data()
         onCleanup()
     }
@@ -251,7 +249,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     private suspend fun notifyStateFinish(state: InternalState, transitionParams: TransitionParams<*>) {
-        machine.log { "$this finished" }
+        log { "$this finished" }
         stateNotify { onFinished(transitionParams) }
         // there is no sense to send event on state machine finish as it stops processing events in this case
         if (this !is StateMachine)

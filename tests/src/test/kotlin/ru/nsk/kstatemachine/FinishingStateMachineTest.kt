@@ -208,7 +208,7 @@ class FinishingStateMachineTest : StringSpec({
             lateinit var finalL2: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 finalL1 = finalState("finalL1") {
                     callbacks.listen(this)

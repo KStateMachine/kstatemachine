@@ -8,7 +8,7 @@ import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 class TestingStartFromTest : StringSpec({
     CoroutineStarterType.values().forEach { coroutineStarterType ->
-        "startFrom()" {
+        "startFromBlocking()" {
             val callbacks = mockkCallbacks()
 
             lateinit var state2: State
@@ -40,7 +40,7 @@ class TestingStartFromTest : StringSpec({
             machine.stopBlocking()
             machine.activeStates().shouldBeEmpty()
 
-            machine.startFrom("state22")
+            machine.startFromBlocking("state22")
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)
@@ -48,6 +48,21 @@ class TestingStartFromTest : StringSpec({
                 callbacks.onEntryState(state2)
                 callbacks.onEntryState(state22)
             }
+        }
+
+        "data startFromBlocking()" {
+            val callbacks = mockkCallbacks()
+            lateinit var state2: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType, start = false) {
+                initialState("state1") {
+                    callbacks.listen(this)
+                }
+                state2 = dataState("state2", 1) {
+                    callbacks.listen(this)
+                }
+            }
+            machine.startFromBlocking(state2, data = 42)
+            state2.data shouldBe 42
         }
 
         "data startFrom()" {

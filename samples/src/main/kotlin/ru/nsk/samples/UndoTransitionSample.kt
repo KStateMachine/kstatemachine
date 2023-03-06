@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.UndoTransitionSample.SwitchEvent
 
@@ -8,14 +9,14 @@ private object UndoTransitionSample {
 }
 
 /**
- * Undo transitions with [StateMachine.undoBlocking] method or [UndoEvent]
+ * Undo transitions with [StateMachine.undo] method or [UndoEvent]
  */
-fun main() {
+fun main() = runBlocking {
     lateinit var state1: State
     lateinit var state2: State
     lateinit var state3: State
 
-    val machine = createStateMachine(enableUndo = true) {
+    val machine = createStateMachine(this, enableUndo = true) {
         state1 = initialState("state1") {
             transitionOn<SwitchEvent> { targetState = { state2 } }
         }
@@ -32,10 +33,10 @@ fun main() {
         }
     }
 
-    machine.processEventBlocking(SwitchEvent)
-    machine.processEventBlocking(SwitchEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
-    machine.undoBlocking() // same as machine.processEventBlocking(UndoEvent)
+    machine.undo() // same as machine.processEvent(UndoEvent)
 
     check(state1 in machine.activeStates())
 }

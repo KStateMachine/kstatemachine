@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.ComplexSyntaxSample.SwitchRedEvent
 import ru.nsk.samples.ComplexSyntaxSample.SwitchYellowEvent
@@ -16,8 +17,9 @@ private object ComplexSyntaxSample {
     class YellowState(val info: Int) : DefaultState("Yellow")
 }
 
-fun main() {
+fun main() = runBlocking {
     val machine = createStateMachine(
+        this, // coroutine scope used for this machine
         "Traffic lights" // StateMachine name is optional
     ) {
         // Create and setup states
@@ -77,7 +79,7 @@ fun main() {
         }
 
         // Set Logger to enable internal state machine logging on your platform
-        logger = StateMachine.Logger { println(it) }
+        logger = StateMachine.Logger { println(it()) }
 
         // Set custom IgnoredEventHandler
         // for event that does not match any transition,
@@ -126,9 +128,9 @@ fun main() {
     transitionToYellow.onTriggered { /* Add transition listener */ }
 
     // Process events, passing arguments optionally
-    machine.processEventBlocking(SwitchYellowEvent, "Get ready!")
-    machine.processEventBlocking(SwitchRedEvent("Stop!"))
+    machine.processEvent(SwitchYellowEvent, "Get ready!")
+    machine.processEvent(SwitchRedEvent("Stop!"))
 
     // get list of currently active states
-    machine.activeStates()
+    val states = machine.activeStates()
 }

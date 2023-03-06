@@ -2,6 +2,9 @@ package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 
+/**
+ * The most common state
+ */
 open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
     BaseStateImpl(name, childMode), State
 
@@ -14,7 +17,7 @@ open class DefaultChoiceState(name: String? = null, private val choiceAction: su
     BasePseudoState(name), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
-        eventAndArgument.choiceAction().also { machine.log { "$this resolved to $it" } }
+        eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {

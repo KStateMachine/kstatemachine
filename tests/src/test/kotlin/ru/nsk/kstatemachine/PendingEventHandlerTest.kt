@@ -11,7 +11,7 @@ class PendingEventHandlerTest : StringSpec({
     CoroutineStarterType.values().forEach { coroutineStarterType ->
         "queue event in QueuePendingEventHandler" {
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val third = state("third")
                 val second = state("second") {
@@ -31,7 +31,7 @@ class PendingEventHandlerTest : StringSpec({
         "queue event on machine start" {
             val callbacks = mockkCallbacks()
             createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val second = state("second")
 
@@ -51,7 +51,7 @@ class PendingEventHandlerTest : StringSpec({
 
         "pending event queue is cleared on processing error" {
             val machine = createTestStateMachine(coroutineStarterType, start = false) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val second = state("second") {
                     transition<SecondEvent>()
@@ -79,7 +79,7 @@ class PendingEventHandlerTest : StringSpec({
 
         "throwing PendingEventHandler does not destroy machine" {
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val second = state("second")
                 initialState("first") {

@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.MinimalSyntaxSample.SwitchEvent
 
@@ -10,9 +11,9 @@ private object MinimalSyntaxSample {
 /**
  * This sample uses factory functions to create states
  */
-fun main() {
+fun main() = runBlocking {
     // Create state machine and configure its states in a setup block
-    val machine = createStateMachine {
+    val machine = createStateMachine(this) {
         // State machine finishes when enters final state
         val redState = finalState()
 
@@ -37,8 +38,8 @@ fun main() {
     }
 
     // Now we can process events
-    machine.processEventBlocking(SwitchEvent)
-    machine.processEventBlocking(SwitchEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
     check(machine.isFinished)
 }

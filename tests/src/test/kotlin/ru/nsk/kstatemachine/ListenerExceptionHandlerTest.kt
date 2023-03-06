@@ -3,18 +3,15 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.called
-import io.mockk.mockk
-import io.mockk.verify
-import io.mockk.verifySequence
-import ru.nsk.kstatemachine.Testing.startFrom
+import io.mockk.*
+import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 class ListenerExceptionHandlerTest : StringSpec({
     CoroutineStarterType.values().forEach { coroutineStarterType ->
         "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
             shouldThrow<TestException> {
                 createTestStateMachine(coroutineStarterType) {
-                    logger = StateMachine.Logger { println(it) }
+                    logger = StateMachine.Logger { println(it()) }
 
                     initialState {
                         onEntry { testError("test exception") }
@@ -75,7 +72,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                 }
             }
 
-            shouldThrow<TestException> { machine.startFrom(state2) }
+            shouldThrow<TestException> { machine.startFromBlocking(state2) }
             machine.isDestroyed shouldBe false
         }
 
@@ -101,7 +98,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                 }
             }
 
-            verifySequence { handlerMock.onException(ofType<TestException>()) }
+            coVerifySequence { handlerMock.onException(ofType<TestException>()) }
             machine.isDestroyed shouldBe false
         }
 
@@ -109,7 +106,7 @@ class ListenerExceptionHandlerTest : StringSpec({
             val handlerMock = mockk<StateMachine.ListenerExceptionHandler>(relaxed = true)
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 listenerExceptionHandler = handlerMock
 

@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 import ru.nsk.samples.PlantUmlExportSample.SwitchEvent
@@ -8,8 +9,8 @@ private object PlantUmlExportSample {
     object SwitchEvent : Event
 }
 
-fun main() {
-    val machine = createStateMachine("Nested states") {
+fun main() = runBlocking {
+    val machine = createStateMachine(this, "Nested states") {
         val state1 = initialState("State1")
         val state3 = finalState("State3")
 

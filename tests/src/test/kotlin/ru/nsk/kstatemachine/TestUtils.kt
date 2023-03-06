@@ -64,7 +64,7 @@ enum class CoroutineStarterType {
 }
 
 /**
- * Wraps [createStateMachine] so it can be easily switched to [createStateMachine]
+ * Wraps [createStdLibStateMachine] so it can be easily switched to [createStdLibStateMachine]
  */
 fun createTestStateMachine(
     coroutineStarterType: CoroutineStarterType,
@@ -76,7 +76,7 @@ fun createTestStateMachine(
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
     init: BuildingStateMachine.() -> Unit
 ) = when (coroutineStarterType) {
-    CoroutineStarterType.STD_LIB -> createStateMachine(
+    CoroutineStarterType.STD_LIB -> createStdLibStateMachine(
         name,
         childMode,
         start,
@@ -86,7 +86,7 @@ fun createTestStateMachine(
         init = init
     )
 
-    CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachine(
+    CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
         CoroutineScope(EmptyCoroutineContext),
         name,
         childMode,
@@ -97,7 +97,7 @@ fun createTestStateMachine(
         init = init
     )
 
-    CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachine(
+    CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Unconfined),
         name,
         childMode,
@@ -108,7 +108,7 @@ fun createTestStateMachine(
         init = init
     )
 
-    CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachine(
+    CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Default.limitedParallelism(1)),
         name,
         childMode,

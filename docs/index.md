@@ -340,7 +340,9 @@ On JVM:
 
 ```kotlin
 createStateMachine {
-    logger = StateMachine.Logger { println(it) }
+    logger = StateMachine.Logger { lazyMessage ->
+        println(lazyMessage())
+    }
     // ...
 }
 ```
@@ -349,7 +351,9 @@ On Android:
 
 ```kotlin
 createStateMachine {
-    logger = StateMachine.Logger { Log.d(this::class.qualifiedName, it) }
+    logger = StateMachine.Logger { lazyMessage -> 
+       Log.d(this::class.qualifiedName, lazyMessage())
+    }
     // ...
 }
 ```

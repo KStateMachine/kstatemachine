@@ -60,12 +60,13 @@ open class DefaultDataState<D : Any>(
         _data = null
     }
 
-    override fun onStopped() {
+    private fun cleanData() {
         _data = null
         _lastData = null
     }
 
-    override fun onCleanup() = onStopped()
+    override suspend fun onStopped() = cleanData()
+    override suspend fun onCleanup() = cleanData()
 }
 
 /** inline constructor function */

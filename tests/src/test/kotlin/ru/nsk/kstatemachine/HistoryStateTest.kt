@@ -41,7 +41,7 @@ class HistoryStateTest : StringSpec({
             lateinit var state2: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
@@ -76,7 +76,7 @@ class HistoryStateTest : StringSpec({
             lateinit var history: HistoryState
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     initialState("state11") {
@@ -119,7 +119,7 @@ class HistoryStateTest : StringSpec({
             lateinit var history: HistoryState
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     initialState("state11") {
@@ -152,7 +152,7 @@ class HistoryStateTest : StringSpec({
             lateinit var history: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     initialState("state11") {
@@ -190,7 +190,7 @@ class HistoryStateTest : StringSpec({
             lateinit var history: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     initialState("state11") {
@@ -222,7 +222,7 @@ class HistoryStateTest : StringSpec({
             lateinit var history: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     initialState("state11") {

@@ -84,13 +84,13 @@ class CompositionStateMachinesTest : StringSpec({
         "transition out from nested machine, negative" {
             lateinit var state1: State
             val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
                 state1 = initialState("inner-state1")
             }
 
             lateinit var state2: State
             val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 addInitialState(inner) {
                     transitionOn<SwitchEvent> { targetState = { state2 } } // invalid
@@ -108,13 +108,13 @@ class CompositionStateMachinesTest : StringSpec({
         "transition into nested machine sub-state, negative" {
             lateinit var innerState2: State
             val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
                 initialState("inner-state1")
                 innerState2 = state("inner-state2")
             }
 
             val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { innerState2 } } // invalid
@@ -139,7 +139,7 @@ private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMa
         name = "Inner machine",
         start = startInnerMachineOnSetup
     ) {
-        logger = StateMachine.Logger { println(it) }
+        logger = StateMachine.Logger { println(it()) }
 
         callbacks.listen(this)
 

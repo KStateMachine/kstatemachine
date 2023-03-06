@@ -17,7 +17,7 @@ class ChoiceStateTest : StringSpec({
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val choice = choiceState("choice") {
                     log { "$event $argument" }
@@ -40,7 +40,7 @@ class ChoiceStateTest : StringSpec({
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val choice2 = choiceState("choice2") { State2 }
                 val choice1 = choiceState("choice1") { choice2 }

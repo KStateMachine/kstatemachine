@@ -9,7 +9,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 class CoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
     "call suspend functions from major listeners and callbacks" {
-        val machine = createStateMachine {
+        val machine = createStdLibStateMachine {
             onStarted {
                 delay(0)
             }
@@ -48,7 +48,7 @@ class CoroutinesTest : StringSpec({
 
     "using coroutines with std lib throws" {
         shouldThrow<UnsupportedOperationException> {
-            createStateMachine {
+            createStdLibStateMachine {
                 initialState()
                 onStarted { delay(1) }
             }
@@ -58,7 +58,7 @@ class CoroutinesTest : StringSpec({
     "test coroutines called from machine callbacks" {
         val scope = CoroutineScope(EmptyCoroutineContext)
         try {
-            createStateMachine(scope) {
+            createStateMachineBlocking(scope) {
                 onStarted { delay(1) }
                 initialState("first") {
                     onEntry {

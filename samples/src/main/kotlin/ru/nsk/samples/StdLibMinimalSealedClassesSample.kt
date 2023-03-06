@@ -1,11 +1,10 @@
 package ru.nsk.samples
 
-import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
-import ru.nsk.samples.MinimalSealedClassesSample.States.*
-import ru.nsk.samples.MinimalSealedClassesSample.SwitchEvent
+import ru.nsk.samples.StdLibMinimalSealedClassesSample.States.*
+import ru.nsk.samples.StdLibMinimalSealedClassesSample.SwitchEvent
 
-private object MinimalSealedClassesSample {
+private object StdLibMinimalSealedClassesSample {
     object SwitchEvent : Event
 
     sealed class States : DefaultState() {
@@ -16,11 +15,11 @@ private object MinimalSealedClassesSample {
 }
 
 /**
- * This sample uses states defined in sealed class
+ * This sample uses KStateMachine only with Kotlin Standard library (without Kotlin Coroutines library).
  */
-fun main() = runBlocking {
+fun main() {
     // Create state machine and configure its states in a setup block
-    val machine = createStateMachine(this) {
+    val machine = createStdLibStateMachine {
         addInitialState(GreenState) {
             // Add state listeners
             onEntry { println("Enter $this") }
@@ -44,8 +43,8 @@ fun main() = runBlocking {
     }
 
     // Now we can process events
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
+    machine.processEventBlocking(SwitchEvent)
 
     check(machine.isFinished)
 }

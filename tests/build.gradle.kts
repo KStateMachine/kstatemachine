@@ -23,7 +23,6 @@ java {
 }
 
 dependencies {
-    testImplementation(project(":kstatemachine"))
     testImplementation(project(":kstatemachine-coroutines"))
 
     testImplementation("io.kotest:kotest-assertions-core:${Versions.kotest}")

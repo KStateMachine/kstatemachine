@@ -10,7 +10,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.StateMachineTestData.OffEvent
 import ru.nsk.kstatemachine.StateMachineTestData.OnEvent
-import ru.nsk.kstatemachine.Testing.startFrom
+import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 private object StateMachineTestData {
     object OnEvent : Event
@@ -204,9 +204,11 @@ class StateMachineTest : StringSpec({
         }
 
         "process event before started" {
-            createTestStateMachine(coroutineStarterType) {
+            val machine = createTestStateMachine(coroutineStarterType, start = false) {
                 initialState("first")
-                shouldThrow<IllegalStateException> { processEventBlocking(SwitchEvent) }
+            }
+            shouldThrow<IllegalStateException> {
+                machine.processEventBlocking(SwitchEvent)
             }
         }
 
@@ -251,7 +253,7 @@ class StateMachineTest : StringSpec({
             lateinit var state2: State
 
             val machine = createTestStateMachine(coroutineStarterType, start = false) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
                 callbacks.listen(this)
 
                 state1 = initialState("state1") { callbacks.listen(this) }
@@ -261,7 +263,7 @@ class StateMachineTest : StringSpec({
                 onStopped { callbacks.onStopped(this) }
             }
 
-            machine.startFrom(state2)
+            machine.startFromBlocking(state2)
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)
@@ -287,7 +289,7 @@ class StateMachineTest : StringSpec({
             lateinit var state2: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }

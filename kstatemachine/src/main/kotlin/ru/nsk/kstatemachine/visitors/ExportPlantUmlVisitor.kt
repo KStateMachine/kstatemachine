@@ -9,14 +9,14 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetState
  *
  * Conditional transitions currently are not supported.
  */
-internal class ExportPlantUmlVisitor : Visitor {
+internal class ExportPlantUmlVisitor : CoVisitor {
     private val builder = StringBuilder()
     private var indent = 0
     private val crossLevelTransitions = mutableListOf<String>()
 
     fun export() = builder.toString()
 
-    override fun visit(machine: StateMachine) {
+    override suspend fun visit(machine: StateMachine) {
         line("@startuml")
         line("hide empty description")
 
@@ -26,7 +26,7 @@ internal class ExportPlantUmlVisitor : Visitor {
         line("@enduml")
     }
 
-    override fun visit(state: IState) {
+    override suspend fun visit(state: IState) {
         if (state.states.isEmpty()) {
             when (state) {
                 is HistoryState, is UndoState -> return
@@ -51,18 +51,16 @@ internal class ExportPlantUmlVisitor : Visitor {
      * It requires to see all states declarations first to provide correct rendering,
      * so we have to store them to print after state declaration.
      */
-    override fun <E : Event> visit(transition: Transition<E>) {
+    override suspend fun <E : Event> visit(transition: Transition<E>) {
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
 
-        val targetState = transition.sourceState.machine.coroutineAbstraction.runBlocking {
-            val state = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState as? InternalState
-            if (state != null) Result.success(state) else Result.failure(NullPointerException("state is null"))
-        }.getOrElse { return }
+        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState
+                as? InternalState ?: return
 
         val graphName = if (targetState is HistoryState) {
-            val prefix = targetState.requireParent().graphName()
+            val prefix = targetState.requireInternalParent().graphName()
             when (targetState.historyType) {
                 HistoryType.SHALLOW -> "$prefix$SHALLOW_HISTORY"
                 HistoryType.DEEP -> "$prefix$DEEP_HISTORY"
@@ -79,7 +77,7 @@ internal class ExportPlantUmlVisitor : Visitor {
             crossLevelTransitions.add(transitionString)
     }
 
-    private fun processStateBody(state: IState) {
+    private suspend fun processStateBody(state: IState) {
         val states = state.states.toList()
         // visit child states
         for (s in states.indices) {
@@ -120,7 +118,14 @@ internal class ExportPlantUmlVisitor : Visitor {
     }
 }
 
-fun StateMachine.exportToPlantUml() = with(ExportPlantUmlVisitor()) {
+suspend fun StateMachine.exportToPlantUml() = with(ExportPlantUmlVisitor()) {
     accept(this)
     export()
+}
+
+fun StateMachine.exportToPlantUmlBlocking() = coroutineAbstraction.runBlocking {
+    with(ExportPlantUmlVisitor()) {
+        accept(this)
+        export()
+    }
 }

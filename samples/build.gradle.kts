@@ -24,6 +24,5 @@ java {
 }
 
 dependencies {
-    implementation(project(":kstatemachine"))
     implementation(project(":kstatemachine-coroutines"))
 }

@@ -12,7 +12,7 @@ class CrossLevelTransitionTest : StringSpec({
             lateinit var state1: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("1") {
                     callbacks.listen(this)
@@ -39,7 +39,7 @@ class CrossLevelTransitionTest : StringSpec({
             lateinit var state12: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("1") {
                     callbacks.listen(this)
@@ -94,7 +94,7 @@ class CrossLevelTransitionTest : StringSpec({
             lateinit var state12: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("1") {
                     callbacks.listen(this)
@@ -263,7 +263,7 @@ class CrossLevelTransitionTest : StringSpec({
             lateinit var state12: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 state1 = initialState("1") {
                     callbacks.listen(this)

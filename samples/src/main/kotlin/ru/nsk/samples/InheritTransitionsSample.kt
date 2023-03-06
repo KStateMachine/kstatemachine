@@ -1,7 +1,7 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.visitors.exportToPlantUml
 import ru.nsk.samples.InheritTransitionsSample.Events.ExitEvent
 import ru.nsk.samples.InheritTransitionsSample.Events.SwitchEvent
 
@@ -15,9 +15,9 @@ private object InheritTransitionsSample {
 /**
  * Nested states allow grouping states and inherit their parent transitions
  */
-fun main() {
-    val machine = createStateMachine("Nested states") {
-        logger = StateMachine.Logger { println(it) }
+fun main() = runBlocking {
+    val machine = createStateMachine(this, "Nested states") {
+        logger = StateMachine.Logger { println(it()) }
 
         val state2 = finalState("State2")
 
@@ -40,11 +40,9 @@ fun main() {
         }
     }
 
-    machine.processEventBlocking(SwitchEvent)
-    machine.processEventBlocking(SwitchEvent)
-    machine.processEventBlocking(ExitEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(SwitchEvent)
+    machine.processEvent(ExitEvent)
 
     check(machine.requireState("State2") in machine.activeStates())
-
-    println("\n" + machine.exportToPlantUml())
 }

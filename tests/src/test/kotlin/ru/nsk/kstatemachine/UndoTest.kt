@@ -214,7 +214,7 @@ class UndoTest : StringSpec({
             lateinit var state12: DataState<Int>
             lateinit var state2: State
             val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
                 initialState("state1") {
                     state11 = initialState("state11") {
                         dataTransitionOn<SwitchDataEvent, Int> { targetState = { state12 } }

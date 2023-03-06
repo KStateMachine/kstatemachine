@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 import ru.nsk.samples.CrossLevelTransitionSample.SwitchEvent
@@ -11,9 +12,9 @@ private object CrossLevelTransitionSample {
 /**
  * Transition may target any states from state machine
  */
-fun main() {
-    val machine = createStateMachine {
-        logger = StateMachine.Logger { println(it) }
+fun main() = runBlocking {
+    val machine = createStateMachine(this) {
+        logger = StateMachine.Logger { println(it()) }
 
         lateinit var nested22: State
 
@@ -30,7 +31,7 @@ fun main() {
         }
     }
 
-    machine.processEventBlocking(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
     println("\n" + machine.exportToPlantUml())
 }

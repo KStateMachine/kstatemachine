@@ -41,3 +41,23 @@ internal class StdLibCoroutineAbstraction : CoroutineAbstraction {
     /** Simply calls [block] */
     override suspend fun <R : Any> withContext(block: suspend () -> R): R = block()
 }
+
+suspend fun CoroutineAbstraction.createStateMachine(
+    name: String?,
+    childMode: ChildMode,
+    start: Boolean,
+    autoDestroyOnStatesReuse: Boolean,
+    enableUndo: Boolean,
+    doNotThrowOnMultipleTransitionsMatch: Boolean,
+    init: BuildingStateMachine.() -> Unit
+): StateMachine = StateMachineImpl(
+    name,
+    childMode,
+    autoDestroyOnStatesReuse,
+    enableUndo,
+    doNotThrowOnMultipleTransitionsMatch,
+    this,
+).apply {
+    init()
+    if (start) start()
+}

@@ -32,6 +32,6 @@ internal class UndoState : BasePseudoState("undo") {
         null
     }
 
-    override fun onStopped() = stack.clear()
-    override fun onCleanup() = onStopped()
+    override suspend fun onStopped() = stack.clear()
+    override suspend fun onCleanup() = stack.clear()
 }

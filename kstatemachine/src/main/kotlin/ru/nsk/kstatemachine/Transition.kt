@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 
@@ -27,6 +28,10 @@ interface Transition<E : Event> : VisitorAcceptor {
      * Checks if the [event] matches this [Transition]
      */
     suspend fun isMatchingEvent(event: Event): Boolean
+
+    override suspend fun accept(visitor: CoVisitor) = sourceState.machine.coroutineAbstraction.withContext {
+        visitor.visit(this)
+    }
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 

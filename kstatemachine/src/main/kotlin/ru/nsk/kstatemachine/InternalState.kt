@@ -35,10 +35,10 @@ abstract class InternalState : IState {
      * Called after each (including initial) transition completion.
      */
     internal abstract suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>)
-    internal abstract fun cleanup()
+    internal abstract suspend fun cleanup()
 }
 
-internal fun InternalState.requireParent() = requireNotNull(internalParent) { "$this parent is not set" }
+internal fun InternalState.requireInternalParent() = requireNotNull(internalParent) { "$this parent is not set" }
 
 internal suspend fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }

@@ -20,6 +20,6 @@ java {
 }
 
 dependencies {
-    implementation(project(":kstatemachine"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutinesCore}")
+    api(project(":kstatemachine"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutinesCore}")
 }

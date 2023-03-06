@@ -1,11 +1,14 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.visitors.CoVisitor
+import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 import kotlin.reflect.KClass
 
 /**
- * Base interface for all kind of states
+ * Base interface for all kind of states.
+ * Many additional methods implemented like extensions to keep this interface clean and minimalistic.
  */
 @StateMachineDslMarker
 interface IState : TransitionStateApi, VisitorAcceptor {
@@ -29,23 +32,21 @@ interface IState : TransitionStateApi, VisitorAcceptor {
      */
     fun setInitialState(state: IState)
 
-    /**
-     * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
-     * Internal states of nested machines are not included.
-     */
-    fun activeStates(selfIncluding: Boolean = false): Set<IState>
+    override suspend fun accept(visitor: CoVisitor) = machine.coroutineAbstraction.withContext {
+        visitor.visit(this)
+    }
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     /**
      * Called when machine is stopped, to perform cleanup steps.
      */
-    fun onStopped() = Unit
+    suspend fun onStopped() = Unit
 
     /**
      * Called when state is sequentially used on multiple machine instances, to perform cleanup steps.
      */
-    fun onCleanup() = Unit
+    suspend fun onCleanup() = Unit
 
     interface Listener {
         suspend fun onEntry(transitionParams: TransitionParams<*>) = Unit
@@ -124,6 +125,16 @@ interface HistoryState : PseudoState {
 typealias StateBlock<S> = S.() -> Unit
 
 /**
+ * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
+ * Internal states of nested machines are not included.
+ */
+fun IState.activeStates(selfIncluding: Boolean = false): Set<IState> {
+    val visitor = GetActiveStatesVisitor(selfIncluding)
+    accept(visitor)
+    return visitor.activeStates
+}
+
+/**
  * Get state by name. This might be used to start listening to state after state machine setup.
  */
 fun IState.findState(name: String, recursive: Boolean = true): IState? {
@@ -179,6 +190,8 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
     requireNotNull(findState<S>(recursive)) { "State ${S::class.simpleName} not found" }
 
 operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
+
+fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else parent?.machineOrNull()
 
 /**
  * @param name is optional and is useful for getting state instance after state machine setup

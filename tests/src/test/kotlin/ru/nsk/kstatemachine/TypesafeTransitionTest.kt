@@ -215,7 +215,7 @@ class TypesafeTransitionTest : StringSpec({
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 val dataState = dataState<Int>("state2") {
                     transition<SwitchEvent> { callbacks.listen(this) }
@@ -248,7 +248,7 @@ class TypesafeTransitionTest : StringSpec({
             lateinit var dataState: DataState<Int>
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 initialState("state1") {
                     dataTransitionOn<IdEvent, Int> { targetState = { dataState } }

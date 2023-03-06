@@ -43,7 +43,7 @@ class NestedStateTest : StringSpec({
             lateinit var secondL2: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it) }
+                logger = StateMachine.Logger { println(it()) }
 
                 secondL1 = state("secondL1") {
                     callbacks.listen(this)

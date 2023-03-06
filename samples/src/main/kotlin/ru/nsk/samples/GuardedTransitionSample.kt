@@ -1,5 +1,6 @@
 package ru.nsk.samples
 
+import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.*
 import ru.nsk.samples.GuardedTransitionSample.States.State1
 import ru.nsk.samples.GuardedTransitionSample.States.State2
@@ -14,9 +15,9 @@ private object GuardedTransitionSample {
     }
 }
 
-fun main() {
-    val machine = createStateMachine {
-        logger = StateMachine.Logger { println(it) }
+fun main() = runBlocking {
+    val machine = createStateMachine(this) {
+        logger = StateMachine.Logger { println(it()) }
 
         addInitialState(State1(42)) {
             transition<SwitchEvent> {
@@ -28,7 +29,7 @@ fun main() {
         addFinalState(State2)
     }
 
-    machine.processEventBlocking(SwitchEvent)
+    machine.processEvent(SwitchEvent)
 
     check(State2 in machine.activeStates())
 }

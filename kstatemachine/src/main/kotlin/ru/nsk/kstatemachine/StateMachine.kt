@@ -1,6 +1,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
+import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 
 @DslMarker
@@ -61,7 +62,9 @@ interface StateMachine : State {
      */
     suspend fun processEvent(event: Event, argument: Any? = null): ProcessingResult
 
-    fun log(lazyMessage: () -> String)
+    override suspend fun accept(visitor: CoVisitor) = coroutineAbstraction.withContext {
+        visitor.visit(this)
+    }
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
@@ -99,19 +102,20 @@ interface StateMachine : State {
      * State machine uses this interface to support internal logging on different platforms
      */
     fun interface Logger {
-        fun log(message: String)
+        /** Message is lazy for performance reasons */
+        suspend fun log(lazyMessage: () -> String)
     }
 
     fun interface IgnoredEventHandler {
-        fun onIgnoredEvent(eventAndArgument: EventAndArgument<*>)
+        suspend fun onIgnoredEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface PendingEventHandler {
-        fun onPendingEvent(eventAndArgument: EventAndArgument<*>)
+        suspend fun onPendingEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface ListenerExceptionHandler {
-        fun onException(exception: Exception)
+        suspend fun onException(exception: Exception)
     }
 }
 
@@ -124,8 +128,6 @@ fun StateMachine.processEventBlocking(event: Event, argument: Any? = null) = cor
     processEvent(event, argument)
 }
 
-fun StateMachine.restartBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { restart(argument) }
-
 /**
  * Shortcut for [StateMachine.stopBlocking] and [StateMachine.start] sequence calls
  */
@@ -134,13 +136,13 @@ suspend fun StateMachine.restart(argument: Any? = null) {
     start(argument)
 }
 
+fun StateMachine.restartBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { restart(argument) }
+
 /**
  * Rolls back transition (usually it is navigating machine to previous state).
  * Previous states are stored in a stack, so this method mey be called multiple times if needed.
  * This function has same effect as alternative syntax processEvent(UndoEvent), but throws if undo feature is not enabled.
  */
-fun StateMachine.undoBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { undo(argument) }
-
 suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
     check(isUndoEnabled) {
         "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
@@ -149,11 +151,9 @@ suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = corouti
 }
 
 /**
- * Forces state machine to stop
- * Warning: calling this function from notification callback may cause deadlock
- * if you are using single threaded coroutineContext, so [stop] should be preferred.
+ * Blocking analog of [undo]
  */
-fun StateMachine.stopBlocking() = coroutineAbstraction.runBlocking { stop() }
+fun StateMachine.undoBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { undo(argument) }
 
 /**
  * Suspendable [stopBlocking] analog. Should be preferred especially if called from machine notifications.
@@ -164,16 +164,27 @@ suspend fun StateMachine.stop() = coroutineAbstraction.withContext {
     processEvent(StopEvent)
 }
 
+/**
+ * Forces state machine to stop
+ * Warning: calling this function from notification callback may cause deadlock
+ * if you are using single threaded coroutineContext, so [stop] should be preferred.
+ */
+fun StateMachine.stopBlocking() = coroutineAbstraction.runBlocking { stop() }
 
 /**
  * Destroys machine structure clearing all listeners, states etc.
  */
-fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
-
 suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.withContext {
     if (isDestroyed) return@withContext
     processEvent(DestroyEvent(stop))
 }
+
+/**
+ * Blocking analog of [destroy]
+ */
+fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
+
+suspend fun IState.log(lazyMessage: () -> String) = machineOrNull()?.logger?.log(lazyMessage)
 
 /**
  * Allows to mutate some properties, which is necessary during setup, before machine is started
@@ -186,28 +197,30 @@ interface BuildingStateMachine : StateMachine {
 }
 
 /**
- * Factory method for creating [StateMachine]
+ * Factory method for creating [StateMachine].
+ * Suspendable code will be called via Kotlin Standard library (without Kotlin Coroutines library support).
  */
-fun createStateMachine(
+fun createStdLibStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    coroutineAbstraction: CoroutineAbstraction = StdLibCoroutineAbstraction(),
     init: BuildingStateMachine.() -> Unit
 ): StateMachine {
-    return StateMachineImpl(
-        name,
-        childMode,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
-        coroutineAbstraction,
-    ).apply {
-        init()
-        if (start) startBlocking()
+    return with(StdLibCoroutineAbstraction()) {
+        runBlocking {
+            createStateMachine(
+                name,
+                childMode,
+                start,
+                autoDestroyOnStatesReuse,
+                enableUndo,
+                doNotThrowOnMultipleTransitionsMatch,
+                init
+            )
+        }
     }
 }
 
