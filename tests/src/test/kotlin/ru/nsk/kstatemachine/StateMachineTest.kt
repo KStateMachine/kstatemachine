@@ -76,6 +76,8 @@ class StateMachineTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, name = "machine", start = false) { /* empty */ }
             val first = DefaultState("first")
             val second = DefaultState("second")
+            val third = DefaultState("third")
+            second.addInitialState(third)
 
             second.onEntry { println("$name entered") }
 

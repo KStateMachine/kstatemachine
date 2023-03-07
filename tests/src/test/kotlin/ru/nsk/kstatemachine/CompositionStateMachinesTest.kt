@@ -83,18 +83,17 @@ class CompositionStateMachinesTest : StringSpec({
 
         "transition out from nested machine, negative" {
             lateinit var state1: State
+            lateinit var state2: State
             val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
                 logger = StateMachine.Logger { println(it()) }
                 state1 = initialState("inner-state1")
+                transitionOn<SwitchEvent> { targetState = { state2 } } // invalid
             }
 
-            lateinit var state2: State
             val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
                 logger = StateMachine.Logger { println(it()) }
 
-                addInitialState(inner) {
-                    transitionOn<SwitchEvent> { targetState = { state2 } } // invalid
-                }
+                addInitialState(inner)
                 state2 = state("outer-state2")
             }
 

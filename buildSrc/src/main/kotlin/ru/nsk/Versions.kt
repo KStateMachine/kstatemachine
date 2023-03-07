@@ -2,8 +2,9 @@ import org.gradle.api.JavaVersion
 
 object Versions {
     // library
-    const val libraryGroup = "io.github.nsk90"
-    const val libraryVersion = "0.18.1"
+    const val libraryMavenCentralGroup = "io.github.nsk90"
+    const val libraryJitPackGroup = "com.github.nsk90"
+    const val libraryVersion = "0.20.0"
 
     // tools
     const val kotlin = "1.8.10"
@@ -17,7 +18,7 @@ object Versions {
     const val apiVersion = "1.5"
 
     // dependencies
-    const val coroutinesCore = "1.6.3"
+    const val coroutinesCore = "1.6.4"
 
     // test dependencies   
     const val mockk = "1.13.4"
