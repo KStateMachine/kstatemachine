@@ -39,10 +39,8 @@ publishing {
                 groupId = project.group.toString()
                 version = project.version.toString()
             } else {
-                afterEvaluate {
-                    groupId = project.group.toString()
-                    version = project.version.toString()
-                }
+                groupId = rootProject.group.toString()
+                version = rootProject.version.toString()
             }
 
             from(components["java"])
