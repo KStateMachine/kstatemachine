@@ -143,12 +143,14 @@ The library consists of 2 artifacts:
 Add the dependency:
 
 ```groovy
+// groovy
 dependencies {
     implementation 'io.github.nsk90:kstatemachine:<Tag>'
 }
 ```
 
 ```kotlin
+// kotlin
 dependencies {
     implementation("io.github.nsk90:kstatemachine:<Tag>")
 }
@@ -185,6 +187,9 @@ Add the dependency:
 // groovy
 dependencies {
     implementation 'com.github.nsk90:kstatemachine:<Tag>'
+    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
+    // it is some strange JitPack behaviour
+    implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
 }
 ```
 
@@ -192,6 +197,9 @@ dependencies {
 // kotlin
 dependencies {
     implementation("com.github.nsk90:kstatemachine:<Tag>")
+    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
+    // it is some strange JitPack behaviour
+    implementation("com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>") // optional
 }
 ```
 

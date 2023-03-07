@@ -58,13 +58,13 @@ class CoroutinesTest : StringSpec({
     "test coroutines called from machine callbacks" {
         val scope = CoroutineScope(EmptyCoroutineContext)
         try {
-            createStateMachineBlocking(scope) {
+            createStateMachine(scope) {
                 onStarted { delay(1) }
                 initialState("first") {
                     onEntry {
                         coroutineScope {
-                            launch { delay(1) }
-                            launch { delay(1) }
+                            scope.launch { delay(1) }
+                            scope.launch { delay(1) }
                         }
                         withContext(Dispatchers.Default) {
                             delay(1)

@@ -29,6 +29,7 @@ machine.processEvent(YellowEvent)
 ## Create state machine
 
 First we create a state machine with one of those factory functions:
+
 * `createStateMachine()` suspendable version (from `kstatemachine-coroutines` artifact)
 * `createStateMachineBlocking()` blocking version (from `kstatemachine-coroutines` artifact)
 * `createStdLibStateMachine()` - creates machine without Kotlin Coroutines support (from `kstatemachine` artifact)
@@ -42,7 +43,9 @@ val machine = createStateMachine(
 }
 ```
 
-By default, `createStateMachine()` starts state machine. You can control it using `start` argument.
+By default, factory functions start state machine. You can control it using `start` argument.
+
+Subsequent samples will use `createStateMachine()` function, but you can choose that one which fits your needs.
 
 ## Setup states
 
@@ -56,7 +59,7 @@ using [state subclasses](#state-subclasses).
 In state machine setup block define states with `initialState()`, `state()` and `finalState()` functions:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     // Use initialState() function to create initial State and add it to StateMachine
     // State machine enters this state after setup is complete
     val greenState = initialState()
@@ -71,7 +74,7 @@ createStateMachine {
 You can use `setInitialState()` function to set initial state separately:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     val greenState = state()
     setInitialState(greenState)
     // ...
@@ -87,7 +90,7 @@ Subclass `DefaultState`, `DefaultFinalState` or their [data](#typesafe-transitio
 ```kotlin
 class SomeState : DefaultState()
 
-createStateMachine {
+createStateMachine(scope) {
     val someState = addState(SomeState())
     // ...
 }
@@ -163,7 +166,7 @@ on an application business logic like with [conditional transitions](#conditiona
 and less flexibility:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     lateinit var yellowState: State
 
     greenState {
@@ -217,7 +220,7 @@ There might be many transitions from one state to another. It is possible to lis
 setup block:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     // ...
     onTransition {
         // Listen to all triggered transitions here
@@ -343,7 +346,7 @@ You can enable internal state machine logging on your platform.
 On JVM:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     logger = StateMachine.Logger { lazyMessage ->
         println(lazyMessage())
     }
@@ -354,9 +357,9 @@ createStateMachine {
 On Android:
 
 ```kotlin
-createStateMachine {
-    logger = StateMachine.Logger { lazyMessage -> 
-       Log.d(this::class.qualifiedName, lazyMessage())
+createStateMachine(scope) {
+    logger = StateMachine.Logger { lazyMessage ->
+        Log.d(this::class.qualifiedName, lazyMessage())
     }
     // ...
 }
@@ -391,7 +394,7 @@ Notifications about finishing are available in two forms:
 1. Triggering of `onFinished()` listener callback. This is the only option for `StateMachine`.
 
     ```kotlin
-    val machine = createStateMachine {
+    val machine = createStateMachine(scope) {
         val final = finalState("final")
         setInitialState(final)
     
@@ -404,7 +407,7 @@ Notifications about finishing are available in two forms:
    for performing transitions on finishing:
 
     ```kotlin
-    createStateMachine {
+    createStateMachine(scope) {
         val state2 = state("state2")
    
         initialState("state1") {
@@ -433,7 +436,7 @@ To create nested states simply use same functions (`state()`, `initialState()` e
 setup block:
 
 ```kotlin
-val machine = createStateMachine {
+val machine = createStateMachine(scope) {
     val topLevelState = initialState {
         // ...
         val nestedState = initialState {
@@ -459,7 +462,7 @@ A child state can override an inherited transition. To override parent transitio
 transition that matches the event.
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     val state2 = state("state2")
     // all nested states inherit this parent transition
     transition<SwitchEvent> { targetState = state2 }
@@ -500,7 +503,7 @@ Set `childMode` argument of a state machine, or a state creation functions to `C
 with parallel child mode is entered or exited, all its child states will be simultaneously entered or exited:
 
 ```kotlin
-createStateMachine(childMode = ChildMode.PARALLEL) {
+createStateMachine(scope, childMode = ChildMode.PARALLEL) {
     state("Charger") {
         initialState("Charging") { /* ... */ }
         state("OnBattery") { /* ... */ }
@@ -539,7 +542,7 @@ You can specify default state which will be used if history was not recorded yet
 When default state is not specified, parent initial state will be entered on transition to history state.
 
 ```kotlin
-val machine = createStateMachine {
+val machine = createStateMachine(scope) {
     state {
         val state11 = initialState()
         val state12 = state()
@@ -562,7 +565,7 @@ from defining a transition with incompatible data type parameters of event and t
 ```kotlin
 class StringEvent(override val data: String) : DataEvent<String>
 
-createStateMachine {
+createStateMachine(scope) {
     val state2 = dataState<String> {
         onEntry { println("State data: $data") }
     }
@@ -602,7 +605,7 @@ simpler to use event argument. You can specify arbitrary argument with an event 
 can get this argument in a state and transition listeners.
 
 ```kotlin
-val machine = createStateMachine {
+val machine = createStateMachine(scope) {
     state("offState").onEntry {
         println("Event ${it.event} argument: ${it.argument}")
     }
@@ -639,7 +642,7 @@ By default, state machine simply ignores events that does not match any defined 
 logging is enabled or use custom `IgnoredEventHandler` for example to throw error:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     // ...
     ignoredEventHandler = StateMachine.IgnoredEventHandler {
         error("unexpected ${it.event}")
@@ -662,7 +665,7 @@ thrown. Alternatively with custom `PendingEventHandler` you can post such events
 passing to `processEvent()`. Using of throwing `PendingEventHandler` sample:
 
 ```kotlin
-createStateMachine {
+createStateMachine(scope) {
     // ...
     pendingEventHandler = throwingPendingEventHandler()
 }
@@ -687,38 +690,47 @@ Calling `processEvent()` on destroyed machine will throw also.
 
 ## Multithreading and concurrency
 
-KStateMachine is designed to work in single thread. 
+KStateMachine is designed to work in single thread.
 Concurrent modification of library classes will lead to race conditions.
 
 ## Kotlin Coroutines
 
 Starting from `KStateMachine v0.20.0` the library has built-in coroutines support.
 All its callbacks and other APIs were marked with `suspend` modifier, allowing to use coroutines from them.
-You can still use all KStateMachine features without Kotlin Coroutines library dependency as `suspend` keyword 
+You can still use all KStateMachine features without Kotlin Coroutines library dependency as `suspend` keyword
 is implemented at compiler level and Coroutines library is not really necessary to start coroutines.
 
-TODO work in progress
+Many functions like `createStateMachine`/`start`/`stop`/`processEvent`/`undo` etc. are suspendable, but all of them
+has analogs with `Blocking` suffix which are not marked with `suspend` keyword.
+If you use KStateMachine with coroutines support you should prefer suspendable function versions.
+Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` function which is rather dangerous and
+may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
+recursively (from library callbacks).
+
+Such suspendable functions preserve state machines coroutine context (using `kotlinx.coroutines.withContext`),
+so it should be ok to call them from any thread.
 
 ### Migration guide from versions older than v0.20.0
 
 #### If you already have or ready to add Kotlin Coroutines dependency
 
 * Add both `kstatemachine` and `kstatemachine-coroutines` artifacts to your build system
-* Use `createStateMachine` from `kstatemachine-coroutines` artifact to create state machines
-  providing `CoroutineScope` as argument
-* Use suspendable versions of functions (`start`/`stop`/`processEvent` etc.) when possible
+* Use `createStateMachine` or `createStateMachineBlocking` from `kstatemachine-coroutines` artifact to create state
+  machines providing `CoroutineScope` as argument
+* Use suspendable versions of functions (`start`/`stop`/`processEvent`/`undo` etc.) when possible
 * Avoid using function analogs with `Blocking` suffix **(especially recursively)** as this may easily lead to deadlocks
-or race conditions depending on your use case and machine configuration
+  or race conditions depending on your use case and machine configuration
 
 #### If you can not have dependency on Kotlin Coroutines or just do not want to use it
 
 * Use only `kstatemachine` artifact in your build system
 * Use `createStdLibStateMachine` to create state machines
-* Use suspendable versions of functions (`start`/`stop`/`processEvent` etc.) when possible (from KStateMachine callbacks)
+* Use suspendable versions of functions (`start`/`stop`/`processEvent`/`undo` etc.) when possible
+  (from KStateMachine callbacks for example)
 * In other cases use their analogs with `Blocking` suffix, it is ok
 * If you try to use Kotlin Coroutines library from machine created by `createStdLibStateMachine` you will probably get
-  an exception. 
-* Using suspendable code without calls to Kotlin Coroutines library is ok, as `suspend` keyword is a compiler feature, 
+  an exception.
+* Using suspendable code without calls to Kotlin Coroutines library is ok, as `suspend` keyword is a compiler feature,
   not library one.
 
 ## Export
@@ -729,11 +741,11 @@ may touch application data that is not valid when export is running._
 
 ### PlantUML
 
-Use `exportToPlantUml()/exportToPlantUmlBlocking()` extension function to export state machine
+Use `exportToPlantUml()`/`exportToPlantUmlBlocking()` extension function to export state machine
 to [PlantUML state diagram](https://plantuml.com/en/state-diagram).
 
 ```kotlin
-val machine = createStateMachine { /* ... */ }
+val machine = createStateMachine(scope) { /* ... */ }
 println(machine.exportToPlantUml())
 ```
 
@@ -744,12 +756,13 @@ See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachin
 ## Testing
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
-are several `Testing.startFrom()` overloaded functions which allow starting the machine from a specified state:
+are several `Testing.startFrom()`/`Testing.startFromBlocking()` overloaded functions which allow starting the machine 
+from a specified state:
 
 ```kotlin
 lateinit var state2: State
 
-val machine = createStateMachine(start = false) {
+val machine = createStateMachine(scope, start = false) {
     initialState("state1")
     state2 = state("state2")
     // ...
@@ -802,7 +815,8 @@ Correct - let the state machine to make decisions on an event:
 machine.processEvent(SomethingHappenedEvent)
 ```
 
-In certain scenarios (like a `state pattern` maybe) it is fine to use events like some kind of _setState() / goToState()_
+In certain scenarios (like a `state pattern` maybe) it is fine to use events like some kind of _setState() /
+goToState()_
 functions but in general it is wrong, as events are not commands.
 
 ## Known issues

@@ -74,7 +74,7 @@ fun createTestStateMachine(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    init: BuildingStateMachine.() -> Unit
+    init: suspend BuildingStateMachine.() -> Unit
 ) = when (coroutineStarterType) {
     CoroutineStarterType.STD_LIB -> createStdLibStateMachine(
         name,
