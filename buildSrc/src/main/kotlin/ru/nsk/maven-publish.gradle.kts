@@ -31,15 +31,24 @@ val localProperties = Properties().apply {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenCentral") {
-            groupId = "io.github.nsk90"
+        create<MavenPublication>("mavenPublication") {
             artifactId = project.name
-            version = rootProject.version as String
+
+            if (project.group == Versions.libraryJitPackGroup) {
+                // JitPack passes this in arguments
+                groupId = project.group.toString()
+                version = project.version.toString()
+            } else {
+                afterEvaluate {
+                    groupId = project.group.toString()
+                    version = project.version.toString()
+                }
+            }
 
             from(components["java"])
 
             pom {
-                name.set(rootProject.name)
+                name.set(project.name)
                 description.set(
                     "KStateMachine is a Kotlin DSL library for creating state machines and " +
                             "hierarchical state machines (statecharts)."
@@ -72,57 +81,15 @@ publishing {
                     developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
                 }
             }
-
-            repositories {
-                maven {
-                    credentials {
-                        username = localProperties.getProperty("mavenUsername", "")
-                        password = localProperties.getProperty("mavenPassword", "")
+            if (groupId == Versions.libraryMavenCentralGroup) {
+                repositories {
+                    maven {
+                        credentials {
+                            username = localProperties.getProperty("mavenUsername", "")
+                            password = localProperties.getProperty("mavenPassword", "")
+                        }
+                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
                     }
-                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
-                }
-            }
-        }
-
-        create<MavenPublication>("mavenJitpack") {
-            groupId = "com.github.nsk90"
-            artifactId = project.name
-            version = rootProject.version as String
-
-            from(components["java"])
-
-            pom {
-                name.set(rootProject.name)
-                description.set(
-                    "KStateMachine is a Kotlin DSL library for creating state machines and " +
-                            "hierarchical state machines (statecharts)."
-                )
-                url.set("https://github.com/nsk90/kstatemachine")
-                inceptionYear.set("2020")
-
-                issueManagement {
-                    system.set("GitHub")
-                    url.set("https://github.com/nsk90/kstatemachine/issues")
-                }
-                licenses {
-                    license {
-                        name.set("Boost Software License 1.0")
-                        url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
-                        distribution.set("repo")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("nsk")
-                        name.set("Mikhail Fedotov")
-                        email.set("nosik90@gmail.com")
-                        url.set("https://github.com/nsk90")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/nsk90/kstatemachine")
-                    connection.set("scm:git:git://github.com/nsk90/kstatemachine.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
                 }
             }
         }
