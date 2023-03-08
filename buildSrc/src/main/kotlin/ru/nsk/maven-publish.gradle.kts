@@ -105,7 +105,7 @@ localProperties.getProperty("signing.gnupg.executable")?.let { executable ->
 
             signing {
                 useGpgCmd()
-                sign(publishing.publications["mavenCentral"])
+                sign(publishing.publications["mavenPublication"])
             }
         }
     }
