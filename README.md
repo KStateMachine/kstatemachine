@@ -4,7 +4,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine)
-![Dependencies none](https://img.shields.io/badge/dependencies-none-green)
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
 
