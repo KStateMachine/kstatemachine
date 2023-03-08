@@ -2,8 +2,8 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.*
-import java.lang.UnsupportedOperationException
 import kotlin.coroutines.EmptyCoroutineContext
 
 class CoroutinesTest : StringSpec({
@@ -50,7 +50,7 @@ class CoroutinesTest : StringSpec({
         shouldThrow<UnsupportedOperationException> {
             createStdLibStateMachine {
                 initialState()
-                onStarted { delay(1) }
+                onStarted { delay(100) }
             }
         }
     }
@@ -74,6 +74,52 @@ class CoroutinesTest : StringSpec({
             }
         } finally {
             scope.cancel()
+        }
+    }
+
+    "test context preserving by suspend methods called from threads" test@{
+        val thread = Thread.currentThread()
+        withContext(Dispatchers.IO) {
+            println("${Thread.currentThread()}")
+            createStateMachine(this@test) {
+                onStarted { Thread.currentThread() shouldBe thread }
+                initialState()
+            }
+        }
+    }
+
+    "empty context does not preserve machine if suspend methods called from threads" {
+        val scope = CoroutineScope(EmptyCoroutineContext)
+        withContext(Dispatchers.IO) {
+            val thread = Thread.currentThread()
+            createStateMachine(scope) {
+                onStarted { Thread.currentThread() shouldBe thread }
+                initialState()
+            }
+        }
+    }
+
+    "threaded context preserving by suspend methods called from threads" {
+        val scope = CoroutineScope(Dispatchers.Default.limitedParallelism(1))
+        val thread = runBlocking(scope.coroutineContext) { Thread.currentThread() }
+
+        withContext(Dispatchers.IO) {
+            createStateMachine(scope) {
+                onStarted { Thread.currentThread() shouldBe thread }
+                initialState()
+            }
+        }
+    }
+
+    "current thread context preserving by suspend methods called from threads" {
+        runBlocking {
+            val thread = Thread.currentThread()
+            withContext(Dispatchers.IO) {
+                createStateMachine(this@runBlocking) {
+                    onStarted { Thread.currentThread()  shouldBe thread }
+                    initialState()
+                }
+            }
         }
     }
 })

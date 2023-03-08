@@ -707,8 +707,15 @@ Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` fu
 may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
 recursively (from library callbacks).
 
-Such suspendable functions preserve state machines coroutine context (using `kotlinx.coroutines.withContext`),
-so it should be ok to call them from any thread.
+When you create a state machine with `createStateMachine`/`createStateMachineBlocking` functions you have to provide 
+`CoroutineScope` on which machine will work, this scope also contains `CoroutineContext` by design. 
+This is how you can control a thread where state machine works.
+
+Suspendable functions and their `Blocking` analogs internally switch current execution coroutine context 
+(from which they are called) to state machines one using `kotlinx.coroutines.withContext` or
+`kotlinx.coroutines.runBlocking` arguments respectively.
+Note that if you created machine with a scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not 
+be performed.
 
 ### Migration guide from versions older than v0.20.0
 
