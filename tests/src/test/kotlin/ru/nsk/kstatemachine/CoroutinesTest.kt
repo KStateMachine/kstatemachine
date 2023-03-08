@@ -100,14 +100,20 @@ class CoroutinesTest : StringSpec({
     }
 
     "threaded context preserving by suspend methods called from threads" {
-        val scope = CoroutineScope(Dispatchers.Default.limitedParallelism(1))
-        val thread = runBlocking(scope.coroutineContext) { Thread.currentThread() }
+        val scope = CoroutineScope(newSingleThreadContext("test thread"))
+        try {
+            val thread = runBlocking(scope.coroutineContext) { Thread.currentThread() }
+            println(thread)
 
-        withContext(Dispatchers.IO) {
-            createStateMachine(scope) {
-                onStarted { Thread.currentThread() shouldBe thread }
-                initialState()
+            withContext(Dispatchers.IO) {
+                println("io" + Thread.currentThread())
+                createStateMachine(scope) {
+                    onStarted { Thread.currentThread() shouldBe thread }
+                    initialState()
+                }
             }
+        } finally {
+            scope.cancel()
         }
     }
 
