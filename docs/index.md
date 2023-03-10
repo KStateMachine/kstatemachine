@@ -717,6 +717,45 @@ Suspendable functions and their `Blocking` analogs internally switch current exe
 Note that if you created machine with a scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not 
 be performed.
 
+Multithreading is always complicated and hard to explain, so you can also check this sample 
+regarding working with state machine from coroutines running from multiple threads:
+
+```kotlin
+runBlocking { // defines non empty coroutine context for state machine
+    val machineThread = Thread.currentThread()
+    val machineScope = this
+
+    val machine = createStateMachine(machineScope) {
+        onStarted { check(Thread.currentThread() == machineThread) }
+
+        val state2 = state("state2")
+        initialState("state1") {
+            transition<SwitchEvent> {
+                targetState = state2
+                onTriggered { check(Thread.currentThread() == machineThread) }
+            }
+        }
+    }
+
+    withContext(Dispatchers.Default) {
+        check(Thread.currentThread() != machineThread) // suppose we are working from some other thread
+
+        // OK, will be processed on state machine context as `processEvent` is suspendable and switches context
+        // internally and context is not EmptyCoroutineContext
+        machine.processEvent(SwitchEvent)
+
+        // But this is NOT OK, this will be a race condition as this property is muted from state machines thread
+        // if (machine.isRunning) { /* do something */ }
+
+        withContext(machineScope.coroutineContext) {
+            // OK again as we switched context explicitly before accessing property
+            if (machine.isRunning) { /* do something */ }
+            check(Thread.currentThread() == machineThread)
+        }
+    }
+}
+```
+
 ### Migration guide from versions older than v0.20.0
 
 #### If you already have or ready to add Kotlin Coroutines dependency

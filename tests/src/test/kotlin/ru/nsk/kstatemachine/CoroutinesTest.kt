@@ -128,4 +128,40 @@ class CoroutinesTest : StringSpec({
             }
         }
     }
+
+    "threading sample for docs" {
+        runBlocking { // defines non empty coroutine context for state machine
+            val machineThread = Thread.currentThread()
+            val machineScope = this
+
+            val machine = createStateMachine(machineScope) {
+                onStarted { check(Thread.currentThread() == machineThread) }
+
+                val state2 = state("state2")
+                initialState("state1") {
+                    transition<SwitchEvent> {
+                        targetState = state2
+                        onTriggered { check(Thread.currentThread() == machineThread) }
+                    }
+                }
+            }
+
+            withContext(Dispatchers.Default) {
+                check(Thread.currentThread() != machineThread) // suppose we are working from some other thread
+
+                // OK, will be processed on state machine context as `processEvent` is suspendable and switches context
+                // internally and context is not EmptyCoroutineContext
+                machine.processEvent(SwitchEvent)
+
+                // But this is NOT OK, this will be a race condition as this property is muted from state machines thread
+                // if (machine.isRunning) { /* do something */ }
+
+                withContext(machineScope.coroutineContext) {
+                    // OK again as we switched context explicitly before accessing property
+                    if (machine.isRunning) { /* do something */ }
+                    check(Thread.currentThread() == machineThread)
+                }
+            }
+        }
+    }
 })
