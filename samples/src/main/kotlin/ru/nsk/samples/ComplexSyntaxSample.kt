@@ -104,7 +104,7 @@ fun main() = runBlocking {
 
     // Listeners might be added in or after setup block
     with(machine) {
-        onTransition {
+        onTransitionTriggered {
             // Listen to all transitions in one place
             // instead of listening to each transition separately
             println(

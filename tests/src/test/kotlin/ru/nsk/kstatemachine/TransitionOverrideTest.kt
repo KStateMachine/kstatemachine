@@ -24,7 +24,7 @@ class TransitionOverrideTest : StringSpec({
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent, 2) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent, 2) }
         }
 
         "override with stay()" {
@@ -34,7 +34,7 @@ class TransitionOverrideTest : StringSpec({
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "override all events" {
@@ -46,7 +46,7 @@ class TransitionOverrideTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 transitionOn<SwitchEvent> {
                     targetState = { state2 }
-                    onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+                    onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
                 }
 
                 state1 = initialState("state1") {
@@ -57,10 +57,10 @@ class TransitionOverrideTest : StringSpec({
                 state2 = state("state2") { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
     }
 })
@@ -74,14 +74,14 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType(cor
     val machine = createTestStateMachine(coroutineStarterType) {
         transitionOn<SwitchEvent> {
             targetState = { state3 }
-            onTriggered { callbacks.onTriggeredTransition(it.event, 3) }
+            onTriggered { callbacks.onTransitionTriggered(it.event, 3) }
         }
 
         initialState("state1") {
             // overrides parent transition
             transitionOn<E> {
                 targetState = { state2 }
-                onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+                onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
             }
         }
         state2 = state("state2") { callbacks.listen(this) }
@@ -91,8 +91,8 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType(cor
     machine.processEventBlocking(SwitchEvent)
 
     verifySequence {
-        callbacks.onTriggeredTransition(SwitchEvent, 2)
-        callbacks.onEntryState(state2)
+        callbacks.onTransitionTriggered(SwitchEvent, 2)
+        callbacks.onStateEntry(state2)
     }
 }
 
@@ -104,7 +104,7 @@ private fun overrideWithDirection(
     lateinit var state2: State
     transitionOn<SwitchEvent> {
         targetState = { state2 }
-        onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+        onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
     }
 
     initialState("state1") {

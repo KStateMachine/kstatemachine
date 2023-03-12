@@ -24,11 +24,11 @@ class CrossLevelTransitionTest : StringSpec({
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "self to self with children" {
@@ -65,24 +65,24 @@ class CrossLevelTransitionTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEventL2)
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(SwitchEventL2)
-                callbacks.onExitState(state11)
-                callbacks.onEntryState(state12)
+                callbacks.onTransitionTriggered(SwitchEventL2)
+                callbacks.onStateExit(state11)
+                callbacks.onStateEntry(state12)
             }
 
             machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEventL1)
-                callbacks.onExitState(state12)
-                callbacks.onEntryState(state11)
+                callbacks.onTransitionTriggered(SwitchEventL1)
+                callbacks.onStateExit(state12)
+                callbacks.onStateEntry(state11)
             }
         }
 
@@ -114,16 +114,16 @@ class CrossLevelTransitionTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state11)
-                callbacks.onEntryState(state12)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state11)
+                callbacks.onStateEntry(state12)
             }
         }
 
@@ -152,15 +152,15 @@ class CrossLevelTransitionTest : StringSpec({
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
-                callbacks.onEntryState(state21)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateEntry(state21)
             }
         }
 
@@ -199,18 +199,18 @@ class CrossLevelTransitionTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state11)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
-                callbacks.onEntryState(state22)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state11)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateEntry(state22)
             }
         }
 
@@ -241,17 +241,17 @@ class CrossLevelTransitionTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state11)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state11)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
         }
 
@@ -288,24 +288,24 @@ class CrossLevelTransitionTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state11)
-                callbacks.onEntryState(state12)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state11)
+                callbacks.onStateEntry(state12)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state12)
-                callbacks.onEntryState(state11)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state12)
+                callbacks.onStateEntry(state11)
             }
         }
     }

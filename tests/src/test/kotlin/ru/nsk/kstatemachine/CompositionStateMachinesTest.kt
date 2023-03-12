@@ -33,7 +33,7 @@ class CompositionStateMachinesTest : StringSpec({
             }
 
             verifySequence {
-                callbacks.onEntryState(state1)
+                callbacks.onStateEntry(state1)
             }
         }
 
@@ -178,20 +178,20 @@ private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMa
     }
 
     verifyOrder {
-        callbacks.onEntryState(machine)
-        callbacks.onEntryState(outerState1)
+        callbacks.onStateEntry(machine)
+        callbacks.onStateEntry(outerState1)
     }
     clearMocks(callbacks, answers = false)
 
     machine.processEventBlocking(SwitchEvent)
 
     verify {
-        callbacks.onTriggeredTransition(SwitchEvent)
-        callbacks.onExitState(outerState1)
+        callbacks.onTransitionTriggered(SwitchEvent)
+        callbacks.onStateExit(outerState1)
         if (!startInnerMachineOnSetup) {
             callbacks.onStarted(innerMachine)
-            callbacks.onEntryState(innerMachine)
-            callbacks.onEntryState(innerState1)
+            callbacks.onStateEntry(innerMachine)
+            callbacks.onStateEntry(innerState1)
         }
     }
     clearMocks(callbacks, answers = false)
@@ -199,9 +199,9 @@ private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMa
     innerMachine.processEventBlocking(SwitchEvent)
 
     verifyOrder {
-        callbacks.onTriggeredTransition(SwitchEvent)
-        callbacks.onExitState(innerState1)
-        callbacks.onEntryState(innerState2)
+        callbacks.onTransitionTriggered(SwitchEvent)
+        callbacks.onStateExit(innerState1)
+        callbacks.onStateEntry(innerState2)
     }
     clearMocks(callbacks, answers = false)
 }

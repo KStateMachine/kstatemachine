@@ -57,6 +57,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     private fun onStateReuseDetected() {
+        val machine = machine
         if (machine.autoDestroyOnStatesReuse)
             machine.destroyBlocking()
         else
@@ -114,12 +115,12 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override suspend fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isActive) {
-            val machine = machine as InternalStateMachine
+            val machine = machine
             if (parent != null) machine.log { "Parent $parent entering child $this" }
             data.isActive = true
             onDoEnter(transitionParams)
             stateNotify { onEntry(transitionParams) }
-            machine.machineNotify { onStateEntry(this@BaseStateImpl) }
+            machine.machineNotify { onStateEntry(this@BaseStateImpl, transitionParams) }
         }
     }
 
@@ -131,6 +132,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             data.isFinished = false
             data.isActive = false
             stateNotify { onExit(transitionParams) }
+            machine.machineNotify { onStateExit(this@BaseStateImpl, transitionParams) }
         }
     }
 
@@ -250,6 +252,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     private suspend fun notifyStateFinish(state: InternalState, transitionParams: TransitionParams<*>) {
         log { "$this finished" }
         stateNotify { onFinished(transitionParams) }
+        machine.machineNotify { onStateFinished(this@BaseStateImpl, transitionParams) }
         // there is no sense to send event on state machine finish as it stops processing events in this case
         if (this !is StateMachine)
             machine.processEvent(makeFinishedEvent(state))

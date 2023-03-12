@@ -27,7 +27,7 @@ class TransitionArgumentTest : StringSpec({
             }
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onEntryState(second) }
+            verifySequence { callbacks.onStateEntry(second) }
         }
 
         "transition argument on start" {
@@ -43,7 +43,7 @@ class TransitionArgumentTest : StringSpec({
             machine.startBlocking(ARGUMENT)
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onEntryState(state1) }
+            verifySequence { callbacks.onStateEntry(state1) }
         }
     }
 })

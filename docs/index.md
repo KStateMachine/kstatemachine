@@ -222,7 +222,7 @@ setup block:
 ```kotlin
 createStateMachine(scope) {
     // ...
-    onTransition {
+    onTransitionTriggered {
         // Listen to all triggered transitions here
         println(it.event)
     }

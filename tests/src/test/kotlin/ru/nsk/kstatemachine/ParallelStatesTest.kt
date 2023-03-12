@@ -45,9 +45,9 @@ class ParallelStatesTest : StringSpec({
             }
 
             verifySequence {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state2)
             }
 
             machine.activeStates() should containExactlyInAnyOrder(state1, state2)
@@ -78,10 +78,10 @@ class ParallelStatesTest : StringSpec({
             }
 
             verifySequence {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
-                callbacks.onEntryState(state111)
-                callbacks.onEntryState(state12)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
+                callbacks.onStateEntry(state111)
+                callbacks.onStateEntry(state12)
             }
 
             machine.activeStates() should containExactlyInAnyOrder(state1, state11, state12, state111)
@@ -108,18 +108,18 @@ class ParallelStatesTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
-                callbacks.onEntryState(state12)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
+                callbacks.onStateEntry(state12)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onExitState(state11)
-                callbacks.onExitState(state12)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onStateExit(state11)
+                callbacks.onStateExit(state12)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
         }
 
@@ -130,12 +130,12 @@ class ParallelStatesTest : StringSpec({
                 initialState(childMode = ChildMode.PARALLEL) {
                     state {
                         transition<SwitchEvent> {
-                            onTriggered { callbacks.onTriggeredTransition(it.event, 1) }
+                            onTriggered { callbacks.onTransitionTriggered(it.event, 1) }
                         }
                     }
                     state {
                         transition<SwitchEvent> {
-                            onTriggered { callbacks.onTriggeredTransition(it.event, 2) }
+                            onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
                         }
                     }
                 }
@@ -161,10 +161,10 @@ class ParallelStatesTest : StringSpec({
             }
 
             machine.processEventBlocking(FirstEvent)
-            verify { callbacks.onTriggeredTransition(FirstEvent) }
+            verify { callbacks.onTransitionTriggered(FirstEvent) }
 
             machine.processEventBlocking(SecondEvent)
-            verify { callbacks.onTriggeredTransition(SecondEvent) }
+            verify { callbacks.onTransitionTriggered(SecondEvent) }
         }
     }
 })

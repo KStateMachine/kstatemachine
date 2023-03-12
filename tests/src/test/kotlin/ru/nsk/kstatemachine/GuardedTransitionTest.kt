@@ -34,7 +34,7 @@ class GuardedTransitionTest : StringSpec({
 
             value = "value2"
             machine.processEventBlocking(SwitchEvent)
-            verify { callbacks.onTriggeredTransition(SwitchEvent) }
+            verify { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "guarded transitionOn() with lateinit state" {
@@ -61,7 +61,7 @@ class GuardedTransitionTest : StringSpec({
 
             value = "value2"
             machine.processEventBlocking(SwitchEvent)
-            verify { callbacks.onTriggeredTransition(SwitchEvent) }
+            verify { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "guarded transition same event" {
@@ -92,14 +92,14 @@ class GuardedTransitionTest : StringSpec({
                 state3 = state("state3") { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state3)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state3)
             }
         }
     }

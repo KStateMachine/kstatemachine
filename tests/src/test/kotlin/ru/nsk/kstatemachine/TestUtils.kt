@@ -20,23 +20,25 @@ object SecondEvent : Event
 
 interface Callbacks {
     fun onStarted(machine: StateMachine)
-    fun onStopped(machine: StateMachine)
-    fun onFinished(state: IState)
     fun onIgnoredEvent(event: Event)
-    fun onTriggeredTransition(event: Event)
-    fun onTriggeredTransition(event: Event, index: Int)
-    fun onEntryState(state: IState)
-    fun onExitState(state: IState)
+    fun onTransitionTriggered(event: Event)
+    fun onTransitionTriggered(event: Event, index: Int)
+    fun onTransitionComplete(event: Event)
+    fun onStateEntry(state: IState)
+    fun onStateExit(state: IState)
+    fun onStateFinished(state: IState)
+    fun onStopped(machine: StateMachine)
+    fun onDestroyed(machine: StateMachine)
 }
 
 fun Callbacks.listen(state: IState) {
-    state.onEntry { onEntryState(this) }
-    state.onExit { onExitState(this) }
-    state.onFinished { onFinished(this) }
+    state.onEntry { onStateEntry(this) }
+    state.onExit { onStateExit(this) }
+    state.onFinished { onStateFinished(this) }
 }
 
 inline fun <reified E : Event> Callbacks.listen(transitionBuilder: TransitionBuilder<E>) {
-    transitionBuilder.onTriggered { onTriggeredTransition(it.event) }
+    transitionBuilder.onTriggered { onTransitionTriggered(it.event) }
 }
 
 fun mockkCallbacks() = mockk<Callbacks>(relaxUnitFun = true)

@@ -52,20 +52,20 @@ class StateMachineTest : StringSpec({
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(on) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(on) }
 
             machine.processEventBlocking(OffEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(OffEvent)
-                callbacks.onExitState(on)
-                callbacks.onEntryState(off)
+                callbacks.onTransitionTriggered(OffEvent)
+                callbacks.onStateExit(on)
+                callbacks.onStateEntry(off)
             }
 
             machine.processEventBlocking(OnEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(OnEvent)
-                callbacks.onExitState(off)
-                callbacks.onEntryState(on)
+                callbacks.onTransitionTriggered(OnEvent)
+                callbacks.onStateExit(off)
+                callbacks.onStateEntry(on)
             }
 
             machine.processEventBlocking(OnEvent)
@@ -97,7 +97,7 @@ class StateMachineTest : StringSpec({
             second.isActive shouldBe true
         }
 
-        "onTransition() notification" {
+        "onTransitionTriggered() notification" {
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -105,11 +105,11 @@ class StateMachineTest : StringSpec({
                     transition<SwitchEvent>()
                 }
 
-                onTransition { callbacks.onTriggeredTransition(it.event) }
+                onTransitionTriggered { callbacks.onTransitionTriggered(it.event) }
             }
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "onTransitionComplete() notification" {
@@ -127,13 +127,13 @@ class StateMachineTest : StringSpec({
                 }
 
                 onTransitionComplete { transitionParams, activeStates ->
-                    callbacks.onTriggeredTransition(transitionParams.event)
+                    callbacks.onTransitionTriggered(transitionParams.event)
                     activeStates.shouldContainExactlyInAnyOrder(state2, state22)
                 }
             }
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
 
@@ -143,12 +143,12 @@ class StateMachineTest : StringSpec({
 
             val machine = createTestStateMachine(coroutineStarterType) {
                 first = initialState("first")
-                onStateEntry { callbacks.onEntryState(it) }
+                onStateEntry { state, _ -> callbacks.onStateEntry(state) }
             }
 
             verifySequence {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(first)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(first)
             }
         }
 
@@ -225,7 +225,7 @@ class StateMachineTest : StringSpec({
 
             verifySequence {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(first)
+                callbacks.onStateEntry(first)
             }
         }
 
@@ -243,8 +243,8 @@ class StateMachineTest : StringSpec({
             }
 
             verifySequence {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(initialState)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(initialState)
             }
         }
 
@@ -269,8 +269,8 @@ class StateMachineTest : StringSpec({
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state2)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state2)
             }
 
             machine.stopBlocking()
@@ -280,8 +280,8 @@ class StateMachineTest : StringSpec({
             machine.startBlocking()
             verifySequence {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
             }
         }
 
@@ -299,18 +299,18 @@ class StateMachineTest : StringSpec({
                 state2 = finalState("state2")
 
                 onStarted { callbacks.onStarted(this) }
-                onStateEntry { callbacks.onEntryState(it) }
-                onFinished { callbacks.onFinished(this) }
+                onStateEntry { state, _ -> callbacks.onStateEntry(state) }
+                onFinished { callbacks.onStateFinished(this) }
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state2)
-                callbacks.onFinished(machine)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateFinished(machine)
             }
         }
 

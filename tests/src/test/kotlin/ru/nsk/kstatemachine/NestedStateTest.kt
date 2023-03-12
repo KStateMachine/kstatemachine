@@ -28,9 +28,9 @@ class NestedStateTest : StringSpec({
             }
 
             verifySequence {
-                callbacks.onEntryState(firstL1)
-                callbacks.onEntryState(firstL2)
-                callbacks.onEntryState(firstL3)
+                callbacks.onStateEntry(firstL1)
+                callbacks.onStateEntry(firstL2)
+                callbacks.onStateEntry(firstL3)
             }
         }
 
@@ -68,18 +68,18 @@ class NestedStateTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(firstL1)
-                callbacks.onEntryState(firstL2)
+                callbacks.onStateEntry(firstL1)
+                callbacks.onStateEntry(firstL2)
             }
 
             machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEventL1)
-                callbacks.onExitState(firstL2)
-                callbacks.onExitState(firstL1)
-                callbacks.onEntryState(secondL1)
-                callbacks.onEntryState(secondL2)
+                callbacks.onTransitionTriggered(SwitchEventL1)
+                callbacks.onStateExit(firstL2)
+                callbacks.onStateExit(firstL1)
+                callbacks.onStateEntry(secondL1)
+                callbacks.onStateEntry(secondL2)
             }
         }
 
@@ -124,24 +124,24 @@ class NestedStateTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state11)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state11)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state2)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state2)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
         }
     }

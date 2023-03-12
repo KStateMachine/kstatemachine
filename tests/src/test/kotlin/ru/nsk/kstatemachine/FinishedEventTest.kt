@@ -19,13 +19,13 @@ class FinishedEventTest : StringSpec({
                     onEntry { error("should not be triggered") }
                 }
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
                 transitionOn<FinishedEvent> { targetState = { state2 } }
             }
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onFinished(machine) }
+            verifySequence { callbacks.onStateFinished(machine) }
             machine.isFinished shouldBe true
         }
 
@@ -40,7 +40,7 @@ class FinishedEventTest : StringSpec({
                         transition<SwitchEvent>(targetState = final)
                     }
 
-                    onFinished { callbacks.onFinished(this) }
+                    onFinished { callbacks.onStateFinished(this) }
                     transitionOn<FinishedEvent> { targetState = { state2 } }
                 }
                 state2 = state("state2") {
@@ -51,8 +51,8 @@ class FinishedEventTest : StringSpec({
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onFinished(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onStateFinished(state1)
+                callbacks.onStateEntry(state2)
             }
             state1.isFinished shouldBe false
             machine.isFinished shouldBe false
@@ -88,7 +88,7 @@ class FinishedEventTest : StringSpec({
             }
             machine.processEventBlocking(IntEvent(intData))
             verifySequence {
-                callbacks.onTriggeredTransition(ofType<FinishedEvent>())
+                callbacks.onTransitionTriggered(ofType<FinishedEvent>())
             }
         }
 
@@ -109,7 +109,7 @@ class FinishedEventTest : StringSpec({
                 }
             }
             verifySequence {
-                callbacks.onTriggeredTransition(ofType<FinishedEvent>())
+                callbacks.onTransitionTriggered(ofType<FinishedEvent>())
             }
         }
 
@@ -122,14 +122,14 @@ class FinishedEventTest : StringSpec({
                     transition<FinishedEvent> {
                         onTriggered {
                             it.event.data shouldBe null
-                            callbacks.onTriggeredTransition(it.event)
+                            callbacks.onTransitionTriggered(it.event)
                         }
                     }
                 }
             }
 
             verifySequence {
-                callbacks.onTriggeredTransition(ofType<FinishedEvent>())
+                callbacks.onTransitionTriggered(ofType<FinishedEvent>())
             }
         }
     }

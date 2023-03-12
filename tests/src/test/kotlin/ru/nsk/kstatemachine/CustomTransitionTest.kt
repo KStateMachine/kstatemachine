@@ -34,7 +34,7 @@ class CustomTransitionTest : StringSpec({
 
                 initialState("state1") {
                     val transition = CustomTransition("customTransition", this, state2).apply {
-                        onTriggered { callbacks.onTriggeredTransition(it.event) }
+                        onTriggered { callbacks.onTransitionTriggered(it.event) }
                     }
                     addTransition(transition)
                 }
@@ -43,7 +43,7 @@ class CustomTransitionTest : StringSpec({
 
             machine.processEventBlocking(event)
 
-            verifySequence { callbacks.onTriggeredTransition(event) }
+            verifySequence { callbacks.onTransitionTriggered(event) }
         }
     }
 })

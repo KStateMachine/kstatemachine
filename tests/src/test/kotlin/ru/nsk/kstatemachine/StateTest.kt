@@ -75,9 +75,9 @@ class StateTest : StringSpec({
 //                    }
 //                    setInitialState(subclassState)
 //                    // forbidden
-//                    onTransition { _, _, _, _ -> }
+//                    onTransitionTriggered { _, _, _, _ -> }
 //                }
-//                onTransition { _, _, _, _ -> }
+//                onTransitionTriggered { _, _, _, _ -> }
 //                setInitialState(subclassState)
 //            }
         }

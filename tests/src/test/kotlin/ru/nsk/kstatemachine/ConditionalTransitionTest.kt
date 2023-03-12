@@ -28,11 +28,11 @@ class ConditionalTransitionTest : StringSpec({
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "conditional transition noTransition()" {
@@ -49,10 +49,10 @@ class ConditionalTransitionTest : StringSpec({
                         callbacks.listen(this)
                     }
                 }
-                onTransition { callbacks.onTriggeredTransition(it.event) }
+                onTransitionTriggered { callbacks.onTransitionTriggered(it.event) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }
@@ -76,13 +76,13 @@ class ConditionalTransitionTest : StringSpec({
                 addState(second) { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(SwitchEvent)
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(first)
-                callbacks.onEntryState(second)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(first)
+                callbacks.onStateEntry(second)
             }
         }
 
@@ -104,13 +104,13 @@ class ConditionalTransitionTest : StringSpec({
                 addState(second) { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(SwitchEvent)
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(first)
-                callbacks.onEntryState(second)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(first)
+                callbacks.onStateEntry(second)
             }
         }
 
@@ -135,13 +135,13 @@ class ConditionalTransitionTest : StringSpec({
             }
 
             val event = ConditionEvent(false)
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(event)
             verifySequence {
-                callbacks.onTriggeredTransition(event)
-                callbacks.onExitState(first)
-                callbacks.onEntryState(third)
+                callbacks.onTransitionTriggered(event)
+                callbacks.onStateExit(first)
+                callbacks.onStateEntry(third)
             }
         }
 
@@ -165,13 +165,13 @@ class ConditionalTransitionTest : StringSpec({
                 addState(third) { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(first) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
             machine.processEventBlocking(SwitchEvent, false)
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(first)
-                callbacks.onEntryState(third)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(first)
+                callbacks.onStateEntry(third)
             }
         }
     }

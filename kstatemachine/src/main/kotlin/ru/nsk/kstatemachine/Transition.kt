@@ -36,7 +36,15 @@ interface Transition<E : Event> : VisitorAcceptor {
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
     interface Listener {
+        /**
+         * Called when transition is triggered/performed
+         */
         suspend fun onTriggered(transitionParams: TransitionParams<*>) = Unit
+
+        /**
+         * Triggered after transition is complete and provides set of current active states
+         */
+        suspend fun onComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
     }
 }
 

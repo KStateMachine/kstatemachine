@@ -25,15 +25,15 @@ class ExternalTransitionTest : StringSpec({
                 }
             }
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
         }
 
@@ -62,18 +62,18 @@ class ExternalTransitionTest : StringSpec({
                 }
             }
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state11)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state12)
+                callbacks.onStateExit(state11)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state12)
             }
         }
 
@@ -101,15 +101,15 @@ class ExternalTransitionTest : StringSpec({
                 }
             }
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
-                callbacks.onEntryState(state11)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
             }
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state11)
-                callbacks.onEntryState(state11)
+                callbacks.onStateExit(state11)
+                callbacks.onStateEntry(state11)
             }
         }
 
@@ -138,14 +138,14 @@ class ExternalTransitionTest : StringSpec({
                     }
                 }
                 verifySequenceAndClear(callbacks) {
-                    callbacks.onEntryState(machine)
-                    callbacks.onEntryState(state1)
-                    callbacks.onEntryState(state11)
+                    callbacks.onStateEntry(machine)
+                    callbacks.onStateEntry(state1)
+                    callbacks.onStateEntry(state11)
                 }
 
                 machine.processEventBlocking(SwitchEvent)
                 verifySequenceAndClear(callbacks) {
-                    callbacks.onTriggeredTransition(SwitchEvent)
+                    callbacks.onTransitionTriggered(SwitchEvent)
                 }
             }
         }

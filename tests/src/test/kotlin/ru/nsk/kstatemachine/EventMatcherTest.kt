@@ -35,7 +35,7 @@ class EventMatcherTest : StringSpec({
 
             machine.processEventBlocking(event)
 
-            verifySequence { callbacks.onTriggeredTransition(event) }
+            verifySequence { callbacks.onTransitionTriggered(event) }
         }
 
         "isEqual() negative" {
@@ -73,7 +73,7 @@ class EventMatcherTest : StringSpec({
 
             machine.processEventBlocking(event)
 
-            verifySequence { callbacks.onTriggeredTransition(event) }
+            verifySequence { callbacks.onTransitionTriggered(event) }
         }
 
         "isInstanceOf() negative" {

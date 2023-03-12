@@ -258,7 +258,7 @@ class UndoTest : StringSpec({
                 state2 = state("state2") {
                     transition<SwitchEvent>()
                 }
-                onTransition {
+                onTransitionTriggered {
                     println("transition event: ${it.event}, argument: ${it.argument}")
                 }
             }

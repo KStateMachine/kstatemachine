@@ -28,12 +28,12 @@ class ChoiceStateTest : StringSpec({
                     transition<SwitchEvent> { targetState = choice }
                 }
                 addState(State2) { callbacks.listen(this) }
-                onTransition { log { it.toString() } }
+                onTransitionTriggered { log { it.toString() } }
             }
 
             machine.processEventBlocking(SwitchEvent, false)
 
-            verifySequence { callbacks.onEntryState(State2) }
+            verifySequence { callbacks.onStateEntry(State2) }
         }
 
         "redirecting choice states chain" {
@@ -53,7 +53,7 @@ class ChoiceStateTest : StringSpec({
 
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onEntryState(State2) }
+            verifySequence { callbacks.onStateEntry(State2) }
         }
 
         "initial choice state currently not supported" {

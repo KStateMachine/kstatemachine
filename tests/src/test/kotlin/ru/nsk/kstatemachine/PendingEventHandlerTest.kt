@@ -46,7 +46,7 @@ class PendingEventHandlerTest : StringSpec({
                 }
             }
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "pending event queue is cleared on processing error" {

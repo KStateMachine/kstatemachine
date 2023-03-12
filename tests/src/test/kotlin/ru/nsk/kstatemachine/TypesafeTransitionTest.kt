@@ -127,14 +127,14 @@ class TypesafeTransitionTest : StringSpec({
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             val name = "testName"
             machine.processEventBlocking(NameEvent(name))
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
-                callbacks.onEntryState(state21)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateEntry(state21)
             }
 
             state2.data shouldBe name
@@ -142,8 +142,8 @@ class TypesafeTransitionTest : StringSpec({
             val id = 42
             machine.processEventBlocking(IdEvent(id))
             verifySequence {
-                callbacks.onExitState(state21)
-                callbacks.onEntryState(state22)
+                callbacks.onStateExit(state21)
+                callbacks.onStateEntry(state22)
             }
 
             state2.data shouldBe name
@@ -229,7 +229,7 @@ class TypesafeTransitionTest : StringSpec({
             machine.processEventBlocking(IdEvent(13))
             machine.processEventBlocking(SwitchEvent)
 
-            verify { callbacks.onTriggeredTransition(SwitchEvent) }
+            verify { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "self targeted transition in data state" {

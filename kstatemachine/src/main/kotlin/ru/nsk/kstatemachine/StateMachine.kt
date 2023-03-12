@@ -68,6 +68,10 @@ interface StateMachine : State {
 
     override fun accept(visitor: Visitor) = visitor.visit(this)
 
+    /**
+     * Provides [StateMachine] specific notifications and also duplicates [IState.Listener] and [Transition.Listener]
+     * functionality allowing to listen all notifications in one place if necessary.
+     */
     interface Listener {
         /**
          * Notifies that state machine started (entered initial state).
@@ -75,27 +79,31 @@ interface StateMachine : State {
         suspend fun onStarted() = Unit
 
         /**
-         * This method is called when transition is performed.
-         * There might be many transitions from one state to another,
-         * this method might be used to listen to all transitions in one place
-         * instead of listening for each transition separately.
+         * This method is called when any transition is triggered/performed.
          */
-        suspend fun onTransition(transitionParams: TransitionParams<*>) = Unit
+        suspend fun onTransitionTriggered(transitionParams: TransitionParams<*>) = Unit
 
         /**
-         * Same as [onTransition] but called after transition is complete and provides set of current active states.
+         * Same as [onTransitionTriggered] but called after transition is complete and provides set of current active states.
          */
         suspend fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
 
         /**
-         * Notifies about child state entry (including nested states).
+         * Notifies about any child state entry (including nested states).
          */
-        suspend fun onStateEntry(state: IState) = Unit
+        suspend fun onStateEntry(state: IState, transitionParams: TransitionParams<*>) = Unit
+        suspend fun onStateExit(state: IState, transitionParams: TransitionParams<*>) = Unit
+        suspend fun onStateFinished(state: IState, transitionParams: TransitionParams<*>) = Unit
 
         /**
          * Notifies that state machine has stopped.
          */
         suspend fun onStopped() = Unit
+
+        /**
+         * Notifies that state machine has destroyed.
+         */
+        suspend fun onDestroyed() = Unit
     }
 
     /**
@@ -184,7 +192,9 @@ suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.wi
  */
 fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
 
-suspend fun IState.log(lazyMessage: () -> String) = machineOrNull()?.logger?.log(lazyMessage)
+suspend fun IState.log(lazyMessage: () -> String) {
+    machineOrNull()?.logger?.log(lazyMessage)
+}
 
 /**
  * Allows to mutate some properties, which is necessary during setup, before machine is started

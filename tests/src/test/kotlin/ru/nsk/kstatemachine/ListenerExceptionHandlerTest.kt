@@ -48,8 +48,8 @@ class ListenerExceptionHandlerTest : StringSpec({
 
             verifySequence {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state1)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state1)
             }
         }
 

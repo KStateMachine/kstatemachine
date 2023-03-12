@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 
 @StateMachineDslMarker
 abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: IState) {
-    var listener: Transition.Listener? = null
+    val listeners = mutableListOf<Transition.Listener>()
     lateinit var eventMatcher: EventMatcher<E>
     var type = TransitionType.LOCAL
 
@@ -35,7 +35,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
         }
 
         val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
-        listener?.let { transition.addListener(it) }
+        listeners.forEach { transition.addListener(it) }
         return transition
     }
 }
@@ -58,7 +58,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
         }
 
         val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
-        listener?.let { transition.addListener(it) }
+        listeners.forEach { transition.addListener(it) }
         return transition
     }
 }
@@ -76,7 +76,7 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
         }
 
         val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
-        listener?.let { transition.addListener(it) }
+        listeners.forEach { transition.addListener(it) }
         return transition
     }
 }
@@ -105,13 +105,22 @@ class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, s
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(
     crossinline block: suspend (TransitionParams<E>) -> Unit
 ): Transition.Listener {
-    require(listener == null) { "Listener is already set, only one listener is allowed in a builder" }
-
     return object : Transition.Listener {
         @Suppress("UNCHECKED_CAST")
         override suspend fun onTriggered(transitionParams: TransitionParams<*>) =
             block(transitionParams as TransitionParams<E>)
-    }.also { listener = it }
+    }.also { listeners += it }
+}
+
+inline fun <reified E : Event> TransitionBuilder<E>.onComplete(
+    // arg names are provided for better syntax highlighting
+    crossinline block: suspend (transitionParams: TransitionParams<E>, activeStates: Set<IState>) -> Unit
+): Transition.Listener {
+    return object : Transition.Listener {
+        @Suppress("UNCHECKED_CAST")
+        override suspend fun onComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
+            block(transitionParams as TransitionParams<E>, activeStates)
+    }.also { listeners += it }
 }
 
 /**

@@ -32,9 +32,9 @@ class TestingStartFromTest : StringSpec({
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state2)
-                callbacks.onEntryState(state22)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateEntry(state22)
             }
 
             machine.stopBlocking()
@@ -44,9 +44,9 @@ class TestingStartFromTest : StringSpec({
 
             verifySequenceAndClear(callbacks) {
                 callbacks.onStarted(machine)
-                callbacks.onEntryState(machine)
-                callbacks.onEntryState(state2)
-                callbacks.onEntryState(state22)
+                callbacks.onStateEntry(machine)
+                callbacks.onStateEntry(state2)
+                callbacks.onStateEntry(state22)
             }
         }
 

@@ -43,14 +43,14 @@ class IgnoredEventHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 setInitialState(finalState("final"))
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
 
                 ignoredEventHandler = StateMachine.IgnoredEventHandler {
                     callbacks.onIgnoredEvent(it.event)
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onFinished(machine) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateFinished(machine) }
 
             machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
             verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }

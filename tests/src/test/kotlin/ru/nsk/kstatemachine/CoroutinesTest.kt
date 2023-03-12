@@ -13,10 +13,13 @@ class CoroutinesTest : StringSpec({
             onStarted {
                 delay(0)
             }
-            onStopped { delay(0) }
-            onTransition { delay(0) }
+            onTransitionTriggered { delay(0) }
             onTransitionComplete { _, _ -> delay(0) }
-            onStateEntry { delay(0) }
+            onStateEntry { _, _ -> delay(0) }
+            onStateExit { _, _ -> delay(0) }
+            onStateFinished { _, _ -> delay(0) }
+            onStopped { delay(0) }
+            onDestroyed { delay(0) }
             val first = initialState("first") {
                 onEntry { delay(0) }
                 onExit { delay(0) }

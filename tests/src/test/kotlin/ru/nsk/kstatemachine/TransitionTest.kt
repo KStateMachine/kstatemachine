@@ -28,14 +28,14 @@ class TransitionTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 state1 = initialState("state1") {
                     onEntry {
-                        callbacks.onEntryState(this)
+                        callbacks.onStateEntry(this)
                         it.transition.sourceState shouldBeSameInstanceAs this@createTestStateMachine
                         it.direction.targetState shouldBeSameInstanceAs this@createTestStateMachine
                     }
 
                     onExit {
                         if (it.direction.targetState == state2)
-                            callbacks.onExitState(this)
+                            callbacks.onStateExit(this)
                         else
                             fail("incorrect direction ${it.direction}")
                     }
@@ -49,14 +49,14 @@ class TransitionTest : StringSpec({
                 state2 = state("state2") { callbacks.listen(this) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
             machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
         }
 
@@ -78,8 +78,8 @@ class TransitionTest : StringSpec({
             machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEvent)
-                callbacks.onEntryState(state2)
+                callbacks.onTransitionTriggered(SwitchEvent)
+                callbacks.onStateEntry(state2)
             }
         }
 
@@ -96,7 +96,7 @@ class TransitionTest : StringSpec({
             }
 
             machine.processEventBlocking(SwitchEvent)
-            verify { callbacks.onTriggeredTransition(SwitchEvent) }
+            verify { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "transition with shortcut method" {

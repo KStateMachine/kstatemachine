@@ -18,12 +18,12 @@ class FinishingStateMachineTest : StringSpec({
                 final = finalState("final") { callbacks.listen(this) }
                 setInitialState(final)
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
             }
 
             verifySequence {
-                callbacks.onEntryState(final)
-                callbacks.onFinished(machine)
+                callbacks.onStateEntry(final)
+                callbacks.onStateFinished(machine)
             }
         }
 
@@ -53,7 +53,7 @@ class FinishingStateMachineTest : StringSpec({
                 final = finalState("final") { callbacks.listen(this) }
                 setInitialState(final)
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
 
                 transition<SwitchEvent> {
                     targetState = final
@@ -62,8 +62,8 @@ class FinishingStateMachineTest : StringSpec({
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(final)
-                callbacks.onFinished(machine)
+                callbacks.onStateEntry(final)
+                callbacks.onStateFinished(machine)
             }
 
             machine.processEventBlocking(SwitchEvent)
@@ -100,32 +100,32 @@ class FinishingStateMachineTest : StringSpec({
                 state1 = state("State1", childMode = ChildMode.PARALLEL) {
                     state11 = state("State11") {
                         addInitialState(DefaultFinalState("Final state111"))
-                        onFinished { callbacks.onFinished(this) }
+                        onFinished { callbacks.onStateFinished(this) }
                     }
                     state12 = state("State12") {
                         addInitialState(DefaultFinalState("Final state121"))
-                        onFinished { callbacks.onFinished(this) }
+                        onFinished { callbacks.onStateFinished(this) }
                     }
-                    onFinished { callbacks.onFinished(this) }
+                    onFinished { callbacks.onStateFinished(this) }
                 }
                 state2 = state("State2") {
                     val finalState22 = finalState("State22")
                     initialState {
                         transition<SwitchEvent> { targetState = finalState22 }
                     }
-                    onFinished { callbacks.onFinished(this) }
+                    onFinished { callbacks.onStateFinished(this) }
                 }
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
             }
 
             machine.processEventBlocking(SwitchEvent)
 
             verifySequence {
-                callbacks.onFinished(state11)
-                callbacks.onFinished(state12)
-                callbacks.onFinished(state1)
-                callbacks.onFinished(state2)
-                callbacks.onFinished(machine)
+                callbacks.onStateFinished(state11)
+                callbacks.onStateFinished(state12)
+                callbacks.onStateFinished(state1)
+                callbacks.onStateFinished(state2)
+                callbacks.onStateFinished(machine)
             }
 
             machine.isFinished shouldBe true
@@ -142,15 +142,15 @@ class FinishingStateMachineTest : StringSpec({
             createTestStateMachine(coroutineStarterType, childMode = ChildMode.PARALLEL) {
                 state1 = state("State1") {
                     addInitialState(DefaultFinalState("Final state11"))
-                    onFinished { callbacks.onFinished(this) }
+                    onFinished { callbacks.onStateFinished(this) }
                 }
                 state("State2")
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
             }
 
             verifySequence {
-                callbacks.onFinished(state1)
+                callbacks.onStateFinished(state1)
             }
         }
 
@@ -161,7 +161,7 @@ class FinishingStateMachineTest : StringSpec({
                 state1 = state("state1") {
                     addInitialState(DefaultFinalState("finalState11"))
                     transition<SwitchEvent> {
-                        onTriggered { callbacks.onTriggeredTransition(it.event) }
+                        onTriggered { callbacks.onTransitionTriggered(it.event) }
                     }
                 }
                 state("state2")
@@ -171,7 +171,7 @@ class FinishingStateMachineTest : StringSpec({
             machine.isFinished shouldBe false
             machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTriggeredTransition(SwitchEvent) }
+            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
         "nested finished state does not stop machine and does not ignore events" {
@@ -236,32 +236,32 @@ class FinishingStateMachineTest : StringSpec({
                     }
                 }
 
-                onFinished { callbacks.onFinished(this) }
+                onFinished { callbacks.onStateFinished(this) }
             }
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(initialL1)
-                callbacks.onEntryState(initialL2)
+                callbacks.onStateEntry(initialL1)
+                callbacks.onStateEntry(initialL2)
             }
 
             machine.processEventBlocking(SwitchEventL2)
 
             verifySequenceAndClear(callbacks) {
-                callbacks.onTriggeredTransition(SwitchEventL2)
-                callbacks.onExitState(initialL2)
-                callbacks.onEntryState(finalL2)
-                callbacks.onFinished(initialL1)
+                callbacks.onTransitionTriggered(SwitchEventL2)
+                callbacks.onStateExit(initialL2)
+                callbacks.onStateEntry(finalL2)
+                callbacks.onStateFinished(initialL1)
             }
             initialL1.isFinished shouldBe true
 
             machine.processEventBlocking(SwitchEventL1)
 
             verifySequence {
-                callbacks.onTriggeredTransition(SwitchEventL1)
-                callbacks.onExitState(finalL2)
-                callbacks.onExitState(initialL1)
-                callbacks.onEntryState(finalL1)
-                callbacks.onFinished(machine)
+                callbacks.onTransitionTriggered(SwitchEventL1)
+                callbacks.onStateExit(finalL2)
+                callbacks.onStateExit(initialL1)
+                callbacks.onStateEntry(finalL1)
+                callbacks.onStateFinished(machine)
             }
             machine.isFinished shouldBe true
         }

@@ -94,6 +94,7 @@ internal class StateMachineImpl(
             checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
     }
 
+    /** To be called only from [runCheckingExceptions] */
     private suspend fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
         log { "$this started" }
@@ -242,13 +243,14 @@ internal class StateMachineImpl(
         }
 
         transition.transitionNotify { onTriggered(transitionParams) }
-        machineNotify { onTransition(transitionParams) }
+        machineNotify { onTransitionTriggered(transitionParams) }
 
         targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
 
         recursiveAfterTransitionComplete(transitionParams)
 
         val activeStates = activeStates()
+        transition.transitionNotify { onComplete(transitionParams, activeStates) }
         machineNotify { onTransitionComplete(transitionParams, activeStates) }
 
         return true
@@ -271,6 +273,7 @@ internal class StateMachineImpl(
         accept(CleanupVisitor())
         _isDestroyed = true
         log { "$this destroyed" }
+        machineNotify { onDestroyed() }
     }
 }
 

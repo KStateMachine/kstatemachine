@@ -54,13 +54,13 @@ class HistoryStateTest : StringSpec({
                 history = historyState("history")
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onEntryState(state1) }
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
             history.storedState shouldBe state1
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state1)
-                callbacks.onEntryState(state2)
+                callbacks.onStateExit(state1)
+                callbacks.onStateEntry(state2)
             }
             history.storedState shouldBe state2
 
@@ -97,19 +97,19 @@ class HistoryStateTest : StringSpec({
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state12)
+                callbacks.onStateEntry(state12)
             }
             history.storedState shouldBe state12
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onExitState(state12)
+                callbacks.onStateExit(state12)
             }
             history.storedState shouldBe state12
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state12)
+                callbacks.onStateEntry(state12)
             }
         }
 
@@ -141,7 +141,7 @@ class HistoryStateTest : StringSpec({
 
             machine.processEventBlocking(SwitchEvent)
             verifySequenceAndClear(callbacks) {
-                callbacks.onEntryState(state22)
+                callbacks.onStateEntry(state22)
             }
             history.storedState shouldBe state22
         }
