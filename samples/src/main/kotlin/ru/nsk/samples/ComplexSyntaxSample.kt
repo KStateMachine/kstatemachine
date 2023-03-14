@@ -75,6 +75,7 @@ fun main() = runBlocking {
                 }
                 // Access info from a State subclass
                 onTriggered { println("Switching state with info: ${this@yellowState.info}") }
+                onComplete { _, activeStates -> println("Transition complete: $activeStates") }
             }
         }
 
@@ -98,8 +99,11 @@ fun main() = runBlocking {
             )
         }
 
-        // Listen to state machine start
+        // Listen to state machine notifications
         onStarted { println("$name started") }
+        onStopped { println("$name stopped") }
+        onFinished { println("$name finished") }
+        onDestroyed { println("$name destroyed") }
     }
 
     // Listeners might be added in or after setup block
@@ -115,8 +119,10 @@ fun main() = runBlocking {
         onTransitionComplete { transitionParams, activeStates ->
             println("Transition from ${transitionParams.transition.sourceState}, active states: $activeStates")
         }
-        onStateEntry { println("Entered state $it") }
-        onFinished { println("$name finished") }
+        onStateEntry { state, _ -> println("Entered state $state") }
+        onStateExit { state, _ -> println("Exit state $state") }
+        onStateFinished { state, _ -> println("State finished $state") }
+
     }
 
     // Access state after state machine setup

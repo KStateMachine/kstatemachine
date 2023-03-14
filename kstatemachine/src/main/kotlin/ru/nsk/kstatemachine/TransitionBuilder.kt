@@ -125,6 +125,6 @@ inline fun <reified E : Event> TransitionBuilder<E>.onComplete(
 
 /**
  * Pair of event and argument coming from processEvent() method.
- * Used as single argument in all guard and conditional callbacks same os [TransitionParams] for transitions
+ * Used as single argument in all guard and conditional callbacks same as [TransitionParams] for transitions
  */
 data class EventAndArgument<E : Event>(val event: E, val argument: Any?)

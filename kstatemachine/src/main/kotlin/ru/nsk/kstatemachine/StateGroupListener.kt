@@ -19,20 +19,28 @@ fun onActiveAllOf(
     onChanged: (Boolean) -> Unit
 ): GroupListener {
     val allStates = setOf(mandatoryState1, mandatoryState2, *otherStates)
-    require(allStates.size >= 2) {
+    return onActiveAllOf(allStates, notifyOnSubscribe, onChanged)
+}
+
+fun onActiveAllOf(
+    states: Set<IState>,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener {
+    require(states.size >= 2) {
         "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
     }
-    val initialActiveCount = allStates.countActive()
+    val initialActiveCount = states.countActive()
 
     val listener = object : StateGroupListener {
-        private var status by observable(initialActiveCount == allStates.size) { _, oldValue, newValue ->
+        private var status by observable(initialActiveCount == states.size) { _, oldValue, newValue ->
             if (oldValue != newValue) onChanged(newValue)
         }
 
         private var activeCount = initialActiveCount
             set(value) {
                 field = value
-                status = allStates.countActive() == allStates.size
+                status = states.countActive() == states.size
             }
 
         init {
@@ -48,11 +56,11 @@ fun onActiveAllOf(
         }
 
         override fun unsubscribe() {
-            allStates.forEach { it.removeListener(this) }
+            states.forEach { it.removeListener(this) }
         }
     }
 
-    allStates.forEach { it.addListener(listener) }
+    states.forEach { it.addListener(listener) }
     return listener
 }
 
@@ -69,7 +77,15 @@ fun onActiveAnyOf(
     onChanged: (Boolean) -> Unit
 ): GroupListener {
     val allStates = setOf(mandatoryState1, mandatoryState2, *otherStates)
-    require(allStates.size >= 2) {
+    return onActiveAnyOf(allStates, notifyOnSubscribe, onChanged)
+}
+
+fun onActiveAnyOf(
+    states: Set<IState>,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener {
+    require(states.size >= 2) {
         "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
     }
 
@@ -86,16 +102,16 @@ fun onActiveAnyOf(
             status = calculateStatus()
         }
 
-        private fun calculateStatus() = allStates.firstOrNull { it.isActive } != null
+        private fun calculateStatus() = states.firstOrNull { it.isActive } != null
 
         override suspend fun onEntry(transitionParams: TransitionParams<*>) = updateStatus()
         override suspend fun onExit(transitionParams: TransitionParams<*>) = updateStatus()
 
         override fun unsubscribe() {
-            allStates.forEach { it.removeListener(this) }
+            states.forEach { it.removeListener(this) }
         }
     }
 
-    allStates.forEach { it.addListener(listener) }
+    states.forEach { it.addListener(listener) }
     return listener
 }

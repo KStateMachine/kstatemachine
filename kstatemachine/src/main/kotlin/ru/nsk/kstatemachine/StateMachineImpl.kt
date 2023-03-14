@@ -270,10 +270,10 @@ internal class StateMachineImpl(
 
     /** To be called only from [runCheckingExceptions] */
     private suspend fun doDestroy() {
-        accept(CleanupVisitor())
         _isDestroyed = true
-        log { "$this destroyed" }
         machineNotify { onDestroyed() }
+        log { "$this destroyed" }
+        accept(CleanupVisitor())
     }
 }
 

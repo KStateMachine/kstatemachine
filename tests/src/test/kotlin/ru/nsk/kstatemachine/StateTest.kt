@@ -59,11 +59,14 @@ class StateTest : StringSpec({
         "dsl marker" {
 //            createTestStateMachine(coroutineStarterType) {
 //                val subclassState = addState(SubclassState())
-//
+//                onStarted {}
 //                subclassState {
+//                    // forbidden
+//                    onStarted {}
 //                    // forbidden
 //                    addState(SubclassState())
 //                    transition<SwitchEvent> {
+//
 //                        // forbidden
 //                        onEntry {
 //                            if (dataField == 0)
@@ -75,9 +78,9 @@ class StateTest : StringSpec({
 //                    }
 //                    setInitialState(subclassState)
 //                    // forbidden
-//                    onTransitionTriggered { _, _, _, _ -> }
+//                    onTransitionTriggered {}
 //                }
-//                onTransitionTriggered { _, _, _, _ -> }
+//                onTransitionTriggered {}
 //                setInitialState(subclassState)
 //            }
         }

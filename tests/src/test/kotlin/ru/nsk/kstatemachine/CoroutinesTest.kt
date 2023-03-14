@@ -3,7 +3,10 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.verifySequence
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.take
+import ru.nsk.kstatemachine.StateMachineNotification.*
 import kotlin.coroutines.EmptyCoroutineContext
 
 class CoroutinesTest : StringSpec({
@@ -125,7 +128,7 @@ class CoroutinesTest : StringSpec({
             val thread = Thread.currentThread()
             withContext(Dispatchers.IO) {
                 createStateMachine(this@runBlocking) {
-                    onStarted { Thread.currentThread()  shouldBe thread }
+                    onStarted { Thread.currentThread() shouldBe thread }
                     initialState()
                 }
             }
@@ -161,10 +164,104 @@ class CoroutinesTest : StringSpec({
 
                 withContext(machineScope.coroutineContext) {
                     // OK again as we switched context explicitly before accessing property
-                    if (machine.isRunning) { /* do something */ }
+                    if (machine.isRunning) { /* do something */
+                    }
                     check(Thread.currentThread() == machineThread)
                 }
             }
+        }
+    }
+
+    "machine notification flow with replay" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(this, start = false) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2")
+        }
+
+        val eventsCount = 9
+        val notificationFlow = machine.stateMachineNotificationFlow(replay = eventsCount)
+
+        machine.start()
+        machine.processEvent(SwitchEvent)
+        machine.destroy()
+
+        val callbacks = mockkCallbacks()
+        notificationFlow.take(eventsCount).collect {
+            when (it) {
+                is Started -> callbacks.onStarted(it.machine)
+                is TransitionTriggered -> callbacks.onTransitionTriggered(it.transitionParams.event)
+                is TransitionComplete -> callbacks.onTransitionComplete(it.transitionParams.event)
+                is StateEntry -> callbacks.onStateEntry(it.state)
+                is StateExit -> callbacks.onStateExit(it.state)
+                is StateFinished -> callbacks.onStateFinished(it.state)
+                is Stopped -> callbacks.onStopped(it.machine)
+                is Destroyed -> callbacks.onDestroyed(it.machine)
+            }
+        }
+
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onStateEntry(machine)
+            callbacks.onStateEntry(state1)
+            callbacks.onTransitionTriggered(SwitchEvent)
+            callbacks.onStateExit(state1)
+            callbacks.onStateEntry(state2)
+            callbacks.onTransitionComplete(SwitchEvent)
+            callbacks.onStopped(machine)
+            callbacks.onDestroyed(machine)
+        }
+    }
+
+    "machine notification flow" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(this, start = false) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2")
+        }
+
+        val eventsCount = 9
+        val callbacks = mockkCallbacks()
+
+        val job = launch(start = CoroutineStart.UNDISPATCHED) {
+            machine.stateMachineNotificationFlow()
+                .take(eventsCount)
+                .collect {
+                    println("$it")
+                    when (it) {
+                        is Started -> callbacks.onStarted(it.machine)
+                        is TransitionTriggered -> callbacks.onTransitionTriggered(it.transitionParams.event)
+                        is TransitionComplete -> callbacks.onTransitionComplete(it.transitionParams.event)
+                        is StateEntry -> callbacks.onStateEntry(it.state)
+                        is StateExit -> callbacks.onStateExit(it.state)
+                        is StateFinished -> callbacks.onStateFinished(it.state)
+                        is Stopped -> callbacks.onStopped(it.machine)
+                        is Destroyed -> callbacks.onDestroyed(it.machine)
+                    }
+                }
+        }
+
+        machine.start()
+        machine.processEvent(SwitchEvent)
+        machine.destroy()
+        job.join()
+
+        verifySequence {
+            callbacks.onStarted(machine)
+            callbacks.onStateEntry(machine)
+            callbacks.onStateEntry(state1)
+            callbacks.onTransitionTriggered(SwitchEvent)
+            callbacks.onStateExit(state1)
+            callbacks.onStateEntry(state2)
+            callbacks.onTransitionComplete(SwitchEvent)
+            callbacks.onStopped(machine)
+            callbacks.onDestroyed(machine)
         }
     }
 })

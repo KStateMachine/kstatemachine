@@ -19,10 +19,12 @@ class FinishingStateMachineTest : StringSpec({
                 setInitialState(final)
 
                 onFinished { callbacks.onStateFinished(this) }
+                onStateFinished { state, _ -> callbacks.onStateFinished(state) }
             }
 
             verifySequence {
                 callbacks.onStateEntry(final)
+                callbacks.onStateFinished(machine)
                 callbacks.onStateFinished(machine)
             }
         }

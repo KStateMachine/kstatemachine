@@ -322,9 +322,23 @@ class StateMachineTest : StringSpec({
         }
 
         "destroy from onStart" {
-            createTestStateMachine(coroutineStarterType) {
+            val callbacks = mockkCallbacks()
+            val machine = createTestStateMachine(coroutineStarterType) {
                 initialState("initial")
-                onStarted { destroy() }
+                onStarted {
+                    callbacks.onStarted(this)
+                    destroy()
+                }
+                onStopped { callbacks.onStopped(this) }
+                onDestroyed { callbacks.onDestroyed(this) }
+            }
+            machine.isRunning shouldBe false
+            machine.isDestroyed shouldBe true
+
+            verifySequence {
+                callbacks.onStarted(machine)
+                callbacks.onStopped(machine)
+                callbacks.onDestroyed(machine)
             }
         }
     }
