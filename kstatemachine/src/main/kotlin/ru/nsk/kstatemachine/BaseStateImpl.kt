@@ -4,7 +4,6 @@ import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 import ru.nsk.kstatemachine.ChildMode.PARALLEL
 import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
-import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 
 /**
  * Base [IState] implementation for all states

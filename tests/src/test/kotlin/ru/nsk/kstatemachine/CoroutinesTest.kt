@@ -2,9 +2,15 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.take
 import ru.nsk.kstatemachine.StateMachineNotification.*
 import kotlin.coroutines.EmptyCoroutineContext
@@ -263,5 +269,21 @@ class CoroutinesTest : StringSpec({
             callbacks.onStopped(machine)
             callbacks.onDestroyed(machine)
         }
+    }
+
+    "activeStatesFlow()" {
+        lateinit var state1: State
+        lateinit var state2: State
+        val machine = createStateMachine(this) {
+            state1 = initialState("state1") {
+                transitionOn<SwitchEvent> { targetState = { state2 } }
+            }
+            state2 = state("state2")
+        }
+        val statesFlow = machine.activeStatesFlow()
+        statesFlow.first().shouldContainExactlyInAnyOrder(state1)
+
+        machine.processEvent(SwitchEvent)
+        statesFlow.first().shouldContainExactlyInAnyOrder(state2)
     }
 })
