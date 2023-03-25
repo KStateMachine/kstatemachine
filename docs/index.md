@@ -756,6 +756,14 @@ runBlocking { // defines non empty coroutine context for state machine
 }
 ```
 
+### Additional kstatemachine-coroutines artifact
+
+Contains additional functions to work with KStateMachine depending on Kotlin Coroutines library
+
+* `createStateMachine()` / `createStateMachineBlocking()` creates state machine with specified `CoroutineScope`
+* `stateMachineNotificationFlow()` returns a `SharedFlow` of all machine notifications
+* `activeStatesFlow()` returns a `StateFlow` of active machine states
+
 ### Migration guide from versions older than v0.20.0
 
 #### If you already have or ready to add Kotlin Coroutines dependency
