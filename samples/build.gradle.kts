@@ -1,19 +1,25 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     application
 }
 
 group = rootProject.group
 version = rootProject.version
 
-application {
-    mainClass.set("FullSyntaxSample")
-}
-
 kotlin {
     jvmToolchain(Versions.jdkVersion)
-}
+    jvm {}
+//    js(IR) {
+//        browser()
+//        nodejs()
+//    }
+//    iosArm64()
 
-dependencies {
-    implementation(project(":kstatemachine-coroutines"))
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":kstatemachine-coroutines"))
+            }
+        }
+    }
 }

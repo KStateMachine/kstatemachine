@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
@@ -11,13 +11,17 @@ version = rootProject.version
 
 kotlin {
     jvmToolchain(Versions.jdkVersion)
-}
-
-tasks {
-    compileKotlin {
-        kotlinOptions {
+    sourceSets.all {
+        languageSettings.apply {
             languageVersion = Versions.languageVersion
             apiVersion = Versions.apiVersion
         }
     }
+
+    jvm {}
+    js(IR) {
+        browser()
+        nodejs()
+    }
+    iosArm64()
 }
