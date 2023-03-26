@@ -9,17 +9,15 @@ plugins {
 group = rootProject.group
 version = rootProject.version
 
+kotlin {
+    jvmToolchain(Versions.jdkVersion)
+}
+
 tasks {
     compileKotlin {
         kotlinOptions {
-            jvmTarget = Versions.jvmTarget
             languageVersion = Versions.languageVersion
             apiVersion = Versions.apiVersion
         }
     }
-}
-
-java {
-    sourceCompatibility = Versions.javaCompatibilityVersion
-    targetCompatibility = Versions.javaCompatibilityVersion
 }

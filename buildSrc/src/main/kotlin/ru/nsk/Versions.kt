@@ -12,8 +12,7 @@ object Versions {
     const val gradle = "7.1.0"
 
     // compatibility
-    const val jvmTarget = "1.8"
-    val javaCompatibilityVersion = JavaVersion.VERSION_1_8
+    const val jdkVersion = 8
     const val languageVersion = "1.5"
     const val apiVersion = "1.5"
 

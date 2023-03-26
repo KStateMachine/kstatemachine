@@ -10,17 +10,8 @@ application {
     mainClass.set("FullSyntaxSample")
 }
 
-tasks {
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = Versions.jvmTarget
-        }
-    }
-}
-
-java {
-    sourceCompatibility = Versions.javaCompatibilityVersion
-    targetCompatibility = Versions.javaCompatibilityVersion
+kotlin {
+    jvmToolchain(Versions.jdkVersion)
 }
 
 dependencies {

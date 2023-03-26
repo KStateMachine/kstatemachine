@@ -5,21 +5,12 @@ plugins {
 group = rootProject.group
 version = rootProject.version
 
+kotlin {
+    jvmToolchain(Versions.jdkVersion)
+}
+
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks {
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = Versions.jvmTarget
-        }
-    }
-}
-
-java {
-    sourceCompatibility = Versions.javaCompatibilityVersion
-    targetCompatibility = Versions.javaCompatibilityVersion
 }
 
 dependencies {
