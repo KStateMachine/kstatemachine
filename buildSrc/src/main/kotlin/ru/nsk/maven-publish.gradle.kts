@@ -83,8 +83,10 @@ publishing {
                 repositories {
                     maven {
                         credentials {
-                            username = localProperties.getProperty("mavenUsername", "")
-                            password = localProperties.getProperty("mavenPassword", "")
+                            val mavenUsername: String? by project
+                            val mavenPassword: String? by project
+                            username = localProperties.getProperty("mavenUsername", mavenUsername)
+                            password = localProperties.getProperty("mavenPassword", mavenPassword)
                         }
                         url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
                     }
@@ -94,7 +96,8 @@ publishing {
     }
 }
 
-localProperties.getProperty("signing.gnupg.executable")?.let { executable ->
+private val executable = localProperties.getProperty("signing.gnupg.executable")
+if (executable != null) {
     ext.set("signing.gnupg.executable", executable)
 
     localProperties.getProperty("signing.gnupg.keyName")?.let { keyName ->
@@ -108,5 +111,14 @@ localProperties.getProperty("signing.gnupg.executable")?.let { executable ->
                 sign(publishing.publications["mavenPublication"])
             }
         }
+    }
+} else { // try getting from environment (GitHub flow)
+    val signingKeyId: String? by project // must be the last 8 digits of the key
+    val signingKey: String? by project
+    val signingPassword: String? by project
+
+    signing {
+        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        sign(publishing.publications["mavenPublication"])
     }
 }
