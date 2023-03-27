@@ -19,9 +19,9 @@ kotlin {
     }
 
     jvm {}
-    js(IR) {
-        browser()
-        nodejs()
-    }
-    iosArm64()
+//    js(IR) {
+//        browser()
+//        nodejs()
+//    }
+//    iosArm64()
 }
