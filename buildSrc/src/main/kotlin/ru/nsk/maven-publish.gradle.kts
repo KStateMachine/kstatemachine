@@ -117,8 +117,10 @@ if (executable != null) {
     val signingKey: String? by project
     val signingPassword: String? by project
 
-    signing {
-        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-        sign(publishing.publications["mavenPublication"])
+    if (signingKeyId != null && signingKey != null && signingPassword != null) {
+        signing {
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            sign(publishing.publications["mavenPublication"])
+        }
     }
 }
