@@ -9,7 +9,7 @@ object Versions {
     // tools
     const val kotlin = "1.8.10"
     const val kotlinDokka = "1.7.20"
-    const val gradle = "7.1.0"
+    const val jacocoTool = "0.8.8"
 
     // compatibility
     const val jdkVersion = 8

@@ -1,12 +1,14 @@
 package ru.nsk
 
+import Versions
+
 plugins {
     java
     jacoco
 }
 
 jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = Versions.jacocoTool
 }
 
 tasks.test {
