@@ -31,19 +31,20 @@ val localProperties = Properties().apply {
 }
 
 publishing {
-    publications.withType<MavenPublication> {
-        // Publication is created by multiplatform plugin itself
-        // this code references it and configures
-        artifactId = project.name
 
-        if (project.group == Versions.libraryJitPackGroup) {
-            // JitPack passes this in arguments
-            groupId = project.group.toString()
-            version = project.version.toString()
-        } else {
-            groupId = rootProject.group.toString()
-            version = rootProject.version.toString()
-        }
+    val (resolvedGroupId, resolvedVersion) = if (project.group == Versions.libraryJitPackGroup) {
+        // JitPack passes this in arguments
+        project.group.toString() to project.version.toString()
+    } else {
+        rootProject.group.toString() to rootProject.version.toString()
+    }
+
+    // Publication is created by multiplatform plugin itself
+    // this code references it and configures
+    publications.withType<MavenPublication> {
+        artifactId = project.name
+        groupId = resolvedGroupId
+        version = resolvedVersion
 
         pom {
             name.set(project.name)
@@ -79,17 +80,18 @@ publishing {
                 developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
             }
         }
-        if (groupId == Versions.libraryMavenCentralGroup) {
-            repositories {
-                maven {
-                    credentials {
-                        val mavenUsername: String? by project
-                        val mavenPassword: String? by project
-                        username = localProperties.getProperty("mavenUsername", mavenUsername)
-                        password = localProperties.getProperty("mavenPassword", mavenPassword)
-                    }
-                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+    }
+
+    if (resolvedGroupId == Versions.libraryMavenCentralGroup) {
+        repositories {
+            maven {
+                credentials {
+                    val mavenUsername: String? by project
+                    val mavenPassword: String? by project
+                    username = localProperties.getProperty("mavenUsername", mavenUsername)
+                    password = localProperties.getProperty("mavenPassword", mavenPassword)
                 }
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
             }
         }
     }
