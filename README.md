@@ -6,6 +6,7 @@
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
+![multiplatform support](https://img.shields.io/badge/multiplatform-jvm-brightgreen)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and hierarchical state machines ([statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf)).
@@ -17,14 +18,18 @@ The library follows concepts from this two great and well known works:
 * [Statecharts: A visual formalism for complex systems](https://www.wisdom.weizmann.ac.il/~dharel/SCANNED.PAPERS/Statecharts.pdf)
 * [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
 
-Main features are:
+Integration features are:
 
+* Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * Zero dependency. It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK
 * [Built-in support for Kotlin Coroutines.](https://nsk90.github.io/kstatemachine/#kotlin-coroutines)
   But you can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
-* Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
+* Kotlin [Multiplatform](https://nsk90.github.io/kstatemachine/#multiplatform) support
 * [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
   till Kotlin 1.5
+
+State management features:
+
 * Event based - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
   incoming events
 * [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states,

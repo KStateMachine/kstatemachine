@@ -825,6 +825,11 @@ val machine = createStateMachine(scope, start = false) {
 machine.startFrom(state2)
 ```
 
+## Multiplatform
+
+Starting from v0.22.0 KStateMachine is moved to Kotlin Multiplatform. More platforms besides JVM will be added.
+_If you need missing platform support please create new GitHub issue._
+
 ## Consider using Kotlin `sealed` classes
 
 With sealed classes for states and events your state machine structure may look simpler. Try to compare this two samples
