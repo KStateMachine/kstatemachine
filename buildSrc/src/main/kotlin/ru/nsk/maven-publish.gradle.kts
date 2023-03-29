@@ -1,5 +1,6 @@
 package ru.nsk
 
+import Versions
 import java.util.*
 
 plugins {
@@ -30,66 +31,64 @@ val localProperties = Properties().apply {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("mavenPublication") {
-            artifactId = project.name
+    publications.withType<MavenPublication> {
+        // Publication is created by multiplatform plugin itself
+        // this code references it and configures
+        artifactId = project.name
 
-            if (project.group == Versions.libraryJitPackGroup) {
-                // JitPack passes this in arguments
-                groupId = project.group.toString()
-                version = project.version.toString()
-            } else {
-                groupId = rootProject.group.toString()
-                version = rootProject.version.toString()
+        if (project.group == Versions.libraryJitPackGroup) {
+            // JitPack passes this in arguments
+            groupId = project.group.toString()
+            version = project.version.toString()
+        } else {
+            groupId = rootProject.group.toString()
+            version = rootProject.version.toString()
+        }
+
+        pom {
+            name.set(project.name)
+            description.set(
+                "KStateMachine is a Kotlin DSL library for creating state machines and " +
+                        "hierarchical state machines (statecharts)."
+            )
+            url.set("https://github.com/nsk90/kstatemachine")
+            inceptionYear.set("2020")
+
+            issueManagement {
+                system.set("GitHub")
+                url.set("https://github.com/nsk90/kstatemachine/issues")
             }
-
-            from(components["java"])
-
-            pom {
-                name.set(project.name)
-                description.set(
-                    "KStateMachine is a Kotlin DSL library for creating state machines and " +
-                            "hierarchical state machines (statecharts)."
-                )
+            licenses {
+                license {
+                    name.set("Boost Software License 1.0")
+                    url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
+                    distribution.set("repo")
+                }
+            }
+            developers {
+                developer {
+                    id.set("nsk")
+                    name.set("Mikhail Fedotov")
+                    email.set("nosik90@gmail.com")
+                    url.set("https://github.com/nsk90")
+                }
+            }
+            scm {
                 url.set("https://github.com/nsk90/kstatemachine")
-                inceptionYear.set("2020")
-
-                issueManagement {
-                    system.set("GitHub")
-                    url.set("https://github.com/nsk90/kstatemachine/issues")
-                }
-                licenses {
-                    license {
-                        name.set("Boost Software License 1.0")
-                        url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
-                        distribution.set("repo")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("nsk")
-                        name.set("Mikhail Fedotov")
-                        email.set("nosik90@gmail.com")
-                        url.set("https://github.com/nsk90")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/nsk90/kstatemachine")
-                    connection.set("scm:git:git://github.com/nsk90/kstatemachine.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
-                }
+                connection.set("scm:git:git://github.com/nsk90/kstatemachine.git")
+                developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
             }
-            if (groupId == Versions.libraryMavenCentralGroup) {
-                repositories {
-                    maven {
-                        credentials {
-                            val mavenUsername: String? by project
-                            val mavenPassword: String? by project
-                            username = localProperties.getProperty("mavenUsername", mavenUsername)
-                            password = localProperties.getProperty("mavenPassword", mavenPassword)
-                        }
-                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+        }
+        if (groupId == Versions.libraryMavenCentralGroup) {
+            repositories {
+                maven {
+                    credentials {
+                        val mavenUsername: String? by project
+                        val mavenPassword: String? by project
+                        username = localProperties.getProperty("mavenUsername", mavenUsername)
+                        password = localProperties.getProperty("mavenPassword", mavenPassword)
                     }
+                    url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
                 }
             }
         }
@@ -108,7 +107,7 @@ if (executable != null) {
 
             signing {
                 useGpgCmd()
-                sign(publishing.publications["mavenPublication"])
+                sign(publishing.publications)
             }
         }
     }
@@ -117,8 +116,10 @@ if (executable != null) {
     val signingKey: String? by project
     val signingPassword: String? by project
 
-    signing {
-        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-        sign(publishing.publications["mavenPublication"])
+    if (signingKeyId != null && signingKey != null && signingPassword != null) {
+        signing {
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            sign(publishing.publications)
+        }
     }
 }
