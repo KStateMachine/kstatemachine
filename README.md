@@ -137,40 +137,56 @@ fun main() = runBlocking {
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
-The library consists of 2 artifacts:
+The library consists of 2 components:
 
-* `kstatemachine` - state machine implementation (depends only on Kotlin Standard library)
-* `kstatemachine-coroutines` - add-ons for working with coroutines (depends on Kotlin Coroutines library)
+* `kstatemachine` - (mandatory) state machine implementation (depends only on Kotlin Standard library)
+* `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on Kotlin Coroutines library)
 
 ### Maven Central
 
-Add the dependency:
-
-```groovy
-// groovy
-dependencies {
-    implementation 'io.github.nsk90:kstatemachine:<Tag>'
-    implementation 'io.github.nsk90:kstatemachine-coroutines:<Tag>' // optional
-}
-```
+Add dependencies:
 
 ```kotlin
 // kotlin
 dependencies {
-    implementation("io.github.nsk90:kstatemachine:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>") // optional
+    // Multiplatform artifacts
+    implementation("io.github.nsk90:kstatemachine:<Tag>") 
+    implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
+    // or JVM/Android artifacts
+    implementation("io.github.nsk90:kstatemachine-jvm:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-jvm:<Tag>")
+}
+```
+
+```groovy
+// groovy
+dependencies {
+    // multiplatform artifacts
+    implementation 'io.github.nsk90:kstatemachine:<Tag>'
+    implementation 'io.github.nsk90:kstatemachine-coroutines:<Tag>' // optional
+    // etc..
 }
 ```
 
 Where `<Tag>` is a library version.
 
+You can see official docs about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
+
 ### JitPack
 
-Currently, JitPack does not support Kotlin multiplatform artifacts.
-So versions starting from `0.22.0` are not available there, use mavenCentral instead.
+Currently, `JitPack` does not support Kotlin multiplatform artifacts.
+So versions starting from `0.22.0` are not available there, use `Maven Central` instead.
 
 Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
 root `build.gradle` at the end of repositories:
+
+```kotlin
+// kotlin
+repositories {
+    //  ...
+    maven { url = uri("https://jitpack.io") }
+}
+```
 
 ```groovy
 // groovy
@@ -182,25 +198,7 @@ allprojects {
 }
 ```
 
-```kotlin
-// kotlin
-repositories {
-    //  ...
-    maven { url = uri("https://jitpack.io") }
-}
-```
-
-Add the dependency:
-
-```groovy
-// groovy
-dependencies {
-    implementation 'com.github.nsk90:kstatemachine:<Tag>'
-    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
-    // it is some strange JitPack behaviour
-    implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
-}
-```
+Add dependencies:
 
 ```kotlin
 // kotlin
@@ -209,6 +207,16 @@ dependencies {
     // note that group is different in second artifact, long group name also works for first artifact but not vise versa
     // it is some strange JitPack behaviour
     implementation("com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>") // optional
+}
+```
+
+```groovy
+// groovy
+dependencies {
+    implementation 'com.github.nsk90:kstatemachine:<Tag>'
+    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
+    // it is some strange JitPack behaviour
+    implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
 }
 ```
 
