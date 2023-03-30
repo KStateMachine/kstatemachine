@@ -9,12 +9,6 @@ plugins {
     signing
 }
 
-java {
-    // maven central requires these .jar files even if they are empty
-    withSourcesJar()
-    withJavadocJar()
-}
-
 /**
  * Local configuration with credentials is stored in local.properties file that is not under vcs.
  * local.properties file structure sample:
@@ -30,21 +24,25 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.reader())
 }
 
-publishing {
-
-    val (resolvedGroupId, resolvedVersion) = if (project.group == Versions.libraryJitPackGroup) {
-        // JitPack passes this in arguments
-        project.group.toString() to project.version.toString()
-    } else {
-        rootProject.group.toString() to rootProject.version.toString()
+afterEvaluate {
+    tasks.create<Jar>("javadocJar") {
+        archiveClassifier.set("javadoc")
+        from(tasks.named("dokkaHtml"))
     }
+}
+
+publishing {
+    val resolvedGroupId = if (project.group == Versions.libraryJitPackGroup)
+        project.group.toString() // JitPack passes this as arguments
+    else
+        rootProject.group.toString()
 
     // Publication is created by multiplatform plugin itself
     // this code references it and configures
     publications.withType<MavenPublication> {
-        artifactId = project.name
-        groupId = resolvedGroupId
-        version = resolvedVersion
+        afterEvaluate {
+            artifact(tasks.named("javadocJar"))
+        }
 
         pom {
             name.set(project.name)
@@ -97,7 +95,7 @@ publishing {
     }
 }
 
-private val executable = localProperties.getProperty("signing.gnupg.executable")
+val executable = localProperties.getProperty("signing.gnupg.executable")
 if (executable != null) {
     ext.set("signing.gnupg.executable", executable)
 
@@ -114,14 +112,19 @@ if (executable != null) {
         }
     }
 } else { // try getting from environment (GitHub flow)
-    val signingKeyId: String? by project // must be the last 8 digits of the key
     val signingKey: String? by project
     val signingPassword: String? by project
 
-    if (signingKeyId != null && signingKey != null && signingPassword != null) {
+    if (signingKey != null && signingPassword != null) {
         signing {
-            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            useInMemoryPgpKeys(signingKey, signingPassword)
             sign(publishing.publications)
         }
     }
+}
+
+// workaround for gradle warning about task order. should be removed with gradle 8
+val signingTasks = tasks.withType<Sign>()
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    dependsOn(signingTasks)
 }
