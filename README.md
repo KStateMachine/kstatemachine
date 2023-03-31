@@ -22,7 +22,7 @@ Integration features are:
 
 * Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
 * Zero dependency. It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK
-* [Built-in support for Kotlin Coroutines.](https://nsk90.github.io/kstatemachine/#kotlin-coroutines)
+* Kotlin [Coroutines](https://nsk90.github.io/kstatemachine/#kotlin-coroutines) support.
   But you can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
 * Kotlin [Multiplatform](https://nsk90.github.io/kstatemachine/#multiplatform) support
 * [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
