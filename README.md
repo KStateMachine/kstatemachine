@@ -149,7 +149,7 @@ Add dependencies:
 ```kotlin
 // kotlin
 dependencies {
-    // Multiplatform artifacts
+    // multiplatform artifacts
     implementation("io.github.nsk90:kstatemachine:<Tag>") 
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
     // or JVM/Android artifacts

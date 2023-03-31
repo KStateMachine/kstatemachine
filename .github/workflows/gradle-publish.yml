@@ -6,7 +6,7 @@ name: Gradle Publish
 on:
   push:
     tags:
-      - v*.*.*
+      - v*.**.*
 
   workflow_dispatch:
 
