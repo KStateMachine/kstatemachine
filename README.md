@@ -53,7 +53,7 @@ State management features:
 * [Pending events](https://nsk90.github.io/kstatemachine/#pending-events) support
 * [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure
   to [PlantUML](https://plantuml.com/);
-* Built-in [logging](https://nsk90.github.io/kstatemachine/#logging) support
+* Internal [logging](https://nsk90.github.io/kstatemachine/#logging) support
 * [Testable](https://nsk90.github.io/kstatemachine/#testing) - you can run state machine from specified state
 * Well tested. All features are covered by tests
 
@@ -141,6 +141,8 @@ The library consists of 2 components:
 
 * `kstatemachine` - (mandatory) state machine implementation (depends only on Kotlin Standard library)
 * `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on Kotlin Coroutines library)
+
+Please note that starting from `v0.22.0` the library switched to Kotlin Multiplatform and artifact naming has changed.
 
 ### Maven Central
 
