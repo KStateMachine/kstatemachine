@@ -59,7 +59,7 @@ class CoroutinesTest : StringSpec({
     }
 
     "using coroutines with std lib throws" {
-        shouldThrow<UnsupportedOperationException> {
+        shouldThrow<IllegalStateException> {
             createStdLibStateMachine {
                 initialState()
                 onStarted { delay(100) }

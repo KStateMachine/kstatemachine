@@ -19,5 +19,6 @@ kotlin {
     }
 
     jvm {}
-//    iosArm64()
+    ios()
+    iosSimulatorArm64()
 }
