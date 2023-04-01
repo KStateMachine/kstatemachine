@@ -245,7 +245,7 @@ state1 {
 }
 ```
 
-See [guarded transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
+See [guarded transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 
 ![Guarded transition diagram](./diagrams/guarded-transition.png)
 
@@ -337,7 +337,7 @@ state {
 }
 ```
 
-See [undo transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
+See [undo transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
 
 ## Logging
 
@@ -426,7 +426,7 @@ Notifications about finishing are available in two forms:
 
    If `FinalState` that triggered `FinishedEvent` is also a `DataState` then its `data` field will be copied
    into `FinishedEvent`.
-   See [transition on FinishedEvent sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/FinishedEventSample.kt)
+   See [transition on FinishedEvent sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventSample.kt)
 
 ## Nested states
 
@@ -805,7 +805,7 @@ println(machine.exportToPlantUml())
 
 Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
 
-See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
+See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 
 ## Testing
 
@@ -835,9 +835,9 @@ _If you need missing platform support please create new GitHub issue._
 With sealed classes for states and events your state machine structure may look simpler. Try to compare this two samples
 they both are doing the same thing but using of sealed classes makes code self explaining:
 
-[Minimal sealed classes sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
+[Minimal sealed classes sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 vs
-[Minimal syntax sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/main/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
+[Minimal syntax sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
 Also sealed classes eliminate need of using `lateinit` states variables or reordering of states in state machine setup
 block to have a valid state references for transitions.
