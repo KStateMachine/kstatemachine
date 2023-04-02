@@ -827,8 +827,10 @@ machine.startFrom(state2)
 
 ## Multiplatform
 
-Starting from v0.22.0 KStateMachine is moved to Kotlin Multiplatform. More platforms besides JVM will be added.
-_If you need missing platform support please create new GitHub issue._
+Starting from v0.22.0 KStateMachine has moved to Kotlin Multiplatform only with `JVM` platform support.
+In v0.22.1 `iOS` support has been added also.
+
+_If you need missing platform support please create a GitHub issue._
 
 ## Consider using Kotlin `sealed` classes
 
