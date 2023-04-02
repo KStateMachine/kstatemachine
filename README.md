@@ -151,12 +151,21 @@ Add dependencies:
 ```kotlin
 // kotlin
 dependencies {
-    // multiplatform artifacts
+    // multiplatform artifacts (starting from 0.22.0)
     implementation("io.github.nsk90:kstatemachine:<Tag>") 
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
-    // or JVM/Android artifacts
+    // or JVM/Android artifacts (starting from 0.22.0)
     implementation("io.github.nsk90:kstatemachine-jvm:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-jvm:<Tag>")
+    // or iOS artifacts (starting from 0.22.1)
+    implementation("io.github.nsk90:kstatemachine-iosarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-iosarm64:<Tag>")
+
+    implementation("io.github.nsk90:kstatemachine-iosx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-iosx64:<Tag>")
+  
+    implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
 }
 ```
 
