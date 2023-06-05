@@ -153,7 +153,7 @@ fun StateMachine.restartBlocking(argument: Any? = null) = coroutineAbstraction.r
  */
 suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
     check(isUndoEnabled) {
-        "Undo functionality is not enabled, use createStateMachine(isUndoEnabled = true) argument to enable it."
+        "Undo functionality is not enabled, use createStateMachine(enableUndo = true) argument to enable it."
     }
     return@withContext processEvent(UndoEvent, argument)
 }
