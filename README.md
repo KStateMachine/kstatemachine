@@ -10,6 +10,8 @@
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
 ![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)
 
+[Documentation](https://nsk90.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
 
@@ -59,7 +61,9 @@ State management features:
 > The library is in a development phase. You are welcome to propose useful features, or contribute to the project.
 > Don't forget to push the ⭐ if you like this project.
 
-## Quick start sample (finishing traffic light)
+## Quick start sample
+
+### Finishing traffic light
 
 ```mermaid
 stateDiagram-v2
@@ -244,7 +248,9 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 To run tests from IDE download official [Kotest plugin](https://github.com/kotest/kotest-intellij-plugin).
 
-## Licensed under permissive [Boost Software License](./LICENSE)
+## License
+
+Licensed under permissive [Boost Software License](./LICENSE)
 
 ## Thanks to supporters
 
