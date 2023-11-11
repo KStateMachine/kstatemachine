@@ -856,9 +856,10 @@ Contains additional functions to work with KStateMachine depending on Kotlin Cor
 
 ## Export
 
-{% include note.html content="Currently transitions that use lambdas like `transitionConditionally()` and
-`transitionOn()` are not exported. User defined lambdas that are passed to calculate next state could not be correctly
-called during export process as they may touch application data that is not valid when export is running." %}
+> [!NOTE]
+> Currently transitions that use lambdas like `transitionConditionally()` and`transitionOn()` are not exported.
+> User defined lambdas that are passed to calculate next state could not be correctly
+> called during export process as they may touch application data that is not valid when export is running.
 
 ### PlantUML
 
