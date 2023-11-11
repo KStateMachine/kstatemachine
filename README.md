@@ -1,71 +1,75 @@
 ![KStateMachine](./docs/kstatemachine-logo.png)
 
+# KStateMachine
+
 ![Build and test with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
+[![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine)
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
-[![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
-![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20ios-brightgreen)
+![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
-and hierarchical state machines ([statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf)).
+and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
 
 ## Overview
 
-The library follows concepts from this two great and well known works:
-
-* [Statecharts: A visual formalism for complex systems](https://www.wisdom.weizmann.ac.il/~dharel/SCANNED.PAPERS/Statecharts.pdf)
-* [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
-
 Integration features are:
 
-* Kotlin DSL syntax for defining state machine structure. Using without DSL is also possible
-* Zero dependency. It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK
-* Kotlin [Coroutines](https://nsk90.github.io/kstatemachine/#kotlin-coroutines) support.
-  But you can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
-* Kotlin [Multiplatform](https://nsk90.github.io/kstatemachine/#multiplatform) support
-* [Backward compatible](https://github.com/nsk90/kstatemachine/blob/master/buildSrc/src/main/kotlin/ru/nsk/Versions.kt)
-  till Kotlin 1.5
+* **Kotlin [DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax.**
+  Declarative and clear state machine structure. Using without DSL is also possible.
+* **Kotlin [Coroutines](https://nsk90.github.io/kstatemachine/#kotlin-coroutines) support.**
+  Call suspendable functions within the library.
+  You can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
+* **Kotlin [Multiplatform](https://nsk90.github.io/kstatemachine/#multiplatform) support.**
+* **Zero dependency.** It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
 
 State management features:
 
-* Event based - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
+* **Event based** - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
   incoming events
-* [Listeners](https://nsk90.github.io/kstatemachine/#listen-states) for machine, states,
-  [state groups](https://nsk90.github.io/kstatemachine/#listen-group-of-states) and transitions. Listener callbacks are
-  shipped with information about
-  current transition
-* [Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
-  and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions) with dynamic target
+* **[Reactive](https://nsk90.github.io/kstatemachine/#listen-states)** - listen for machine, states,
+  [state groups](https://nsk90.github.io/kstatemachine/#listen-group-of-states) and transitions
+* **[Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
+  and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions)** - dynamic target
   state which is calculated in a moment of event processing depending on application business logic
-* [Nested states](https://nsk90.github.io/kstatemachine/#nested-states) - hierarchical state machines (HSMs)
+* **[Nested states](https://nsk90.github.io/kstatemachine/#nested-states)** - build hierarchical state machines (
+  statecharts)
   with [cross-level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
-* [Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines) Use
+* **[Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
   state machines as atomic child states
-* [Pseudo states](https://nsk90.github.io/kstatemachine/#pseudo-states) for additional logic in machine behaviour
-* [Typesafe transitions](https://nsk90.github.io/kstatemachine/#typesafe-transitions) to pass data in typesafe way
+* **[Pseudo states](https://nsk90.github.io/kstatemachine/#pseudo-states)** for additional logic in machine behaviour
+* **[Typesafe transitions](https://nsk90.github.io/kstatemachine/#typesafe-transitions)** - pass data in typesafe way
   from event to state
-* [Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states) to avoid a combinatorial explosion of
+* **[Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial explosion of
   states
-* [Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions) for navigating back to previous state
-* [Argument](https://nsk90.github.io/kstatemachine/#arguments) passing for events and transitions
-* [Pending events](https://nsk90.github.io/kstatemachine/#pending-events) support
-* [Export state machine](https://nsk90.github.io/kstatemachine/#export) structure
-  to [PlantUML](https://plantuml.com/);
-* Internal [logging](https://nsk90.github.io/kstatemachine/#logging) support
-* [Testable](https://nsk90.github.io/kstatemachine/#testing) - you can run state machine from specified state
-* Well tested. All features are covered by tests
+* **[Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
+* **[Optional argument](https://nsk90.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
+* **[Export](https://nsk90.github.io/kstatemachine/#export)** state machine structure
+  to [PlantUML](https://plantuml.com/)
+* **[Logging](https://nsk90.github.io/kstatemachine/#logging)** - useful for debugging
+* **[Testable](https://nsk90.github.io/kstatemachine/#testing)** - run state machine from specified state
+* **Well tested** - all features are covered by tests
 
-_The library is still in a development phase. You are welcome to propose useful features._
+_The library is in a development phase. You are welcome to propose useful features, or contribute to the project._
 
 _Don't forget to push the ⭐ if you like this project._
 
-## SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
+> [!IMPORTANT]
+> SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
 
 ## Quick start sample (finishing traffic light)
 
-![Traffic light diagram](./docs/diagrams/finishing-traffic-light.svg)
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> GreenState
+    GreenState --> YellowState : SwitchEvent
+    YellowState --> RedState : SwitchEvent
+    RedState --> [*]
+
+```
 
 ```kotlin
 
@@ -152,7 +156,7 @@ Add dependencies:
 // kotlin
 dependencies {
     // multiplatform artifacts (starting from 0.22.0)
-    implementation("io.github.nsk90:kstatemachine:<Tag>") 
+    implementation("io.github.nsk90:kstatemachine:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
     // or JVM/Android artifacts (starting from 0.22.0)
     implementation("io.github.nsk90:kstatemachine-jvm:<Tag>")
@@ -163,7 +167,7 @@ dependencies {
 
     implementation("io.github.nsk90:kstatemachine-iosx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iosx64:<Tag>")
-  
+
     implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
 }
@@ -181,9 +185,10 @@ dependencies {
 
 Where `<Tag>` is a library version.
 
-You can see official docs about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
+You can see official docs
+about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
 
-### JitPack
+### JitPack (deprecated)
 
 Currently, `JitPack` does not support Kotlin multiplatform artifacts.
 So versions starting from `0.22.0` are not available there, use `Maven Central` instead.

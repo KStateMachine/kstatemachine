@@ -1,5 +1,13 @@
 # KStateMachine documentation
 
+* Table of contents
+  {:toc}
+
+The library follows concepts from this two great and well known works:
+
+* [Statecharts: A visual formalism for complex systems](https://www.wisdom.weizmann.ac.il/~dharel/SCANNED.PAPERS/Statecharts.pdf)
+* [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
+
 ## Workflow
 
 Building blocks (main interfaces) of the library:
@@ -120,8 +128,9 @@ the first triggering.
 state().onEntry(once = true) { /* ... */ }
 ```
 
-_Note: it is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
-modifications._
+> [!NOTE]
+> It is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
+> modifications.
 
 ### Listen group of states
 
@@ -194,7 +203,8 @@ greenState {
 }
 ```
 
-_Note: Such transitions are also called internal._
+> [!NOTE]
+> Such transitions are also called internal.
 
 ### Transition type
 
@@ -594,9 +604,10 @@ to `defaultData` if provided or throws.
 4. Activation by non data event. This should not be necessary, but it might be done manually, same way as in case 3.
    Using custom `DataExtractor` you can pass any data from any event type to `DataState`.
 
-## Arguments
+## Optional arguments
 
-_Note: Type of arguments is `Any?`, so it is not type safe ot use them._
+> [!NOTE]
+> Type of arguments is `Any?`, so it is not type safe ot use them.
 
 ### Event argument
 
@@ -631,8 +642,9 @@ state("first") {
 }
 ```
 
-_Note: it is up to user to control that argument field is set from one listener. You can use some mutable data structure
-and fill it from multiple listeners._
+> [!NOTE]
+> It is up to user to control that argument field is set from one listener. You can use some mutable data structure
+> and fill it from multiple listeners.
 
 ## Error handling
 
@@ -671,8 +683,9 @@ createStateMachine(scope) {
 }
 ```
 
-_Note: `PendingEventHandler` that does nothing will not let you process pending events (they will be dropped) as it
-leads to undefined machine state and mixed notifications._
+> [!NOTE]
+> `PendingEventHandler` that does nothing will not let you process pending events (they will be dropped) as it
+> leads to undefined machine state and mixed notifications.
 
 ### Exceptions from listeners
 
@@ -707,17 +720,17 @@ Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` fu
 may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
 recursively (from library callbacks).
 
-When you create a state machine with `createStateMachine`/`createStateMachineBlocking` functions you have to provide 
-`CoroutineScope` on which machine will work, this scope also contains `CoroutineContext` by design. 
+When you create a state machine with `createStateMachine`/`createStateMachineBlocking` functions you have to provide
+`CoroutineScope` on which machine will work, this scope also contains `CoroutineContext` by design.
 This is how you can control a thread where state machine works.
 
-Suspendable functions and their `Blocking` analogs internally switch current execution coroutine context 
+Suspendable functions and their `Blocking` analogs internally switch current execution coroutine context
 (from which they are called) to state machines one using `kotlinx.coroutines.withContext` or
 `kotlinx.coroutines.runBlocking` arguments respectively.
-Note that if you created machine with a scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not 
+Note that if you created machine with a scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not
 be performed.
 
-Multithreading is always complicated and hard to explain, so you can also check this sample 
+Multithreading is always complicated and hard to explain, so you can also check this sample
 regarding working with state machine from coroutines running from multiple threads:
 
 ```kotlin
@@ -749,7 +762,8 @@ runBlocking { // defines non empty coroutine context for state machine
 
         withContext(machineScope.coroutineContext) {
             // OK again as we switched context explicitly before accessing property
-            if (machine.isRunning) { /* do something */ }
+            if (machine.isRunning) { /* do something */
+            }
             check(Thread.currentThread() == machineThread)
         }
     }
@@ -789,9 +803,10 @@ Contains additional functions to work with KStateMachine depending on Kotlin Cor
 
 ## Export
 
-_Note: Currently transitions that use lambdas like `transitionConditionally()` and `transitionOn()` are not exported.
-User defined lambdas that are passed to calculate next state could not be correctly called during export process as they
-may touch application data that is not valid when export is running._
+> [!NOTE]
+> Currently transitions that use lambdas like `transitionConditionally()` and `transitionOn()` are not exported.
+> User defined lambdas that are passed to calculate next state could not be correctly called during export process as they
+> may touch application data that is not valid when export is running.
 
 ### PlantUML
 
@@ -810,7 +825,7 @@ See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachin
 ## Testing
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
-are several `Testing.startFrom()`/`Testing.startFromBlocking()` overloaded functions which allow starting the machine 
+are several `Testing.startFrom()`/`Testing.startFromBlocking()` overloaded functions which allow starting the machine
 from a specified state:
 
 ```kotlin
