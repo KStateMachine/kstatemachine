@@ -52,12 +52,12 @@ State management features:
 * **[Testable](https://nsk90.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered by tests
 
-_The library is in a development phase. You are welcome to propose useful features, or contribute to the project._
-
-_Don't forget to push the ⭐ if you like this project._
-
 > [!IMPORTANT]
 > SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
+
+> [!NOTE]
+> The library is in a development phase. You are welcome to propose useful features, or contribute to the project.
+> Don't forget to push the ⭐ if you like this project.
 
 ## Quick start sample (finishing traffic light)
 

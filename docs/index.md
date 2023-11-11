@@ -1,7 +1,60 @@
 # KStateMachine documentation
 
-* Table of contents
-  {:toc}
+## Table of contents
+
+* [Table of contents](#table-of-contents)
+* [Overview](#overview)
+* [Workflow](#workflow)
+* [Create state machine](#create-state-machine)
+* [Setup states](#setup-states)
+    * [Default states](#default-states)
+    * [State subclasses](#state-subclasses)
+    * [Listen states](#listen-states)
+    * [Listen group of states](#listen-group-of-states)
+* [Setup transitions](#setup-transitions)
+    * [Target-less transitions](#target-less-transitions)
+    * [Transition type](#transition-type)
+    * [Listen to all transitions in one place](#listen-to-all-transitions-in-one-place)
+    * [Guarded transitions](#guarded-transitions)
+    * [Conditional transitions](#conditional-transitions)
+    * [Transition event type matching](#transition-event-type-matching)
+* [Undo transitions](#undo-transitions)
+* [Logging](#logging)
+* [Finishing states and state machine](#finishing-states-and-state-machine)
+* [Nested states](#nested-states)
+    * [Inherit transitions by grouping states](#inherit-transitions-by-grouping-states)
+    * [Cross-level transitions](#cross-level-transitions)
+* [Composed (nested) state machines](#composed-nested-state-machines)
+* [Parallel states](#parallel-states)
+* [Pseudo states](#pseudo-states)
+    * [Choice state](#choice-state)
+    * [History state](#history-state)
+* [Typesafe transitions](#typesafe-transitions)
+    * [Corner cases of DataState activation](#corner-cases-of-datastate-activation)
+* [Optional arguments](#optional-arguments)
+    * [Event argument](#event-argument)
+    * [Transition argument](#transition-argument)
+* [Error handling](#error-handling)
+    * [Ignored events](#ignored-events)
+    * [Pending events](#pending-events)
+    * [Exceptions from listeners](#exceptions-from-listeners)
+    * [Other exceptions](#other-exceptions)
+* [Multithreading and concurrency](#multithreading-and-concurrency)
+* [Kotlin Coroutines](#kotlin-coroutines)
+    * [Additional kstatemachine-coroutines artifact](#additional-kstatemachine-coroutines-artifact)
+    * [Migration guide from versions older than v0.20.0](#migration-guide-from-versions-older-than-v0200)
+* [Export](#export)
+    * [PlantUML](#plantuml)
+* [Testing](#testing)
+* [Multiplatform](#multiplatform)
+* [Consider using Kotlin sealed classes](#consider-using-kotlin-sealed-classes)
+    * [Object states](#object-states)
+* [Do not](#do-not)
+* [Known issues](#known-issues)
+
+## Overview
+
+KStateMachine is a Kotlin DSL library for creating state machines and statecharts.
 
 The library follows concepts from this two great and well known works:
 
@@ -803,10 +856,9 @@ Contains additional functions to work with KStateMachine depending on Kotlin Cor
 
 ## Export
 
-> [!NOTE]
-> Currently transitions that use lambdas like `transitionConditionally()` and `transitionOn()` are not exported.
-> User defined lambdas that are passed to calculate next state could not be correctly called during export process as they
-> may touch application data that is not valid when export is running.
+{% include note.html content="Currently transitions that use lambdas like `transitionConditionally()` and
+`transitionOn()` are not exported. User defined lambdas that are passed to calculate next state could not be correctly
+called during export process as they may touch application data that is not valid when export is running." %}
 
 ### PlantUML
 
