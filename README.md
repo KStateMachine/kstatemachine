@@ -8,6 +8,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine)
 [![](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
+[![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin)
 ![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)
 
 [Documentation](https://nsk90.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
@@ -52,7 +53,8 @@ State management features:
   to [PlantUML](https://plantuml.com/)
 * **[Logging](https://nsk90.github.io/kstatemachine/#logging)** - useful for debugging
 * **[Testable](https://nsk90.github.io/kstatemachine/#testing)** - run state machine from specified state
-* **Well tested** - all features are covered by tests
+* **Well tested** - all features are covered
+  by [tests](https://github.com/nsk90/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
 
 > [!IMPORTANT]
 > SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
