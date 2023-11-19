@@ -94,7 +94,29 @@ class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: ISta
  * Type safe argument transition builder
  */
 class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
-    GuardedTransitionBuilder<E, DataState<D>>(name, sourceState)
+    BaseGuardedTransitionBuilder<E>(name, sourceState) {
+    /** User should initialize this filed */
+    lateinit var targetState: DataState<D>
+
+    override fun build(): Transition<E> {
+        require(this::targetState.isInitialized) { "targetState should be set in this transition builder" }
+        val direction: TransitionDirectionProducer<E> = {
+            when (it) {
+                is DefaultPolicy<E> ->
+                    if (it.eventAndArgument.guard())
+                        it.targetState(targetState)
+                    else
+                        noTransition()
+
+                is CollectTargetStatesPolicy<E> -> it.targetState(targetState)
+            }
+        }
+
+        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction)
+        listeners.forEach { transition.addListener(it) }
+        return transition
+    }
+}
 
 /**
  * Type safe argument transitionOn builder

@@ -79,7 +79,7 @@ interface State : IState
 /**
  * State which holds data while it is active
  */
-interface DataState<D : Any> : IState {
+interface DataState<D : Any> : IState, DataTransitionStateApi<D> {
     val defaultData: D?
 
     /**

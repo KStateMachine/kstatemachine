@@ -257,7 +257,7 @@ greenState {
 ```
 
 > [!NOTE]
-> Such transitions are also called internal.
+> Such transitions are also called internal or self-targeted.
 
 ### Transition type
 
@@ -641,8 +641,13 @@ createStateMachine(scope) {
 
 `DataState`'s `data` field is set and might be accessed only while the state is active. At the moment when `DataState`
 is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
-after state exit, it falls back
-to `defaultData` if provided or throws.
+after state exit, it falls back to `defaultData` if provided or throws.
+
+### Target-less data transitions 
+
+You can define target-less transitions for `DataState`. Please, note that if you want such transition to change state's
+`data` field, it should be `EXTERNAL` type. If target-less transition is `LOCAL` it does not change states data.
+This is related to the way how `DataState` is implemented, `data` field is changed only on state entry moment.
 
 ### Corner cases of `DataState` activation
 

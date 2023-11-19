@@ -201,7 +201,7 @@ class TypesafeTransitionTest : StringSpec({
             state2.data shouldBe id
         }
 
-        "target-less data transition negative" {
+        "target-less data transition inside nonDataState negative" {
             shouldThrow<IllegalArgumentException> {
                 createTestStateMachine(coroutineStarterType) {
                     initialState("state1") {
@@ -211,7 +211,34 @@ class TypesafeTransitionTest : StringSpec({
             }
         }
 
-        "target-less transition in data state" {
+        "create self targeted data transition in DataState" {
+            createTestStateMachine(coroutineStarterType) {
+                initialDataState<Int>("state1", 42) {
+                    dataTransition<IdEvent, Int>(targetState = this)
+                }
+            }
+        }
+
+        "create self targeted data transition in DataState via builder" {
+            createTestStateMachine(coroutineStarterType) {
+                initialDataState<Int>("state1", 42) {
+                    dataTransition<IdEvent, Int> {
+                        targetState = this@initialDataState
+                    }
+                }
+            }
+        }
+
+        "create target-less data transition in DataState" {
+            createTestStateMachine(coroutineStarterType) {
+                initialDataState<Int>("state1", 42) {
+                    // this method is only available for DataState
+                    dataTransition<IdEvent, Int>()
+                }
+            }
+        }
+
+        "simple target-less transition in data state" {
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -232,19 +259,33 @@ class TypesafeTransitionTest : StringSpec({
             verify { callbacks.onTransitionTriggered(SwitchEvent) }
         }
 
-        "self targeted transition in data state" {
-            shouldThrow<IllegalArgumentException> {
-                createTestStateMachine(coroutineStarterType) {
-                    initialState("state1")
-
-                    dataState("state2") {
-                        dataTransition<IdEvent, Int>(targetState = this)
-                    }
+        "self targeted LOCAL transition in data state, does not update data value" {
+            lateinit var dataState: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType) {
+                dataState = initialDataState("state1", defaultData = 1) {
+                    dataTransition<IdEvent, Int>(targetState = this)
                 }
             }
+
+            dataState.data shouldBe 1
+            machine.processEvent(IdEvent(2))
+            dataState.data shouldBe 1
         }
 
-        "self targeted transitionOn() does not update data, cannot throw on construction" {
+        "self targeted EXTERNAL transition in data state updates data value" {
+            lateinit var dataState: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType) {
+                dataState = initialDataState("state1", defaultData = 1) {
+                    dataTransition<IdEvent, Int>(targetState = this, type = TransitionType.EXTERNAL)
+                }
+            }
+
+            dataState.data shouldBe 1
+            machine.processEvent(IdEvent(2))
+            dataState.data shouldBe 2
+        }
+
+        "self targeted LOCAL transitionOn() does not update data" {
             lateinit var dataState: DataState<Int>
 
             val machine = createTestStateMachine(coroutineStarterType) {

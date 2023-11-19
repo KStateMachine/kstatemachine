@@ -49,7 +49,7 @@ interface Transition<E : Event> : VisitorAcceptor {
 }
 
 /**
- * Most of the cases external and local transition are functionally equivalent except in cases where transition
+ * Most of the cases [EXTERNAL] and [LOCAL] transition are functionally equivalent except in cases where transition
  * is happening between super and sub states. Local transition doesn't cause exit and entry to source state if
  * target state is a sub-state of a source state.
  * Other way around, local transition doesn't cause exit and entry to target state if target is a superstate of a source state.

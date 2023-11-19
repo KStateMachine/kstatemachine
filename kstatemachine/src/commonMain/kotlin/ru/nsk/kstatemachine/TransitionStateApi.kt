@@ -18,6 +18,11 @@ interface TransitionStateApi {
 }
 
 /**
+ * Same as [TransitionStateApi] interface, for specialized [DataState] api.
+ */
+interface DataTransitionStateApi<D : Any> : TransitionStateApi
+
+/**
  * Find transition by name. This might be used to start listening to transition after state machine setup.
  */
 fun TransitionStateApi.findTransition(name: String) = transitions.find { it.name == name }
@@ -101,17 +106,25 @@ inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
 
 /**
  * Shortcut function for type safe argument transition.
- * Data transition can not be target-less as it does not make sense.
+ * Data transition can be target-less (self-targeted), it is useful to update [DataState] data
+ * Note that transition must be [TransitionType.EXTERNAL] to update data.
  */
 inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
     targetState: DataState<D>,
     type: TransitionType = LOCAL,
 ): Transition<E> {
-    require(targetState != asState()) {
-        "data transition should no be self targeted, use simple transition instead"
-    }
     return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
+}
+
+/**
+ * Shortcut function for type safe target-less (self targeted) transition.
+ */
+inline fun <reified E : DataEvent<D>, D : Any> DataTransitionStateApi<D>.dataTransition(
+    name: String? = null,
+    type: TransitionType = LOCAL,
+): Transition<E> {
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), null))
 }
 
 /**
@@ -124,12 +137,6 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     val builder = DataGuardedTransitionBuilder<E, D>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
-    }
-    requireNotNull(builder.targetState) {
-        "data transition should no be target-less, specify targetState or use simple transition instead"
-    }
-    require(builder.targetState != asState()) {
-        "data transition should no be self targeted, use simple transition instead"
     }
     return addTransition(builder.build())
 }
