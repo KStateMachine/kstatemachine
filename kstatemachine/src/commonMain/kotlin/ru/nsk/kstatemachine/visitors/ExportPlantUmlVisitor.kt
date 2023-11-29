@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetState
  *
  * Conditional transitions currently are not supported.
  */
-internal class ExportPlantUmlVisitor : CoVisitor {
+internal class ExportPlantUmlVisitor(val showEventLabels: Boolean = false) : CoVisitor {
     private val builder = StringBuilder()
     private var indent = 0
     private val crossLevelTransitions = mutableListOf<String>()
@@ -69,7 +69,8 @@ internal class ExportPlantUmlVisitor : CoVisitor {
             targetState.graphName()
         }
 
-        val transitionString = "$sourceState --> $graphName${label(transition.name)}"
+        val eventLabel = if(showEventLabels) transition.eventMatcher.eventClass.simpleName else null
+        val transitionString = "$sourceState --> $graphName${label(transition.name, eventLabel)}"
 
         if (transition.sourceState.isNeighbor(targetState))
             line(transitionString)
@@ -114,17 +115,19 @@ internal class ExportPlantUmlVisitor : CoVisitor {
             return if (this !is StateMachine) name else "${name}_StateMachine"
         }
 
-        fun label(name: String?) = if (name != null) " : $name" else ""
+        fun label(name: String?, eventName: String? = null) =
+            if (name == null && eventName == null) "" else
+                " :${name?.let { " $it" } ?: ""}${eventName?.let { " $it" } ?: ""}"
     }
 }
 
-suspend fun StateMachine.exportToPlantUml() = with(ExportPlantUmlVisitor()) {
+suspend fun StateMachine.exportToPlantUml(showEventLabels: Boolean = false) = with(ExportPlantUmlVisitor(showEventLabels)) {
     accept(this)
     export()
 }
 
-fun StateMachine.exportToPlantUmlBlocking() = coroutineAbstraction.runBlocking {
-    with(ExportPlantUmlVisitor()) {
+fun StateMachine.exportToPlantUmlBlocking(showEventLabels: Boolean = false) = coroutineAbstraction.runBlocking {
+    with(ExportPlantUmlVisitor(showEventLabels)) {
         accept(this)
         export()
     }
