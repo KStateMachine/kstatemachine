@@ -873,7 +873,7 @@ to [PlantUML state diagram](https://plantuml.com/en/state-diagram).
 
 ```kotlin
 val machine = createStateMachine(scope) { /* ... */ }
-println(machine.exportToPlantUml())
+println(machine.exportToPlantUml(showEventLabels = false))
 ```
 
 Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
