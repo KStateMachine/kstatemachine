@@ -1,6 +1,10 @@
 package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.data.forAll
+import io.kotest.data.headers
+import io.kotest.data.row
+import io.kotest.data.table
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.HistoryType.DEEP
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
@@ -23,6 +27,28 @@ State1 --> State2 : to State2
 State1 --> State1
 State2 --> State3
 State2 --> State1 : back
+State3 --> [*]
+@enduml
+"""
+
+private const val PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT = """@startuml
+hide empty description
+state State1
+state State3
+state State2 {
+    state Final_subState
+    state Initial_subState
+    
+    [*] --> Initial_subState
+    Initial_subState --> Final_subState : SwitchEvent
+    Final_subState --> [*]
+}
+
+[*] --> State1
+State1 --> State2 : to State2, SwitchEvent
+State1 --> State1 : SwitchEvent
+State2 --> State3 : SwitchEvent
+State2 --> State1 : back, SwitchEvent
 State3 --> [*]
 @enduml
 """
@@ -89,29 +115,35 @@ state inner_machine_StateMachine
 
 class ExportToPlantUmlTest : StringSpec({
     CoroutineStarterType.values().forEach { coroutineStarterType ->
-        "export nested states" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
-                val state1 = initialState("State1")
-                val state3 = finalState("State3")
+        table(
+            headers("showEventLabels", "result"),
+            row(false, PLANTUML_NESTED_STATES_RESULT),
+            row(true, PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT),
+        ).forAll { showEventLabels, result ->
+            "export nested states" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
+                    val state1 = initialState("State1")
+                    val state3 = finalState("State3")
 
-                val state2 = state("State2") {
-                    transition<SwitchEvent> { targetState = state3 }
-                    transition<SwitchEvent>("back") { targetState = state1 }
+                    val state2 = state("State2") {
+                        transition<SwitchEvent> { targetState = state3 }
+                        transition<SwitchEvent>("back") { targetState = state1 }
 
-                    val finalSubState = finalState("Final subState")
-                    initialState("Initial subState") {
-                        transition<SwitchEvent> { targetState = finalSubState }
+                        val finalSubState = finalState("Final subState")
+                        initialState("Initial subState") {
+                            transition<SwitchEvent> { targetState = finalSubState }
+                        }
+                    }
+
+                    state1 {
+                        transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
+                        transition<SwitchEvent> { targetState = this@state1 }
+                        transition<SwitchEvent>()
                     }
                 }
 
-                state1 {
-                    transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
-                    transition<SwitchEvent> { targetState = this@state1 }
-                    transition<SwitchEvent>()
-                }
+                machine.exportToPlantUml(showEventLabels) shouldBe result
             }
-
-            machine.exportToPlantUml() shouldBe PLANTUML_NESTED_STATES_RESULT
         }
 
         "export parallel states" {

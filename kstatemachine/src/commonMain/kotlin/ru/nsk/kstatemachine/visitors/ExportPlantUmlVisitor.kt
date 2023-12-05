@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetState
  *
  * Conditional transitions currently are not supported.
  */
-internal class ExportPlantUmlVisitor(val showEventLabels: Boolean = false) : CoVisitor {
+internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoVisitor {
     private val builder = StringBuilder()
     private var indent = 0
     private val crossLevelTransitions = mutableListOf<String>()
@@ -69,8 +69,7 @@ internal class ExportPlantUmlVisitor(val showEventLabels: Boolean = false) : CoV
             targetState.graphName()
         }
 
-        val eventLabel = if(showEventLabels) transition.eventMatcher.eventClass.simpleName else null
-        val transitionString = "$sourceState --> $graphName${label(transition.name, eventLabel)}"
+        val transitionString = "$sourceState --> $graphName${transitionLabel(transition)}"
 
         if (transition.sourceState.isNeighbor(targetState))
             line(transitionString)
@@ -103,6 +102,12 @@ internal class ExportPlantUmlVisitor(val showEventLabels: Boolean = false) : CoV
 
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
 
+    private fun transitionLabel(transition: Transition<*>): String {
+        val eventName = if (showEventLabels) transition.eventMatcher.eventClass.simpleName else null
+        val entries = listOfNotNull(transition.name, eventName)
+        return label(entries.joinToString())
+    }
+
     private companion object {
         const val STAR = "[*]"
         const val SINGLE_INDENT = "    "
@@ -115,16 +120,15 @@ internal class ExportPlantUmlVisitor(val showEventLabels: Boolean = false) : CoV
             return if (this !is StateMachine) name else "${name}_StateMachine"
         }
 
-        fun label(name: String?, eventName: String? = null) =
-            if (name == null && eventName == null) "" else
-                " :${name?.let { " $it" } ?: ""}${eventName?.let { " $it" } ?: ""}"
+        fun label(text: String?) = if (!text.isNullOrBlank()) " : $text" else ""
     }
 }
 
-suspend fun StateMachine.exportToPlantUml(showEventLabels: Boolean = false) = with(ExportPlantUmlVisitor(showEventLabels)) {
-    accept(this)
-    export()
-}
+suspend fun StateMachine.exportToPlantUml(showEventLabels: Boolean = false) =
+    with(ExportPlantUmlVisitor(showEventLabels)) {
+        accept(this)
+        export()
+    }
 
 fun StateMachine.exportToPlantUmlBlocking(showEventLabels: Boolean = false) = coroutineAbstraction.runBlocking {
     with(ExportPlantUmlVisitor(showEventLabels)) {
