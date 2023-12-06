@@ -103,8 +103,10 @@ internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoV
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
 
     private fun transitionLabel(transition: Transition<*>): String {
-        val eventName = if (showEventLabels) transition.eventMatcher.eventClass.simpleName else null
-        val entries = listOfNotNull(transition.name, eventName)
+        val entries = listOfNotNull(
+            transition.name,
+            transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
+        )
         return label(entries.joinToString())
     }
 

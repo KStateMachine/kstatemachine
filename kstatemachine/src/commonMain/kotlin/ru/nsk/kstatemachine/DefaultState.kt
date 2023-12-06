@@ -10,14 +10,26 @@ open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) 
 
 open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState
 
-/**
- * Currently it does not allow to target [DataState]
- */
-open class DefaultChoiceState(name: String? = null, private val choiceAction: suspend EventAndArgument<*>.() -> State) :
-    BasePseudoState(name), RedirectPseudoState {
+open class DefaultChoiceState(
+    name: String? = null,
+    private val choiceAction: suspend EventAndArgument<*>.() -> State
+) : BasePseudoState(name), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
         eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
+}
+
+open class DefaultChoiceDataState<D : Any>(
+    name: String? = null,
+    private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
+) : DataState<D>, BasePseudoState(name), RedirectPseudoState {
+
+    override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
+        eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
+
+    override val defaultData: D? = null
+    override val data: D get() = error("PseudoState $this can not have data")
+    override val lastData: D get() = error("PseudoState $this can not have lastData")
 }
 
 open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {

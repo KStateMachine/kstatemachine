@@ -68,5 +68,40 @@ class ChoiceStateTest : StringSpec({
                 }
             }
         }
+
+        "redirecting choice data state" {
+            val callbacks = mockkCallbacks()
+
+            class IntEvent(override val data: Int) : DataEvent<Int>
+
+            lateinit var intState1: DataState<Int>
+            lateinit var intState2: DataState<Int>
+
+            val machine = createTestStateMachine(coroutineStarterType) {
+                logger = StateMachine.Logger { println(it()) }
+
+                addInitialState(State1)
+
+                val choice = choiceDataState("data choice") {
+                    log { "$event $argument" }
+                    val intEvent = event as? IntEvent // cast is necessary as we don't know event type here
+                    if (intEvent?.data == 42) intState1 else intState2
+                }
+
+                dataTransition<IntEvent, Int> { targetState = choice }
+
+                intState1 = dataState<Int>("intState1") { callbacks.listen(this) }
+                intState2 = dataState<Int>("intState2") { callbacks.listen(this) }
+                onTransitionTriggered { log { it.toString() } }
+            }
+
+            machine.processEvent(IntEvent(42), true)
+            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(intState1) }
+            machine.processEvent(IntEvent(66), false)
+            verifySequenceAndClear(callbacks) {
+                callbacks.onStateExit(intState1)
+                callbacks.onStateEntry(intState2)
+            }
+        }
     }
 })

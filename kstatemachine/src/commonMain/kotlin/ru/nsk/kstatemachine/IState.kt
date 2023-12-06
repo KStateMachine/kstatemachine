@@ -260,6 +260,11 @@ inline fun <reified D : Any> IState.finalDataState(
 fun IState.choiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))
 
+fun <D : Any> IState.choiceDataState(
+    name: String? = null,
+    choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
+) = addState(DefaultChoiceDataState(name, choiceAction))
+
 fun IState.historyState(
     name: String? = null,
     defaultState: IState? = null,
