@@ -595,6 +595,9 @@ choiceState {
 }
 ```
 
+There is also `choiceDataState()` function available for choosing between `DataState`s. You can define `dataTransition` 
+to target such pseudo data state.
+
 ### History state
 
 There are two types of history states, shallow and deep. Shallow history state is used to represent the most recently
