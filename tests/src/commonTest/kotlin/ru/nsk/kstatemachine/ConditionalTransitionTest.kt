@@ -52,7 +52,10 @@ class ConditionalTransitionTest : StringSpec({
                 onTransitionTriggered { callbacks.onTransitionTriggered(it.event) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+            verifySequenceAndClear(callbacks) {
+                callbacks.onTransitionTriggered(ofType<StartEvent>())
+                callbacks.onStateEntry(first)
+            }
 
             machine.processEventBlocking(SwitchEvent)
             verify { callbacks wasNot called }

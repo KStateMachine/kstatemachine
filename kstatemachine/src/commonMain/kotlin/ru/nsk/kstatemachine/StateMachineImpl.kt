@@ -32,6 +32,9 @@ internal class StateMachineImpl(
     override val isDestroyed get() = _isDestroyed
 
     init {
+        transitionConditionally<StartEvent>("start transition") {
+            direction = { targetState(event.startState) }
+        }
         if (isUndoEnabled) {
             val undoState = addState(UndoState())
             transition<WrappedEvent>("undo transition", undoState)
@@ -63,24 +66,24 @@ internal class StateMachineImpl(
         _machineListeners.remove(listener)
     }
 
-    override suspend fun start(argument: Any?) = startFrom(this, argument)
+    override suspend fun start(argument: Any?): Unit = startFrom(this, argument)
 
-    override suspend fun startFrom(state: IState, argument: Any?) =
-        doStartFrom(StartEventImpl(), state, argument)
+    override suspend fun startFrom(state: IState, argument: Any?): Unit =
+        doStartFrom(StartEventImpl(state), argument)
 
-    override suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?) =
-        doStartFrom(StartDataEventImpl(data), state, argument)
+    override suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?): Unit =
+        doStartFrom(StartDataEventImpl(state, data), argument)
 
-    private suspend fun doStartFrom(event: StartEvent, state: IState, argument: Any?) =
+    private suspend fun doStartFrom(event: StartEvent, argument: Any?): Unit =
         coroutineAbstraction.withContext {
             checkBeforeRunMachine()
-
+            // fixme loosing this params (but similary (not same target) will be recreated on transition)
+            val eventAndArgument = EventAndArgument(event, argument)
             eventProcessingScope {
                 runCheckingExceptions {
-                    val transitionParams = makeStartTransitionParams(event, this, state, argument)
+                    val transitionParams = makeStartTransitionParams(event, this, event.startState, argument)
                     runMachine(transitionParams)
-                    switchToTargetState(state as InternalState, this, transitionParams)
-                    recursiveAfterTransitionComplete(transitionParams)
+                    doProcessEvent(eventAndArgument)
                 }
             }
         }
@@ -257,9 +260,9 @@ internal class StateMachineImpl(
     /**
      * Starts machine if it is inner state of another one machine
      */
-    override suspend fun doEnter(transitionParams: TransitionParams<*>) =
+    override suspend fun doEnter(transitionParams: TransitionParams<*>) {
         if (!isRunning) startBlocking() else super.doEnter(transitionParams)
-
+    }
 
     override suspend fun cleanup() {
         _machineListeners.clear()

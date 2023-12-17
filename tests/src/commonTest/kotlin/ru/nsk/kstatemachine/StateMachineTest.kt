@@ -8,6 +8,7 @@ import io.kotest.data.headers
 import io.kotest.data.row
 import io.kotest.data.table
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.verify
@@ -113,16 +114,20 @@ class StateMachineTest : StringSpec({
             }
 
             machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+            verifySequence {
+                callbacks.onTransitionTriggered(ofType<StartEvent>())
+                callbacks.onTransitionTriggered(SwitchEvent)
+            }
         }
 
         "onTransitionComplete() notification" {
             val callbacks = mockkCallbacks()
 
+            lateinit var state1: State
             lateinit var state2: State
             lateinit var state22: State
             val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
+                state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
 
@@ -131,8 +136,13 @@ class StateMachineTest : StringSpec({
                 }
 
                 onTransitionComplete { transitionParams, activeStates ->
-                    callbacks.onTransitionTriggered(transitionParams.event)
-                    activeStates.shouldContainExactlyInAnyOrder(state2, state22)
+                    when (transitionParams.event) {
+                        is StartEvent -> activeStates.shouldContainExactlyInAnyOrder(state1)
+                        SwitchEvent -> {
+                            callbacks.onTransitionTriggered(transitionParams.event)
+                            activeStates.shouldContainExactlyInAnyOrder(state2, state22)
+                        }
+                    }
                 }
             }
 

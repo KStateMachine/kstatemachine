@@ -1,7 +1,7 @@
 package ru.nsk.kstatemachine
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.ChoiceStateTestData.State2
@@ -56,17 +56,45 @@ class ChoiceStateTest : StringSpec({
             verifySequence { callbacks.onStateEntry(State2) }
         }
 
-        "initial choice state currently not supported" {
+        "initial choice state" {
             val callbacks = mockkCallbacks()
 
-            shouldThrow<IllegalStateException> {
-                createTestStateMachine(coroutineStarterType) {
-                    val choice = choiceState("choice") { State2 }
-                    setInitialState(choice)
+            createTestStateMachine(coroutineStarterType) {
+                initialChoiceState("choice") { State2 }
+                addState(State2) { callbacks.listen(this) }
+            }
+            verifySequence { callbacks.onStateEntry(State2) }
+        }
 
-                    addState(State2) { callbacks.listen(this) }
+        "initial choice state on entry parent" {
+            lateinit var state1: State
+            lateinit var state2: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                state1 = initialState("state1") {
+                    initialChoiceState("choice") { state2 }
+                }
+
+                state2 = state("state2") {
+                    transition<SwitchEvent>(targetState = state1)
                 }
             }
+            machine.processEvent(SwitchEvent)
+            machine.activeStates().shouldContainExactly(state2)
+        }
+
+        "initial choice state in a parallel state" {
+            lateinit var state2: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("state1", childMode = ChildMode.PARALLEL) {
+                    state("state11") {}
+                    state("state12") {
+                        initialChoiceState("choice") { state2 }
+                    }
+                }
+
+                state2 = state("state2")
+            }
+            machine.activeStates().shouldContainExactly(state2)
         }
 
         "redirecting choice data state" {

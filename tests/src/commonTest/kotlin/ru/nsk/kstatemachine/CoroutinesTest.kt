@@ -2,15 +2,11 @@ package ru.nsk.kstatemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.take
 import ru.nsk.kstatemachine.StateMachineNotification.*
 import kotlin.coroutines.EmptyCoroutineContext
@@ -188,7 +184,7 @@ class CoroutinesTest : StringSpec({
             state2 = state("state2")
         }
 
-        val eventsCount = 9
+        val eventsCount = 11
         val notificationFlow = machine.stateMachineNotificationFlow(replay = eventsCount)
 
         machine.start()
@@ -212,7 +208,9 @@ class CoroutinesTest : StringSpec({
         verifySequence {
             callbacks.onStarted(machine)
             callbacks.onStateEntry(machine)
+            callbacks.onTransitionTriggered(ofType<StartEvent>())
             callbacks.onStateEntry(state1)
+            callbacks.onTransitionComplete(ofType<StartEvent>())
             callbacks.onTransitionTriggered(SwitchEvent)
             callbacks.onStateExit(state1)
             callbacks.onStateEntry(state2)
@@ -232,7 +230,7 @@ class CoroutinesTest : StringSpec({
             state2 = state("state2")
         }
 
-        val eventsCount = 9
+        val eventsCount = 11
         val callbacks = mockkCallbacks()
 
         val job = launch(start = CoroutineStart.UNDISPATCHED) {
@@ -261,7 +259,9 @@ class CoroutinesTest : StringSpec({
         verifySequence {
             callbacks.onStarted(machine)
             callbacks.onStateEntry(machine)
+            callbacks.onTransitionTriggered(ofType<StartEvent>())
             callbacks.onStateEntry(state1)
+            callbacks.onTransitionComplete(ofType<StartEvent>())
             callbacks.onTransitionTriggered(SwitchEvent)
             callbacks.onStateExit(state1)
             callbacks.onStateEntry(state2)

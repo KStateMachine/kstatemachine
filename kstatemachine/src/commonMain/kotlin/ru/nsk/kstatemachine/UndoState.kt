@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 private data class StateAndEvent(val state: IState, val eventAndArgument: EventAndArgument<*>)
 
-internal class UndoState : BasePseudoState("undo") {
+internal class UndoState : BasePseudoState("undoState") {
     private val stack = mutableListOf<StateAndEvent>()
 
     override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
@@ -25,13 +25,13 @@ internal class UndoState : BasePseudoState("undo") {
             WrappedEvent(UndoEvent, null)
     }
 
-    fun popState() = if (stack.size >= 2) {
+    fun popState(): IState? = if (stack.size >= 2) {
         stack.removeLast()
         stack.last().state
     } else {
         null
     }
 
-    override suspend fun onStopped() = stack.clear()
-    override suspend fun onCleanup() = stack.clear()
+    override suspend fun onStopped(): Unit = stack.clear()
+    override suspend fun onCleanup(): Unit = stack.clear()
 }
