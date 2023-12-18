@@ -1,6 +1,8 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.verifySequence
 
 class CrossLevelTransitionTest : StringSpec({
@@ -306,6 +308,40 @@ class CrossLevelTransitionTest : StringSpec({
                 callbacks.onTransitionTriggered(SwitchEvent)
                 callbacks.onStateExit(state12)
                 callbacks.onStateEntry(state11)
+            }
+        }
+
+        "transition to parallel state" {
+            lateinit var state2: State
+            lateinit var state21: State
+            lateinit var state22: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("state1") {
+                    transitionOn<SwitchEvent> { targetState = { state22 } }
+                }
+
+                state2 = state("state2", childMode = ChildMode.PARALLEL) {
+                    state21 = state("state21")
+                    state22 = state("state22")
+                }
+            }
+            machine.processEvent(SwitchEvent)
+
+            machine.activeStates().shouldContainExactly(state2, state21, state22)
+        }
+
+        "transition to nested state machine" {
+            lateinit var state21: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("state1") {
+                    transitionOn<SwitchEvent> { targetState = { state21 } }
+                }
+                createTestStateMachine(coroutineStarterType) {
+                    state21 = initialState("state21")
+                }
+            }
+            shouldThrow<IllegalStateException> {
+                machine.processEvent(SwitchEvent)
             }
         }
     }

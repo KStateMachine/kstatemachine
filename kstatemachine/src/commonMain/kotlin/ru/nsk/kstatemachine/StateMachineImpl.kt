@@ -149,13 +149,11 @@ internal class StateMachineImpl(
                     doStop()
                     true
                 }
-
                 is DestroyEvent -> {
                     if (event.stop) doStop()
                     doDestroy()
                     true
                 }
-
                 else -> doProcessEvent(wrappedEventAndArgument)
             }
         }

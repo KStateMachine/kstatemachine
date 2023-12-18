@@ -29,7 +29,6 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
                         it.targetStateOrStay(targetState)
                     else
                         noTransition()
-
                 is CollectTargetStatesPolicy<E> -> it.targetStateOrStay(targetState)
             }
         }
@@ -52,7 +51,6 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
                         it.targetState(it.eventAndArgument.targetState())
                     else
                         noTransition()
-
                 is CollectTargetStatesPolicy<E> -> noTransition()
             }
         }
@@ -107,7 +105,6 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
                         it.targetState(targetState)
                     else
                         noTransition()
-
                 is CollectTargetStatesPolicy<E> -> it.targetState(targetState)
             }
         }

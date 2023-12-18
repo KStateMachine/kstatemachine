@@ -171,7 +171,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
                     initialState.recursiveEnterInitialStates(transitionParams)
             }
-
             PARALLEL -> data.states.forEach {
                 handleStateEntry(it, transitionParams)
                 if (it !is StateMachine) // inner state machine manages its internal state by its own
@@ -180,15 +179,30 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         }
     }
 
-    override suspend fun recursiveEnterStatePath(path: MutableList<InternalState>, transitionParams: TransitionParams<*>) {
+    override suspend fun recursiveEnterStatePath(
+        path: MutableList<InternalState>,
+        transitionParams: TransitionParams<*>
+    ) {
         if (path.isEmpty()) {
             recursiveEnterInitialStates(transitionParams)
         } else {
             val state = path.removeLast()
-            setCurrentState(state, transitionParams)
-
-            if (state !is StateMachine) // inner state machine manages its internal state by its own
-                state.recursiveEnterStatePath(path, transitionParams)
+            when (childMode) {
+                EXCLUSIVE -> {
+                    setCurrentState(state, transitionParams)
+                    if (state !is StateMachine) // inner state machine manages its internal state by its own
+                        state.recursiveEnterStatePath(path, transitionParams)
+                }
+                PARALLEL -> data.states.forEach {
+                    handleStateEntry(it, transitionParams)
+                    if (it !is StateMachine) { // inner state machine manages its internal state by its own
+                        if (it === state)
+                            it.recursiveEnterStatePath(path, transitionParams)
+                        else
+                            recursiveEnterInitialStates(transitionParams)
+                    }
+                }
+            }
         }
     }
 
