@@ -3,6 +3,10 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.data.forAll
+import io.kotest.data.headers
+import io.kotest.data.row
+import io.kotest.data.table
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -339,6 +343,25 @@ class StateMachineTest : StringSpec({
                 callbacks.onStarted(machine)
                 callbacks.onStopped(machine)
                 callbacks.onDestroyed(machine)
+            }
+        }
+
+        table(
+            headers("stop"),
+            row(false),
+            row(true),
+        ).forAll { stop ->
+            "destroy stopped machine" {
+                val callbacks = mockkCallbacks()
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("initial")
+                    onStopped { callbacks.onStopped(this) }
+                }
+                machine.stop()
+                machine.destroy(stop)
+
+                machine.isDestroyed shouldBe true
+                verifySequence { callbacks.onStopped(machine) }
             }
         }
     }

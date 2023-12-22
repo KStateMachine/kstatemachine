@@ -113,7 +113,7 @@ internal class StateMachineImpl(
     override suspend fun processEvent(event: Event, argument: Any?): ProcessingResult {
         return coroutineAbstraction.withContext {
             checkNotDestroyed()
-            check(isRunning) { "$this is not started, call start() first" }
+            check(isRunning || event is DestroyEvent) { "$this is not started, call start() first" }
 
             val eventAndArgument = EventAndArgument(event, argument)
 
@@ -150,7 +150,7 @@ internal class StateMachineImpl(
                     true
                 }
                 is DestroyEvent -> {
-                    if (event.stop) doStop()
+                    if (event.stop && isRunning) doStop()
                     doDestroy()
                     true
                 }

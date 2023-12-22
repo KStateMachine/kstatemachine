@@ -28,6 +28,11 @@ class ObjectStatesTest : StringSpec({
             useInMachine(coroutineStarterType, true).destroyBlocking()
         }
 
+        "multiple usage of object states allowed first machine stopped" {
+            useInMachine(coroutineStarterType, true).stop()
+            useInMachine(coroutineStarterType, true).destroyBlocking()
+        }
+
         "multiple usage of object states throws if current machine forbids auto destroy" {
             useInMachine(coroutineStarterType, true)
             val machine = useInMachine(coroutineStarterType, false)
