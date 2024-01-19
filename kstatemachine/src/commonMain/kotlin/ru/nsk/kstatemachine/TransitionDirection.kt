@@ -29,14 +29,27 @@ internal open class TargetState(override val targetState: IState) : TransitionDi
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
-suspend fun EventAndArgument<*>.targetState(targetState: IState) = recursiveResolveTargetState(targetState)
+suspend fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection = resolveTargetState(targetState)
 
-private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): TransitionDirection {
-    return when (targetState) {
+private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState): TransitionDirection {
+    val resolvedState = recursiveResolveTargetState(targetState)
+    return if (resolvedState != null) TargetState(resolvedState) else NoTransition
+}
+
+private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
+    val resolvedTarget =  when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
-        is HistoryState -> TargetState(targetState.storedState)
-        is UndoState -> targetState.popState()?.let { TargetState(it) } ?: NoTransition
-        else -> TargetState(targetState)
+        is HistoryState -> targetState.storedState
+        is UndoState -> targetState.popState()
+        else -> targetState
+    }
+    // when target state calculated we need to check if its entry will trigger another redirection
+    // by initial child choiceState (for instance)
+    return if (resolvedTarget != null) {
+        val initialPseudoState = resolvedTarget.findInitialPseudoState()
+        if (initialPseudoState == null) resolvedTarget else recursiveResolveTargetState(initialPseudoState)
+    } else {
+        null // means no transition
     }
 }
 
@@ -69,4 +82,36 @@ sealed class TransitionDirectionProducerPolicy<E : Event> {
 
     abstract suspend fun targetState(targetState: IState): TransitionDirection
     abstract suspend fun targetStateOrStay(targetState: IState?): TransitionDirection
+}
+
+/**
+ * Finds [PseudoState] if it is on initial path (would be activated if simply enter initial state path)
+ */
+private fun IState.findInitialPseudoState(): PseudoState? {
+    if (this is PseudoState) return this
+    if (states.isEmpty()) return null
+    when (childMode) {
+        ChildMode.EXCLUSIVE -> {
+            val initialState = checkNotNull(initialState) {
+                "Initial state is not set, call setInitialState() first"
+            }
+            return if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
+                initialState.findInitialPseudoState()
+            else
+                null
+        }
+
+        ChildMode.PARALLEL -> {
+            val initialStates = states.mapNotNull {
+                if (it !is StateMachine) // inner state machine manages its internal state by its own
+                    it.findInitialPseudoState()
+                else
+                    null
+            }
+            return if (initialStates.isEmpty())
+                null
+            else
+                initialStates.first() // fixme take first or other else??
+        }
+    }
 }

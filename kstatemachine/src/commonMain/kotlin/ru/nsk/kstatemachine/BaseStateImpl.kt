@@ -3,7 +3,6 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 import ru.nsk.kstatemachine.ChildMode.PARALLEL
 import ru.nsk.kstatemachine.TransitionType.EXTERNAL
-import ru.nsk.kstatemachine.TreeAlgorithms.findPathFromTargetToLca
 
 /**
  * Base [IState] implementation for all states
@@ -44,7 +43,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
     override val isActive get() = data.isActive
     override val isFinished get() = data.isFinished
-
 
     override val internalParent get() = data.internalParent
 
@@ -234,7 +232,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         require(childMode == EXCLUSIVE) { "Cannot set current state in child mode $childMode" }
         require(states.contains(state)) { "$state is not a child of $this" }
 
-        if (data.currentState == state && transitionParams.transition.type != EXTERNAL) return
+        if (data.currentState === state && transitionParams.transition.type != EXTERNAL) return
         data.currentState?.recursiveExit(transitionParams)
         data.currentState = state
 

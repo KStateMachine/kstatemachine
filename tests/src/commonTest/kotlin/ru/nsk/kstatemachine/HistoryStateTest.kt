@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.verify
@@ -217,6 +218,8 @@ class HistoryStateTest : StringSpec({
         }
 
         "deep history, switching inside neighbour state" {
+            lateinit var state1: State
+            lateinit var state11: State
             lateinit var state2: State
             lateinit var state112: State
             lateinit var history: State
@@ -224,8 +227,8 @@ class HistoryStateTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 logger = StateMachine.Logger { println(it()) }
 
-                initialState("state1") {
-                    initialState("state11") {
+                state1 = initialState("state1") {
+                    state11 = initialState("state11") {
                         initialState("state111") {
                             transitionOn<SwitchEvent> { targetState = { state112 } }
                         }
@@ -245,7 +248,7 @@ class HistoryStateTest : StringSpec({
             machine.processEventBlocking(SwitchEvent) // exit history scope
             machine.processEventBlocking(SwitchEvent) // go back through history
 
-            machine.activeStates().shouldContain(state112)
+            machine.activeStates().shouldContainExactly(state1, state11, state112)
         }
     }
 })

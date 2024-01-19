@@ -35,7 +35,7 @@ open class DefaultDataState<D : Any>(
             }
         }
 
-        if (this == transitionParams.direction.targetState) {
+        if (this === transitionParams.direction.targetState) {
             when (val event = transitionParams.event) {
                 is DataEvent<*> -> assignData(event)
                 is WrappedEvent -> assignData(event.event)

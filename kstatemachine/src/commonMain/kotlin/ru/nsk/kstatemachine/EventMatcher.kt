@@ -25,5 +25,5 @@ inline fun <reified E : Event> TransitionBuilder<E>.isEqual() = object : EventMa
 }
 
 fun finishedEventMatcher(state: IState) = object : EventMatcher<FinishedEvent>(FinishedEvent::class) {
-    override suspend fun match(value: Event) = if (value is FinishedEvent) value.state == state else false
+    override suspend fun match(value: Event) = if (value is FinishedEvent) value.state === state else false
 }

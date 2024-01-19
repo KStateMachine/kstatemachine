@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.confirmVerified
 import io.mockk.verify
 import io.mockk.verifySequence
 import org.junit.jupiter.api.fail
@@ -34,7 +35,7 @@ class TransitionTest : StringSpec({
                     }
 
                     onExit {
-                        if (it.direction.targetState == state2)
+                        if (it.direction.targetState === state2)
                             callbacks.onStateExit(this)
                         else
                             fail("incorrect direction ${it.direction}")
@@ -176,6 +177,30 @@ class TransitionTest : StringSpec({
             }
 
             machine.processEventBlocking(SwitchEvent)
+        }
+
+        "self-targeted transition does not trigger reentering states" {
+            val callbacks = mockkCallbacks()
+            lateinit var state1: State
+            lateinit var state11: State
+
+            val machine = createTestStateMachine(coroutineStarterType) {
+                state1 = initialState("state1") {
+                    transition<SwitchEvent> { targetState = this@initialState }
+                    callbacks.listen(this)
+                    state11 = initialState("state11") {
+                        callbacks.listen(this)
+                    }
+                }
+            }
+
+            verifySequenceAndClear(callbacks) {
+                callbacks.onStateEntry(state1)
+                callbacks.onStateEntry(state11)
+            }
+            machine.processEvent(SwitchEvent)
+
+            confirmVerified(callbacks)
         }
     }
 })
