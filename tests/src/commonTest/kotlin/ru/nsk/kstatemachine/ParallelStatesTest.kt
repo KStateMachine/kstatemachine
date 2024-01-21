@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -165,6 +166,37 @@ class ParallelStatesTest : StringSpec({
 
             machine.processEventBlocking(SecondEvent)
             verify { callbacks.onTransitionTriggered(SecondEvent) }
+        }
+
+        "transition targets multiple parallel states children" {
+            lateinit var state2: State
+            lateinit var state21: State
+            lateinit var state212: State
+            lateinit var state22: State
+            lateinit var state222: State
+
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("state1") {
+                    transitionConditionally<SwitchEvent> {
+                        direction = {
+                            targetParallelStates(state212, state222)
+                        }
+                    }
+                }
+                state2 = state("state2", childMode = ChildMode.PARALLEL) {
+                    state21 = state("state21") {
+                        initialState("state211")
+                        state212 = state("state212")
+                    }
+                    state22 = state("state22") {
+                        initialState("state221")
+                        state222 = state("state222")
+                    }
+                }
+            }
+
+            machine.processEvent(SwitchEvent)
+            machine.activeStates().shouldContainExactly(state2, state21, state212, state22, state222)
         }
     }
 })

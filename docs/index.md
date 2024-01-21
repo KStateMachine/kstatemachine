@@ -577,7 +577,8 @@ createStateMachine(scope, childMode = ChildMode.PARALLEL) {
 ```
 
 Currently, there is no way to process multiple transitions for one event by using parallel states, only one transition
-may be triggered for each event.
+may be triggered for each event. Such behaviour might be easily emulated using separated events for each
+parallel branch (region).
 
 ## Pseudo states
 

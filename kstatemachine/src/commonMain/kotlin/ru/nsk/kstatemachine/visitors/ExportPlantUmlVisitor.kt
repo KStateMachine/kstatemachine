@@ -56,8 +56,10 @@ internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoV
 
         val sourceState = transition.sourceState.graphName()
 
-        val targetState = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetState
-                as? InternalState ?: return
+        @Suppress("UNCHECKED_CAST")
+        val targetStates = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetStates
+                as Set<InternalState>
+        val targetState = targetStates.firstOrNull() ?: return // fixme iterate over all
 
         val graphName = if (targetState is HistoryState) {
             val prefix = targetState.requireInternalParent().graphName()

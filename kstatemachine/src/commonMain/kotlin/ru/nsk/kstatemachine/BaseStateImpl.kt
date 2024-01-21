@@ -178,13 +178,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     }
 
     override suspend fun recursiveEnterStatePath(
-        path: MutableList<InternalState>,
+        path: ListIterator<InternalState>,
         transitionParams: TransitionParams<*>
     ) {
-        if (path.isEmpty()) {
+        if (!path.hasPrevious()) {
             recursiveEnterInitialStates(transitionParams)
         } else {
-            val state = path.removeLast()
+            val state = path.previous()
             when (childMode) {
                 EXCLUSIVE -> {
                     setCurrentState(state, transitionParams)
@@ -196,6 +196,36 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                     if (it !is StateMachine) { // inner state machine manages its internal state by its own
                         if (it === state)
                             it.recursiveEnterStatePath(path, transitionParams)
+                        else
+                            recursiveEnterInitialStates(transitionParams)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun recursiveEnterStatePath(
+        pathHead: PathNode,
+        transitionParams: TransitionParams<*>
+    ) {
+        if (pathHead.children.isEmpty()) {
+            recursiveEnterInitialStates(transitionParams)
+        } else {
+            when (childMode) {
+                EXCLUSIVE -> {
+                    val exclusivePath = pathHead.children.single()
+                    val state = exclusivePath.state
+                    setCurrentState(state, transitionParams)
+                    if (state !is StateMachine) // inner state machine manages its internal state by its own
+                        state.recursiveEnterStatePath(exclusivePath, transitionParams)
+                }
+                PARALLEL -> data.states.forEach { childState ->
+                    val paths = pathHead.children
+                    handleStateEntry(childState, transitionParams)
+                    if (childState !is StateMachine) { // inner state machine manages its internal state by its own
+                        val regionPath = paths.find { it.state === childState }
+                        if (regionPath != null)
+                            childState.recursiveEnterStatePath(regionPath, transitionParams)
                         else
                             recursiveEnterInitialStates(transitionParams)
                     }
@@ -277,15 +307,34 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             FinishedEvent(this)
     }
 
-    internal suspend fun switchToTargetState(
-        targetState: InternalState,
+    internal suspend fun switchToTargetStates(
+        targetStates: Set<InternalState>,
         fromState: InternalState,
         transitionParams: TransitionParams<*>
     ) {
-        val path = fromState.findPathFromTargetToLca(targetState)
-        if (transitionParams.transition.type == EXTERNAL)
-            path.last().internalParent?.let { path.add(it) }
-        val lca = path.removeLast()
-        lca.recursiveEnterStatePath(path, transitionParams)
+        when {
+            targetStates.isEmpty() -> return
+            targetStates.size == 1 -> {
+                val path = fromState.findPathFromTargetToLca(
+                    targetStates.single(),
+                    transitionParams.transition.type == EXTERNAL
+                )
+                val iterator = path.listIterator(path.size)
+                iterator.previous().recursiveEnterStatePath(iterator, transitionParams)
+            }
+            else -> {
+                val pathHead = fromState.findTreePathFromTargetsToLca(
+                    targetStates,
+                    transitionParams.transition.type == EXTERNAL
+                )
+                pathHead.state.recursiveEnterStatePath(pathHead, transitionParams)
+            }
+        }
     }
 }
+
+data class PathNode(
+    val parent: PathNode?,
+    val children: Set<PathNode>,
+    val state: InternalState,
+)

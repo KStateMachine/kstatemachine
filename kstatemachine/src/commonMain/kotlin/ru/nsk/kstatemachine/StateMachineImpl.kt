@@ -232,21 +232,23 @@ internal class StateMachineImpl(
 
         val transitionParams = TransitionParams(transition, direction, event, argument)
 
-        val targetState = (direction.targetState as? InternalState)?.also {
-            check(it === this || it.isSubStateOf(this)) {
-                "Transitioning to state $it from another state machine is not possible"
+        @Suppress("UNCHECKED_CAST")
+        val targetStates = (direction.targetStates as Set<InternalState>).also { targetStates ->
+            val alienState = targetStates.find { it !== this && !it.isSubStateOf(this) }
+            check(alienState == null) {
+                "Transitioning to targetState $alienState from another state machine is not possible"
             }
         }
 
         log {
-            val targetText = if (targetState != null) "to $targetState" else "[target-less]"
-            "${event::class.simpleName} triggers $transition from ${transition.sourceState} $targetText"
+            val targetsText = if (targetStates.isNotEmpty()) "to [${targetStates.joinToString()}]" else "[target-less]"
+            "${event::class.simpleName} triggers $transition from ${transition.sourceState} $targetsText"
         }
 
         transition.transitionNotify { onTriggered(transitionParams) }
         machineNotify { onTransitionTriggered(transitionParams) }
 
-        targetState?.let { switchToTargetState(it, transition.sourceState, transitionParams) }
+        switchToTargetStates(targetStates, transition.sourceState, transitionParams)
 
         recursiveAfterTransitionComplete(transitionParams)
 

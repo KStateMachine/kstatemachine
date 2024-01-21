@@ -15,7 +15,11 @@ abstract class InternalState : IState {
 
     internal abstract suspend fun doEnter(transitionParams: TransitionParams<*>)
     internal abstract suspend fun doExit(transitionParams: TransitionParams<*>)
-    internal abstract suspend fun afterChildFinished(finishedChild: InternalState, transitionParams: TransitionParams<*>)
+    internal abstract suspend fun afterChildFinished(
+        finishedChild: InternalState,
+        transitionParams: TransitionParams<*>
+    )
+
     internal open fun onParentCurrentStateChanged(currentState: InternalState) = Unit
 
     internal abstract suspend fun <E : Event> recursiveFindUniqueResolvedTransition(
@@ -24,7 +28,12 @@ abstract class InternalState : IState {
 
     internal abstract suspend fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>)
     internal abstract suspend fun recursiveEnterStatePath(
-        path: MutableList<InternalState>,
+        path: ListIterator<InternalState>,
+        transitionParams: TransitionParams<*>
+    )
+
+    internal abstract suspend fun recursiveEnterStatePath(
+        pathHead: PathNode,
         transitionParams: TransitionParams<*>
     )
 
@@ -41,9 +50,8 @@ abstract class InternalState : IState {
 internal fun InternalState.requireInternalParent() = requireNotNull(internalParent) { "$this parent is not set" }
 
 internal suspend fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
-    val triggeringTransitions = transitions.filter { it.isMatchingEvent(event) }
     @Suppress("UNCHECKED_CAST")
-    return triggeringTransitions as List<InternalTransition<E>>
+    return transitions.filter { it.isMatchingEvent(event) } as List<InternalTransition<E>>
 }
 
 internal suspend fun <E : Event> InternalState.findUniqueResolvedTransition(eventAndArgument: EventAndArgument<E>): ResolvedTransition<E>? {

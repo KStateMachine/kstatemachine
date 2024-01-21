@@ -1,43 +1,82 @@
 package ru.nsk.kstatemachine
 
-sealed class TransitionDirection {
+sealed interface TransitionDirection {
     /**
      * Already resolved target state of conditional transition or [PseudoState] computation
+     * This is always the first element of [targetStates] list or null, if the list is empty.
      */
-    open val targetState: IState? = null
+    val targetState: IState? get() = targetStates.firstOrNull()
+
+    /**
+     * Transition can target multiple states if they all are located at different regions of a parallel state.
+     */
+    val targetStates: Set<IState>
 }
 
 /**
  * [Transition] is triggered, but state is not changed
  */
-internal object Stay : TransitionDirection()
+internal object Stay : TransitionDirection {
+    override val targetStates = emptySet<IState>()
+}
 
 fun stay(): TransitionDirection = Stay
 
 /**
  * [Transition] should not be triggered
  */
-internal object NoTransition : TransitionDirection()
+internal object NoTransition : TransitionDirection {
+    override val targetStates = emptySet<IState>()
+}
 
 fun noTransition(): TransitionDirection = NoTransition
 
 /**
- * [Transition] is triggered with a [targetState].
+ * [Transition] is triggered with [targetStates] (usually with single [targetState])
  */
-internal open class TargetState(override val targetState: IState) : TransitionDirection()
+internal class TargetState(override val targetStates: Set<IState>) : TransitionDirection {
+    init {
+        require(targetStates.isNotEmpty())
+    }
+
+    override val targetState: IState
+        get() = requireNotNull(super.targetState) { "Never get here, targetState is always present" }
+}
 
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
 suspend fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection = resolveTargetState(targetState)
 
+suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>): TransitionDirection {
+    require(targetStates.size >= 2) {
+        "There should be at least two targetStates, current amount ${targetStates.size}," +
+                " check that you are not using the same state multiple times"
+    }
+    @Suppress("UNCHECKED_CAST")
+    val lca = findLca(targetStates as Set<InternalState>)
+    check(lca.childMode == ChildMode.PARALLEL) {
+        "Lowest common ancestor $lca for specified states has not ${ChildMode.PARALLEL} child mode. " +
+                "Only children of a state with ${ChildMode.PARALLEL} child mode may be specified as targets here."
+    }
+    val resolvedStates = mutableSetOf<IState>()
+    targetStates.mapNotNullTo(resolvedStates) { recursiveResolveTargetState(it) }
+    return if (resolvedStates.isNotEmpty()) TargetState(resolvedStates) else NoTransition
+}
+
+suspend fun EventAndArgument<*>.targetParallelStates(
+    targetState1: IState,
+    targetState2: IState,
+    vararg targetStates: IState
+) = targetParallelStates(setOf(targetState1, targetState2, *targetStates))
+
 private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState): TransitionDirection {
     val resolvedState = recursiveResolveTargetState(targetState)
-    return if (resolvedState != null) TargetState(resolvedState) else NoTransition
+    return if (resolvedState != null) TargetState(setOf(resolvedState)) else NoTransition
 }
 
 private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
-    val resolvedTarget =  when (targetState) {
+    val resolvedTarget = when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
         is HistoryState -> targetState.storedState
         is UndoState -> targetState.popState()
@@ -56,7 +95,7 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
 /**
  * Internal use only. TODO remove it when possible
  */
-internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(targetState)
+internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(setOf(targetState))
 
 /**
  * Transition that matches event and has a meaningful direction (except [NoTransition])
