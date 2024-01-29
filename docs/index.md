@@ -598,6 +598,11 @@ choiceState {
 There is also `choiceDataState()` function available for choosing between `DataState`s. You can define `dataTransition` 
 to target such pseudo data state.
 
+You can use `choiceState` even on initial state branch.
+Note that `choiceState` can not be active, so if the library performs a transition and finds that `choiceState` is 
+going to be activated, it executes its lambda argument and navigates to the resulting state. 
+If the resulting state is also a `PseudoState` instance, further redirections might be applied.
+
 ### History state
 
 There are two types of history states, shallow and deep. Shallow history state is used to represent the most recently
