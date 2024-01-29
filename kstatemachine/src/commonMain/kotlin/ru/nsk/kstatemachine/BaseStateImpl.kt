@@ -214,7 +214,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
             when (childMode) {
                 EXCLUSIVE -> {
                     val exclusivePath = pathHead.children.single()
-                    val state = exclusivePath.state
+                    val state = exclusivePath.state as InternalState
                     setCurrentState(state, transitionParams)
                     if (state !is StateMachine) // inner state machine manages its internal state by its own
                         state.recursiveEnterStatePath(exclusivePath, transitionParams)
@@ -315,10 +315,11 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         when {
             targetStates.isEmpty() -> return
             targetStates.size == 1 -> {
+                @Suppress("UNCHECKED_CAST")
                 val path = fromState.findPathFromTargetToLca(
                     targetStates.single(),
                     transitionParams.transition.type == EXTERNAL
-                )
+                ) as List<InternalState>
                 val iterator = path.listIterator(path.size)
                 iterator.previous().recursiveEnterStatePath(iterator, transitionParams)
             }
@@ -327,14 +328,9 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                     targetStates,
                     transitionParams.transition.type == EXTERNAL
                 )
-                pathHead.state.recursiveEnterStatePath(pathHead, transitionParams)
+                val state = pathHead.state as InternalState
+                state.recursiveEnterStatePath(pathHead, transitionParams)
             }
         }
     }
 }
-
-data class PathNode(
-    val parent: PathNode?,
-    val children: Set<PathNode>,
-    val state: InternalState,
-)

@@ -3,12 +3,25 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
 
 /**
+ * Contains tree composition api for [InternalState].
+ * Necessary for tree algorithms testing purpose, to be able not create full states in tests.
+ * This is safe to cast any [InternalNode] to [InternalState] by design.
+ */
+internal interface InternalNode {
+    val internalParent: InternalNode?
+}
+
+internal fun InternalNode.requireParentNode(): InternalNode =
+    requireNotNull(internalParent) { "$this parent is not set" }
+
+/**
  * Defines state API for internal library usage. All states must implement this class.
  * Unfortunately cannot use interface for this purpose.
+ * This is safe to cast any [IState] to [InternalState] by design.
  */
-abstract class InternalState : IState {
+abstract class InternalState : IState, InternalNode {
     override val parent: IState? get() = internalParent
-    internal abstract val internalParent: InternalState?
+    abstract override val internalParent: InternalState?
     internal abstract fun setParent(parent: InternalState)
 
     internal abstract fun getCurrentStates(): List<InternalState>
@@ -47,7 +60,8 @@ abstract class InternalState : IState {
     internal abstract suspend fun cleanup()
 }
 
-internal fun InternalState.requireInternalParent() = requireNotNull(internalParent) { "$this parent is not set" }
+internal fun InternalState.requireInternalParent(): InternalState =
+    requireNotNull(internalParent) { "$this parent is not set" }
 
 internal suspend fun <E : Event> InternalState.findTransitionsByEvent(event: E): List<InternalTransition<E>> {
     @Suppress("UNCHECKED_CAST")
