@@ -11,7 +11,7 @@ kotlin {
     jvm {}
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":kstatemachine-coroutines"))
             }
