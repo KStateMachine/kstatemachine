@@ -4,7 +4,7 @@ object Versions {
     // library
     const val libraryMavenCentralGroup = "io.github.nsk90"
     const val libraryJitPackGroup = "com.github.nsk90"
-    const val libraryVersion = "0.25.0"
+    const val libraryVersion = "0.25.1"
 
     // tools
     const val kotlin = "1.9.22"
