@@ -49,9 +49,10 @@ inline fun <reified E : Event> TransitionStateApi.requireTransition() =
  */
 inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
+    displayName: String = "",
     targetState: State? = null,
     type: TransitionType = LOCAL,
-): Transition<E> = addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
+): Transition<E> = addTransition(DefaultTransition(name, displayName, matcherForEvent(asState()), type, asState(), targetState))
 
 /**
  * Creates transition.
@@ -61,9 +62,10 @@ inline fun <reified E : Event> TransitionStateApi.transition(
  */
 inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
+    displayName: String = "",
     block: UnitGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = UnitGuardedTransitionBuilder<E>(name, asState()).apply {
+    val builder = UnitGuardedTransitionBuilder<E>(name, displayName, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
     }
@@ -80,9 +82,10 @@ inline fun <reified E : Event> TransitionStateApi.transition(
  */
 inline fun <reified E : Event> TransitionStateApi.transitionOn(
     name: String? = null,
+    displayName: String = "",
     block: UnitGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = UnitGuardedTransitionOnBuilder<E>(name, asState()).apply {
+    val builder = UnitGuardedTransitionOnBuilder<E>(name, displayName, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
     }
@@ -95,9 +98,10 @@ inline fun <reified E : Event> TransitionStateApi.transitionOn(
  */
 inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
     name: String? = null,
+    displayName: String = "",
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
-    val builder = ConditionalTransitionBuilder<E>(name, asState()).apply {
+    val builder = ConditionalTransitionBuilder<E>(name, displayName, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
     }
@@ -111,10 +115,11 @@ inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
  */
 inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
+    displayName: String = "",
     targetState: DataState<D>,
     type: TransitionType = LOCAL,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
+    return addTransition(DefaultTransition(name, displayName, matcherForEvent(asState()), type, asState(), targetState))
 }
 
 /**
@@ -122,9 +127,10 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
  */
 inline fun <reified E : DataEvent<D>, D : Any> DataTransitionStateApi<D>.dataTransition(
     name: String? = null,
+    displayName: String = "",
     type: TransitionType = LOCAL,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), null))
+    return addTransition(DefaultTransition(name, displayName, matcherForEvent(asState()), type, asState(), null))
 }
 
 /**
@@ -132,9 +138,10 @@ inline fun <reified E : DataEvent<D>, D : Any> DataTransitionStateApi<D>.dataTra
  */
 inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition(
     name: String? = null,
+    displayName: String = "",
     block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
 ): Transition<E> {
-    val builder = DataGuardedTransitionBuilder<E, D>(name, asState()).apply {
+    val builder = DataGuardedTransitionBuilder<E, D>(name, displayName, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
     }
@@ -146,9 +153,10 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
  */
 inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransitionOn(
     name: String? = null,
+    displayName: String = "",
     block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
 ): Transition<E> {
-    val builder = DataGuardedTransitionOnBuilder<E, D>(name, asState()).apply {
+    val builder = DataGuardedTransitionOnBuilder<E, D>(name, displayName, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
     }

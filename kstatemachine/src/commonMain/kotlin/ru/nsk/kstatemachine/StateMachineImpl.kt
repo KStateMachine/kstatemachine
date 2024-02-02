@@ -37,7 +37,7 @@ internal class StateMachineImpl(
         }
         if (isUndoEnabled) {
             val undoState = addState(UndoState())
-            transition<WrappedEvent>("undo transition", undoState)
+            transition<WrappedEvent>("undo transition", targetState = undoState)
         }
     }
 
@@ -297,6 +297,7 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
 ): TransitionParams<*> {
     val transition = DefaultTransition(
         "Starting",
+        "",
         EventMatcher.isInstanceOf<E>(),
         TransitionType.LOCAL,
         sourceState,

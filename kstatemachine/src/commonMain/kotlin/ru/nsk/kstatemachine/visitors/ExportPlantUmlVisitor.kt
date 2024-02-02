@@ -135,7 +135,7 @@ internal class ExportPlantUmlVisitor(
 
     private fun transitionLabel(transition: Transition<*>): String {
         val entries = listOfNotNull(
-            transition.name,
+            transition.displayName.trim().takeIf { it.isNotBlank() } ?: transition.name,
             transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
         )
         return label(entries.joinToString())
