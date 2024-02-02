@@ -6,7 +6,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 
 class GuardedTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "guarded transition" {
             val callbacks = mockkCallbacks()
 

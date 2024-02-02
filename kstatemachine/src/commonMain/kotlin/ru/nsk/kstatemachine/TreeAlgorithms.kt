@@ -41,7 +41,7 @@ internal fun InternalNode.findPathFromTargetToLca(
 
 internal data class PathNode(
     val state: InternalNode,
-    val children: Set<PathNode>,
+    val children: MutableSet<PathNode>,
 )
 
 /**
@@ -60,29 +60,36 @@ internal fun InternalNode.findTreePathFromTargetsToLca(
     )
 
     val statePointers = mutableListOf<StatePointer>()
-    targetStates.mapTo(statePointers) { StatePointer(PathNode(it, emptySet()), it.findDepth()) }
-    statePointers += StatePointer(PathNode(this, emptySet()), this.findDepth(), true)
+    targetStates.mapTo(statePointers) { StatePointer(PathNode(it, mutableSetOf()), it.findDepth()) }
+    statePointers += StatePointer(PathNode(this, mutableSetOf()), this.findDepth(), true)
 
     do {
         val maxDepth = statePointers.maxOf { it.depth }
         statePointers.filter { it.depth == maxDepth }.forEach {
-            it.path = PathNode(it.path.state.requireParentNode(), setOf(it.path))
+            it.path = PathNode(it.path.state.requireParentNode(), mutableSetOf(it.path))
             it.depth--
         }
 
         val deepestStatePointers = statePointers.filter { it.depth == maxDepth - 1 }
         val groups = deepestStatePointers.groupBy { it.path.state }
-        // cхлопнуть вместе и удалить лишние группы
-        groups.forEach {
-            if (it.value.size >= 2)
-
+        for (entry in groups) {
+            // merge branches into leading one and remove merged
+            val leadBranchIndex = entry.value.indexOfFirst { !it.ignore }
+            if (leadBranchIndex == -1) continue
+            entry.value.forEachIndexed { index, statePointer ->
+                if (index != leadBranchIndex) {
+                    if (!statePointer.ignore)
+                        entry.value[leadBranchIndex].path.children.addAll(statePointer.path.children)
+                    statePointers.remove(statePointer)
+                }
+            }
         }
-    } while ()
+    } while (statePointers.size > 1)
 
-    val path = PathNode()
+    val path = statePointers.single().path
     if (addLcaParent)
         path.state.internalParent?.let {
-            return PathNode(it, setOf(path))
+            return PathNode(it, mutableSetOf(path))
         }
     return path
 }

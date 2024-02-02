@@ -12,7 +12,7 @@ private object ChoiceStateTestData {
 }
 
 class ChoiceStateTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "redirecting choice state" {
             val callbacks = mockkCallbacks()
 

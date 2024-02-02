@@ -23,7 +23,7 @@ private object CustomTransitionTestData {
  * as conditional transitions might be used for the same purpose.
  */
 class CustomTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "custom transition" {
             val callbacks = mockkCallbacks()
 

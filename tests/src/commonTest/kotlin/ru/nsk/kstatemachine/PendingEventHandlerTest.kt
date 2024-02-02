@@ -8,7 +8,7 @@ import ru.nsk.kstatemachine.ProcessingResult.PENDING
 import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class PendingEventHandlerTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "queue event in QueuePendingEventHandler" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 logger = StateMachine.Logger { println(it()) }

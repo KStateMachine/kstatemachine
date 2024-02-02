@@ -14,7 +14,7 @@ private object EventMatcherTestData {
 }
 
 class EventMatcherTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "isEqual()" {
             val callbacks = mockkCallbacks()
 

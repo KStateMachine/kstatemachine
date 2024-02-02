@@ -17,7 +17,7 @@ private object TypesafeTransitionTestData {
 }
 
 class TypesafeTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "initial DataState negative" {
             shouldThrow<Exception> {
                 createTestStateMachine(coroutineStarterType) {

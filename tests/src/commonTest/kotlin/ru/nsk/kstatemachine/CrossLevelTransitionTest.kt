@@ -6,7 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.verifySequence
 
 class CrossLevelTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         // Transition from self to self is same as target-less transition
         "self to self" {
             val callbacks = mockkCallbacks()

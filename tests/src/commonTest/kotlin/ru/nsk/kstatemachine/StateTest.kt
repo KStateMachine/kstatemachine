@@ -11,7 +11,7 @@ private object StateTestData {
 }
 
 class StateTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "state subclass" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 // simple but little explicit, easy to forget addState() call

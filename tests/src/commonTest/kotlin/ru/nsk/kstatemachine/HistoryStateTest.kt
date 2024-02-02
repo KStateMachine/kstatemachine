@@ -9,7 +9,7 @@ import io.mockk.called
 import io.mockk.verify
 
 class HistoryStateTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "history state cannot have listeners" {
             createTestStateMachine(coroutineStarterType) {
                 initialState()

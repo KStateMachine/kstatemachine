@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.Testing.startFrom
 import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 class TestingStartFromTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "startFromBlocking()" {
             val callbacks = mockkCallbacks()
 

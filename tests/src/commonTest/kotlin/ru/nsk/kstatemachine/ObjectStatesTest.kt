@@ -15,7 +15,7 @@ private object ObjectStatesTestData {
  * autoDestroyOnStatesReuse argument is false.
  */
 class ObjectStatesTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "multiple usage of object states throws" {
             val machine = useInMachine(coroutineStarterType, false)
             shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, false) }

@@ -54,7 +54,7 @@ suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>):
                 " check that you are not using the same state multiple times"
     }
     @Suppress("UNCHECKED_CAST")
-    val lca = findLca(targetStates as Set<InternalState>)
+    val lca = findLca(targetStates as Set<InternalNode>) as InternalState
     check(lca.childMode == ChildMode.PARALLEL) {
         "Lowest common ancestor $lca for specified states has not ${ChildMode.PARALLEL} child mode. " +
                 "Only children of a state with ${ChildMode.PARALLEL} child mode may be specified as targets here."

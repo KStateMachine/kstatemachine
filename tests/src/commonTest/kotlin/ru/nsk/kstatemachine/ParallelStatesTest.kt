@@ -10,8 +10,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 
 class ParallelStatesTest : StringSpec({
-    //CoroutineStarterType.values().
-    listOf(CoroutineStarterType.STD_LIB).forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "initial state in parallel mode negative" {
             createTestStateMachine(coroutineStarterType) {
                 initialState(childMode = ChildMode.PARALLEL) {
@@ -169,7 +168,7 @@ class ParallelStatesTest : StringSpec({
             verify { callbacks.onTransitionTriggered(SecondEvent) }
         }
 
-        "f:transition targets multiple parallel states children" {
+        "transition targets multiple parallel states children" {
             lateinit var state2: State
             lateinit var state21: State
             lateinit var state212: State

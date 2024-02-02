@@ -7,7 +7,7 @@ import io.mockk.verifySequence
 private const val ARGUMENT = 1
 
 class TransitionArgumentTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "transition argument" {
             val callbacks = mockkCallbacks()
 

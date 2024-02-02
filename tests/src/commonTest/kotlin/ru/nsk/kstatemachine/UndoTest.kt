@@ -12,7 +12,7 @@ private object UndoTestData {
 }
 
 class UndoTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "undo not enabled" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()

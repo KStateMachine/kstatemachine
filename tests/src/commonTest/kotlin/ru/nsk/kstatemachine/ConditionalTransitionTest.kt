@@ -11,7 +11,7 @@ private object ConditionalTransitionTestData {
 }
 
 class ConditionalTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "conditional transition stay()" {
             val callbacks = mockkCallbacks()
 

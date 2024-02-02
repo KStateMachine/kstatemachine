@@ -5,7 +5,7 @@ import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.TransitionType.LOCAL
 
 class ExternalTransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "external transition on machine level" {
             val callbacks = mockkCallbacks()
             lateinit var state1: State
