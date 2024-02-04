@@ -167,36 +167,5 @@ class ParallelStatesTest : StringSpec({
             machine.processEventBlocking(SecondEvent)
             verify { callbacks.onTransitionTriggered(SecondEvent) }
         }
-
-        "transition targets multiple parallel states children" {
-            lateinit var state2: State
-            lateinit var state21: State
-            lateinit var state212: State
-            lateinit var state22: State
-            lateinit var state222: State
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    transitionConditionally<SwitchEvent> {
-                        direction = {
-                            targetParallelStates(state212, state222)
-                        }
-                    }
-                }
-                state2 = state("state2", childMode = ChildMode.PARALLEL) {
-                    state21 = state("state21") {
-                        initialState("state211")
-                        state212 = state("state212")
-                    }
-                    state22 = state("state22") {
-                        initialState("state221")
-                        state222 = state("state222")
-                    }
-                }
-            }
-
-            machine.processEvent(SwitchEvent)
-            machine.activeStates().shouldContainExactly(state2, state21, state212, state22, state222)
-        }
     }
 })

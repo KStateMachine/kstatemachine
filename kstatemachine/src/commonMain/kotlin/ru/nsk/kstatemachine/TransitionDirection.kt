@@ -53,15 +53,22 @@ suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>):
         "There should be at least two targetStates, current amount ${targetStates.size}," +
                 " check that you are not using the same state multiple times"
     }
-    @Suppress("UNCHECKED_CAST")
-    val lca = findLca(targetStates as Set<InternalNode>) as InternalState
-    check(lca.childMode == ChildMode.PARALLEL) {
-        "Lowest common ancestor $lca for specified states has not ${ChildMode.PARALLEL} child mode. " +
-                "Only children of a state with ${ChildMode.PARALLEL} child mode may be specified as targets here."
-    }
     val resolvedStates = mutableSetOf<IState>()
     targetStates.mapNotNullTo(resolvedStates) { recursiveResolveTargetState(it) }
-    return if (resolvedStates.isNotEmpty()) TargetState(resolvedStates) else NoTransition
+    if (resolvedStates.isEmpty()) return NoTransition
+
+    @Suppress("UNCHECKED_CAST")
+    val lca = findLca(resolvedStates as Set<InternalNode>) as InternalState
+    check(lca.findParallelAncestor() != null) {
+        "Resolved states does not have common ancestor with ${ChildMode.PARALLEL} child mode. " +
+                "Only children of a state with ${ChildMode.PARALLEL} child mode" +
+                " might be used as effective (resolved) targets here."
+    }
+    return TargetState(resolvedStates)
+}
+
+private fun InternalState.findParallelAncestor(): InternalState? {
+    return if (childMode == ChildMode.PARALLEL) this else internalParent?.findParallelAncestor()
 }
 
 suspend fun EventAndArgument<*>.targetParallelStates(
