@@ -251,7 +251,7 @@ class ExportToPlantUmlTest : StringSpec({
 
         "plantUml export parallel states" {
             val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
-                initialState("parallel states", ChildMode.PARALLEL) {
+                initialState("parallel states", "parallel states",ChildMode.PARALLEL) {
                     state("State1") {
                         val state11 = initialState("State11")
                         val state12 = state("State12")

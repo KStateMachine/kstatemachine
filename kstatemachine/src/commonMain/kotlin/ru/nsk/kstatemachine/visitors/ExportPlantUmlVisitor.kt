@@ -150,7 +150,7 @@ internal class ExportPlantUmlVisitor(
         const val CHOICE = "<<choice>>"
 
         fun IState.graphName(): String {
-            val name = name?.replace(" ", "_") ?: "State${hashCode()}"
+            val name = displayName?.replace(" ", "_") ?: "State${hashCode()}"
             return if (this !is StateMachine) name else "${name}_StateMachine"
         }
 

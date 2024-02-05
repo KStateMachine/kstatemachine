@@ -5,15 +5,22 @@ import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 /**
  * The most common state
  */
-open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
-    BaseStateImpl(name, childMode), State
+open class DefaultState(
+    name: String? = null,
+    displayName: String? = null,
+    childMode: ChildMode = EXCLUSIVE
+) : BaseStateImpl(name, displayName, childMode), State
 
-open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState
+open class DefaultFinalState(
+    name: String? = null,
+    displayName: String? = null
+) : DefaultState(name, displayName), FinalState
 
 open class DefaultChoiceState(
     name: String? = null,
+    displayName: String? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> State
-) : BasePseudoState(name), RedirectPseudoState {
+) : BasePseudoState(name, displayName), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
         eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
@@ -21,8 +28,9 @@ open class DefaultChoiceState(
 
 open class DefaultChoiceDataState<D : Any>(
     name: String? = null,
+    displayName: String? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
-) : DataState<D>, BasePseudoState(name), RedirectPseudoState {
+) : DataState<D>, BasePseudoState(name, displayName), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
         eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
@@ -32,7 +40,7 @@ open class DefaultChoiceDataState<D : Any>(
     override val lastData: D get() = error("PseudoState $this can not have lastData")
 }
 
-open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
+open class BasePseudoState(name: String?, displayName: String?) : BaseStateImpl(name, displayName, EXCLUSIVE), PseudoState {
     override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 

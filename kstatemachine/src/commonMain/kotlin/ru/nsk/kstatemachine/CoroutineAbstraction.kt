@@ -44,6 +44,7 @@ internal class StdLibCoroutineAbstraction : CoroutineAbstraction {
 
 suspend fun CoroutineAbstraction.createStateMachine(
     name: String?,
+    displayName: String?,
     childMode: ChildMode,
     start: Boolean,
     autoDestroyOnStatesReuse: Boolean,
@@ -52,6 +53,7 @@ suspend fun CoroutineAbstraction.createStateMachine(
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,
+    displayName,
     childMode,
     autoDestroyOnStatesReuse,
     enableUndo,

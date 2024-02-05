@@ -212,6 +212,7 @@ interface BuildingStateMachine : StateMachine {
  */
 fun createStdLibStateMachine(
     name: String? = null,
+    displayName: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
@@ -223,6 +224,7 @@ fun createStdLibStateMachine(
         runBlocking {
             createStateMachine(
                 name,
+                displayName,
                 childMode,
                 start,
                 autoDestroyOnStatesReuse,

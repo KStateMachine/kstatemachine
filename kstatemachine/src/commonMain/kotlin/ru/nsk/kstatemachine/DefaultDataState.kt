@@ -5,17 +5,19 @@ import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 /** inline constructor function */
 inline fun <reified D : Any> defaultDataState(
     name: String? = null,
+    displayName: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = EXCLUSIVE,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-) = DefaultDataState(name, defaultData, childMode, dataExtractor)
+) = DefaultDataState(name, displayName, defaultData, childMode, dataExtractor)
 
 open class DefaultDataState<D : Any>(
     name: String? = null,
+    displayName: String? = null,
     override val defaultData: D? = null,
     childMode: ChildMode = EXCLUSIVE,
     private val dataExtractor: DataExtractor<D>,
-) : BaseStateImpl(name, childMode), DataState<D> {
+) : BaseStateImpl(name, displayName, childMode), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is $this state active?" }
 
@@ -72,12 +74,14 @@ open class DefaultDataState<D : Any>(
 /** inline constructor function */
 inline fun <reified D : Any> defaultFinalDataState(
     name: String? = null,
+    displayName: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): DefaultFinalDataState<D> = DefaultFinalDataState(name, defaultData, dataExtractor)
+): DefaultFinalDataState<D> = DefaultFinalDataState(name, displayName, defaultData, dataExtractor)
 
 open class DefaultFinalDataState<D : Any>(
     name: String? = null,
+    displayName: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D>
-) : DefaultDataState<D>(name, defaultData, EXCLUSIVE, dataExtractor), FinalDataState<D>
+) : DefaultDataState<D>(name, displayName, defaultData, EXCLUSIVE, dataExtractor), FinalDataState<D>

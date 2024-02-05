@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
  */
 suspend fun createStateMachine(
     scope: CoroutineScope,
+    displayName: String? = null,
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
@@ -25,6 +26,7 @@ suspend fun createStateMachine(
     init: suspend BuildingStateMachine.() -> Unit
 ) = CoroutinesLibCoroutineAbstraction(scope).createStateMachine(
     name,
+    displayName,
     childMode,
     start,
     autoDestroyOnStatesReuse,
@@ -36,6 +38,7 @@ suspend fun createStateMachine(
 fun createStateMachineBlocking(
     scope: CoroutineScope,
     name: String? = null,
+    displayName: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
@@ -46,6 +49,7 @@ fun createStateMachineBlocking(
     runBlocking {
         createStateMachine(
             name,
+            displayName,
             childMode,
             start,
             autoDestroyOnStatesReuse,

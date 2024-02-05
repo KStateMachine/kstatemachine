@@ -2,7 +2,7 @@ package ru.nsk.kstatemachine
 
 private data class StateAndEvent(val state: IState, val eventAndArgument: EventAndArgument<*>)
 
-internal class UndoState : BasePseudoState("undoState") {
+internal class UndoState : BasePseudoState("undoState", null) {
     private val stack = mutableListOf<StateAndEvent>()
 
     override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
