@@ -224,10 +224,14 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                     handleStateEntry(childState, transitionParams)
                     if (childState !is StateMachine) { // inner state machine manages its internal state by its own
                         val regionPath = paths.find { it.state === childState }
-                        if (regionPath != null)
-                            childState.recursiveEnterStatePath(regionPath, transitionParams)
-                        else
-                            recursiveEnterInitialStates(transitionParams)
+                        if (regionPath != null) {
+                            childState.recursiveEnterStatePath(
+                                regionPath,
+                                transitionParams.repackForRegion(regionPath.requireFirstLeaf().state as IState)
+                            )
+                        } else {
+                            childState.recursiveEnterInitialStates(transitionParams)
+                        }
                     }
                 }
             }
@@ -332,5 +336,13 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
                 state.recursiveEnterStatePath(pathHead, transitionParams)
             }
         }
+    }
+}
+
+private fun TransitionParams<*>.repackForRegion(regionTargetState: IState): TransitionParams<*> {
+    return if (direction.targetState === regionTargetState) {
+        this
+    } else {
+        copy(direction = TargetState(direction.targetStates, regionTargetState))
     }
 }

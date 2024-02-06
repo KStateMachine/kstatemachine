@@ -39,6 +39,9 @@ internal fun InternalNode.findPathFromTargetToLca(
     return targetPath
 }
 
+/**
+ * This is used for tree structured paths (with multiple leafs)
+ */
 internal data class PathNode(
     val state: InternalNode,
     val children: MutableSet<PathNode>,
@@ -127,10 +130,12 @@ internal fun findLca(states: Set<InternalNode>): InternalNode {
 
 internal fun InternalNode.findDepth(): Int {
     var depth = 0
-    var parent = this.internalParent
+    var parent = internalParent
     while (parent != null) {
         depth++
         parent = parent.internalParent
     }
     return depth
 }
+
+internal fun PathNode.requireFirstLeaf(): PathNode = children.firstOrNull()?.requireFirstLeaf() ?: this

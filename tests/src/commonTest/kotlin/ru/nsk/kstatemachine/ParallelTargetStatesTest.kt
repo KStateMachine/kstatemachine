@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 
 class ParallelTargetStatesTest : StringSpec({
@@ -34,15 +35,27 @@ class ParallelTargetStatesTest : StringSpec({
                         }
                         state212 = state("state212") {
                             callbacks.listen(this)
+                            onEntry {
+                                it.direction.targetStates shouldContainExactly listOf(state212, state222)
+                                it.direction.targetState shouldBe state212
+                            }
                         }
                     }
                     state22 = state("state22") {
                         callbacks.listen(this)
                         initialState("state221") {
                             callbacks.listen(this)
+                            onEntry {
+                                it.direction.targetStates shouldContainExactly listOf(state212, state222)
+                                it.direction.targetState shouldBe state222
+                            }
                         }
                         state222 = state("state222") {
                             callbacks.listen(this)
+                            onEntry {
+                                it.direction.targetStates shouldContainExactly listOf(state212, state222)
+                                it.direction.targetState shouldBe state222
+                            }
                         }
                     }
                 }
@@ -115,7 +128,7 @@ class ParallelTargetStatesTest : StringSpec({
             }
         }
 
-        "transition targets multiple states, negative state amount" {
+        "negative transition targets multiple states, invalid state amount" {
             lateinit var state1: State
 
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -130,7 +143,7 @@ class ParallelTargetStatesTest : StringSpec({
             ) { machine.processEvent(SwitchEvent) }
         }
 
-        "transition targets multiple states negative state targets" {
+        "negative transition targets multiple states, invalid target states" {
             lateinit var state1: State
             lateinit var state2: State
 
@@ -329,7 +342,6 @@ class ParallelTargetStatesTest : StringSpec({
                 state2, state21, state212, state22, state221, state222, state2222
             )
 
-            // todo check trasitionParams args
             verifySequence {
                 callbacks.onStateExit(state1)
                 callbacks.onStateEntry(state2)

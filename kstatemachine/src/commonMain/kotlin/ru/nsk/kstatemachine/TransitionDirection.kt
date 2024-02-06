@@ -3,9 +3,9 @@ package ru.nsk.kstatemachine
 sealed interface TransitionDirection {
     /**
      * Already resolved target state of conditional transition or [PseudoState] computation
-     * This is always the first element of [targetStates] list or null, if the list is empty.
+     * This is always one of [targetStates] list elements or null, if the list is empty.
      */
-    val targetState: IState? get() = targetStates.firstOrNull()
+    val targetState: IState? get() = null
 
     /**
      * Transition can target multiple states if they all are located at different regions of a parallel state.
@@ -34,13 +34,15 @@ fun noTransition(): TransitionDirection = NoTransition
 /**
  * [Transition] is triggered with [targetStates] (usually with single [targetState])
  */
-internal class TargetState(override val targetStates: Set<IState>) : TransitionDirection {
+internal data class TargetState(
+    override val targetStates: Set<IState>,
+    override val targetState: IState = targetStates.first()
+) : TransitionDirection {
     init {
-        require(targetStates.isNotEmpty())
+        require(targetStates.contains(targetState)) {
+            "Internal logical error, invalid ${TargetState::class.simpleName} construction, this should never happen"
+        }
     }
-
-    override val targetState: IState
-        get() = requireNotNull(super.targetState) { "Never get here, targetState is always present" }
 }
 
 /**

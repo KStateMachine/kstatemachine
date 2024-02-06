@@ -40,11 +40,14 @@ abstract class InternalState : IState, InternalNode {
     ): ResolvedTransition<E>?
 
     internal abstract suspend fun recursiveEnterInitialStates(transitionParams: TransitionParams<*>)
+
+    /** Enters single branch path */
     internal abstract suspend fun recursiveEnterStatePath(
         path: ListIterator<InternalState>,
         transitionParams: TransitionParams<*>
     )
 
+    /** Enters path with multiple branches */
     internal abstract suspend fun recursiveEnterStatePath(
         pathHead: PathNode,
         transitionParams: TransitionParams<*>
