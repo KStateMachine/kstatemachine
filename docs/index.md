@@ -433,7 +433,7 @@ createStateMachine(scope) {
 Some of state machines and states are infinite, but other ones may finish.
 
 * In `ChildMode.EXCLUSIVE` state or state machine finishes when enters top-level final state.
-* In `ChildMode.PARALLEL` state or state machine finishes when all its children has finished.
+* In `ChildMode.PARALLEL` state or state machine finishes when all its direct children has finished.
 
 To make a state final, it must implement `FinalState` marker interface.
 Built-in implementation of such state is `DefaultFinalState`.
@@ -446,6 +446,8 @@ sealed class States : DefaultState() {
     object State2 : States(), FinalState
 }
 ```
+
+See [Finished state sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
 
 Finishing of states and state machines is treated little differently.
 State machine that was finished stops processing incoming events.
@@ -596,12 +598,12 @@ choiceState {
 }
 ```
 
-There is also `choiceDataState()` function available for choosing between `DataState`s. You can define `dataTransition` 
+There is also `choiceDataState()` function available for choosing between `DataState`s. You can define `dataTransition`
 to target such pseudo data state.
 
 You can use `choiceState` even on initial state branch.
-Note that `choiceState` can not be active, so if the library performs a transition and finds that `choiceState` is 
-going to be activated, it executes its lambda argument and navigates to the resulting state. 
+Note that `choiceState` can not be active, so if the library performs a transition and finds that `choiceState` is
+going to be activated, it executes its lambda argument and navigates to the resulting state.
 If the resulting state is also a `PseudoState` instance, further redirections might be applied.
 
 ### History state
@@ -652,7 +654,7 @@ createStateMachine(scope) {
 is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
 after state exit, it falls back to `defaultData` if provided or throws.
 
-### Target-less data transitions 
+### Target-less data transitions
 
 You can define target-less transitions for `DataState`. Please, note that if you want such transition to change state's
 `data` field, it should be `EXTERNAL` type. If target-less transition is `LOCAL` it does not change states data.
@@ -871,9 +873,14 @@ Contains additional functions to work with KStateMachine depending on Kotlin Cor
 ## Export
 
 > [!NOTE]
-> Currently transitions that use lambdas like `transitionConditionally()` and`transitionOn()` are not exported.
-> User defined lambdas that are passed to calculate next state could not be correctly
-> called during export process as they may touch application data that is not valid when export is running.
+> Transitions that use lambdas like `transitionConditionally()` and`transitionOn()` are not exported by default.
+> You can enable their export with `unsafeCallConditionalLambdas` flag of `exportToPlantUml()` function.
+> With `unsafeCallConditionalLambdas` flag set, user defined lambdas that are passed to the library to calculate next
+> state would be called during export process. This will give more complete (still not full) export output,
+> but may cause runtime errors depending on what the lambda actually do. As it may touch application data that is not
+> valid when export is running, also `event` argument will be faked by unsafe cast, so touching it 
+> will cause `ClassCastException`
+> That is why `unsafeCallConditionalLambdas` flag should be considered as debug/development tool only.
 
 ### PlantUML
 

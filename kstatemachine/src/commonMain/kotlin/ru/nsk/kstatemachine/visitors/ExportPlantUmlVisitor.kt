@@ -2,14 +2,24 @@ package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.UnsafeCollectTargetStatesPolicy
+
+/**
+ * This object will be unsafely cast to any kind of [Event],
+ * causing runtime failures if user defined (conditional) lambdas will touch this object.
+ */
+internal object ExportPlantUmlEvent : Event
 
 /**
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
- * Conditional transitions currently are not supported.
+ * Conditional transitions are partly supported with [unsafeCallConditionalLambdas] flag.
  */
-internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoVisitor {
+internal class ExportPlantUmlVisitor(
+    private val showEventLabels: Boolean,
+    private val unsafeCallConditionalLambdas: Boolean,
+) : CoVisitor {
     private val builder = StringBuilder()
     private var indent = 0
     private val crossLevelTransitions = mutableListOf<String>()
@@ -30,7 +40,16 @@ internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoV
         if (state.states.isEmpty()) {
             when (state) {
                 is HistoryState, is UndoState -> return
-                is RedirectPseudoState -> line("state ${state.graphName()} $CHOICE")
+                is RedirectPseudoState -> {
+                    val stateName = state.graphName()
+                    line("state $stateName $CHOICE")
+                    if (unsafeCallConditionalLambdas) {
+                        val targetState = state.resolveTargetState(
+                            EventAndArgument(ExportPlantUmlEvent, null)
+                        ) as InternalState
+                        crossLevelTransitions += "$stateName --> ${targetState.targetGraphName()}"
+                    }
+                }
                 else -> line("state ${state.graphName()}")
             }
         } else {
@@ -57,26 +76,25 @@ internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoV
         val sourceState = transition.sourceState.graphName()
 
         @Suppress("UNCHECKED_CAST")
-        val targetStates = transition.produceTargetStateDirection(CollectTargetStatesPolicy()).targetStates
+        val targetStates = transition.produceTargetStateDirection(makeDirectionProducerPolicy()).targetStates
                 as Set<InternalState>
-        val targetState = targetStates.firstOrNull() ?: return // fixme iterate over all
+        targetStates.forEach { targetState -> // actually plantUml may not understand multiple transitions
+            val transitionString = "$sourceState --> ${targetState.targetGraphName()}${transitionLabel(transition)}"
 
-        val graphName = if (targetState is HistoryState) {
-            val prefix = targetState.requireInternalParent().graphName()
-            when (targetState.historyType) {
-                HistoryType.SHALLOW -> "$prefix$SHALLOW_HISTORY"
-                HistoryType.DEEP -> "$prefix$DEEP_HISTORY"
-            }
-        } else {
-            targetState.graphName()
+            if (transition.sourceState.isNeighbor(targetState))
+                line(transitionString)
+            else
+                crossLevelTransitions += transitionString
         }
+    }
 
-        val transitionString = "$sourceState --> $graphName${transitionLabel(transition)}"
-
-        if (transition.sourceState.isNeighbor(targetState))
-            line(transitionString)
-        else
-            crossLevelTransitions.add(transitionString)
+    private fun <E : Event> makeDirectionProducerPolicy(): TransitionDirectionProducerPolicy<E> {
+        return if (unsafeCallConditionalLambdas) {
+            @Suppress("UNCHECKED_CAST") // this is unsafe by design
+            UnsafeCollectTargetStatesPolicy(EventAndArgument(ExportPlantUmlEvent as E, null))
+        } else {
+            CollectTargetStatesPolicy()
+        }
     }
 
     private suspend fun processStateBody(state: IState) {
@@ -119,23 +137,46 @@ internal class ExportPlantUmlVisitor(private val showEventLabels: Boolean) : CoV
         const val SHALLOW_HISTORY = "[H]"
         const val DEEP_HISTORY = "[H*]"
         const val CHOICE = "<<choice>>"
+
         fun IState.graphName(): String {
             val name = name?.replace(" ", "_") ?: "State${hashCode()}"
             return if (this !is StateMachine) name else "${name}_StateMachine"
+        }
+
+        fun InternalState.targetGraphName(): String {
+            return if (this is HistoryState) {
+                val prefix = requireInternalParent().graphName()
+                when (historyType) {
+                    HistoryType.SHALLOW -> "$prefix$SHALLOW_HISTORY"
+                    HistoryType.DEEP -> "$prefix$DEEP_HISTORY"
+                }
+            } else {
+                graphName()
+            }
         }
 
         fun label(text: String?) = if (!text.isNullOrBlank()) " : $text" else ""
     }
 }
 
-suspend fun StateMachine.exportToPlantUml(showEventLabels: Boolean = false) =
-    with(ExportPlantUmlVisitor(showEventLabels)) {
+suspend fun StateMachine.exportToPlantUml(
+    showEventLabels: Boolean = false,
+    unsafeCallConditionalLambdas: Boolean = false,
+) =
+    with(ExportPlantUmlVisitor(showEventLabels, unsafeCallConditionalLambdas)) {
         accept(this)
         export()
     }
 
-fun StateMachine.exportToPlantUmlBlocking(showEventLabels: Boolean = false) = coroutineAbstraction.runBlocking {
-    with(ExportPlantUmlVisitor(showEventLabels)) {
+/**
+ * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
+ * this may give more complete output, but may be not safe.
+ */
+fun StateMachine.exportToPlantUmlBlocking(
+    showEventLabels: Boolean = false,
+    unsafeCallConditionalLambdas: Boolean = false,
+) = coroutineAbstraction.runBlocking {
+    with(ExportPlantUmlVisitor(showEventLabels, unsafeCallConditionalLambdas)) {
         accept(this)
         export()
     }

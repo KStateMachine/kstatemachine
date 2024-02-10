@@ -1,7 +1,6 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
-import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 @StateMachineDslMarker
 abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val sourceState: IState) {
@@ -24,12 +23,13 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
             when (it) {
-                is DefaultPolicy<E> ->
+                is DefaultPolicy ->
                     if (it.eventAndArgument.guard())
                         it.targetStateOrStay(targetState)
                     else
                         noTransition()
-                is CollectTargetStatesPolicy<E> -> it.targetStateOrStay(targetState)
+                is CollectTargetStatesPolicy,
+                is UnsafeCollectTargetStatesPolicy -> it.targetStateOrStay(targetState)
             }
         }
 
@@ -44,14 +44,15 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
     lateinit var targetState: suspend EventAndArgument<E>.() -> S
 
     override fun build(): Transition<E> {
-        val direction: TransitionDirectionProducer<E> = {
-            when (it) {
-                is DefaultPolicy<E> ->
-                    if (it.eventAndArgument.guard())
-                        it.targetState(it.eventAndArgument.targetState())
+        val direction: TransitionDirectionProducer<E> = { policy ->
+            when (policy) {
+                is DefaultPolicy ->
+                    if (policy.eventAndArgument.guard())
+                        policy.targetState(policy.eventAndArgument.targetState())
                     else
                         noTransition()
-                is CollectTargetStatesPolicy<E> -> noTransition()
+                is CollectTargetStatesPolicy -> noTransition()
+                is UnsafeCollectTargetStatesPolicy -> policy.targetState(policy.eventAndArgument.targetState())
             }
         }
 
@@ -66,10 +67,11 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
     lateinit var direction: suspend EventAndArgument<E>.() -> TransitionDirection
 
     override fun build(): Transition<E> {
-        val direction: TransitionDirectionProducer<E> = {
-            when (it) {
-                is DefaultPolicy<E> -> it.eventAndArgument.direction()
-                is CollectTargetStatesPolicy<E> -> noTransition()
+        val direction: TransitionDirectionProducer<E> = { policy ->
+            when (policy) {
+                is DefaultPolicy -> policy.eventAndArgument.direction()
+                is CollectTargetStatesPolicy -> noTransition()
+                is UnsafeCollectTargetStatesPolicy -> policy.eventAndArgument.direction()
             }
         }
 
@@ -98,14 +100,15 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
 
     override fun build(): Transition<E> {
         require(this::targetState.isInitialized) { "targetState should be set in this transition builder" }
-        val direction: TransitionDirectionProducer<E> = {
-            when (it) {
-                is DefaultPolicy<E> ->
-                    if (it.eventAndArgument.guard())
-                        it.targetState(targetState)
+        val direction: TransitionDirectionProducer<E> = { policy ->
+            when (policy) {
+                is DefaultPolicy ->
+                    if (policy.eventAndArgument.guard())
+                        policy.targetState(targetState)
                     else
                         noTransition()
-                is CollectTargetStatesPolicy<E> -> it.targetState(targetState)
+                is CollectTargetStatesPolicy,
+                is UnsafeCollectTargetStatesPolicy -> policy.targetState(targetState)
             }
         }
 
