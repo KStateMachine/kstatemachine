@@ -45,6 +45,7 @@
     * [Migration guide from versions older than v0.20.0](#migration-guide-from-versions-older-than-v0200)
 * [Export](#export)
     * [PlantUML](#plantuml)
+    * [Mermaid](#mermaid)
 * [Testing](#testing)
 * [Multiplatform](#multiplatform)
 * [Consider using Kotlin sealed classes](#consider-using-kotlin-sealed-classes)
@@ -895,6 +896,25 @@ println(machine.exportToPlantUml())
 Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
 
 See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
+
+### Mermaid
+
+`Mermaid` uses almost the same text format as `PlantUML`.
+
+Use `exportToMermaid()`/`exportToToMermaidBlocking()` extension function to export state machine
+to [Mermaid state diagram](https://mermaid.js.org/syntax/stateDiagram.html).
+
+```kotlin
+val machine = createStateMachine(scope) { /* ... */ }
+println(machine.exportToPlantUml())
+```
+
+`Intellij IDEA` users may use official [Mermaid plugin](https://plugins.jetbrains.com/plugin/20146-mermaid) 
+to view diagrams directly in IDE for file types: `.mmd` and `.mermaid`.
+
+Copy/paste resulting output to [Mermaid live editor](https://mermaid.live/)
+
+See [Mermaid nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
 
 ## Testing
 

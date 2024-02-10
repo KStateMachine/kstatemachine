@@ -3,12 +3,16 @@ package ru.nsk.kstatemachine.visitors
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.UnsafeCollectTargetStatesPolicy
+import ru.nsk.kstatemachine.visitors.CompatibilityFormat.MERMAID
+import ru.nsk.kstatemachine.visitors.CompatibilityFormat.PLANT_UML
 
 /**
  * This object will be unsafely cast to any kind of [Event],
  * causing runtime failures if user defined (conditional) lambdas will touch this object.
  */
 internal object ExportPlantUmlEvent : Event
+
+internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
 
 /**
  * Export state machine to Plant UML language format.
@@ -17,6 +21,7 @@ internal object ExportPlantUmlEvent : Event
  * Conditional transitions are partly supported with [unsafeCallConditionalLambdas] flag.
  */
 internal class ExportPlantUmlVisitor(
+    private val format: CompatibilityFormat,
     private val showEventLabels: Boolean,
     private val unsafeCallConditionalLambdas: Boolean,
 ) : CoVisitor {
@@ -27,13 +32,19 @@ internal class ExportPlantUmlVisitor(
     fun export() = builder.toString()
 
     override suspend fun visit(machine: StateMachine) {
-        line("@startuml")
-        line("hide empty description")
+        when (format) {
+            PLANT_UML -> {
+                line("@startuml")
+                line("hide empty description")
+            }
+            MERMAID -> line("stateDiagram-v2")
+        }
 
         processStateBody(machine)
         crossLevelTransitions.forEach { line(it) }
 
-        line("@enduml")
+        if (format == PLANT_UML)
+            line("@enduml")
     }
 
     override suspend fun visit(state: IState) {
@@ -159,24 +170,27 @@ internal class ExportPlantUmlVisitor(
     }
 }
 
-suspend fun StateMachine.exportToPlantUml(
-    showEventLabels: Boolean = false,
-    unsafeCallConditionalLambdas: Boolean = false,
-) =
-    with(ExportPlantUmlVisitor(showEventLabels, unsafeCallConditionalLambdas)) {
-        accept(this)
-        export()
-    }
-
 /**
+ * Export [StateMachine] to PlantUML state diagram
+ * @see <a href="https://plantuml.com/">PlantUML</a>
+ *
  * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
  * this may give more complete output, but may be not safe.
  */
+suspend fun StateMachine.exportToPlantUml(
+    showEventLabels: Boolean = false,
+    unsafeCallConditionalLambdas: Boolean = false,
+) = with(ExportPlantUmlVisitor(PLANT_UML, showEventLabels, unsafeCallConditionalLambdas)) {
+    accept(this)
+    export()
+}
+
+/** Blocking analog for [exportToPlantUml] */
 fun StateMachine.exportToPlantUmlBlocking(
     showEventLabels: Boolean = false,
     unsafeCallConditionalLambdas: Boolean = false,
 ) = coroutineAbstraction.runBlocking {
-    with(ExportPlantUmlVisitor(showEventLabels, unsafeCallConditionalLambdas)) {
+    with(ExportPlantUmlVisitor(PLANT_UML, showEventLabels, unsafeCallConditionalLambdas)) {
         accept(this)
         export()
     }

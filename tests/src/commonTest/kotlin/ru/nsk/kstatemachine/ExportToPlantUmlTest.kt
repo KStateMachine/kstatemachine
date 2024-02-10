@@ -8,6 +8,7 @@ import io.kotest.data.table
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 import ru.nsk.kstatemachine.HistoryType.DEEP
+import ru.nsk.kstatemachine.visitors.exportToMermaid
 import ru.nsk.kstatemachine.visitors.exportToPlantUml
 
 private const val PLANTUML_NESTED_STATES_RESULT = """@startuml
@@ -52,6 +53,26 @@ State2 --> State3 : SwitchEvent
 State2 --> State1 : back, SwitchEvent
 State3 --> [*]
 @enduml
+"""
+
+private const val MERMAID_NESTED_STATES_RESULT = """stateDiagram-v2
+state State1
+state State3
+state State2 {
+    state Final_subState
+    state Initial_subState
+    
+    [*] --> Initial_subState
+    Initial_subState --> Final_subState
+    Final_subState --> [*]
+}
+
+[*] --> State1
+State1 --> State2 : to State2
+State1 --> State1
+State2 --> State3
+State2 --> State1 : back
+State3 --> [*]
 """
 
 private const val PLANTUML_PARALLEL_STATES_RESULT = """@startuml
@@ -172,7 +193,7 @@ class ExportToPlantUmlTest : StringSpec({
             row(false, PLANTUML_NESTED_STATES_RESULT),
             row(true, PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT),
         ).forAll { showEventLabels, result ->
-            "export nested states" {
+            "plantUml export nested states" {
                 val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
                     val state1 = initialState("State1")
                     val state3 = finalState("State3")
@@ -198,7 +219,32 @@ class ExportToPlantUmlTest : StringSpec({
             }
         }
 
-        "export parallel states" {
+        "Mermaid export nested states" {
+            val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
+                val state1 = initialState("State1")
+                val state3 = finalState("State3")
+
+                val state2 = state("State2") {
+                    transition<SwitchEvent> { targetState = state3 }
+                    transition<SwitchEvent>("back") { targetState = state1 }
+
+                    val finalSubState = finalState("Final subState")
+                    initialState("Initial subState") {
+                        transition<SwitchEvent> { targetState = finalSubState }
+                    }
+                }
+
+                state1 {
+                    transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
+                    transition<SwitchEvent> { targetState = this@state1 }
+                    transition<SwitchEvent>()
+                }
+            }
+
+            machine.exportToMermaid() shouldBe MERMAID_NESTED_STATES_RESULT
+        }
+
+        "plantUml export parallel states" {
             val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
                 initialState("parallel states", ChildMode.PARALLEL) {
                     state("State1") {
@@ -229,7 +275,7 @@ class ExportToPlantUmlTest : StringSpec({
             machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
         }
 
-        "export with pseudo states" {
+        "plantUml export with pseudo states" {
             val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
                 val state1 = initialState("state1")
 
@@ -253,7 +299,7 @@ class ExportToPlantUmlTest : StringSpec({
             machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
         }
 
-        "unsafe export with pseudo states" {
+        "plantUml unsafe export with pseudo states" {
             val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
                 val state1 = initialState("state1")
 
@@ -277,7 +323,7 @@ class ExportToPlantUmlTest : StringSpec({
             machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_UNSAFE_PSEUDO_STATES_RESULT
         }
 
-        "export composed machines" {
+        "plantUml export composed machines" {
             val inner = createTestStateMachine(coroutineStarterType, name = "inner machine") {
                 initialState("inner state1")
                 state("inner state2")
@@ -290,7 +336,7 @@ class ExportToPlantUmlTest : StringSpec({
             outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
         }
 
-        "export multiple target states" {
+        "plantUml export multiple target states" {
             lateinit var state212: State
             lateinit var state222: State
 
