@@ -17,6 +17,7 @@
     * [Listen to all transitions in one place](#listen-to-all-transitions-in-one-place)
     * [Guarded transitions](#guarded-transitions)
     * [Conditional transitions](#conditional-transitions)
+    * [Transition targeting multiple states](#transition-targeting-multiple-states)
     * [Transition event type matching](#transition-event-type-matching)
 * [Undo transitions](#undo-transitions)
 * [Logging](#logging)
@@ -348,6 +349,32 @@ redState {
     }
     // Same as before you can listen when conditional transition is triggered
     onTriggered { println("Conditional transition is triggered") }
+}
+```
+
+### Transition targeting multiple states
+
+When you work with parallel states, you may want to specify multiple states as a transition target, specifying 
+a target state for each parallel state region. 
+
+This may be done with `targetParallelStates()` method inside `transitionConditionally()` transition builder function.
+Each specified state must be a child (not necessary direct) of a parallel state.
+
+```kotlin
+initialState("state1") {
+    transitionConditionally<SwitchEvent> {
+        direction = { targetParallelStates(state212, state222) }
+    }
+}
+state("state2", childMode = ChildMode.PARALLEL) {
+    state("state21") {
+        initialState("state211")
+        state212 = state("state212")
+    }
+    state("state22") {
+        initialState("state221")
+        state222 = state("state222")
+    }
 }
 ```
 
@@ -906,13 +933,12 @@ to [Mermaid state diagram](https://mermaid.js.org/syntax/stateDiagram.html).
 
 ```kotlin
 val machine = createStateMachine(scope) { /* ... */ }
-println(machine.exportToPlantUml())
+println(machine.exportToMermaid())
 ```
 
-`Intellij IDEA` users may use official [Mermaid plugin](https://plugins.jetbrains.com/plugin/20146-mermaid) 
+* `Intellij IDEA` users may use official [Mermaid plugin](https://plugins.jetbrains.com/plugin/20146-mermaid) 
 to view diagrams directly in IDE for file types: `.mmd` and `.mermaid`.
-
-Copy/paste resulting output to [Mermaid live editor](https://mermaid.live/)
+* or copy/paste resulting output to [Mermaid live editor](https://mermaid.live/)
 
 See [Mermaid nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
 
@@ -996,6 +1022,6 @@ difference between generic classes with different argument types, this is known 
 So library cannot separate such types from each other at runtime. When it is necessary to check that some object is an
 instance of
 a class, such check may be positive for class parameterized with any type.
-So it's easier aviod using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s
+So it's easier avoid using generic types in such cases. You have to use custom `EventMatcher`s and `DataExtractor`'s
 that
 will use some additional information to compare such types, or be sure that such invalid comparison never happens.
