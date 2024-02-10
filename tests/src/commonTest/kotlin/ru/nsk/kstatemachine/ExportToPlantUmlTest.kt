@@ -186,6 +186,51 @@ state1 --> state222
 @enduml
 """
 
+private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
+    return createTestStateMachine(coroutineStarterType, name = "Nested states") {
+        val state1 = initialState("State1")
+        val state3 = finalState("State3")
+
+        val state2 = state("State2") {
+            transition<SwitchEvent> { targetState = state3 }
+            transition<SwitchEvent>("back") { targetState = state1 }
+
+            val finalSubState = finalState("Final subState")
+            initialState("Initial subState") {
+                transition<SwitchEvent> { targetState = finalSubState }
+            }
+        }
+
+        state1 {
+            transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
+            transition<SwitchEvent> { targetState = this@state1 }
+            transition<SwitchEvent>()
+        }
+    }
+}
+
+private fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
+    return createTestStateMachine(coroutineStarterType, enableUndo = true) {
+        val state1 = initialState("state1")
+
+        val state2 = state("state2") {
+            initialState("state21") {
+                initialState("state211")
+            }
+            state("state22")
+        }
+        val shallowHistory = state2.historyState("shallow history")
+        val deepHistory = state2.historyState("deep history", historyType = DEEP)
+
+        state("state3") {
+            transition<FirstEvent>(targetState = shallowHistory)
+            transition<SecondEvent>(targetState = deepHistory)
+        }
+        choiceState("choice") { state1 }
+        finalState("final")
+    }
+}
+
 class ExportToPlantUmlTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         table(
@@ -194,53 +239,13 @@ class ExportToPlantUmlTest : StringSpec({
             row(true, PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT),
         ).forAll { showEventLabels, result ->
             "plantUml export nested states" {
-                val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
-                    val state1 = initialState("State1")
-                    val state3 = finalState("State3")
-
-                    val state2 = state("State2") {
-                        transition<SwitchEvent> { targetState = state3 }
-                        transition<SwitchEvent>("back") { targetState = state1 }
-
-                        val finalSubState = finalState("Final subState")
-                        initialState("Initial subState") {
-                            transition<SwitchEvent> { targetState = finalSubState }
-                        }
-                    }
-
-                    state1 {
-                        transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
-                        transition<SwitchEvent> { targetState = this@state1 }
-                        transition<SwitchEvent>()
-                    }
-                }
-
+                val machine = makeNestedMachine(coroutineStarterType)
                 machine.exportToPlantUml(showEventLabels) shouldBe result
             }
         }
 
         "Mermaid export nested states" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Nested states") {
-                val state1 = initialState("State1")
-                val state3 = finalState("State3")
-
-                val state2 = state("State2") {
-                    transition<SwitchEvent> { targetState = state3 }
-                    transition<SwitchEvent>("back") { targetState = state1 }
-
-                    val finalSubState = finalState("Final subState")
-                    initialState("Initial subState") {
-                        transition<SwitchEvent> { targetState = finalSubState }
-                    }
-                }
-
-                state1 {
-                    transition<SwitchEvent>("to ${state2.name}") { targetState = state2 }
-                    transition<SwitchEvent> { targetState = this@state1 }
-                    transition<SwitchEvent>()
-                }
-            }
-
+            val machine = makeNestedMachine(coroutineStarterType)
             machine.exportToMermaid() shouldBe MERMAID_NESTED_STATES_RESULT
         }
 
@@ -276,50 +281,12 @@ class ExportToPlantUmlTest : StringSpec({
         }
 
         "plantUml export with pseudo states" {
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                val state1 = initialState("state1")
-
-                val state2 = state("state2") {
-                    initialState("state21") {
-                        initialState("state211")
-                    }
-                    state("state22")
-                }
-                val shallowHistory = state2.historyState("shallow history")
-                val deepHistory = state2.historyState("deep history", historyType = DEEP)
-
-                state("state3") {
-                    transition<FirstEvent>(targetState = shallowHistory)
-                    transition<SecondEvent>(targetState = deepHistory)
-                }
-                choiceState("choice") { state1 }
-                finalState("final")
-            }
-
+            val machine = makeChoiceMachine(coroutineStarterType)
             machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
         }
 
         "plantUml unsafe export with pseudo states" {
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                val state1 = initialState("state1")
-
-                val state2 = state("state2") {
-                    initialState("state21") {
-                        initialState("state211")
-                    }
-                    state("state22")
-                }
-                val shallowHistory = state2.historyState("shallow history")
-                val deepHistory = state2.historyState("deep history", historyType = DEEP)
-
-                state("state3") {
-                    transition<FirstEvent>(targetState = shallowHistory)
-                    transition<SecondEvent>(targetState = deepHistory)
-                }
-                choiceState("choice") { state1 }
-                finalState("final")
-            }
-
+            val machine = makeChoiceMachine(coroutineStarterType)
             machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_UNSAFE_PSEUDO_STATES_RESULT
         }
 

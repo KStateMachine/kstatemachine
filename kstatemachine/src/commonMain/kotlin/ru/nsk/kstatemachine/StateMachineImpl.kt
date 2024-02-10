@@ -94,7 +94,7 @@ internal class StateMachineImpl(
         check(!isRunning) { "$this is already started" }
         check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }
         if (childMode == ChildMode.EXCLUSIVE)
-            checkNotNull(initialState) { "Initial state is not set, call setInitialState() first" }
+            requireInitialState()
     }
 
     /** To be called only from [runCheckingExceptions] */

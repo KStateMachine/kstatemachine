@@ -48,7 +48,7 @@ fun verifySequenceAndClear(mock: Any, verifyBlock: MockKVerificationScope.() -> 
     clearMocks(mock, answers = false)
 }
 
-fun testError(message: String): Nothing {
+fun testError(message: String = "test exception"): Nothing {
     throw TestException(message)
 }
 

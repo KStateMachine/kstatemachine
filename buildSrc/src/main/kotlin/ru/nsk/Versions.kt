@@ -1,5 +1,3 @@
-import org.gradle.api.JavaVersion
-
 object Versions {
     // library
     const val libraryMavenCentralGroup = "io.github.nsk90"

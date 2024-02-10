@@ -14,7 +14,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                     logger = StateMachine.Logger { println(it()) }
 
                     initialState {
-                        onEntry { testError("test exception") }
+                        onEntry { testError() }
                     }
                 }
             }
@@ -23,7 +23,7 @@ class ListenerExceptionHandlerTest : StringSpec({
         "default ListenerExceptionHandler rethrows exception from state onEntry() on manual start() call" {
             val machine = createTestStateMachine(coroutineStarterType, start = false) {
                 initialState {
-                    onEntry { testError("test exception") }
+                    onEntry { testError() }
                 }
             }
 
@@ -38,7 +38,7 @@ class ListenerExceptionHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, start = false) {
                 onStarted { callbacks.onStarted(this) }
                 callbacks.listen(this)
-                onEntry { testError("test exception") }
+                onEntry { testError() }
 
                 state1 = initialState {
                     callbacks.listen(this)
@@ -56,7 +56,7 @@ class ListenerExceptionHandlerTest : StringSpec({
         "default ListenerExceptionHandler rethrows exception from onStarted() on start() call" {
             shouldThrow<TestException> {
                 createTestStateMachine(coroutineStarterType) {
-                    onStarted { testError("test exception") }
+                    onStarted { testError() }
 
                     initialState()
                 }
@@ -68,7 +68,7 @@ class ListenerExceptionHandlerTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, start = false) {
                 initialState()
                 state2 = state {
-                    onEntry { testError("test exception") }
+                    onEntry { testError() }
                 }
             }
 
@@ -79,7 +79,7 @@ class ListenerExceptionHandlerTest : StringSpec({
         "default ListenerExceptionHandler rethrows exception from stop()" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()
-                onStopped { testError("test exception") }
+                onStopped { testError() }
             }
 
             shouldThrow<TestException> { machine.stopBlocking() }
@@ -94,7 +94,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                 listenerExceptionHandler = handlerMock
 
                 initialState {
-                    onEntry { testError("test exception") }
+                    onEntry { testError() }
                 }
             }
 
@@ -113,7 +113,7 @@ class ListenerExceptionHandlerTest : StringSpec({
                 val state2 = state()
                 initialState {
                     transition<SwitchEvent> {
-                        guard = { testError("test exception") }
+                        guard = { testError() }
                         targetState = state2
                     }
                 }

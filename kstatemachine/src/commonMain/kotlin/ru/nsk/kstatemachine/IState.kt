@@ -124,6 +124,10 @@ interface HistoryState : PseudoState {
 
 typealias StateBlock<S> = S.() -> Unit
 
+fun IState.requireInitialState() = checkNotNull(initialState) {
+    "Initial state is not set, call setInitialState() first"
+}
+
 /**
  * Set of states that the state is currently in. Including state itself if [selfIncluding] is true.
  * Internal states of nested machines are not included.

@@ -162,9 +162,7 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
 
         when (childMode) {
             EXCLUSIVE -> {
-                val initialState = checkNotNull(initialState) {
-                    "Initial state is not set, call setInitialState() first"
-                }
+                val initialState = requireInitialState() as InternalState
                 setCurrentState(initialState, transitionParams)
                 if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
                     initialState.recursiveEnterInitialStates(transitionParams)
@@ -254,8 +252,6 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
     override suspend fun recursiveAfterTransitionComplete(transitionParams: TransitionParams<*>) {
         data.states.forEachState { it.recursiveAfterTransitionComplete(transitionParams) }
     }
-
-    private fun requireCurrentState() = requireNotNull(data.currentState) { "Current state is not set" }
 
     override fun getCurrentStates() = when (childMode) {
         EXCLUSIVE -> listOfNotNull(data.currentState)

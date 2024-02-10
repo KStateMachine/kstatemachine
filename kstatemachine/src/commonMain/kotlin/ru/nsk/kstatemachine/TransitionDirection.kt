@@ -101,9 +101,6 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
     }
 }
 
-/**
- * Internal use only. TODO remove it when possible
- */
 internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(setOf(targetState))
 
 /**
@@ -154,9 +151,7 @@ private fun IState.findInitialPseudoState(): PseudoState? {
     if (states.isEmpty()) return null
     when (childMode) {
         ChildMode.EXCLUSIVE -> {
-            val initialState = checkNotNull(initialState) {
-                "Initial state is not set, call setInitialState() first"
-            }
+            val initialState = requireInitialState()
             return if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
                 initialState.findInitialPseudoState()
             else
@@ -173,7 +168,7 @@ private fun IState.findInitialPseudoState(): PseudoState? {
             return if (initialStates.isEmpty())
                 null
             else
-                initialStates.first() // fixme take first or other else??
+                initialStates.first() // take first or other else?
         }
     }
 }
