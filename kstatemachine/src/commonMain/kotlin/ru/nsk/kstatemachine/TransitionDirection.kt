@@ -114,6 +114,9 @@ typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirectio
 internal typealias TransitionDirectionProducer<E> = suspend (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
 
 sealed class TransitionDirectionProducerPolicy<E : Event> {
+    /**
+     * Standard behaviour, calls all lambdas and resolves target states
+     */
     internal class DefaultPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) :
         TransitionDirectionProducerPolicy<E>() {
         override suspend fun targetState(targetState: IState) = eventAndArgument.targetState(targetState)
@@ -121,9 +124,20 @@ sealed class TransitionDirectionProducerPolicy<E : Event> {
     }
 
     /**
-     * TODO find the way to collect target states of conditional transitions
+     * Does not call conditional lambdas, gets only non-conditional target states
      */
-    internal class CollectTargetStatesPolicy<E : Event> : TransitionDirectionProducerPolicy<E>() {
+    internal class CollectTargetStatesPolicy<E : Event> :
+        TransitionDirectionProducerPolicy<E>() {
+        override suspend fun targetState(targetState: IState) = unresolvedTargetState(targetState)
+        override suspend fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
+    }
+
+    /**
+     * Calls lambdas to get unresolved target states,
+     * this may fail in runtime depending on user defined lambda behaviour
+     */
+    internal class UnsafeCollectTargetStatesPolicy<E : Event>(val eventAndArgument: EventAndArgument<E>) :
+        TransitionDirectionProducerPolicy<E>() {
         override suspend fun targetState(targetState: IState) = unresolvedTargetState(targetState)
         override suspend fun targetStateOrStay(targetState: IState?) = targetState?.let { targetState(it) } ?: stay()
     }

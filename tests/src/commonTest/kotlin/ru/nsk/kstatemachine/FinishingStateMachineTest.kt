@@ -89,7 +89,6 @@ class FinishingStateMachineTest : StringSpec({
             machine.processEventBlocking(SwitchEvent)
         }
 
-        // FIXME add sample code and readme refs
         // Parallel StateMachine finishes when all direct child states has finished
         "finishing with parallel states" {
             val callbacks = mockkCallbacks()
