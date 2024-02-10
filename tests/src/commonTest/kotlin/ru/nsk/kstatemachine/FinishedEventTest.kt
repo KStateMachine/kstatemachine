@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 
 class FinishedEventTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "FinishedEvent in machine is not working as machine ignores events" {
             val callbacks = mockkCallbacks()
             lateinit var state2: State

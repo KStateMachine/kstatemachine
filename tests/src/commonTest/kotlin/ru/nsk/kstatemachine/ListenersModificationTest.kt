@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import io.kotest.core.spec.style.StringSpec
 
 class ListenersModificationTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "remove state listener from callback" {
             createTestStateMachine(coroutineStarterType) {
                 initialState {

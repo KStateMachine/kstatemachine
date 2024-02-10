@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
 class IsSubStateOfTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "isSubStateOf()" {
             lateinit var state1: IState
             lateinit var state12: IState

@@ -23,7 +23,7 @@ private object StateMachineTestData {
 }
 
 class StateMachineTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "no initial state" {
             shouldThrow<IllegalStateException> {
                 createTestStateMachine(coroutineStarterType) {}

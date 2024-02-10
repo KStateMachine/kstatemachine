@@ -8,7 +8,7 @@ import io.mockk.verifySequence
 import ru.nsk.kstatemachine.ProcessingResult.IGNORED
 
 class IgnoredEventHandlerTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "ignored event handler" {
             val callbacks = mockkCallbacks()
 

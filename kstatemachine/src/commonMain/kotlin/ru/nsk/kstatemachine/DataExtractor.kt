@@ -12,6 +12,8 @@ interface DataExtractor<D : Any> {
 }
 
 inline fun <reified D : Any> defaultDataExtractor() = object : DataExtractor<D> {
-    override suspend fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) = event.data as? D
+    override suspend fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) =
+        event.data as? D
+
     override suspend fun extract(transitionParams: TransitionParams<*>) = null
 }

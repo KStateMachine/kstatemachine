@@ -7,7 +7,7 @@ import io.mockk.*
 import ru.nsk.kstatemachine.Testing.startFromBlocking
 
 class ListenerExceptionHandlerTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
             shouldThrow<TestException> {
                 createTestStateMachine(coroutineStarterType) {

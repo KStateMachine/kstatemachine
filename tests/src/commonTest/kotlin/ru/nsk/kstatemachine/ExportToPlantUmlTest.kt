@@ -114,7 +114,7 @@ state inner_machine_StateMachine
 """
 
 class ExportToPlantUmlTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         table(
             headers("showEventLabels", "result"),
             row(false, PLANTUML_NESTED_STATES_RESULT),

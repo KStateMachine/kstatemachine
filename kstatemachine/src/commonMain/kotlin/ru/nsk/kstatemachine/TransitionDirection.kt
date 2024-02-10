@@ -1,43 +1,91 @@
 package ru.nsk.kstatemachine
 
-sealed class TransitionDirection {
+sealed interface TransitionDirection {
     /**
      * Already resolved target state of conditional transition or [PseudoState] computation
+     * This is always one of [targetStates] list elements or null, if the list is empty.
      */
-    open val targetState: IState? = null
+    val targetState: IState? get() = null
+
+    /**
+     * Transition can target multiple states if they all are located at different regions of a parallel state.
+     */
+    val targetStates: Set<IState>
 }
 
 /**
  * [Transition] is triggered, but state is not changed
  */
-internal object Stay : TransitionDirection()
+internal object Stay : TransitionDirection {
+    override val targetStates = emptySet<IState>()
+}
 
 fun stay(): TransitionDirection = Stay
 
 /**
  * [Transition] should not be triggered
  */
-internal object NoTransition : TransitionDirection()
+internal object NoTransition : TransitionDirection {
+    override val targetStates = emptySet<IState>()
+}
 
 fun noTransition(): TransitionDirection = NoTransition
 
 /**
- * [Transition] is triggered with a [targetState].
+ * [Transition] is triggered with [targetStates] (usually with single [targetState])
  */
-internal open class TargetState(override val targetState: IState) : TransitionDirection()
+internal data class TargetState(
+    override val targetStates: Set<IState>,
+    override val targetState: IState = targetStates.first()
+) : TransitionDirection {
+    init {
+        require(targetStates.contains(targetState)) {
+            "Internal logical error, invalid ${TargetState::class.simpleName} construction, this should never happen"
+        }
+    }
+}
 
 /**
  * [Transition] is triggered with a targetState, resolving it in place if it is a [PseudoState]
  */
 suspend fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection = resolveTargetState(targetState)
 
+suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>): TransitionDirection {
+    require(targetStates.size >= 2) {
+        "There should be at least two targetStates, current amount ${targetStates.size}," +
+                " check that you are not using the same state multiple times"
+    }
+    val resolvedStates = mutableSetOf<IState>()
+    targetStates.mapNotNullTo(resolvedStates) { recursiveResolveTargetState(it) }
+    if (resolvedStates.isEmpty()) return NoTransition
+
+    @Suppress("UNCHECKED_CAST")
+    val lca = findLca(resolvedStates as Set<InternalNode>) as InternalState
+    check(lca.findParallelAncestor() != null) {
+        "Resolved states does not have common ancestor with ${ChildMode.PARALLEL} child mode. " +
+                "Only children of a state with ${ChildMode.PARALLEL} child mode" +
+                " might be used as effective (resolved) targets here."
+    }
+    return TargetState(resolvedStates)
+}
+
+private fun InternalState.findParallelAncestor(): InternalState? {
+    return if (childMode == ChildMode.PARALLEL) this else internalParent?.findParallelAncestor()
+}
+
+suspend fun EventAndArgument<*>.targetParallelStates(
+    targetState1: IState,
+    targetState2: IState,
+    vararg targetStates: IState
+) = targetParallelStates(setOf(targetState1, targetState2, *targetStates))
+
 private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState): TransitionDirection {
     val resolvedState = recursiveResolveTargetState(targetState)
-    return if (resolvedState != null) TargetState(resolvedState) else NoTransition
+    return if (resolvedState != null) TargetState(setOf(resolvedState)) else NoTransition
 }
 
 private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
-    val resolvedTarget =  when (targetState) {
+    val resolvedTarget = when (targetState) {
         is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
         is HistoryState -> targetState.storedState
         is UndoState -> targetState.popState()
@@ -56,7 +104,7 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
 /**
  * Internal use only. TODO remove it when possible
  */
-internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(targetState)
+internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(setOf(targetState))
 
 /**
  * Transition that matches event and has a meaningful direction (except [NoTransition])

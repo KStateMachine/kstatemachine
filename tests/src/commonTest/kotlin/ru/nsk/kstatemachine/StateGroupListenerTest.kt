@@ -18,7 +18,7 @@ private object StateGroupListenerTestData {
 }
 
 class StateGroupListenerTest : FreeSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "onActiveAllOf()" - {
             withData(
                 { "callback behaviour with notifyOnSubscribe:$it" },

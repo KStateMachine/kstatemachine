@@ -4,12 +4,13 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
 import io.mockk.verify
 import io.mockk.verifySequence
 
 class ParallelStatesTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "initial state in parallel mode negative" {
             createTestStateMachine(coroutineStarterType) {
                 initialState(childMode = ChildMode.PARALLEL) {

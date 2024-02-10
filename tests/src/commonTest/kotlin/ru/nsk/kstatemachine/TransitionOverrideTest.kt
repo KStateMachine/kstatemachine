@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.mockk.verifySequence
 
 class TransitionOverrideTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "override parent transition same event type" {
             overrideParentTransitionWithEventType<SwitchEvent>(coroutineStarterType)
         }

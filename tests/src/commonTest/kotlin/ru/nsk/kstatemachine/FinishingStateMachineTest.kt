@@ -9,7 +9,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 
 class FinishingStateMachineTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "finishing state machine" {
             val callbacks = mockkCallbacks()
 

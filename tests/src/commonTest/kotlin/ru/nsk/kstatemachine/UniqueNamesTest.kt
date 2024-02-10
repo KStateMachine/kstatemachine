@@ -4,7 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 
 class UniqueNamesTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "do not allow transitions with same name" {
             shouldThrow<IllegalStateException> {
                 createTestStateMachine(coroutineStarterType) {

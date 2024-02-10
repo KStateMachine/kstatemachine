@@ -11,7 +11,7 @@ import org.junit.jupiter.api.fail
 import ru.nsk.kstatemachine.ProcessingResult.PROCESSED
 
 class TransitionTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "transition add after machine start" {
             lateinit var state1: State
             createTestStateMachine(coroutineStarterType) {

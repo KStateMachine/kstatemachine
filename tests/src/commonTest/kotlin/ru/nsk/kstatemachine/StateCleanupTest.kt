@@ -10,7 +10,7 @@ private object StateCleanupTestData {
 }
 
 class StateCleanupTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "cleanup is not called" {
             val state = spyk<State1>()
             useInMachine(coroutineStarterType, state)

@@ -15,7 +15,7 @@ import io.mockk.verifySequence
  * Inner machine is started automatically when outer one enters it.
  */
 class CompositionStateMachinesTest : StringSpec({
-    CoroutineStarterType.values().forEach { coroutineStarterType ->
+    CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "composition, inner machine auto start on entry" { composition(coroutineStarterType, false) }
         "composition, inner machine already started" { composition(coroutineStarterType, true) }
 
