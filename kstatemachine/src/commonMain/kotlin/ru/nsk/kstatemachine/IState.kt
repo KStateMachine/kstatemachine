@@ -205,8 +205,8 @@ fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else 
 fun IState.state(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
-    init: StateBlock<State>? = null,
-    metaInfo: StateMetaInfo? = null
+    metaInfo: StateMetaInfo? = null,
+    init: StateBlock<State>? = null
 ) = addState(DefaultState(name, childMode, metaInfo), init)
 
 inline fun <reified D : Any> IState.dataState(
