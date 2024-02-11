@@ -15,8 +15,7 @@ class FinishingStateMachineTest : StringSpec({
 
             lateinit var final: State
             val machine = createTestStateMachine(coroutineStarterType) {
-                final = finalState("final") { callbacks.listen(this) }
-                setInitialState(final)
+                final = initialFinalState("final") { callbacks.listen(this) }
 
                 onFinished { callbacks.onStateFinished(this) }
                 onStateFinished { state, _ -> callbacks.onStateFinished(state) }
@@ -32,8 +31,7 @@ class FinishingStateMachineTest : StringSpec({
         "restart machine after finish" {
             val callbacks = mockkCallbacks()
             val machine = createTestStateMachine(coroutineStarterType) {
-                val final = finalState("final")
-                setInitialState(final)
+                initialFinalState("final")
                 transition<SwitchEvent> { callbacks.listen(this) }
             }
             machine.isFinished shouldBe true
@@ -43,17 +41,12 @@ class FinishingStateMachineTest : StringSpec({
             machine.restartBlocking()
         }
 
-        "reenter finished branch" {
-            //TODO()
-        }
-
         "finished state machine ignores event" {
             val callbacks = mockkCallbacks()
 
             lateinit var final: State
             val machine = createTestStateMachine(coroutineStarterType) {
-                final = finalState("final") { callbacks.listen(this) }
-                setInitialState(final)
+                final = initialFinalState("final") { callbacks.listen(this) }
 
                 onFinished { callbacks.onStateFinished(this) }
 
@@ -73,16 +66,14 @@ class FinishingStateMachineTest : StringSpec({
         }
 
         "finished state machine ignores event from deep transition" {
-            lateinit var final: State
             val machine = createTestStateMachine(coroutineStarterType) {
-                final = finalState("final") {
+                initialFinalState("final") {
                     initialState("nested state") {
                         transition<SwitchEvent> {
                             onTriggered { error("should not be triggered") }
                         }
                     }
                 }
-                setInitialState(final)
             }
 
             machine.isFinished shouldBe true
@@ -182,11 +173,9 @@ class FinishingStateMachineTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 state1 = initialState("state1") {
                     state11 = initialState("state11") {
-                        val final = finalState("finalState111") {
+                        initialFinalState("finalState111") {
                             transitionOn<SwitchEvent> { targetState = { state112 } }
                         }
-                        setInitialState(final)
-
                         state112 = state("state112")
                     }
                 }
@@ -265,50 +254,6 @@ class FinishingStateMachineTest : StringSpec({
                 callbacks.onStateFinished(machine)
             }
             machine.isFinished shouldBe true
-        }
-
-        "composite state isFinished is reset on leaving final state" {
-            lateinit var state11: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    state11 = initialState("state11") {
-                        val state112 = state("state112")
-
-                        val final = finalState("finalState111") {
-                            transition<SwitchEvent>(targetState = state112)
-                        }
-                        setInitialState(final)
-                    }
-                }
-            }
-
-            state11.isFinished shouldBe true
-            machine.isFinished shouldBe false
-
-            machine.processEventBlocking(SwitchEvent)
-            state11.isFinished shouldBe false
-        }
-
-        "composite state isFinished is reset on leaving this state" {
-            lateinit var state11: State
-            lateinit var state12: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    state11 = initialState("state11") {
-                        val final = finalState("finalState111") {
-                            transitionOn<SwitchEvent> { targetState = { state12 } }
-                        }
-                        setInitialState(final)
-                    }
-                }
-                state12 = state("state12")
-            }
-
-            state11.isFinished shouldBe true
-            machine.isFinished shouldBe false
-
-            machine.processEventBlocking(SwitchEvent)
-            state11.isFinished shouldBe false
         }
     }
 })

@@ -98,10 +98,10 @@ class FinishedEventTest : StringSpec({
             createTestStateMachine(coroutineStarterType) {
                 initialState(childMode = ChildMode.PARALLEL) {
                     state("state1") {
-                        setInitialState(finalState("state11"))
+                        initialFinalState("state11")
                     }
                     state("state2") {
-                        setInitialState(finalState("state21"))
+                        initialFinalState("state21")
                     }
                     transition<FinishedEvent> {
                         callbacks.listen(this)
@@ -118,7 +118,7 @@ class FinishedEventTest : StringSpec({
 
             createTestStateMachine(coroutineStarterType) {
                 initialState {
-                    setInitialState(finalState())
+                    initialFinalState()
                     transition<FinishedEvent> {
                         onTriggered {
                             it.event.data shouldBe null

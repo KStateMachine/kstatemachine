@@ -254,12 +254,22 @@ fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null
 fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
+fun IState.initialFinalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+    addInitialState(DefaultFinalState(name), init)
+
 inline fun <reified D : Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
     noinline init: StateBlock<FinalDataState<D>>? = null
 ) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
+
+inline fun <reified D : Any> IState.initialFinalDataState(
+    name: String? = null,
+    defaultData: D? = null,
+    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
+    noinline init: StateBlock<FinalDataState<D>>? = null
+) = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
 fun IState.choiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
     addState(DefaultChoiceState(name, choiceAction))

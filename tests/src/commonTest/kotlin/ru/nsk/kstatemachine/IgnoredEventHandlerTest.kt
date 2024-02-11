@@ -41,7 +41,7 @@ class IgnoredEventHandlerTest : StringSpec({
             val callbacks = mockkCallbacks()
 
             val machine = createTestStateMachine(coroutineStarterType) {
-                setInitialState(finalState("final"))
+                initialFinalState("final")
 
                 onFinished { callbacks.onStateFinished(this) }
 

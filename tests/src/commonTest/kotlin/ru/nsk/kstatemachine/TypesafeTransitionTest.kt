@@ -311,7 +311,7 @@ class TypesafeTransitionTest : StringSpec({
             lateinit var dataState: DataState<Int>
             createTestStateMachine(coroutineStarterType) {
                 initialState {
-                    setInitialState(finalDataState(defaultData = 0))
+                    initialFinalDataState(defaultData = 0)
 
                     transitionConditionally<FinishedEvent> {
                         direction = { targetState(dataState) }
