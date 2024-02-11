@@ -7,20 +7,20 @@ import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
  */
 open class DefaultState(
     name: String? = null,
-    displayName: String? = null,
-    childMode: ChildMode = EXCLUSIVE
-) : BaseStateImpl(name, displayName, childMode), State
+    childMode: ChildMode = EXCLUSIVE,
+    metaInfo: StateMetaInfo? = null
+) : BaseStateImpl(name, childMode, metaInfo), State
 
 open class DefaultFinalState(
     name: String? = null,
-    displayName: String? = null
-) : DefaultState(name, displayName), FinalState
+    metaInfo: StateMetaInfo? = null
+) : DefaultState(name, metaInfo = metaInfo), FinalState
 
 open class DefaultChoiceState(
     name: String? = null,
-    displayName: String? = null,
+    metaInfo: StateMetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> State
-) : BasePseudoState(name, displayName), RedirectPseudoState {
+) : BasePseudoState(name, metaInfo), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
         eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
@@ -28,9 +28,9 @@ open class DefaultChoiceState(
 
 open class DefaultChoiceDataState<D : Any>(
     name: String? = null,
-    displayName: String? = null,
+    metaInfo: StateMetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
-) : DataState<D>, BasePseudoState(name, displayName), RedirectPseudoState {
+) : DataState<D>, BasePseudoState(name, metaInfo), RedirectPseudoState {
 
     override suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>) =
         eventAndArgument.choiceAction().also { log { "$this resolved to $it" } }
@@ -40,7 +40,7 @@ open class DefaultChoiceDataState<D : Any>(
     override val lastData: D get() = error("PseudoState $this can not have lastData")
 }
 
-open class BasePseudoState(name: String?, displayName: String?) : BaseStateImpl(name, displayName, EXCLUSIVE), PseudoState {
+open class BasePseudoState(name: String?, metaInfo: StateMetaInfo?) : BaseStateImpl(name, EXCLUSIVE, metaInfo), PseudoState {
     override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 

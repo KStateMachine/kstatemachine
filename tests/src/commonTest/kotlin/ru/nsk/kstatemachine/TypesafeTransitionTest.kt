@@ -213,7 +213,7 @@ class TypesafeTransitionTest : StringSpec({
 
         "create self targeted data transition in DataState" {
             createTestStateMachine(coroutineStarterType) {
-                initialDataState<Int>("state1", 42) {
+                initialDataState<Int>("state1", defaultData = 42) {
                     dataTransition<IdEvent, Int>(targetState = this)
                 }
             }
@@ -221,7 +221,7 @@ class TypesafeTransitionTest : StringSpec({
 
         "create self targeted data transition in DataState via builder" {
             createTestStateMachine(coroutineStarterType) {
-                initialDataState<Int>("state1", 42) {
+                initialDataState<Int>("state1", defaultData = 42) {
                     dataTransition<IdEvent, Int> {
                         targetState = this@initialDataState
                     }
@@ -231,7 +231,7 @@ class TypesafeTransitionTest : StringSpec({
 
         "create target-less data transition in DataState" {
             createTestStateMachine(coroutineStarterType) {
-                initialDataState<Int>("state1", 42) {
+                initialDataState<Int>("state1", defaultData = 42) {
                     // this method is only available for DataState
                     dataTransition<IdEvent, Int>()
                 }

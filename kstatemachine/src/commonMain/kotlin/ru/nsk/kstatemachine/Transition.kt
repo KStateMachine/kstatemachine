@@ -11,7 +11,7 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
  */
 interface Transition<E : Event> : VisitorAcceptor {
     val name: String?
-    val displayName: String
+    val metaInfo: TransitionMetaInfo?
     val eventMatcher: EventMatcher<E>
     val sourceState: IState
     val type: TransitionType

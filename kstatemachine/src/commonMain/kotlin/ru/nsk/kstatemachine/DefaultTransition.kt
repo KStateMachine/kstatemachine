@@ -2,30 +2,30 @@ package ru.nsk.kstatemachine
 
 open class DefaultTransition<E : Event>(
     override val name: String?,
-    override val displayName: String,
     override val eventMatcher: EventMatcher<E>,
     override val type: TransitionType,
     sourceState: IState,
+    override val metaInfo: TransitionMetaInfo?,
 ) : InternalTransition<E> {
     constructor(
         name: String?,
-        displayName: String,
         eventMatcher: EventMatcher<E>,
         type: TransitionType,
         sourceState: IState,
-        targetState: IState?
-    ) : this(name, displayName, eventMatcher, type, sourceState) {
+        targetState: IState?,
+        metaInfo: TransitionMetaInfo?
+    ) : this(name, eventMatcher, type, sourceState, metaInfo) {
         targetStateDirectionProducer = { it.targetStateOrStay(targetState) }
     }
 
     constructor(
         name: String?,
-        displayName: String,
         eventMatcher: EventMatcher<E>,
         type: TransitionType,
         sourceState: IState,
-        targetStateDirectionProducer: TransitionDirectionProducer<E>
-    ) : this(name, displayName, eventMatcher, type, sourceState) {
+        targetStateDirectionProducer: TransitionDirectionProducer<E>,
+        metaInfo: TransitionMetaInfo?
+    ) : this(name, eventMatcher, type, sourceState,metaInfo) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
 

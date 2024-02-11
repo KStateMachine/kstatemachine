@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 package ru.nsk.kstatemachine
 
 import io.mockk.MockKVerificationScope
@@ -5,7 +6,9 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -82,6 +85,7 @@ fun createTestStateMachine(
 ) = when (coroutineStarterType) {
     CoroutineStarterType.STD_LIB -> createStdLibStateMachine(
         name,
+        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -92,6 +96,7 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
         CoroutineScope(EmptyCoroutineContext),
         name,
+        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -102,6 +107,7 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Unconfined),
         name,
+        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -112,6 +118,7 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(newSingleThreadContext("")),
         name,
+        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -122,6 +129,7 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Default.limitedParallelism(1)),
         name,
+        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,

@@ -44,21 +44,21 @@ internal class StdLibCoroutineAbstraction : CoroutineAbstraction {
 
 suspend fun CoroutineAbstraction.createStateMachine(
     name: String?,
-    displayName: String?,
     childMode: ChildMode,
     start: Boolean,
     autoDestroyOnStatesReuse: Boolean,
     enableUndo: Boolean,
     doNotThrowOnMultipleTransitionsMatch: Boolean,
+    metaInfo: StateMetaInfo?,
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,
-    displayName,
     childMode,
     autoDestroyOnStatesReuse,
     enableUndo,
     doNotThrowOnMultipleTransitionsMatch,
     this,
+    metaInfo,
 ).apply {
     init()
     if (start) start()

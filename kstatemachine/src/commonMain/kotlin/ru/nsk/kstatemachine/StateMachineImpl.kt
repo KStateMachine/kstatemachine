@@ -7,8 +7,8 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 /**
  * Defines state machine API for internal library usage.
  */
-abstract class InternalStateMachine(name: String?, displayName: String?, childMode: ChildMode) :
-    BuildingStateMachine, DefaultState(name, displayName, childMode) {
+abstract class InternalStateMachine(name: String?, metaInfo: StateMetaInfo?, childMode: ChildMode) :
+    BuildingStateMachine, DefaultState(name, childMode, metaInfo) {
     internal abstract suspend fun startFrom(state: IState, argument: Any?)
     internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
@@ -16,13 +16,13 @@ abstract class InternalStateMachine(name: String?, displayName: String?, childMo
 
 internal class StateMachineImpl(
     name: String?,
-    displayName: String?,
     childMode: ChildMode,
     override val autoDestroyOnStatesReuse: Boolean,
     override val isUndoEnabled: Boolean,
     override val doNotThrowOnMultipleTransitionsMatch: Boolean,
     override val coroutineAbstraction: CoroutineAbstraction,
-) : InternalStateMachine(name, displayName, childMode) {
+    metaInfo: StateMetaInfo?,
+) : InternalStateMachine(name, metaInfo, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = StateMachine.Logger {}
@@ -298,11 +298,11 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
 ): TransitionParams<*> {
     val transition = DefaultTransition(
         "Starting",
-        "",
         EventMatcher.isInstanceOf<E>(),
         TransitionType.LOCAL,
         sourceState,
         targetState,
+        null
     )
 
     return TransitionParams(

@@ -52,26 +52,25 @@ internal class ExportPlantUmlVisitor(
             when (state) {
                 is HistoryState, is UndoState -> return
                 is RedirectPseudoState -> {
-                    val stateName = state.graphName()
-                    line("state $stateName $CHOICE")
+                    line("state $CHOICE ${state.displayName()}")
                     if (unsafeCallConditionalLambdas) {
                         val targetState = state.resolveTargetState(
                             EventAndArgument(ExportPlantUmlEvent, null)
                         ) as InternalState
-                        crossLevelTransitions += "$stateName --> ${targetState.targetGraphName()}"
+                        crossLevelTransitions += "${state.graphName()} --> ${targetState.targetGraphName()}"
                     }
                 }
-                else -> line("state ${state.graphName()}")
+                else -> line("state ${state.displayName()}")
             }
         } else {
             if (state !is StateMachine) { // ignore composed machines
-                line("state ${state.graphName()} {")
+                line("state ${state.displayName()} {")
                 ++indent
                 processStateBody(state)
                 --indent
                 line("}")
             } else {
-                line("state ${state.graphName()}")
+                line("state ${state.displayName()}")
             }
         }
     }
@@ -134,11 +133,11 @@ internal class ExportPlantUmlVisitor(
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
 
     private fun transitionLabel(transition: Transition<*>): String {
-        val entries = listOfNotNull(
-            transition.displayName.trim().takeIf { it.isNotBlank() } ?: transition.name,
+        val text = listOfNotNull(
+            (transition.metaInfo as? UmlMetaInfo)?.umlLabel ?: transition.name,
             transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
-        )
-        return label(entries.joinToString())
+        ).joinToString()
+        return " : $text".takeIf { text.isNotBlank() } ?: ""
     }
 
     private companion object {
@@ -150,8 +149,14 @@ internal class ExportPlantUmlVisitor(
         const val CHOICE = "<<choice>>"
 
         fun IState.graphName(): String {
-            val name = displayName?.replace(" ", "_") ?: "State${hashCode()}"
+            val name = name?.replace(" ", "_") ?: "State${hashCode()}"
             return if (this !is StateMachine) name else "${name}_StateMachine"
+        }
+
+        fun IState.displayName(): String {
+            return (this.metaInfo as? UmlMetaInfo)?.umlLabel?.let { label ->
+                graphName() + " as \"$label\""
+            } ?: graphName()
         }
 
         fun InternalState.targetGraphName(): String {
@@ -165,8 +170,6 @@ internal class ExportPlantUmlVisitor(
                 graphName()
             }
         }
-
-        fun label(text: String?) = if (!text.isNullOrBlank()) " : $text" else ""
     }
 }
 

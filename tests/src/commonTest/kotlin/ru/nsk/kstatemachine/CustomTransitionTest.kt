@@ -9,8 +9,8 @@ import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 private object CustomTransitionTestData {
     class CustomEvent(val value: Int) : Event
 
-    class CustomTransition(name: String, displayName: String, sourceState: IState, targetState: IState) :
-        DefaultTransition<Event>(name,  displayName, isInstanceOf(), TransitionType.LOCAL, sourceState, targetState) {
+    class CustomTransition(name: String, metaInfo: TransitionMetaInfo?, sourceState: IState, targetState: IState) :
+        DefaultTransition<Event>(name, isInstanceOf(), TransitionType.LOCAL, sourceState, targetState, metaInfo) {
         override suspend fun isMatchingEvent(event: Event): Boolean {
             return super.isMatchingEvent(event) && event is CustomEvent && event.value == 42
         }
@@ -33,7 +33,7 @@ class CustomTransitionTest : StringSpec({
                 val state2 = state("state2")
 
                 initialState("state1") {
-                    val transition = CustomTransition("customTransition", "test display name",this, state2).apply {
+                    val transition = CustomTransition("customTransition", null,this, state2).apply {
                         onTriggered { callbacks.onTransitionTriggered(it.event) }
                     }
                     addTransition(transition)

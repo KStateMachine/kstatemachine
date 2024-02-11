@@ -212,24 +212,24 @@ interface BuildingStateMachine : StateMachine {
  */
 fun createStdLibStateMachine(
     name: String? = null,
-    displayName: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    metaInfo: StateMetaInfo? = null,
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine {
     return with(StdLibCoroutineAbstraction()) {
         runBlocking {
             createStateMachine(
                 name,
-                displayName,
                 childMode,
                 start,
                 autoDestroyOnStatesReuse,
                 enableUndo,
                 doNotThrowOnMultipleTransitionsMatch,
+                metaInfo,
                 init
             )
         }

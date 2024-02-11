@@ -10,7 +10,7 @@ private object MermaidExportSample {
 }
 
 fun main() = runBlocking {
-    val machine = createStateMachine(this, "Nested states") {
+    val machine = createStateMachine(this, name = "Nested states") {
         val state1 = initialState("State1")
         val state3 = finalState("State3")
 
