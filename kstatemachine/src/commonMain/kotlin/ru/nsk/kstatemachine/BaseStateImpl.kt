@@ -211,7 +211,11 @@ open class BaseStateImpl(override val name: String?, override val childMode: Chi
         } else {
             when (childMode) {
                 EXCLUSIVE -> {
-                    val exclusivePath = pathHead.children.single()
+                    val exclusivePath = pathHead.children.singleOrNull() ?: error(
+                        "Looks that you have specified multiple targets for exclusive state, which is not correct, " +
+                                "calculated targets: ${pathHead.children.joinToString { it.state.toString() }}, " +
+                                "parent: $this"
+                    )
                     val state = exclusivePath.state as InternalState
                     setCurrentState(state, transitionParams)
                     if (state !is StateMachine) // inner state machine manages its internal state by its own

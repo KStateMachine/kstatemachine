@@ -192,10 +192,6 @@ suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.wi
  */
 fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
 
-suspend fun IState.log(lazyMessage: () -> String) {
-    machineOrNull()?.logger?.log(lazyMessage)
-}
-
 /**
  * Allows to mutate some properties, which is necessary during setup, before machine is started
  */

@@ -1,10 +1,13 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.verifySequence
+import ru.nsk.kstatemachine.Testing.startFrom
 
 class ParallelTargetStatesTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -352,6 +355,38 @@ class ParallelTargetStatesTest : StringSpec({
                 callbacks.onStateEntry(state222)
                 callbacks.onStateEntry(state2222)
             }
+        }
+
+        "negative, multiple targets for EXCLUSIVE state" {
+            lateinit var state221: State
+            lateinit var state222: State
+            lateinit var state232: State
+
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("state1") {
+                    transitionConditionally<SwitchEvent> {
+                        direction = { targetParallelStates(state221, state222, state232) }
+                    }
+                }
+                state("state2", ChildMode.PARALLEL) {
+                    state("state21") {
+                        initialState("state211")
+                        state("state212")
+                    }
+                    state("state22") {
+                        state221 = initialState("state221")
+                        state222 = state("state222")
+                    }
+                    state("state23") {
+                        initialState("state231")
+                        state232 = state("state232")
+                    }
+                }
+            }
+
+            shouldThrow<IllegalStateException> {
+                machine.processEvent(SwitchEvent)
+            }.message shouldStartWith "Looks that you have specified multiple targets for exclusive state, which is not correct"
         }
     }
 })

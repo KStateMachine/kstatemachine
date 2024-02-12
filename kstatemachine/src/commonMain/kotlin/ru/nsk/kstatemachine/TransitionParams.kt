@@ -37,7 +37,13 @@ sealed interface StartEvent : GeneratedEvent {
     val startState: IState
 }
 
-internal class StartEventImpl(override val startState: IState) : StartEvent
+/**
+ * [startStates] must contain at least one state. If there are multiple states they must be sub-children of a parallel
+ * state.
+ */
+internal class StartEventImpl(val startStates: Set<IState>) : StartEvent {
+    override val startState = startStates.first()
+}
 
 internal class StartDataEventImpl<D : Any>(
     override val startState: DataState<D>,

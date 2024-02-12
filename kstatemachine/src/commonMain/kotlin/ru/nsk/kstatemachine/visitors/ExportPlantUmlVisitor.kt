@@ -54,10 +54,10 @@ internal class ExportPlantUmlVisitor(
                 is RedirectPseudoState -> {
                     val stateName = state.graphName()
                     line("state $stateName $CHOICE")
-                    if (unsafeCallConditionalLambdas) {
-                        val targetState = state.resolveTargetState(
-                            EventAndArgument(ExportPlantUmlEvent, null)
-                        ) as InternalState
+                    @Suppress("UNCHECKED_CAST")
+                    val targetStates = state.resolveTargetState(makeDirectionProducerPolicy<Event>())
+                        .targetStates as Set<InternalState>
+                    targetStates.forEach { targetState ->
                         crossLevelTransitions += "$stateName --> ${targetState.targetGraphName()}"
                     }
                 }

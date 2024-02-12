@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
  */
 abstract class InternalStateMachine(name: String?, childMode: ChildMode) :
     BuildingStateMachine, DefaultState(name, childMode) {
-    internal abstract suspend fun startFrom(state: IState, argument: Any?)
+    internal abstract suspend fun startFrom(states: Set<IState>, argument: Any?)
     internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
     internal abstract fun delayListenerException(exception: Exception)
 }
@@ -33,7 +33,18 @@ internal class StateMachineImpl(
 
     init {
         transitionConditionally<StartEvent>("start transition") {
-            direction = { targetState(event.startState) }
+            direction = {
+                when (event) {
+                    is StartEventImpl -> {
+                        if (event.startStates.size == 1) {
+                            targetState(event.startState)
+                        } else {
+                            targetParallelStates(event.startStates)
+                        }
+                    }
+                    is StartDataEventImpl<*> -> targetState(event.startState)
+                }
+            }
         }
         if (isUndoEnabled) {
             val undoState = addState(UndoState())
@@ -66,10 +77,10 @@ internal class StateMachineImpl(
         _machineListeners.remove(listener)
     }
 
-    override suspend fun start(argument: Any?): Unit = startFrom(this, argument)
+    override suspend fun start(argument: Any?): Unit = startFrom(setOf(this), argument)
 
-    override suspend fun startFrom(state: IState, argument: Any?): Unit =
-        doStartFrom(StartEventImpl(state), argument)
+    override suspend fun startFrom(states: Set<IState>, argument: Any?): Unit =
+        doStartFrom(StartEventImpl(states), argument)
 
     override suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?): Unit =
         doStartFrom(StartDataEventImpl(state, data), argument)

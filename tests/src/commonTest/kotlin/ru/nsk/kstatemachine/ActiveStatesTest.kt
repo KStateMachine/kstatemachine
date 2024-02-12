@@ -65,7 +65,7 @@ class ActiveStatesTest : StringSpec({
                 }
             }
 
-            machine.activeStates().shouldContainExactly(initialState, nestedMachine)
+            machine.activeStates() should containExactly(initialState, nestedMachine)
         }
     }
 })

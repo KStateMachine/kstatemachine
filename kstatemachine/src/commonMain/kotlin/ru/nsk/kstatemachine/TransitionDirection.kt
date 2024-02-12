@@ -1,5 +1,7 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.DefaultPolicy
+
 sealed interface TransitionDirection {
     /**
      * Already resolved target state of conditional transition or [PseudoState] computation
@@ -86,7 +88,9 @@ private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState):
 
 private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
     val resolvedTarget = when (targetState) {
-        is RedirectPseudoState -> recursiveResolveTargetState(targetState.resolveTargetState(this))
+        // We can return here to optimize out double initialPseudoState resolution,
+        // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
+        is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetState
         is HistoryState -> targetState.storedState
         is UndoState -> targetState.popState()
         else -> targetState
