@@ -5,7 +5,7 @@ open class DefaultTransition<E : Event>(
     override val eventMatcher: EventMatcher<E>,
     override val type: TransitionType,
     sourceState: IState,
-    override val metaInfo: TransitionMetaInfo?,
+    override val metaInfo: MetaInfo?,
 ) : InternalTransition<E> {
     constructor(
         name: String?,
@@ -13,7 +13,7 @@ open class DefaultTransition<E : Event>(
         type: TransitionType,
         sourceState: IState,
         targetState: IState?,
-        metaInfo: TransitionMetaInfo?
+        metaInfo: MetaInfo?
     ) : this(name, eventMatcher, type, sourceState, metaInfo) {
         targetStateDirectionProducer = { it.targetStateOrStay(targetState) }
     }
@@ -24,7 +24,7 @@ open class DefaultTransition<E : Event>(
         type: TransitionType,
         sourceState: IState,
         targetStateDirectionProducer: TransitionDirectionProducer<E>,
-        metaInfo: TransitionMetaInfo?
+        metaInfo: MetaInfo?
     ) : this(name, eventMatcher, type, sourceState,metaInfo) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }

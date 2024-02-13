@@ -49,7 +49,7 @@ suspend fun CoroutineAbstraction.createStateMachine(
     autoDestroyOnStatesReuse: Boolean,
     enableUndo: Boolean,
     doNotThrowOnMultipleTransitionsMatch: Boolean,
-    metaInfo: StateMetaInfo?,
+    metaInfo: MetaInfo?,
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,

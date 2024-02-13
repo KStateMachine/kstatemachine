@@ -20,7 +20,7 @@ private object ComplexSyntaxSample {
 fun main() = runBlocking {
     val machine = createStateMachine(
         this, // coroutine scope used for this machine
-        name = "Traffic lights" // StateMachine name is optional
+        "Traffic lights" // StateMachine name is optional
     ) {
         // Create and setup states
         val greenState = initialState("Green") // State name is optional

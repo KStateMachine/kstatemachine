@@ -10,7 +10,8 @@ import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 open class BaseStateImpl(
     override val name: String?,
     override val childMode: ChildMode,
-    override val metaInfo: StateMetaInfo?) : InternalState() {
+    override val metaInfo: MetaInfo?
+) : InternalState() {
 
     private class Data {
         val listeners = mutableSetOf<IState.Listener>()

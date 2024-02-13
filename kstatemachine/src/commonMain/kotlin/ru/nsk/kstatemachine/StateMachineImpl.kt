@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 /**
  * Defines state machine API for internal library usage.
  */
-abstract class InternalStateMachine(name: String?, metaInfo: StateMetaInfo?, childMode: ChildMode) :
+abstract class InternalStateMachine(name: String?, childMode: ChildMode, metaInfo: MetaInfo?) :
     BuildingStateMachine, DefaultState(name, childMode, metaInfo) {
     internal abstract suspend fun startFrom(state: IState, argument: Any?)
     internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
@@ -21,8 +21,8 @@ internal class StateMachineImpl(
     override val isUndoEnabled: Boolean,
     override val doNotThrowOnMultipleTransitionsMatch: Boolean,
     override val coroutineAbstraction: CoroutineAbstraction,
-    metaInfo: StateMetaInfo?,
-) : InternalStateMachine(name, metaInfo, childMode) {
+    metaInfo: MetaInfo?,
+) : InternalStateMachine(name, childMode, metaInfo) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = StateMachine.Logger {}

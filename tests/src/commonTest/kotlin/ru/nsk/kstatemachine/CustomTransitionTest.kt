@@ -9,7 +9,7 @@ import ru.nsk.kstatemachine.EventMatcher.Companion.isInstanceOf
 private object CustomTransitionTestData {
     class CustomEvent(val value: Int) : Event
 
-    class CustomTransition(name: String, metaInfo: TransitionMetaInfo?, sourceState: IState, targetState: IState) :
+    class CustomTransition(name: String, metaInfo: MetaInfo?, sourceState: IState, targetState: IState) :
         DefaultTransition<Event>(name, isInstanceOf(), TransitionType.LOCAL, sourceState, targetState, metaInfo) {
         override suspend fun isMatchingEvent(event: Event): Boolean {
             return super.isMatchingEvent(event) && event is CustomEvent && event.value == 42

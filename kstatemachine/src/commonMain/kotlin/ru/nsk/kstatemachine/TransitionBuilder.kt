@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine
 import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 
 @StateMachineDslMarker
-abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val metaInfo: TransitionMetaInfo?, protected val sourceState: IState) {
+abstract class TransitionBuilder<E : Event>(protected val name: String?, protected val metaInfo: MetaInfo?, protected val sourceState: IState) {
     val listeners = mutableListOf<Transition.Listener>()
     lateinit var eventMatcher: EventMatcher<E>
     var type = TransitionType.LOCAL
@@ -11,12 +11,12 @@ abstract class TransitionBuilder<E : Event>(protected val name: String?, protect
     abstract fun build(): Transition<E>
 }
 
-abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     TransitionBuilder<E>(name, metaInfo, sourceState) {
     var guard: suspend EventAndArgument<E>.() -> Boolean = { true }
 }
 
-abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, metaInfo, sourceState) {
     var targetState: S? = null
 
@@ -39,7 +39,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, me
     }
 }
 
-abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, metaInfo, sourceState) {
     lateinit var targetState: suspend EventAndArgument<E>.() -> S
 
@@ -62,7 +62,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
     }
 }
 
-class ConditionalTransitionBuilder<E : Event>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+class ConditionalTransitionBuilder<E : Event>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     TransitionBuilder<E>(name, metaInfo, sourceState) {
     lateinit var direction: suspend EventAndArgument<E>.() -> TransitionDirection
 
@@ -84,16 +84,16 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, metaInfo: Transitio
 /**
  * Any [Event] (with any data) can lead to [State]
  */
-class UnitGuardedTransitionBuilder<E : Event>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+class UnitGuardedTransitionBuilder<E : Event>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     GuardedTransitionBuilder<E, State>(name, metaInfo, sourceState)
 
-class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, State>(name, metaInfo, sourceState)
 
 /**
  * Type safe argument transition builder
  */
-class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, metaInfo, sourceState) {
     /** User should initialize this filed */
     lateinit var targetState: DataState<D>
@@ -121,7 +121,7 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, met
 /**
  * Type safe argument transitionOn builder
  */
-class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, metaInfo: TransitionMetaInfo?, sourceState: IState) :
+class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, metaInfo: MetaInfo?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, metaInfo, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(

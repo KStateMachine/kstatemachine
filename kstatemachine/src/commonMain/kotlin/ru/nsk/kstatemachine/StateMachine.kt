@@ -217,7 +217,7 @@ fun createStdLibStateMachine(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    metaInfo: StateMetaInfo? = null,
+    metaInfo: MetaInfo? = null,
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine {
     return with(StdLibCoroutineAbstraction()) {

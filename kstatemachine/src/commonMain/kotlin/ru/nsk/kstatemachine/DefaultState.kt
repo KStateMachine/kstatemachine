@@ -8,17 +8,17 @@ import ru.nsk.kstatemachine.ChildMode.EXCLUSIVE
 open class DefaultState(
     name: String? = null,
     childMode: ChildMode = EXCLUSIVE,
-    metaInfo: StateMetaInfo? = null
+    metaInfo: MetaInfo? = null
 ) : BaseStateImpl(name, childMode, metaInfo), State
 
 open class DefaultFinalState(
     name: String? = null,
-    metaInfo: StateMetaInfo? = null
+    metaInfo: MetaInfo? = null
 ) : DefaultState(name, metaInfo = metaInfo), FinalState
 
 open class DefaultChoiceState(
     name: String? = null,
-    metaInfo: StateMetaInfo? = null,
+    metaInfo: MetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> State
 ) : BasePseudoState(name, metaInfo), RedirectPseudoState {
 
@@ -28,7 +28,7 @@ open class DefaultChoiceState(
 
 open class DefaultChoiceDataState<D : Any>(
     name: String? = null,
-    metaInfo: StateMetaInfo? = null,
+    metaInfo: MetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
 ) : DataState<D>, BasePseudoState(name, metaInfo), RedirectPseudoState {
 
@@ -40,7 +40,7 @@ open class DefaultChoiceDataState<D : Any>(
     override val lastData: D get() = error("PseudoState $this can not have lastData")
 }
 
-open class BasePseudoState(name: String?, metaInfo: StateMetaInfo?) : BaseStateImpl(name, EXCLUSIVE, metaInfo), PseudoState {
+open class BasePseudoState(name: String?, metaInfo: MetaInfo?) : BaseStateImpl(name, EXCLUSIVE, metaInfo), PseudoState {
     override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 
