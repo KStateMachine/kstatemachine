@@ -8,8 +8,7 @@ inline fun <reified D : Any> defaultDataState(
     defaultData: D? = null,
     childMode: ChildMode = EXCLUSIVE,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
-) = DefaultDataState(name, defaultData, childMode, dataExtractor, metaInfo)
+) = DefaultDataState(name, defaultData, childMode, dataExtractor)
 
 open class DefaultDataState<D : Any>(
     name: String? = null,
@@ -76,8 +75,7 @@ inline fun <reified D : Any> defaultFinalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
-): DefaultFinalDataState<D> = DefaultFinalDataState(name, defaultData, dataExtractor, metaInfo)
+): DefaultFinalDataState<D> = DefaultFinalDataState(name, defaultData, dataExtractor)
 
 open class DefaultFinalDataState<D : Any>(
     name: String? = null,

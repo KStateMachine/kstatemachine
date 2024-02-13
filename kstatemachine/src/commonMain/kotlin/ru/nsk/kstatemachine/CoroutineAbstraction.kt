@@ -49,7 +49,6 @@ suspend fun CoroutineAbstraction.createStateMachine(
     autoDestroyOnStatesReuse: Boolean,
     enableUndo: Boolean,
     doNotThrowOnMultipleTransitionsMatch: Boolean,
-    metaInfo: MetaInfo?,
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,
@@ -58,7 +57,6 @@ suspend fun CoroutineAbstraction.createStateMachine(
     enableUndo,
     doNotThrowOnMultipleTransitionsMatch,
     this,
-    metaInfo,
 ).apply {
     init()
     if (start) start()

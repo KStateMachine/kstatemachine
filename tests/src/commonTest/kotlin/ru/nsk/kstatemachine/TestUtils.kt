@@ -85,7 +85,6 @@ fun createTestStateMachine(
 ) = when (coroutineStarterType) {
     CoroutineStarterType.STD_LIB -> createStdLibStateMachine(
         name,
-        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -96,7 +95,6 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
         CoroutineScope(EmptyCoroutineContext),
         name,
-        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -107,7 +105,6 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Unconfined),
         name,
-        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -118,7 +115,6 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(newSingleThreadContext("")),
         name,
-        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,
@@ -129,7 +125,6 @@ fun createTestStateMachine(
     CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
         CoroutineScope(Dispatchers.Default.limitedParallelism(1)),
         name,
-        null,
         childMode,
         start,
         autoDestroyOnStatesReuse,

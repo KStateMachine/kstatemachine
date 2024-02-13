@@ -22,7 +22,6 @@ suspend fun createStateMachine(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    metaInfo: MetaInfo? = null,
     init: suspend BuildingStateMachine.() -> Unit
 ) = CoroutinesLibCoroutineAbstraction(scope).createStateMachine(
     name,
@@ -31,7 +30,6 @@ suspend fun createStateMachine(
     autoDestroyOnStatesReuse,
     enableUndo,
     doNotThrowOnMultipleTransitionsMatch,
-    metaInfo,
     init
 )
 
@@ -43,7 +41,6 @@ fun createStateMachineBlocking(
     autoDestroyOnStatesReuse: Boolean = true,
     enableUndo: Boolean = false,
     doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    metaInfo: MetaInfo? = null,
     init: suspend BuildingStateMachine.() -> Unit
 ) = with(CoroutinesLibCoroutineAbstraction(scope)) {
     runBlocking {
@@ -54,7 +51,6 @@ fun createStateMachineBlocking(
             autoDestroyOnStatesReuse,
             enableUndo,
             doNotThrowOnMultipleTransitionsMatch,
-            metaInfo,
             init
         )
     }

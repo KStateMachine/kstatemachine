@@ -13,7 +13,6 @@ import kotlin.reflect.KClass
 @StateMachineDslMarker
 interface IState : TransitionStateApi, VisitorAcceptor {
     val name: String?
-    val metaInfo: MetaInfo?
     val states: Set<IState>
     val initialState: IState?
     val parent: IState?
@@ -22,6 +21,8 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val isFinished: Boolean
     val listeners: Collection<Listener>
     val childMode: ChildMode
+
+    var metaInfo: MetaInfo?
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -205,18 +206,16 @@ fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else 
 fun IState.state(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
-    metaInfo: MetaInfo? = null,
     init: StateBlock<State>? = null
-) = addState(DefaultState(name, childMode, metaInfo), init)
+) = addState(DefaultState(name, childMode), init)
 
 inline fun <reified D : Any> IState.dataState(
     name: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
     noinline init: StateBlock<DataState<D>>? = null
-) = addState(defaultDataState(name, defaultData, childMode, dataExtractor, metaInfo), init)
+) = addState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
 
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
@@ -224,9 +223,8 @@ inline fun <reified D : Any> IState.dataState(
 fun IState.initialState(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
-    metaInfo: MetaInfo? = null,
     init: StateBlock<State>? = null
-) = addInitialState(DefaultState(name, childMode, metaInfo), init)
+) = addInitialState(DefaultState(name, childMode), init)
 
 /**
  * @param defaultData is necessary for initial [DataState]
@@ -236,9 +234,8 @@ inline fun <reified D : Any> IState.initialDataState(
     defaultData: D,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
     noinline init: StateBlock<DataState<D>>? = null
-) = addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor, metaInfo), init)
+) = addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
 
 /**
  * A shortcut for [IState.addState] and [IState.setInitialState] calls
@@ -256,55 +253,48 @@ fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? = null): 
 fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null) =
     addState(state, init)
 
-fun IState.finalState(name: String? = null, metaInfo: MetaInfo? = null, init: StateBlock<FinalState>? = null) =
-    addFinalState(DefaultFinalState(name, metaInfo), init)
+fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+    addFinalState(DefaultFinalState(name), init)
 
-fun IState.initialFinalState(name: String? = null, metaInfo: MetaInfo? = null, init: StateBlock<FinalState>? = null) =
-    addInitialState(DefaultFinalState(name, metaInfo), init)
+fun IState.initialFinalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+    addInitialState(DefaultFinalState(name), init)
 
 inline fun <reified D : Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
     noinline init: StateBlock<FinalDataState<D>>? = null
-) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor, metaInfo), init)
+) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
 inline fun <reified D : Any> IState.initialFinalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    metaInfo: MetaInfo? = null,
     noinline init: StateBlock<FinalDataState<D>>? = null
-) = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor, metaInfo), init)
+) = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
 fun IState.choiceState(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     choiceAction: suspend EventAndArgument<*>.() -> State
-) = addState(DefaultChoiceState(name, metaInfo, choiceAction))
+) = addState(DefaultChoiceState(name, choiceAction = choiceAction))
 
 fun IState.initialChoiceState(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     choiceAction: suspend EventAndArgument<*>.() -> State
-) = addInitialState(DefaultChoiceState(name, metaInfo, choiceAction))
+) = addInitialState(DefaultChoiceState(name, choiceAction = choiceAction))
 
 fun <D : Any> IState.choiceDataState(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addState(DefaultChoiceDataState(name, metaInfo, choiceAction))
+) = addState(DefaultChoiceDataState(name, choiceAction = choiceAction))
 
 fun <D : Any> IState.initialChoiceDataState(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addInitialState(DefaultChoiceDataState(name, metaInfo, choiceAction))
+) = addInitialState(DefaultChoiceDataState(name, choiceAction = choiceAction))
 
 fun IState.historyState(
     name: String? = null,
     defaultState: IState? = null,
     historyType: HistoryType = HistoryType.SHALLOW,
-    metaInfo: MetaInfo? = null
-) = addState(DefaultHistoryState(name, defaultState, historyType, metaInfo))
+) = addState(DefaultHistoryState(name, defaultState, historyType))

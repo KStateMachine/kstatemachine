@@ -10,7 +10,7 @@ import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 open class BaseStateImpl(
     override val name: String?,
     override val childMode: ChildMode,
-    override val metaInfo: MetaInfo?
+    override var metaInfo: MetaInfo? = null
 ) : InternalState() {
 
     private class Data {

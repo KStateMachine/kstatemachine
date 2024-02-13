@@ -25,7 +25,7 @@ open class DefaultTransition<E : Event>(
         sourceState: IState,
         targetStateDirectionProducer: TransitionDirectionProducer<E>,
         metaInfo: MetaInfo?
-    ) : this(name, eventMatcher, type, sourceState,metaInfo) {
+    ) : this(name, eventMatcher, type, sourceState, metaInfo) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }
 
