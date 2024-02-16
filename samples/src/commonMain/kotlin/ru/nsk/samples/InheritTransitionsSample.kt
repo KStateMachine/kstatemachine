@@ -16,7 +16,7 @@ private object InheritTransitionsSample {
  * Nested states allow grouping states and inherit their parent transitions
  */
 fun main() = runBlocking {
-    val machine = createStateMachine(this, "Nested states") {
+    val machine = createStateMachine(this, name = "Nested states") {
         logger = StateMachine.Logger { println(it()) }
 
         val state2 = finalState("State2")

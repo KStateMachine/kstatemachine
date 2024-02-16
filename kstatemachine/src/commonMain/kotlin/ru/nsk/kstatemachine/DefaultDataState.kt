@@ -15,7 +15,8 @@ open class DefaultDataState<D : Any>(
     override val defaultData: D? = null,
     childMode: ChildMode = EXCLUSIVE,
     private val dataExtractor: DataExtractor<D>,
-) : BaseStateImpl(name, childMode), DataState<D> {
+    metaInfo: MetaInfo? = null,
+) : BaseStateImpl(name, childMode, metaInfo), DataState<D> {
     private var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is $this state active?" }
 
@@ -79,5 +80,6 @@ inline fun <reified D : Any> defaultFinalDataState(
 open class DefaultFinalDataState<D : Any>(
     name: String? = null,
     defaultData: D? = null,
-    dataExtractor: DataExtractor<D>
-) : DefaultDataState<D>(name, defaultData, EXCLUSIVE, dataExtractor), FinalDataState<D>
+    dataExtractor: DataExtractor<D>,
+    metaInfo: MetaInfo? = null
+) : DefaultDataState<D>(name, defaultData, EXCLUSIVE, dataExtractor, metaInfo), FinalDataState<D>

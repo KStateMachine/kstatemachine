@@ -51,7 +51,7 @@ class TestingStartFromTest : StringSpec({
                 initialState("state1") {
                     callbacks.listen(this)
                 }
-                state2 = dataState("state2", 1) {
+                state2 = dataState("state2", defaultData = 1) {
                     callbacks.listen(this)
                 }
             }
@@ -66,7 +66,7 @@ class TestingStartFromTest : StringSpec({
                 initialState("state1") {
                     callbacks.listen(this)
                 }
-                state2 = dataState("state2", 1) {
+                state2 = dataState("state2", defaultData = 1) {
                     callbacks.listen(this)
                 }
             }

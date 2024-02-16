@@ -51,7 +51,15 @@ inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
     targetState: State? = null,
     type: TransitionType = LOCAL,
-): Transition<E> = addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
+    metaInfo: MetaInfo? = null,
+): Transition<E> = addTransition(DefaultTransition(
+    name,
+    matcherForEvent(asState()),
+    type,
+    asState(),
+    targetState,
+    metaInfo
+))
 
 /**
  * Creates transition.
@@ -113,8 +121,9 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     name: String? = null,
     targetState: DataState<D>,
     type: TransitionType = LOCAL,
+    metaInfo: MetaInfo? = null,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState))
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState, metaInfo))
 }
 
 /**
@@ -123,8 +132,9 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
 inline fun <reified E : DataEvent<D>, D : Any> DataTransitionStateApi<D>.dataTransition(
     name: String? = null,
     type: TransitionType = LOCAL,
+    metaInfo: MetaInfo? = null,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), null))
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), null, metaInfo))
 }
 
 /**

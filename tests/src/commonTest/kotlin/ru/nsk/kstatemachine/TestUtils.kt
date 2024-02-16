@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 package ru.nsk.kstatemachine
 
 import io.mockk.MockKVerificationScope
@@ -5,7 +6,9 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlin.coroutines.EmptyCoroutineContext
 

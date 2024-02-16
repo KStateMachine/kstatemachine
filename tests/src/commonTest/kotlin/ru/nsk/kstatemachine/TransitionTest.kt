@@ -106,7 +106,7 @@ class TransitionTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 finalState = finalState()
                 initialState {
-                    transition<SwitchEvent>("transition1", finalState)
+                    transition<SwitchEvent>("transition1", targetState = finalState)
                 }
             }
 

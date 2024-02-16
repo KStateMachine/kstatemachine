@@ -22,6 +22,8 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val listeners: Collection<Listener>
     val childMode: ChildMode
 
+    var metaInfo: MetaInfo?
+
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
@@ -275,24 +277,28 @@ inline fun <reified D : Any> IState.initialFinalDataState(
     noinline init: StateBlock<FinalDataState<D>>? = null
 ) = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
-fun IState.choiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
-    addState(DefaultChoiceState(name, choiceAction))
+fun IState.choiceState(
+    name: String? = null,
+    choiceAction: suspend EventAndArgument<*>.() -> State
+) = addState(DefaultChoiceState(name, choiceAction = choiceAction))
 
-fun IState.initialChoiceState(name: String? = null, choiceAction: suspend EventAndArgument<*>.() -> State) =
-    addInitialState(DefaultChoiceState(name, choiceAction))
+fun IState.initialChoiceState(
+    name: String? = null,
+    choiceAction: suspend EventAndArgument<*>.() -> State
+) = addInitialState(DefaultChoiceState(name, choiceAction = choiceAction))
 
 fun <D : Any> IState.choiceDataState(
     name: String? = null,
     choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addState(DefaultChoiceDataState(name, choiceAction))
+) = addState(DefaultChoiceDataState(name, choiceAction = choiceAction))
 
 fun <D : Any> IState.initialChoiceDataState(
     name: String? = null,
     choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addInitialState(DefaultChoiceDataState(name, choiceAction))
+) = addInitialState(DefaultChoiceDataState(name, choiceAction = choiceAction))
 
 fun IState.historyState(
     name: String? = null,
     defaultState: IState? = null,
-    historyType: HistoryType = HistoryType.SHALLOW
+    historyType: HistoryType = HistoryType.SHALLOW,
 ) = addState(DefaultHistoryState(name, defaultState, historyType))

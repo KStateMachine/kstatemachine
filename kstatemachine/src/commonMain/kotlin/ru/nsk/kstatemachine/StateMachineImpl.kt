@@ -30,6 +30,7 @@ internal class StateMachineImpl(
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
+    override var metaInfo: MetaInfo? = null
 
     init {
         transitionConditionally<StartEvent>("start transition") {
@@ -48,7 +49,7 @@ internal class StateMachineImpl(
         }
         if (isUndoEnabled) {
             val undoState = addState(UndoState())
-            transition<WrappedEvent>("undo transition", undoState)
+            transition<WrappedEvent>("undo transition", targetState = undoState)
         }
     }
 
@@ -312,6 +313,7 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
         TransitionType.LOCAL,
         sourceState,
         targetState,
+        null
     )
 
     return TransitionParams(

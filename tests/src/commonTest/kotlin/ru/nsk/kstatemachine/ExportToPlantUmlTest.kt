@@ -78,12 +78,12 @@ State3 --> [*]
 private const val PLANTUML_PARALLEL_STATES_RESULT = """@startuml
 hide empty description
 state parallel_states {
-    state State1 {
+    state State1 as "State 1" {
         state State11
         state State12
         
         [*] --> State11
-        State11 --> State12
+        State11 --> State12 : to State 12
         State12 --> State11
     }
     --
@@ -253,11 +253,15 @@ class ExportToPlantUmlTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
                 initialState("parallel states", ChildMode.PARALLEL) {
                     state("State1") {
+                        metaInfo = umlLabel("State 1")
                         val state11 = initialState("State11")
                         val state12 = state("State12")
 
                         state11 {
-                            transition<SwitchEvent> { targetState = state12 }
+                            transition<SwitchEvent> {
+                                metaInfo = umlLabel("to State 12")
+                                targetState = state12
+                            }
                         }
                         state12 {
                             transition<SwitchEvent> { targetState = state11 }
