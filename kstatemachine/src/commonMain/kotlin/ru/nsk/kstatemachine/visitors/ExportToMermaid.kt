@@ -7,6 +7,7 @@ import ru.nsk.kstatemachine.visitors.CompatibilityFormat.MERMAID
  * Export [StateMachine] to Mermaid state diagram
  * @see <a href="https://mermaid.js.org/">Mermaid</a>
  *
+ * [showEventLabels] prints event types for transitions
  * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
  * this may give more complete output, but may be not safe.
  */

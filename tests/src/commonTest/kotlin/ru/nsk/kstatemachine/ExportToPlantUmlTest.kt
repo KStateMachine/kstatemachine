@@ -79,12 +79,12 @@ private const val PLANTUML_PARALLEL_STATES_RESULT = """@startuml
 hide empty description
 state parallel_states {
     state "State 1" as State1 {
-        state State11
+        state State_11
         state State12
         
-        [*] --> State11
-        State11 --> State12 : to State 12
-        State12 --> State11
+        [*] --> State_11
+        State_11 --> State12 : to State 12
+        State12 --> State_11
     }
     --
     state State2 {
@@ -188,9 +188,16 @@ state1 --> state222
 
 private const val PLANTUML_META_INFO = """@startuml
 hide empty description
-state State1
-state "State 3" as State3
-state "State 2" as State2 {
+state State_1 {
+    state State12
+    state "Choice label" as ChoiceState <<choice>>
+    
+    [*] --> ChoiceState
+}
+state "Long State 3" as State3
+State3 : Description 1
+State3 : Description 2
+state "Long State 2" as State2 {
     state "Final sub state" as FinalState
     state Initial_subState
     
@@ -199,12 +206,13 @@ state "State 2" as State2 {
     FinalState --> [*]
 }
 
-[*] --> State1
-State1 --> State2 : go to State2, SwitchEvent
-State1 --> State1 : self targeted, SwitchEvent
+[*] --> State_1
+State_1 --> State2 : go to State2, SwitchEvent
+State_1 --> State_1 : self targeted, SwitchEvent
 State2 --> State3 : That's all, SwitchEvent
-State2 --> State1 : back to State 1, SwitchEvent
+State2 --> State_1 : back to State 1, SwitchEvent
 State3 --> [*]
+ChoiceState --> State12
 @enduml
 """
 
@@ -276,7 +284,7 @@ class ExportToPlantUmlTest : StringSpec({
                 initialState("parallel states", ChildMode.PARALLEL) {
                     state("State1") {
                         metaInfo = UmlMetaInfo("State 1")
-                        val state11 = initialState("State11")
+                        val state11 = initialState("State-11")
                         val state12 = state("State12")
 
                         state11 {
@@ -362,15 +370,18 @@ class ExportToPlantUmlTest : StringSpec({
                 // label for state machine
                 metaInfo = UmlMetaInfo("Nested states sm")
 
-                val state1 = initialState("State1")
+                val state1 = initialState("State-1")
                 val state3 = finalState("State3") {
                     // label for state
-                    metaInfo = UmlMetaInfo("State 3")
+                    metaInfo = UmlMetaInfo(
+                        umlLabel = "Long State 3",
+                        stateDescriptions = listOf("Description 1", "Description 2")
+                    )
                 }
 
                 val state2 = state("State2") {
                     // label for state
-                    metaInfo = UmlMetaInfo("State 2")
+                    metaInfo = UmlMetaInfo("Long State 2")
                     transition<SwitchEvent> {
                         // label for transition
                         metaInfo = UmlMetaInfo("That's all")
@@ -397,10 +408,21 @@ class ExportToPlantUmlTest : StringSpec({
                     }
                     transition<SwitchEvent>("self targeted") { targetState = this@state1 }
                     transition<SwitchEvent>()
+
+                    val state12 = state("State12")
+                    val choiceState = initialChoiceState("ChoiceState") { state12 }
+                    choiceState.metaInfo = UmlMetaInfo(
+                        umlLabel = "Choice label",
+                        // no plantUml nor Mermaid can draw this
+                        stateDescriptions = listOf("Description 1", "Description 2")
+                    )
                 }
             }
 
-            machine.exportToPlantUml(showEventLabels = true) shouldBe PLANTUML_META_INFO
+            machine.exportToPlantUml(
+                showEventLabels = true,
+                unsafeCallConditionalLambdas = true
+            ) shouldBe PLANTUML_META_INFO
         }
     }
 })

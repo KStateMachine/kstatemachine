@@ -6,6 +6,13 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.UnsafeCollectTarge
 import ru.nsk.kstatemachine.visitors.CompatibilityFormat.MERMAID
 import ru.nsk.kstatemachine.visitors.CompatibilityFormat.PLANT_UML
 
+private const val STAR = "[*]"
+private const val SINGLE_INDENT = "    "
+private const val PARALLEL = "--"
+private const val SHALLOW_HISTORY = "[H]"
+private const val DEEP_HISTORY = "[H*]"
+private const val CHOICE = "<<choice>>"
+
 /**
  * This object will be unsafely cast to any kind of [Event],
  * causing runtime failures if user defined (conditional) lambdas will touch this object.
@@ -61,7 +68,10 @@ internal class ExportPlantUmlVisitor(
                         crossLevelTransitions += "${state.graphName()} --> ${targetState.targetGraphName()}"
                     }
                 }
-                else -> line("state ${state.labelGraphName()}")
+                else -> {
+                    line("state ${state.labelGraphName()}")
+                    state.printStateDescriptions()
+                }
             }
         } else {
             if (state !is StateMachine) { // ignore composed machines
@@ -109,6 +119,7 @@ internal class ExportPlantUmlVisitor(
     }
 
     private suspend fun processStateBody(state: IState) {
+        state.printStateDescriptions()
         val states = state.states.toList()
         // visit child states
         for (s in states.indices) {
@@ -141,13 +152,13 @@ internal class ExportPlantUmlVisitor(
         return " : $text".takeIf { text.isNotBlank() } ?: ""
     }
 
+    private fun IState.printStateDescriptions() {
+        val stateDescriptions = (metaInfo as? IUmlMetaInfo)?.stateDescriptions.orEmpty()
+        stateDescriptions.forEach { line("${graphName()} : $it") }
+    }
+
     private companion object {
-        const val STAR = "[*]"
-        const val SINGLE_INDENT = "    "
-        const val PARALLEL = "--"
-        const val SHALLOW_HISTORY = "[H]"
-        const val DEEP_HISTORY = "[H*]"
-        const val CHOICE = "<<choice>>"
+        val MetaInfo.umlLabel get() = (this as? IUmlMetaInfo)?.umlLabel
 
         fun IState.graphName(): String {
             val name = (name ?: "State${hashCode()}").replace(Regex("[ -]"), "_")
@@ -173,12 +184,11 @@ internal class ExportPlantUmlVisitor(
     }
 }
 
-private val MetaInfo.umlLabel: String? get() = (this as? IUmlMetaInfo)?.umlLabel
-
 /**
  * Export [StateMachine] to PlantUML state diagram
  * @see <a href="https://plantuml.com/">PlantUML</a>
  *
+ * [showEventLabels] prints event types for transitions
  * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
  * this may give more complete output, but may be not safe.
  */

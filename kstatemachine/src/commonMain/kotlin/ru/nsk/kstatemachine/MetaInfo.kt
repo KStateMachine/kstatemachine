@@ -15,6 +15,7 @@ interface IUmlMetaInfo : MetaInfo {
      */
     val umlLabel: String?
     val stateDescriptions: List<String>
+    val notes: List<String>
 }
 
 /**
@@ -23,5 +24,6 @@ interface IUmlMetaInfo : MetaInfo {
  */
 data class UmlMetaInfo(
     override val umlLabel: String? = null,
-    override val stateDescriptions: List<String> = emptyList()
+    override val stateDescriptions: List<String> = emptyList(),
+    override val notes: List<String> = emptyList(),
 ): IUmlMetaInfo
