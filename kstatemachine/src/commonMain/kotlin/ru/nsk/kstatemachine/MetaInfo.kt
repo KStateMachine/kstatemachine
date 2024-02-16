@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine
 
-sealed interface MetaInfo
+interface MetaInfo
 interface UmlMetaInfo: MetaInfo {
     val umlLabel: String
 }
