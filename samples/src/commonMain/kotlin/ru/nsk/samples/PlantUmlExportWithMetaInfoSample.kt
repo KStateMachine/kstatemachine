@@ -13,50 +13,26 @@ private object PlantUmlExportWithMetaInfoSample {
  * The sample shows hot to use [MetaInfo] to beautify export output
  */
 fun main() = runBlocking {
+    lateinit var state2: State
     val machine = createStateMachine(this) {
-        // label for state machine
-        metaInfo = UmlMetaInfo("Nested states sm")
+        metaInfo = UmlMetaInfo(umlLabel = "Nested states sm")
 
-        val state1 = initialState("State1") {
-            // label for state
-            metaInfo = UmlMetaInfo("State 1")
-        }
-        val state3 = finalState("State3") {
-            // label for state
-            metaInfo = UmlMetaInfo("State 3")
-        }
-
-        val state2 = state("State2") {
-            // label for state
-            metaInfo = UmlMetaInfo("State 2")
-            transition<SwitchEvent> {
-                // label for transition
-                metaInfo = UmlMetaInfo("That's all")
-                targetState = state3
-            }
-            transition<SwitchEvent> {
-                // label for transition
-                metaInfo = UmlMetaInfo("back to State 1")
-                targetState = state1
-            }
-            val finalSubState = finalState {
-                // label for state
-                metaInfo = UmlMetaInfo("Final sub state")
-            }
-            initialState("Initial subState") {
-                transition<SwitchEvent> { targetState = finalSubState }
+        initialState("State1") {
+            metaInfo = UmlMetaInfo("State 1 Label")
+            transitionOn<SwitchEvent> {
+                metaInfo = UmlMetaInfo("Transition to State 2")
+                targetState = { state2 }
             }
         }
 
-        state1 {
-            transition<SwitchEvent> {
-                metaInfo = UmlMetaInfo("go to ${state2.name}")
-                targetState = state2
-            }
-            transition<SwitchEvent> { targetState = this@state1 }
-            transition<SwitchEvent>()
+        state2 = finalState("State2") {
+            metaInfo = UmlMetaInfo(
+                umlLabel = "FinalState 2 Label",
+                umlStateDescriptions = listOf("Description 1", "Description 2"),
+                umlNotes = listOf("Note 1", "Note 2"),
+            )
         }
     }
 
-    println(machine.exportToPlantUml())
+    println(machine.exportToPlantUml(showEventLabels = true))
 }

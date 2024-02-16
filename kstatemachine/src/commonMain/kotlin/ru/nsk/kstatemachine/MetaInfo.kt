@@ -1,21 +1,31 @@
 package ru.nsk.kstatemachine
 
 /**
- * Additional static (designed to be immutable) info for library primitives.
- * Users may extend this interface to add their own [MetaInfo] implementations
+ * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
+ * Users may extend this interface to add their own [MetaInfo] implementations.
  */
 interface MetaInfo
 
 /**
- * Standard meta info, to control export PlantUML and Mermaid feature visualization.
+ * Standard [MetaInfo], to control export PlantUML and Mermaid feature visualization.
  */
 interface IUmlMetaInfo : MetaInfo {
     /**
-     * Will be mapped to "long name" for state, and a "label" for transition
+     * Will be mapped to "long name" for [IState], and a "label" for [Transition]
      */
     val umlLabel: String?
-    val stateDescriptions: List<String>
-    val notes: List<String>
+    /**
+     * Add description lines for [IState]
+     * Does not have effect for [Transition]
+     */
+    val umlStateDescriptions: List<String>
+
+    /**
+     * For [IState] translated to "note right of".
+     * For [Transition] translated to "note on link" (supports only one note).
+     * Mermaid does not support this, so it will not take any effect.
+     */
+    val umlNotes: List<String>
 }
 
 /**
@@ -24,6 +34,6 @@ interface IUmlMetaInfo : MetaInfo {
  */
 data class UmlMetaInfo(
     override val umlLabel: String? = null,
-    override val stateDescriptions: List<String> = emptyList(),
-    override val notes: List<String> = emptyList(),
+    override val umlStateDescriptions: List<String> = emptyList(),
+    override val umlNotes: List<String> = emptyList(),
 ): IUmlMetaInfo

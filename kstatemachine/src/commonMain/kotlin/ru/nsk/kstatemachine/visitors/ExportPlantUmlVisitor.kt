@@ -64,6 +64,7 @@ internal class ExportPlantUmlVisitor(
                     @Suppress("UNCHECKED_CAST")
                     val targetStates = state.resolveTargetState(makeDirectionProducerPolicy<Event>())
                         .targetStates as Set<InternalState>
+                    state.printStateNotes()
                     targetStates.forEach { targetState ->
                         crossLevelTransitions += "${state.graphName()} --> ${targetState.targetGraphName()}"
                     }
@@ -71,6 +72,7 @@ internal class ExportPlantUmlVisitor(
                 else -> {
                     line("state ${state.labelGraphName()}")
                     state.printStateDescriptions()
+                    state.printStateNotes()
                 }
             }
         } else {
@@ -107,6 +109,14 @@ internal class ExportPlantUmlVisitor(
             else
                 crossLevelTransitions += transitionString
         }
+
+        if (format != MERMAID) { // Mermaid does not support this
+            transition.metaInfo?.umlNotes?.forEach {
+                line("note on link")
+                line("$SINGLE_INDENT$it")
+                line("end note")
+            }
+        }
     }
 
     private fun <E : Event> makeDirectionProducerPolicy(): TransitionDirectionProducerPolicy<E> {
@@ -120,6 +130,8 @@ internal class ExportPlantUmlVisitor(
 
     private suspend fun processStateBody(state: IState) {
         state.printStateDescriptions()
+        state.printStateNotes()
+
         val states = state.states.toList()
         // visit child states
         for (s in states.indices) {
@@ -153,11 +165,16 @@ internal class ExportPlantUmlVisitor(
     }
 
     private fun IState.printStateDescriptions() {
-        val stateDescriptions = (metaInfo as? IUmlMetaInfo)?.stateDescriptions.orEmpty()
-        stateDescriptions.forEach { line("${graphName()} : $it") }
+        val descriptions = (metaInfo as? IUmlMetaInfo)?.umlStateDescriptions.orEmpty()
+        descriptions.forEach { line("${graphName()} : $it") }
+    }
+
+    private fun IState.printStateNotes() {
+        metaInfo?.umlNotes?.forEach { line("note right of ${graphName()} : $it") }
     }
 
     private companion object {
+        val MetaInfo.umlNotes get() = (this as? IUmlMetaInfo)?.umlNotes.orEmpty()
         val MetaInfo.umlLabel get() = (this as? IUmlMetaInfo)?.umlLabel
 
         fun IState.graphName(): String {
