@@ -3,7 +3,7 @@ package ru.nsk.kstatemachine.visitors
 import ru.nsk.kstatemachine.*
 
 internal class GetActiveStatesVisitor(private val selfIncluding: Boolean) : Visitor {
-    private var _activeStates = mutableSetOf<IState>()
+    private val _activeStates = mutableSetOf<IState>()
     private var runner: IState? = null
     val activeStates: Set<IState> get() = _activeStates
 

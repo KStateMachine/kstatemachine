@@ -110,7 +110,7 @@ interface FinalDataState<D : Any> : IFinalState, DataState<D>
 interface PseudoState : State
 
 interface RedirectPseudoState : PseudoState {
-    suspend fun resolveTargetState(eventAndArgument: EventAndArgument<*>): IState
+    suspend fun resolveTargetState(policy: TransitionDirectionProducerPolicy<*>): TransitionDirection
 }
 
 /**
@@ -125,6 +125,10 @@ interface HistoryState : PseudoState {
 }
 
 typealias StateBlock<S> = S.() -> Unit
+
+suspend fun IState.log(lazyMessage: () -> String) {
+    machineOrNull()?.logger?.log(lazyMessage)
+}
 
 fun IState.requireInitialState() = checkNotNull(initialState) {
     "Initial state is not set, call setInitialState() first"

@@ -3,7 +3,6 @@ package ru.nsk.kstatemachine.visitors
 import ru.nsk.kstatemachine.*
 
 internal class CleanupVisitor : RecursiveCoVisitor {
-
     override suspend fun visit(machine: StateMachine) {
         machine.visitChildren()
         (machine as InternalStateMachine).cleanup()
