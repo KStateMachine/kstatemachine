@@ -193,6 +193,22 @@ suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.wi
 fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.runBlocking { destroy(stop) }
 
 /**
+ * A StateMachine snapshot, allowing to restore the machine into saved state.
+ * This object is designed for further serialization,
+ * so it should not contain references for mutable objects like [IState].
+ */
+interface Snapshot {
+    /** State names, describing active configuration */
+    val activeLeafStates: List<String>
+}
+
+fun StateMachine.takeSnapshot(): Snapshot {
+    return object : Snapshot {
+        override val activeLeafStates = activeLeafStates().mapNotNull { it.name }
+    }
+}
+
+/**
  * Allows to mutate some properties, which is necessary during setup, before machine is started
  */
 interface BuildingStateMachine : StateMachine {

@@ -1,9 +1,7 @@
 package ru.nsk.kstatemachine
 
-import ru.nsk.kstatemachine.visitors.CoVisitor
+import ru.nsk.kstatemachine.visitors.*
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
-import ru.nsk.kstatemachine.visitors.Visitor
-import ru.nsk.kstatemachine.visitors.VisitorAcceptor
 import kotlin.reflect.KClass
 
 /**
@@ -148,6 +146,16 @@ fun IState.activeStates(selfIncluding: Boolean = false): Set<IState> {
     val visitor = GetActiveStatesVisitor(selfIncluding)
     accept(visitor)
     return visitor.activeStates
+}
+
+/**
+ * Set of active leaf-states, without their active parents.
+ * Internal states of nested machines are not included.
+ */
+fun IState.activeLeafStates(): Set<IState> {
+    val visitor = GetActiveLeafStatesVisitor()
+    accept(visitor)
+    return visitor.activeLeafStates
 }
 
 /**
