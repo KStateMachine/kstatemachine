@@ -19,6 +19,7 @@ internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
  * Conditional transitions are partly supported with [unsafeCallConditionalLambdas] flag.
+ * Uses [IUmlMetaInfo] for output sugaring.
  */
 internal class ExportPlantUmlVisitor(
     private val format: CompatibilityFormat,
@@ -52,26 +53,25 @@ internal class ExportPlantUmlVisitor(
             when (state) {
                 is HistoryState, is UndoState -> return
                 is RedirectPseudoState -> {
-                    val stateName = state.graphName()
-                    line("state $stateName $CHOICE ${state.displayName()}")
+                    line("state ${state.labelGraphName()} $CHOICE")
                     @Suppress("UNCHECKED_CAST")
                     val targetStates = state.resolveTargetState(makeDirectionProducerPolicy<Event>())
                         .targetStates as Set<InternalState>
                     targetStates.forEach { targetState ->
-                        crossLevelTransitions += "$stateName --> ${targetState.targetGraphName()}"
+                        crossLevelTransitions += "${state.graphName()} --> ${targetState.targetGraphName()}"
                     }
                 }
-                else -> line("state ${state.displayName()}")
+                else -> line("state ${state.labelGraphName()}")
             }
         } else {
             if (state !is StateMachine) { // ignore composed machines
-                line("state ${state.displayName()} {")
+                line("state ${state.labelGraphName()} {")
                 ++indent
                 processStateBody(state)
                 --indent
                 line("}")
             } else {
-                line("state ${state.displayName()}")
+                line("state ${state.labelGraphName()}")
             }
         }
     }
@@ -135,7 +135,7 @@ internal class ExportPlantUmlVisitor(
 
     private fun transitionLabel(transition: Transition<*>): String {
         val text = listOfNotNull(
-            (transition.metaInfo as? UmlMetaInfo)?.umlLabel ?: transition.name,
+            transition.metaInfo?.umlLabel ?: transition.name,
             transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
         ).joinToString()
         return " : $text".takeIf { text.isNotBlank() } ?: ""
@@ -154,10 +154,9 @@ internal class ExportPlantUmlVisitor(
             return if (this !is StateMachine) name else "${name}_StateMachine"
         }
 
-        fun IState.displayName(): String {
-            return (this.metaInfo as? UmlMetaInfo)?.umlLabel?.let { label ->
-                graphName() + " as \"$label\""
-            } ?: graphName()
+        fun IState.labelGraphName(): String {
+            // Mermaid does not support - state name as "long name", notation
+            return metaInfo?.umlLabel?.let { "\"$it\" as " }.orEmpty() + graphName()
         }
 
         fun InternalState.targetGraphName(): String {
@@ -173,6 +172,8 @@ internal class ExportPlantUmlVisitor(
         }
     }
 }
+
+private val MetaInfo.umlLabel: String? get() = (this as? IUmlMetaInfo)?.umlLabel
 
 /**
  * Export [StateMachine] to PlantUML state diagram

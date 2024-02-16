@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine
 
+import io.kotest.assertions.throwables.shouldThrowUnitWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.StateTestData.SubclassState
@@ -53,6 +54,18 @@ class StateTest : StringSpec({
                 setInitialState(final)
             }
             machine.isFinished shouldBe true
+        }
+
+        "metaInfo cannot be changed on running machine" {
+            lateinit var state: State
+            createTestStateMachine(coroutineStarterType) {
+                state = initialState {
+                    metaInfo = UmlMetaInfo("label")
+                }
+            }
+            shouldThrowUnitWithMessage<IllegalStateException>("Can not change metaInfo after state machine started") {
+                state.metaInfo = UmlMetaInfo("fail label")
+            }
         }
 
         /** This code should not compile */

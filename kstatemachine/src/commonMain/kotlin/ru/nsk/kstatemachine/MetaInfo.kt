@@ -1,9 +1,27 @@
 package ru.nsk.kstatemachine
 
+/**
+ * Additional static (designed to be immutable) info for library primitives.
+ * Users may extend this interface to add their own [MetaInfo] implementations
+ */
 interface MetaInfo
-interface UmlMetaInfo: MetaInfo {
-    val umlLabel: String
+
+/**
+ * Standard meta info, to control export PlantUML and Mermaid feature visualization.
+ */
+interface IUmlMetaInfo : MetaInfo {
+    /**
+     * Will be mapped to "long name" for state, and a "label" for transition
+     */
+    val umlLabel: String?
+    val stateDescriptions: List<String>
 }
-fun umlLabel(label: String) = object : UmlMetaInfo {
-    override val umlLabel = label
-}
+
+/**
+ * [IUmlMetaInfo] Implementation is separated from its interface as a user may combine multiple [MetaInfo]
+ * interfaces into one object.
+ */
+data class UmlMetaInfo(
+    override val umlLabel: String? = null,
+    override val stateDescriptions: List<String> = emptyList()
+): IUmlMetaInfo

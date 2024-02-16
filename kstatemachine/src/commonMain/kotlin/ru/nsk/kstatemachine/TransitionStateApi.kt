@@ -56,9 +56,9 @@ inline fun <reified E : Event> TransitionStateApi.transition(
     name,
     matcherForEvent(asState()),
     type,
+    metaInfo,
     asState(),
     targetState,
-    metaInfo
 ))
 
 /**
@@ -123,7 +123,7 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     type: TransitionType = LOCAL,
     metaInfo: MetaInfo? = null,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), targetState, metaInfo))
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, metaInfo, asState(), targetState))
 }
 
 /**
@@ -134,7 +134,7 @@ inline fun <reified E : DataEvent<D>, D : Any> DataTransitionStateApi<D>.dataTra
     type: TransitionType = LOCAL,
     metaInfo: MetaInfo? = null,
 ): Transition<E> {
-    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, asState(), null, metaInfo))
+    return addTransition(DefaultTransition(name, matcherForEvent(asState()), type, metaInfo, asState(), null))
 }
 
 /**

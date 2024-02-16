@@ -86,7 +86,7 @@ class StateMachineTest : StringSpec({
             second.onEntry { println("$name entered") }
 
             val transition = DefaultTransition<SwitchEvent>(
-                "transition", EventMatcher.isInstanceOf(), TransitionType.LOCAL, first, null
+                "transition", EventMatcher.isInstanceOf(), TransitionType.LOCAL, null, first, second
             )
             transition.onTriggered { println("${it.transition.name} triggered") }
 

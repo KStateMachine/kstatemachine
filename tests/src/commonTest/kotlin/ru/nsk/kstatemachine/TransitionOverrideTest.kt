@@ -51,7 +51,7 @@ class TransitionOverrideTest : StringSpec({
 
                 state1 = initialState("state1") {
                     // override all events
-                    transition { callbacks.listen(this) }
+                    transition<Event> { callbacks.listen(this) }
                     callbacks.listen(this)
                 }
                 state2 = state("state2") { callbacks.listen(this) }

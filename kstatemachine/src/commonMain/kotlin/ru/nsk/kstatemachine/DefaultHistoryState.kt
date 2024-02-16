@@ -7,8 +7,7 @@ open class DefaultHistoryState(
     name: String? = null,
     private var _defaultState: IState? = null,
     final override val historyType: HistoryType = HistoryType.SHALLOW,
-    metaInfo: MetaInfo? = null
-) : BasePseudoState(name, metaInfo), HistoryState {
+) : BasePseudoState(name), HistoryState {
     override val defaultState get() = checkNotNull(_defaultState) { "Internal error, default state is not set" }
 
     private var _storedState: IState? = null

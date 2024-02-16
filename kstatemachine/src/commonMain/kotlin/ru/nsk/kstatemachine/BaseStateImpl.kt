@@ -10,7 +10,6 @@ import ru.nsk.kstatemachine.TransitionType.EXTERNAL
 open class BaseStateImpl(
     override val name: String?,
     override val childMode: ChildMode,
-    override var metaInfo: MetaInfo? = null
 ) : InternalState() {
 
     private class Data {
@@ -28,6 +27,7 @@ open class BaseStateImpl(
         var isActive = false
         var isFinished = false
         var internalParent: InternalState? = null
+        var metaInfo: MetaInfo? = null
     }
 
     /**
@@ -49,6 +49,13 @@ open class BaseStateImpl(
     override val isFinished get() = data.isFinished
 
     override val internalParent get() = data.internalParent
+    override var metaInfo: MetaInfo?
+        get() = data.metaInfo
+        set(value) {
+            if (machineOrNull()?.isRunning == true) error("Can not change metaInfo after state machine started")
+            data.metaInfo = value
+        }
+
 
     override fun setParent(parent: InternalState) {
         check(parent !== data.internalParent) { "$parent is already a parent of $this" }

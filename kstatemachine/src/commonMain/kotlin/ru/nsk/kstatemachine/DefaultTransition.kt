@@ -11,9 +11,9 @@ open class DefaultTransition<E : Event>(
         name: String?,
         eventMatcher: EventMatcher<E>,
         type: TransitionType,
+        metaInfo: MetaInfo?,
         sourceState: IState,
-        targetState: IState?,
-        metaInfo: MetaInfo?
+        targetState: IState?
     ) : this(name, eventMatcher, type, sourceState, metaInfo) {
         targetStateDirectionProducer = { it.targetStateOrStay(targetState) }
     }
@@ -22,9 +22,9 @@ open class DefaultTransition<E : Event>(
         name: String?,
         eventMatcher: EventMatcher<E>,
         type: TransitionType,
+        metaInfo: MetaInfo?,
         sourceState: IState,
-        targetStateDirectionProducer: TransitionDirectionProducer<E>,
-        metaInfo: MetaInfo?
+        targetStateDirectionProducer: TransitionDirectionProducer<E>
     ) : this(name, eventMatcher, type, sourceState, metaInfo) {
         this.targetStateDirectionProducer = targetStateDirectionProducer
     }

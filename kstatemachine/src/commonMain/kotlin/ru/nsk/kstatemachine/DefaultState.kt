@@ -6,22 +6,15 @@ import ru.nsk.kstatemachine.TransitionDirectionProducerPolicy.*
 /**
  * The most common state
  */
-open class DefaultState(
-    name: String? = null,
-    childMode: ChildMode = EXCLUSIVE,
-    metaInfo: MetaInfo? = null
-) : BaseStateImpl(name, childMode, metaInfo), State
+open class DefaultState(name: String? = null, childMode: ChildMode = EXCLUSIVE) :
+    BaseStateImpl(name, childMode), State
 
-open class DefaultFinalState(
-    name: String? = null,
-    metaInfo: MetaInfo? = null
-) : DefaultState(name, metaInfo = metaInfo), FinalState
+open class DefaultFinalState(name: String? = null) : DefaultState(name), FinalState
 
 open class DefaultChoiceState(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> State
-) : BasePseudoState(name, metaInfo), RedirectPseudoState {
+) : BasePseudoState(name), RedirectPseudoState {
 
     override suspend fun resolveTargetState(policy: TransitionDirectionProducerPolicy<*>): TransitionDirection {
         return internalResolveTargetState(policy, choiceAction)
@@ -30,9 +23,8 @@ open class DefaultChoiceState(
 
 open class DefaultChoiceDataState<D : Any>(
     name: String? = null,
-    metaInfo: MetaInfo? = null,
     private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
-) : DataState<D>, BasePseudoState(name, metaInfo), RedirectPseudoState {
+) : DataState<D>, BasePseudoState(name), RedirectPseudoState {
 
     override suspend fun resolveTargetState(policy: TransitionDirectionProducerPolicy<*>): TransitionDirection {
         return internalResolveTargetState(policy, choiceAction)
@@ -56,7 +48,7 @@ private suspend fun IState.internalResolveTargetState(
     }
 }
 
-open class BasePseudoState(name: String?, metaInfo: MetaInfo?) : BaseStateImpl(name, EXCLUSIVE, metaInfo), PseudoState {
+open class BasePseudoState(name: String?) : BaseStateImpl(name, EXCLUSIVE), PseudoState {
     override suspend fun doEnter(transitionParams: TransitionParams<*>) = internalError()
     override suspend fun doExit(transitionParams: TransitionParams<*>) = internalError()
 

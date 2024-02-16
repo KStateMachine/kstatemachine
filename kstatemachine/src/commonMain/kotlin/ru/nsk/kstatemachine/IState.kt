@@ -21,7 +21,6 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val isFinished: Boolean
     val listeners: Collection<Listener>
     val childMode: ChildMode
-
     var metaInfo: MetaInfo?
 
     fun <L : Listener> addListener(listener: L): L

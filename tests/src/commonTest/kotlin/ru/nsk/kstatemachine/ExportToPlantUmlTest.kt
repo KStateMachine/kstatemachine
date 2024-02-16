@@ -78,7 +78,7 @@ State3 --> [*]
 private const val PLANTUML_PARALLEL_STATES_RESULT = """@startuml
 hide empty description
 state parallel_states {
-    state State1 as "State 1" {
+    state "State 1" as State1 {
         state State11
         state State12
         
@@ -186,6 +186,28 @@ state1 --> state222
 @enduml
 """
 
+private const val PLANTUML_META_INFO = """@startuml
+hide empty description
+state State1
+state "State 3" as State3
+state "State 2" as State2 {
+    state "Final sub state" as FinalState
+    state Initial_subState
+    
+    [*] --> Initial_subState
+    Initial_subState --> FinalState : SwitchEvent
+    FinalState --> [*]
+}
+
+[*] --> State1
+State1 --> State2 : go to State2, SwitchEvent
+State1 --> State1 : self targeted, SwitchEvent
+State2 --> State3 : That's all, SwitchEvent
+State2 --> State1 : back to State 1, SwitchEvent
+State3 --> [*]
+@enduml
+"""
+
 private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
     return createTestStateMachine(coroutineStarterType, name = "Nested states") {
         val state1 = initialState("State1")
@@ -253,13 +275,13 @@ class ExportToPlantUmlTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
                 initialState("parallel states", ChildMode.PARALLEL) {
                     state("State1") {
-                        metaInfo = umlLabel("State 1")
+                        metaInfo = UmlMetaInfo("State 1")
                         val state11 = initialState("State11")
                         val state12 = state("State12")
 
                         state11 {
                             transition<SwitchEvent> {
-                                metaInfo = umlLabel("to State 12")
+                                metaInfo = UmlMetaInfo("to State 12")
                                 targetState = state12
                             }
                         }
@@ -333,6 +355,52 @@ class ExportToPlantUmlTest : StringSpec({
             }
 
             machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_RESULT
+        }
+
+        "metaInfo export test" {
+            val machine = createStateMachine(this) {
+                // label for state machine
+                metaInfo = UmlMetaInfo("Nested states sm")
+
+                val state1 = initialState("State1")
+                val state3 = finalState("State3") {
+                    // label for state
+                    metaInfo = UmlMetaInfo("State 3")
+                }
+
+                val state2 = state("State2") {
+                    // label for state
+                    metaInfo = UmlMetaInfo("State 2")
+                    transition<SwitchEvent> {
+                        // label for transition
+                        metaInfo = UmlMetaInfo("That's all")
+                        targetState = state3
+                    }
+                    transition<SwitchEvent>("back") {
+                        // label for transition
+                        metaInfo = UmlMetaInfo("back to State 1")
+                        targetState = state1
+                    }
+                    val finalSubState = finalState("FinalState") {
+                        // label for state
+                        metaInfo = UmlMetaInfo("Final sub state")
+                    }
+                    initialState("Initial subState") {
+                        transition<SwitchEvent> { targetState = finalSubState }
+                    }
+                }
+
+                state1 {
+                    transition<SwitchEvent> {
+                        metaInfo = UmlMetaInfo("go to ${state2.name}")
+                        targetState = state2
+                    }
+                    transition<SwitchEvent>("self targeted") { targetState = this@state1 }
+                    transition<SwitchEvent>()
+                }
+            }
+
+            machine.exportToPlantUml(showEventLabels = true) shouldBe PLANTUML_META_INFO
         }
     }
 })

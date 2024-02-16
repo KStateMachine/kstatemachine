@@ -34,7 +34,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction, metaInfo)
+        val transition = DefaultTransition(name, eventMatcher, type, metaInfo, sourceState, direction)
         listeners.forEach { transition.addListener(it) }
         return transition
     }
@@ -57,7 +57,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction, metaInfo)
+        val transition = DefaultTransition(name, eventMatcher, type, metaInfo, sourceState, direction)
         listeners.forEach { transition.addListener(it) }
         return transition
     }
@@ -76,7 +76,7 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction, metaInfo)
+        val transition = DefaultTransition(name, eventMatcher, type, metaInfo, sourceState, direction)
         listeners.forEach { transition.addListener(it) }
         return transition
     }
@@ -113,7 +113,7 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
             }
         }
 
-        val transition = DefaultTransition(name, eventMatcher, type, sourceState, direction, metaInfo)
+        val transition = DefaultTransition(name, eventMatcher, type, metaInfo, sourceState, direction)
         listeners.forEach { transition.addListener(it) }
         return transition
     }

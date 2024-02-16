@@ -9,36 +9,39 @@ private object PlantUmlExportWithMetaInfoSample {
     object SwitchEvent : Event
 }
 
+/**
+ * The sample shows hot to use [MetaInfo] to beautify export output
+ */
 fun main() = runBlocking {
     val machine = createStateMachine(this) {
         // label for state machine
-        metaInfo = umlLabel("Nested states sm")
+        metaInfo = UmlMetaInfo("Nested states sm")
 
         val state1 = initialState("State1") {
             // label for state
-            metaInfo = umlLabel("State 1")
+            metaInfo = UmlMetaInfo("State 1")
         }
         val state3 = finalState("State3") {
             // label for state
-            metaInfo = umlLabel("State 3")
+            metaInfo = UmlMetaInfo("State 3")
         }
 
         val state2 = state("State2") {
             // label for state
-            metaInfo = umlLabel("State 2")
+            metaInfo = UmlMetaInfo("State 2")
             transition<SwitchEvent> {
                 // label for transition
-                metaInfo = umlLabel("That's all")
+                metaInfo = UmlMetaInfo("That's all")
                 targetState = state3
             }
             transition<SwitchEvent> {
                 // label for transition
-                metaInfo = umlLabel("back to State 1")
+                metaInfo = UmlMetaInfo("back to State 1")
                 targetState = state1
             }
             val finalSubState = finalState {
                 // label for state
-                metaInfo = umlLabel("Final sub state")
+                metaInfo = UmlMetaInfo("Final sub state")
             }
             initialState("Initial subState") {
                 transition<SwitchEvent> { targetState = finalSubState }
@@ -47,7 +50,7 @@ fun main() = runBlocking {
 
         state1 {
             transition<SwitchEvent> {
-                metaInfo = umlLabel("go to ${state2.name}")
+                metaInfo = UmlMetaInfo("go to ${state2.name}")
                 targetState = state2
             }
             transition<SwitchEvent> { targetState = this@state1 }

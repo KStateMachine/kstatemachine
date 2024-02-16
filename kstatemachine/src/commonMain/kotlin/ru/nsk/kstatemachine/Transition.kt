@@ -11,18 +11,18 @@ import ru.nsk.kstatemachine.visitors.VisitorAcceptor
  */
 interface Transition<E : Event> : VisitorAcceptor {
     val name: String?
-    val metaInfo: MetaInfo?
     val eventMatcher: EventMatcher<E>
     val sourceState: IState
     val type: TransitionType
-
     /**
      * This parameter may be used to pass arbitrary data with a transition to targetState.
      * This argument may be set from transition listener. Such transition must have only one listener
      * that sets the argument.
      */
     var argument: Any?
+
     val listeners: Collection<Listener>
+    val metaInfo: MetaInfo?
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
