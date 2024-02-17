@@ -50,7 +50,7 @@ State management features:
 * **[Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
 * **[Optional argument](https://nsk90.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
 * **[Export](https://nsk90.github.io/kstatemachine/#export)** state machine structure
-  to [PlantUML](https://plantuml.com/)
+  to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
 * **[Logging](https://nsk90.github.io/kstatemachine/#logging)** - useful for debugging
 * **[Testable](https://nsk90.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered
@@ -134,6 +134,7 @@ fun main() = runBlocking {
 * [Undo transition sample](./samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
 * [PlantUML nested states export sample](./samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 * [Mermaid nested states export sample](./samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
+* [PlantUML with MetaInfo export sample](./samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
 * [Inherit transitions by grouping states sample](./samples/src/commonMain/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)
 * [Minimal sealed classes sample](./samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 * [Usage without Kotlin Coroutines sample](./samples/src/commonMain/kotlin/ru/nsk/samples/StdLibMinimalSealedClassesSample.kt)
