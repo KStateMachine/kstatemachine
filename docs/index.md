@@ -11,6 +11,7 @@
     * [State subclasses](#state-subclasses)
     * [Listen states](#listen-states)
     * [Listen group of states](#listen-group-of-states)
+    * [Payload](#payload)
 * [Setup transitions](#setup-transitions)
     * [Target-less transitions](#target-less-transitions)
     * [Transition type](#transition-type)
@@ -47,6 +48,7 @@
 * [Export](#export)
     * [PlantUML](#plantuml)
     * [Mermaid](#mermaid)
+    * [Controlling export output](#controlling-export-output)
 * [Testing](#testing)
 * [Multiplatform](#multiplatform)
 * [Consider using Kotlin sealed classes](#consider-using-kotlin-sealed-classes)
@@ -197,6 +199,17 @@ onActiveAllOf(State1, State2, State3) {
     println("states active: $it")
 }
 ```
+
+### Payload
+
+States often store some data.
+You can define [state subclass](#state-subclasses) to add properties for your state (this is typesafe) or in some simple
+cases you may use standard `payload` property of `IState` to store arbitrary data in a state.
+Note that it is not typesafe (`payload` type is `Any?`), but might be handy, as you do not need to create subclasses
+each time.
+
+For use cases when you need to pass data from `Event` to `IState`, the library provides `DataState` and `DataEvent`
+concept, see [typesafe transitions](#typesafe-transitions) section.
 
 ## Setup transitions
 
@@ -354,8 +367,8 @@ redState {
 
 ### Transition targeting multiple states
 
-When you work with parallel states, you may want to specify multiple states as a transition target, specifying 
-a target state for each parallel state region. 
+When you work with parallel states, you may want to specify multiple states as a transition target, specifying
+a target state for each parallel state region.
 
 This may be done with `targetParallelStates()` method inside `transitionConditionally()` transition builder function.
 Each specified state must be a child (not necessary direct) of a parallel state.
@@ -942,8 +955,8 @@ val machine = createStateMachine(scope) { /* ... */ }
 println(machine.exportToMermaid())
 ```
 
-* `Intellij IDEA` users may use official [Mermaid plugin](https://plugins.jetbrains.com/plugin/20146-mermaid) 
-to view diagrams directly in IDE for file types: `.mmd` and `.mermaid`.
+* `Intellij IDEA` users may use official [Mermaid plugin](https://plugins.jetbrains.com/plugin/20146-mermaid)
+  to view diagrams directly in IDE for file types: `.mmd` and `.mermaid`.
 * or copy/paste resulting output to [Mermaid live editor](https://mermaid.live/)
 
 See [Mermaid nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
@@ -968,7 +981,7 @@ See [PlantUML with MetaInfo export sample](https://github.com/nsk90/kstatemachin
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
 are several `Testing.startFrom()`/`Testing.startFromBlocking()` overloaded functions which allow starting the machine
-from a specified state:
+from a specified state or states (for parallel regions):
 
 ```kotlin
 lateinit var state2: State

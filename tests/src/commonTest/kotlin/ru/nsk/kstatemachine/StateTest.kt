@@ -68,6 +68,18 @@ class StateTest : StringSpec({
             }
         }
 
+        "set state payload" {
+            lateinit var state: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                state = initialState {
+                    payload = "arbitrary data"
+                }
+            }
+            state.payload shouldBe "arbitrary data"
+            machine.destroy()
+            state.payload shouldBe null
+        }
+
         /** This code should not compile */
         "dsl marker" {
 //            createTestStateMachine(coroutineStarterType) {

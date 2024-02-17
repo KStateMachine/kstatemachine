@@ -23,6 +23,13 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val childMode: ChildMode
     var metaInfo: MetaInfo?
 
+    /**
+     * Arbitrary user defined data.
+     * The property allows to store some data in a state without subclassing it.
+     * This might be handy in same simple use cases.
+     */
+    var payload: Any?
+
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 

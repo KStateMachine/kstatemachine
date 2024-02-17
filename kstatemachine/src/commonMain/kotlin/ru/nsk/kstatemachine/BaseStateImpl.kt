@@ -28,6 +28,7 @@ open class BaseStateImpl(
         var isFinished = false
         var internalParent: InternalState? = null
         var metaInfo: MetaInfo? = null
+        var payload: Any? = null
     }
 
     /**
@@ -54,6 +55,12 @@ open class BaseStateImpl(
         set(value) {
             if (machineOrNull()?.isRunning == true) error("Can not change metaInfo after state machine started")
             data.metaInfo = value
+        }
+
+    override var payload: Any?
+        get() = data.payload
+        set(value) {
+            data.payload = value
         }
 
 
