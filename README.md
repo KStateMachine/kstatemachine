@@ -37,8 +37,8 @@ State management features:
 * **[Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
   and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions)** - dynamic target
   state which is calculated in a moment of event processing depending on application business logic
-* **[Nested states](https://nsk90.github.io/kstatemachine/#nested-states)** - build hierarchical state machines (
-  statecharts)
+* **[Nested states](https://nsk90.github.io/kstatemachine/#nested-states)** - build hierarchical state machines
+  (statecharts)
   with [cross-level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
 * **[Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
   state machines as atomic child states
@@ -71,8 +71,8 @@ State management features:
 stateDiagram-v2
     direction LR
     [*] --> GreenState
-    GreenState --> YellowState : SwitchEvent
-    YellowState --> RedState : SwitchEvent
+    GreenState --> YellowState: SwitchEvent
+    YellowState --> RedState: SwitchEvent
     RedState --> [*]
 
 ```

@@ -36,6 +36,7 @@
 * [Optional arguments](#optional-arguments)
     * [Event argument](#event-argument)
     * [Transition argument](#transition-argument)
+* [Meta information](#meta-information)
 * [Error handling](#error-handling)
     * [Ignored events](#ignored-events)
     * [Pending events](#pending-events)
@@ -753,6 +754,17 @@ state("first") {
 > [!NOTE]
 > It is up to user to control that argument field is set from one listener. You can use some mutable data structure
 > and fill it from multiple listeners.
+
+## Meta information
+
+The library provides `metaInfo` property for `IState` and `Transition` types.
+`MetaInfo` is a marker interface allowing to attach some static information to library primitives.
+This mechanism is extendable and users may add their own `MetaInfo` sub interfaces/classes if necessary.
+Currently the only standard implementation is `UmlMetaInfo` which is useful for export feature.
+See [controlling export output](#controlling-export-output).
+
+> [!NOTE]
+> MetaInfo considered to be immutable data by design
 
 ## Error handling
 
