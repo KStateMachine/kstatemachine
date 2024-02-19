@@ -842,7 +842,8 @@ recursively (from library callbacks).
 
 When you create a state machine with `createStateMachine`/`createStateMachineBlocking` functions you have to provide
 `CoroutineScope` on which machine will work, this scope also contains `CoroutineContext` by design.
-This is how you can control a thread where state machine works.
+This is how you can control a thread where state machine works. The scope is considered to use single threaded context.
+Using multithreaded context like (`default` or `io`) will probably lead to race conditions.
 
 Suspendable functions and their `Blocking` analogs internally switch current execution coroutine context
 (from which they are called) to state machines one using `kotlinx.coroutines.withContext` or
