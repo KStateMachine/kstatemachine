@@ -825,6 +825,8 @@ Calling `processEvent()` on destroyed machine will throw also.
 
 KStateMachine is designed to work in single thread.
 Concurrent modification of library classes will lead to race conditions.
+See [kotlin coroutines](#kotlin-coroutines) section for more info regarding coroutines environment, and how 
+the library helps you to support this requirement.
 
 ## Kotlin Coroutines
 
@@ -840,16 +842,23 @@ Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` fu
 may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
 recursively (from library callbacks).
 
-When you create a state machine with `createStateMachine`/`createStateMachineBlocking` functions you have to provide
-`CoroutineScope` on which machine will work, this scope also contains `CoroutineContext` by design.
-This is how you can control a thread where state machine works. The scope is considered to use single threaded context.
-Using multithreaded context like (`default` or `io`) will probably lead to race conditions.
+When you create a state machine with `createStateMachine`/`createStateMachineBlocking` (with coroutines support)
+functions you have to provide `CoroutineScope` on which machine will work, 
+this scope also contains `CoroutineContext` by coroutines design.
+This is how you can control a thread where state machine works. The scope is considered to use single threaded
+`CoroutineContext`.
+Using multithreaded `CoroutineContext` like (`default` or `io`) will probably lead to race conditions, 
+this is not correct.
 
-Suspendable functions and their `Blocking` analogs internally switch current execution coroutine context
-(from which they are called) to state machines one using `kotlinx.coroutines.withContext` or
+Suspendable functions and their `Blocking` analogs internally switch current execution `СoroutineСontext`
+(from which they are called) to state machines one, using `kotlinx.coroutines.withContext` or
 `kotlinx.coroutines.runBlocking` arguments respectively.
-Note that if you created machine with a scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not
-be performed.
+This is `CoroutineContext` preservation guarantee that the library provides.
+Note that if you created machine with the scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not
+be performed. So if the StateMachine is created with correct (meeting above conditions) scope it is safe to call
+suspendable methods like `processEvent()` from any context/thread due to internal context preservation.
+StateMachine that was created by `createStdLibStateMachine()` (without coroutines support) does not provide any context
+switching and of course does NOT provide any `CotoutineContext` preservation guarantee.
 
 Multithreading is always complicated and hard to explain, so you can also check this sample
 regarding working with state machine from coroutines running from multiple threads:
