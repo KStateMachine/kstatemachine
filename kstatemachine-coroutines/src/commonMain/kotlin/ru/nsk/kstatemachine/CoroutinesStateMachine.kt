@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
  * @param scope be careful while working with threaded scopes as KStateMachine classes are not thread-safe.
  * Usually you should use only single threaded scopes, for example:
  *
- *     CoroutineScope(Dispatchers.Default.limitedParallelism(1))
+ *     CoroutineScope(newSingleThreadContext("single threaded context"))
  *
  * Note that all calls to created machine instance should be done only from that thread.
  */

@@ -113,7 +113,7 @@ fun createTestStateMachine(
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
-        CoroutineScope(newSingleThreadContext("")),
+        CoroutineScope(newSingleThreadContext("test single thread context")),
         name,
         childMode,
         start,
@@ -123,7 +123,7 @@ fun createTestStateMachine(
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
-        CoroutineScope(Dispatchers.Default.limitedParallelism(1)),
+        CoroutineScope(Dispatchers.Default.limitedParallelism(1)), // does not guarantee same thread for each task
         name,
         childMode,
         start,

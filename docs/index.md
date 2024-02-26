@@ -44,6 +44,8 @@
     * [Other exceptions](#other-exceptions)
 * [Multithreading and concurrency](#multithreading-and-concurrency)
 * [Kotlin Coroutines](#kotlin-coroutines)
+    * [Use single threaded CoroutineScope](#use-single-threaded-coroutinescope)
+    * [CoroutineContext preservation guarantee](#coroutinecontext-preservation-guarantee)
     * [Additional kstatemachine-coroutines artifact](#additional-kstatemachine-coroutines-artifact)
     * [Migration guide from versions older than v0.20.0](#migration-guide-from-versions-older-than-v0200)
 * [Export](#export)
@@ -825,7 +827,7 @@ Calling `processEvent()` on destroyed machine will throw also.
 
 KStateMachine is designed to work in single thread.
 Concurrent modification of library classes will lead to race conditions.
-See [kotlin coroutines](#kotlin-coroutines) section for more info regarding coroutines environment, and how 
+See [kotlin coroutines](#kotlin-coroutines) section for more info regarding coroutines environment, and how
 the library helps you to support this requirement.
 
 ## Kotlin Coroutines
@@ -842,13 +844,32 @@ Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` fu
 may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
 recursively (from library callbacks).
 
+### Use single threaded `CoroutineScope`
+
 When you create a state machine with `createStateMachine`/`createStateMachineBlocking` (with coroutines support)
-functions you have to provide `CoroutineScope` on which machine will work, 
+functions you have to provide `CoroutineScope` on which machine will work,
 this scope also contains `CoroutineContext` by coroutines design.
 This is how you can control a thread where state machine works. The scope is considered to use single threaded
 `CoroutineContext`.
-Using multithreaded `CoroutineContext` like (`default` or `io`) will probably lead to race conditions, 
-this is not correct.
+
+Single thread `CoroutineScope` samples:
+
+```kotlin
+CoroutineScope(newSingleThreadContext("single thread"))
+CoroutineScope(Dispatchers.Main)
+```
+
+Using multithreaded `CoroutineContext` like `Dispatchers.Default` or `Dispatchers.IO` will lead to race
+conditions, it is not correct.
+
+Even `Dispatchers.Default.limitedParallelism(1)` that seems to be ok at glance,
+does not provide guarantee that each coroutine will be executed on the same single thread, it only limits the amount of
+used threads. So race condition still takes place, as nothing forces threads, running on different processor cores,
+to update variable values in their processor core caches, so outdated values could be used from core cache. Other words, 
+one thread does not to know about variable changes made by other one. This known as __visibility guarantee__,
+that `volatile` keyword provides on `jvm`.
+
+### `CoroutineContext` preservation guarantee
 
 Suspendable functions and their `Blocking` analogs internally switch current execution `СoroutineСontext`
 (from which they are called) to state machines one, using `kotlinx.coroutines.withContext` or
@@ -857,14 +878,16 @@ This is `CoroutineContext` preservation guarantee that the library provides.
 Note that if you created machine with the scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not
 be performed. So if the StateMachine is created with correct (meeting above conditions) scope it is safe to call
 suspendable methods like `processEvent()` from any context/thread due to internal context preservation.
-StateMachine that was created by `createStdLibStateMachine()` (without coroutines support) does not provide any context
-switching and of course does NOT provide any `CotoutineContext` preservation guarantee.
+StateMachine that was created by `createStdLibStateMachine()` (without coroutines support) does not perform any context
+switching and of course does NOT provide any `CoroutineContext` preservation guarantee.
 
 Multithreading is always complicated and hard to explain, so you can also check this sample
 regarding working with state machine from coroutines running from multiple threads:
 
 ```kotlin
-runBlocking { // defines non empty coroutine context for state machine
+// runBlocking starts an infinite event loop on current running thread,
+// so it produces correct single threaded CoroutineContext for a StateMachine.
+runBlocking { // defines non-empty coroutine context for state machine
     val machineThread = Thread.currentThread()
     val machineScope = this
 

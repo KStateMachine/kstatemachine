@@ -10,7 +10,9 @@
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat )]( https://android-arsenal.com/details/1/8276 )
 [![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin)
 ![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)
-[![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20this%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine%0A%0A%23kstatemachine)
+[![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine%0A%0A%23kstatemachine)
+[![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
+
 
 [Documentation](https://nsk90.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
 
@@ -62,7 +64,10 @@ State management features:
 
 > [!NOTE]
 > The library is in a development phase. You are welcome to propose useful features, or contribute to the project.
+> 
 > Don't forget to push the ⭐ if you like this project.
+> 
+> You can donate or become a sponsor to support the project, using ❤️ github-sponsors button.
 
 ## Quick start sample
 
