@@ -14,7 +14,7 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 
-[Documentation](https://nsk90.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
@@ -25,42 +25,42 @@ Integration features are:
 
 * **Kotlin [DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax.**
   Declarative and clear state machine structure. Using without DSL is also possible.
-* **Kotlin [Coroutines](https://nsk90.github.io/kstatemachine/#kotlin-coroutines) support.**
+* **Kotlin [Coroutines](https://kstatemachine.github.io/kstatemachine/#kotlin-coroutines) support.**
   Call suspendable functions within the library.
   You can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
-* **Kotlin [Multiplatform](https://nsk90.github.io/kstatemachine/#multiplatform) support.**
+* **Kotlin [Multiplatform](https://kstatemachine.github.io/kstatemachine/#multiplatform) support.**
 * **Zero dependency.** It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
 
 State management features:
 
-* **Event based** - [transitions](https://nsk90.github.io/kstatemachine/#setup-transitions) are performed by processing
+* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/#setup-transitions) are performed by processing
   incoming events
-* **[Reactive](https://nsk90.github.io/kstatemachine/#listen-states)** - listen for machine, states,
-  [state groups](https://nsk90.github.io/kstatemachine/#listen-group-of-states) and transitions
-* **[Guarded](https://nsk90.github.io/kstatemachine/#guarded-transitions)
-  and [Conditional transitions](https://nsk90.github.io/kstatemachine/#conditional-transitions)** - dynamic target
+* **[Reactive](https://kstatemachine.github.io/kstatemachine/#listen-states)** - listen for machine, states,
+  [state groups](https://kstatemachine.github.io/kstatemachine/#listen-group-of-states) and transitions
+* **[Guarded](https://kstatemachine.github.io/kstatemachine/#guarded-transitions)
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/#conditional-transitions)** - dynamic target
   state which is calculated in a moment of event processing depending on application business logic
-* **[Nested states](https://nsk90.github.io/kstatemachine/#nested-states)** - build hierarchical state machines
+* **[Nested states](https://kstatemachine.github.io/kstatemachine/#nested-states)** - build hierarchical state machines
   (statecharts)
-  with [cross-level transitions](https://nsk90.github.io/kstatemachine/#cross-level-transitions) support
-* **[Composed (nested) state machines.](https://nsk90.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
+  with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/#cross-level-transitions) support
+* **[Composed (nested) state machines.](https://kstatemachine.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
   state machines as atomic child states
-* **[Pseudo states](https://nsk90.github.io/kstatemachine/#pseudo-states)** for additional logic in machine behaviour
-* **[Typesafe transitions](https://nsk90.github.io/kstatemachine/#typesafe-transitions)** - pass data in typesafe way
+* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/#pseudo-states)** for additional logic in machine behaviour
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/#typesafe-transitions)** - pass data in typesafe way
   from event to state
-* **[Parallel states](https://nsk90.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial explosion of
+* **[Parallel states](https://kstatemachine.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial explosion of
   states
-* **[Undo transitions](https://nsk90.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
-* **[Optional argument](https://nsk90.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
-* **[Export](https://nsk90.github.io/kstatemachine/#export)** state machine structure
+* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
+* **[Optional argument](https://kstatemachine.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
+* **[Export](https://kstatemachine.github.io/kstatemachine/#export)** state machine structure
   to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
-* **[Logging](https://nsk90.github.io/kstatemachine/#logging)** - useful for debugging
-* **[Testable](https://nsk90.github.io/kstatemachine/#testing)** - run state machine from specified state
+* **[Logging](https://kstatemachine.github.io/kstatemachine/#logging)** - useful for debugging
+* **[Testable](https://kstatemachine.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered
   by [tests](https://github.com/nsk90/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
 
 > [!IMPORTANT]
-> SEE FULL [DOCUMENTATION HERE](https://nsk90.github.io/kstatemachine)
+> SEE FULL [DOCUMENTATION HERE](https://kstatemachine.github.io/kstatemachine)
 
 > [!NOTE]
 > The library is in a development phase. You are welcome to propose useful features, or contribute to the project.
