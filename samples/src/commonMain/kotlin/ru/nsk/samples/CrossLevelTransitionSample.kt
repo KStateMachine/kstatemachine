@@ -1,8 +1,14 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.visitors.exportToPlantUml
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.state
+import ru.nsk.kstatemachine.state.transitionOn
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.kstatemachine.visitors.export.exportToPlantUml
 import ru.nsk.samples.CrossLevelTransitionSample.SwitchEvent
 
 private object CrossLevelTransitionSample {

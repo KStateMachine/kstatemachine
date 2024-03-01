@@ -1,8 +1,15 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.visitors.exportToPlantUml
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.finalState
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.transitionOn
+import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.kstatemachine.visitors.export.exportToPlantUml
 import ru.nsk.samples.PlantUmlExportWithMetaInfoSample.SwitchEvent
 
 private object PlantUmlExportWithMetaInfoSample {

@@ -5,11 +5,15 @@ import io.mockk.MockKVerificationScope
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verifySequence
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.BuildingStateMachine
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.createStateMachineBlocking
+import ru.nsk.kstatemachine.statemachine.createStdLibStateMachine
+import ru.nsk.kstatemachine.transition.TransitionBuilder
+import ru.nsk.kstatemachine.transition.onTriggered
 import kotlin.coroutines.EmptyCoroutineContext
 
 typealias Callback<T> = (T) -> Unit

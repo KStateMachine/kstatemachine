@@ -1,8 +1,10 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.visitors.exportToMermaid
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.kstatemachine.visitors.export.exportToMermaid
 import ru.nsk.samples.MermaidExportSample.SwitchEvent
 
 private object MermaidExportSample {

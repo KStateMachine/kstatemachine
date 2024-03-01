@@ -1,6 +1,6 @@
 package ru.nsk.kstatemachine.visitors
 
-import ru.nsk.kstatemachine.IState
+import ru.nsk.kstatemachine.state.IState
 
 internal interface RecursiveVisitor : Visitor {
     fun IState.visitChildren() {

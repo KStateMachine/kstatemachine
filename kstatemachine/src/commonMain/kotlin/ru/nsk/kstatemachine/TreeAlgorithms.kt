@@ -1,5 +1,8 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.state.InternalNode
+import ru.nsk.kstatemachine.state.requireParentNode
+
 /**
  * @return Path from [targetState] to the lowest common ancestor (lca).
  * Path order: Lca and its parent if [addLcaParent] is true are last elements in resulting list.

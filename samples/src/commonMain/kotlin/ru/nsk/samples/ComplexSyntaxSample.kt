@@ -1,7 +1,10 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.transition.*
 import ru.nsk.samples.ComplexSyntaxSample.SwitchRedEvent
 import ru.nsk.samples.ComplexSyntaxSample.SwitchYellowEvent
 import ru.nsk.samples.ComplexSyntaxSample.YellowState
@@ -17,7 +20,7 @@ private object ComplexSyntaxSample {
     class YellowState(val info: Int) : DefaultState("Yellow")
 }
 
-fun main() = runBlocking {
+fun main(): Unit = runBlocking {
     val machine = createStateMachine(
         this, // coroutine scope used for this machine
         "Traffic lights" // StateMachine name is optional
@@ -139,4 +142,8 @@ fun main() = runBlocking {
 
     // get list of currently active states
     val states = machine.activeStates()
+
+    states.apply {
+        // do something with states
+    }
 }

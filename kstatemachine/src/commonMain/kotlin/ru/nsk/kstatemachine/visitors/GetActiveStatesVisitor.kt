@@ -1,6 +1,10 @@
 package ru.nsk.kstatemachine.visitors
 
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.InternalState
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.transition.Transition
 
 internal class GetActiveStatesVisitor(private val selfIncluding: Boolean) : Visitor {
     private val _activeStates = mutableSetOf<IState>()

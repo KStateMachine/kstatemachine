@@ -1,7 +1,11 @@
 package ru.nsk.kstatemachine
 
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.InternalState
+import ru.nsk.kstatemachine.statemachine.StateMachine
+
 /**
- * [forEach] analog which ignores internal state machines
+ * [forEach] analog which ignores internal [StateMachine]s
  */
 internal suspend fun Iterable<InternalState>.forEachState(block: suspend (InternalState) -> Unit) {
     forEach { if (it !is StateMachine) block(it) }

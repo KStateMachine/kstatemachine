@@ -1,14 +1,17 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.samples.InheritTransitionsSample.Events.ExitEvent
 import ru.nsk.samples.InheritTransitionsSample.Events.SwitchEvent
 
 private object InheritTransitionsSample {
     sealed interface Events : Event {
-        object ExitEvent : Events
-        object SwitchEvent : Events
+        data object ExitEvent : Events
+        data object SwitchEvent : Events
     }
 }
 

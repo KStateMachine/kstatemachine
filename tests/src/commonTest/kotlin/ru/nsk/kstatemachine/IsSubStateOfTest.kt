@@ -2,6 +2,10 @@ package ru.nsk.kstatemachine
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.addInitialState
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.state
 
 class IsSubStateOfTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->

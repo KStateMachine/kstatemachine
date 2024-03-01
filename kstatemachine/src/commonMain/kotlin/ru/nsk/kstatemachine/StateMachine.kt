@@ -1,6 +1,19 @@
-package ru.nsk.kstatemachine
+package ru.nsk.kstatemachine.statemachine
 
-import ru.nsk.kstatemachine.StateMachine.PendingEventHandler
+import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
+import ru.nsk.kstatemachine.coroutines.StdLibCoroutineAbstraction
+import ru.nsk.kstatemachine.coroutines.createStateMachine
+import ru.nsk.kstatemachine.event.DestroyEvent
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.event.StopEvent
+import ru.nsk.kstatemachine.event.UndoEvent
+import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.statemachine.StateMachine.PendingEventHandler
+import ru.nsk.kstatemachine.transition.EventAndArgument
+import ru.nsk.kstatemachine.transition.Transition
+import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 

@@ -1,9 +1,9 @@
 package ru.nsk.kstatemachine.visitors
 
-import ru.nsk.kstatemachine.Event
-import ru.nsk.kstatemachine.IState
-import ru.nsk.kstatemachine.StateMachine
-import ru.nsk.kstatemachine.Transition
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.transition.Transition
 
 internal class CheckUniqueNamesVisitor : RecursiveVisitor {
     private val stateNames = mutableSetOf<String>()

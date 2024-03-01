@@ -1,6 +1,10 @@
 package ru.nsk.samples
 
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.createStdLibStateMachine
+import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.transition.onTriggered
 import ru.nsk.samples.StdLibMinimalSealedClassesSample.States.*
 import ru.nsk.samples.StdLibMinimalSealedClassesSample.SwitchEvent
 

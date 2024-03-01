@@ -8,7 +8,12 @@ import io.mockk.verifySequence
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
-import ru.nsk.kstatemachine.StateMachineNotification.*
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
+import ru.nsk.kstatemachine.event.StartEvent
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.transition.onTriggered
+import ru.nsk.kstatemachine.transition.stay
 import kotlin.coroutines.EmptyCoroutineContext
 
 class CoroutinesTest : StringSpec({
@@ -285,5 +290,21 @@ class CoroutinesTest : StringSpec({
 
         machine.processEvent(SwitchEvent)
         statesFlow.first().shouldContainExactlyInAnyOrder(state2)
+    }
+
+    "f:context switching" {
+        println(""+ Thread.currentThread() + Thread.currentThread().hashCode() )
+        val scope = CoroutineScope(EmptyCoroutineContext)
+        val scope1 = CoroutineScope(Dispatchers.Default)
+        val scope2 = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            println("EmptyCoroutineContext ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+        }
+        scope1.launch {
+            println("Default               ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+        }
+        scope2.launch {
+            println("IO                    ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+        }
     }
 })

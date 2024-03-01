@@ -1,7 +1,10 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.DataEvent
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.samples.TypesafeTransitionSample.LoginData
 import ru.nsk.samples.TypesafeTransitionSample.LoginEvent
 import ru.nsk.samples.TypesafeTransitionSample.checkUserPassword

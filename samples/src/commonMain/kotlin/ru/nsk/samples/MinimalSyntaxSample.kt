@@ -1,7 +1,10 @@
 package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
-import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.kstatemachine.transition.onTriggered
 import ru.nsk.samples.MinimalSyntaxSample.SwitchEvent
 
 private object MinimalSyntaxSample {
