@@ -16,7 +16,7 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 
-[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Sponsors](#sponsors-) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+[Documentation](https://kstatemachine.github.io/kstatemachine) | [Sponsors](#sponsors-) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
@@ -63,6 +63,14 @@ State management features:
 
 > [!IMPORTANT]
 > SEE FULL [DOCUMENTATION HERE](https://kstatemachine.github.io/kstatemachine)
+
+## Sponsors ❤
+
+> [!NOTE]
+> Please, push the ⭐ if you like this project
+
+I highly appreciate that you donate or become a sponsor to support the project.
+Use ❤️ github-sponsors button to see supported methods.
 
 ## Quick start sample
 
@@ -118,14 +126,6 @@ fun main() = runBlocking {
     machine.processEvent(SwitchEvent)
 }
 ```
-
-## Sponsors ❤
-
-> [!NOTE]
-> Please, push the ⭐ if you like this project
-
-I highly appreciate that you donate or become a sponsor to support the project.
-Use ❤️ github-sponsors button to see supported methods.
 
 ## Samples
 
