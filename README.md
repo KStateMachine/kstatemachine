@@ -16,7 +16,7 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 
-[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Sponsors](#sponsors-) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
@@ -63,13 +63,6 @@ State management features:
 
 > [!IMPORTANT]
 > SEE FULL [DOCUMENTATION HERE](https://kstatemachine.github.io/kstatemachine)
-
-> [!NOTE]
-> The library is in a development phase. You are welcome to propose useful features, or contribute to the project.
-> 
-> Don't forget to push the ⭐ if you like this project.
-> 
-> You can donate or become a sponsor to support the project, using ❤️ github-sponsors button.
 
 ## Quick start sample
 
@@ -157,114 +150,40 @@ fun main() = runBlocking {
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
-The library consists of 2 components:
-
-* `kstatemachine` - (mandatory) state machine implementation (depends only on Kotlin Standard library)
-* `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on Kotlin Coroutines library)
-
-Please note that starting from `v0.22.0` the library switched to Kotlin Multiplatform and artifact naming has changed.
+See [install section in the docs](https://kstatemachine.github.io/kstatemachine/#install) for details.
 
 ### Maven Central
 
-Add dependencies:
-
 ```kotlin
-// kotlin
 dependencies {
-    // multiplatform artifacts (starting from 0.22.0)
+    // multiplatform artifacts, where <Tag> is a library version.
     implementation("io.github.nsk90:kstatemachine:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
-    // or JVM/Android artifacts (starting from 0.22.0)
-    implementation("io.github.nsk90:kstatemachine-jvm:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-coroutines-jvm:<Tag>")
-    // or iOS artifacts (starting from 0.22.1)
-    implementation("io.github.nsk90:kstatemachine-iosarm64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-coroutines-iosarm64:<Tag>")
-
-    implementation("io.github.nsk90:kstatemachine-iosx64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-coroutines-iosx64:<Tag>")
-
-    implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
 }
 ```
-
-```groovy
-// groovy
-dependencies {
-    // multiplatform artifacts
-    implementation 'io.github.nsk90:kstatemachine:<Tag>'
-    implementation 'io.github.nsk90:kstatemachine-coroutines:<Tag>' // optional
-    // etc..
-}
-```
-
-Where `<Tag>` is a library version.
-
-You can see official docs
-about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
-
-### JitPack (deprecated)
-
-Currently, `JitPack` does not support Kotlin multiplatform artifacts.
-So versions starting from `0.22.0` are not available there, use `Maven Central` instead.
-
-Add the [JitPack](https://jitpack.io/#nsk90/kstatemachine/Tag) repository to your build file. Add it in your
-root `build.gradle` at the end of repositories:
-
-```kotlin
-// kotlin
-repositories {
-    //  ...
-    maven { url = uri("https://jitpack.io") }
-}
-```
-
-```groovy
-// groovy
-allprojects {
-    repositories {
-        //  ...
-        maven { url 'https://jitpack.io' }
-    }
-}
-```
-
-Add dependencies:
-
-```kotlin
-// kotlin
-dependencies {
-    implementation("com.github.nsk90:kstatemachine:<Tag>")
-    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
-    // it is some strange JitPack behaviour
-    implementation("com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>") // optional
-}
-```
-
-```groovy
-// groovy
-dependencies {
-    implementation 'com.github.nsk90:kstatemachine:<Tag>'
-    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
-    // it is some strange JitPack behaviour
-    implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
-}
-```
-
-Where `<Tag>` is a library version.
 
 ## Build
 
 Run `./gradlew build` or build with `Intellij IDEA`.
 
-To run tests from IDE download official [Kotest plugin](https://github.com/kotest/kotest-intellij-plugin).
+## Contribution
 
-## License
+The library is in a active development phase. You are welcome to propose useful features and contribute to the project.
+See [CONTRIBUTING](./CONTRIBUTING.md) file.
 
-Licensed under permissive [Boost Software License](./LICENSE)
+## Sponsors ❤
+
+> [!NOTE]
+> Please, push the ⭐ if you like this project
+
+I highly appreciate that you donate or become a sponsor to support the project.
+Use ❤️ github-sponsors button to see supported methods.
 
 ## Thanks to supporters
 
 [![Stargazers repo roster for @nsk90/kstatemachine](https://reporoster.com/stars/dark/nsk90/kstatemachine)](https://github.com/nsk90/kstatemachine/stargazers)
 [![Forkers repo roster for @nsk90/kstatemachine](https://reporoster.com/forks/dark/nsk90/kstatemachine)](https://github.com/nsk90/kstatemachine/network/members)
+
+## License
+
+Licensed under permissive [Boost Software License](./LICENSE)
