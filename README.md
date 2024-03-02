@@ -16,7 +16,7 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 
-[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Sponsors](#sponsors-) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+[Documentation](https://kstatemachine.github.io/kstatemachine) | [Quick start](#quick-start-sample) | [Sponsors](#sponsors-) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
@@ -119,6 +119,14 @@ fun main() = runBlocking {
 }
 ```
 
+## Sponsors ❤
+
+> [!NOTE]
+> Please, push the ⭐ if you like this project
+
+I highly appreciate that you donate or become a sponsor to support the project.
+Use ❤️ github-sponsors button to see supported methods.
+
 ## Samples
 
 * [Simple Android 2D shooter game sample](https://github.com/nsk90/android-kstatemachine-sample)
@@ -170,14 +178,6 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 The library is in a active development phase. You are welcome to propose useful features and contribute to the project.
 See [CONTRIBUTING](./CONTRIBUTING.md) file.
-
-## Sponsors ❤
-
-> [!NOTE]
-> Please, push the ⭐ if you like this project
-
-I highly appreciate that you donate or become a sponsor to support the project.
-Use ❤️ github-sponsors button to see supported methods.
 
 ## Thanks to supporters
 
