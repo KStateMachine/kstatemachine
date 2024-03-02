@@ -7,10 +7,10 @@
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine)](https://central.sonatype.com/artifact/io.github.nsk90/kstatemachine)
 [![JitPack](https://jitpack.io/v/nsk90/kstatemachine.svg)](https://jitpack.io/#nsk90/kstatemachine)
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-KStateMachine-green.svg?style=flat)](https://android-arsenal.com/details/1/8276)
-[![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)
-[![Open Collective](https://img.shields.io/badge/opencollective-member-lightblue?logo=opencollective&style=flat)](https://opencollective.com/kstatemachine)
 [![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-kstatemachine-green.svg?style=flat)](https://android-arsenal.com/details/1/8276)
+[![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)
+[![Open Collective](https://img.shields.io/badge/opencollective-kstatemachine-lightblue?logo=opencollective&style=flat)](https://opencollective.com/kstatemachine)
 [![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine%0A%0A%23kstatemachine)
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
