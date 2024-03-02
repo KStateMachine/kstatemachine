@@ -3,8 +3,11 @@ package ru.nsk.kstatemachine.statemachine
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.isSubStateOf
+import ru.nsk.kstatemachine.persist.EventRecorder
+import ru.nsk.kstatemachine.persist.EventRecorderImpl
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
@@ -15,7 +18,7 @@ import kotlin.reflect.KClass
 internal class StateMachineImpl(
     name: String?,
     childMode: ChildMode,
-    override val creationArguments: StateMachine.CreationArguments,
+    override val creationArguments: CreationArguments,
     override val coroutineAbstraction: CoroutineAbstraction,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
@@ -43,19 +46,32 @@ internal class StateMachineImpl(
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
 
+    private var _isRunning = false
+    override val isRunning get() = _isRunning
+
     /**
      * Flag for event processing mechanism, which takes place in [processEventBlocking] and during [startBlocking]/[startFrom].
      * It is not possible to process new event while previous processing is incomplete.
      */
     private var isProcessingEvent = false
 
-    private var _isRunning = false
-    override val isRunning get() = _isRunning
+    private var _hasProcessedEvents: Boolean = false
+    override val hasProcessedEvents get() = _hasProcessedEvents
 
     private var delayedListenerException: Exception? = null
 
     private var _areListenersMuted = false
     override val areListenersMuted get() = _areListenersMuted
+
+    private val _eventRecorder = if (creationArguments.recordEvents) EventRecorderImpl(this) else null
+    override val eventRecorder: EventRecorder
+        get() {
+            check(creationArguments.recordEvents) {
+                "Event recording is not enabled. Use ${CreationArguments::recordEvents.name} parameter " +
+                        "of createStateMachine() method family"
+            }
+            return _eventRecorder!!
+        }
 
     init {
         transitionConditionally<StartEvent>("start transition") {
@@ -141,6 +157,7 @@ internal class StateMachineImpl(
     /** To be called only from [runCheckingExceptions] */
     private suspend fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
+        _hasProcessedEvents = false
         log { "$this started" }
         machineNotify { onStarted() }
         doEnter(transitionParams)
@@ -185,6 +202,11 @@ internal class StateMachineImpl(
     }
 
     private suspend fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
+        if (eventAndArgument.event !is StartEvent)
+            _hasProcessedEvents = true
+
+        _eventRecorder?.onProcessEvent(eventAndArgument) // should be done before wrapping to record not wrapped event
+
         val wrappedEventAndArgument = eventAndArgument.wrap()
 
         val eventProcessed = runCheckingExceptions {

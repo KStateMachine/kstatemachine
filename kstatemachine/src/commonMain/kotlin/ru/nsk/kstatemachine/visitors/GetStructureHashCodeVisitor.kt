@@ -51,7 +51,8 @@ internal class GetStructureHashCodeVisitor : RecursiveVisitor {
     }
 }
 
-fun StateMachine.getStructureHashCode() = with(GetStructureHashCodeVisitor()) {
-    visit(this@getStructureHashCode)
-    structureHashCode
-}
+val StateMachine.structureHashCode: Int
+    get() = with(GetStructureHashCodeVisitor()) {
+        visit(this@structureHashCode)
+        structureHashCode
+    }

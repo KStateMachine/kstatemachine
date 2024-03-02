@@ -17,9 +17,9 @@ class GetStructureHashCodeVisitorTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()
             }
-            val hashCode = machine.getStructureHashCode()
+            val hashCode = machine.structureHashCode
             hashCode shouldNotBe 0
-            hashCode shouldBe machine.getStructureHashCode()
+            hashCode shouldBe machine.structureHashCode
         }
 
         "structure hash code for different StateMachine instances should be the same if they have equal structure" {
@@ -34,9 +34,9 @@ class GetStructureHashCodeVisitorTest : StringSpec({
             val machine3 = createTestStateMachine(coroutineStarterType) {
                 initialState("State")
             }
-            val hashCode = machine.getStructureHashCode()
-            hashCode shouldBe machine2.getStructureHashCode()
-            hashCode shouldNotBe machine3.getStructureHashCode()
+            val hashCode = machine.structureHashCode
+            hashCode shouldBe machine2.structureHashCode
+            hashCode shouldNotBe machine3.structureHashCode
         }
 
         "structure hash code should catch state reorder (this might affect behaviour in some corner cases)" {
@@ -50,7 +50,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialState("state1")
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "negative structure hash code should catch state reorder (not works for empty states)" {
@@ -65,7 +65,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
             }
 
             // should not be equal, but cannot implement it
-            machine.getStructureHashCode() shouldBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldBe machine2.structureHashCode
         }
 
         "structure hash code is affected by CreationArguments" {
@@ -83,7 +83,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialState()
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by state name" {
@@ -95,7 +95,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialState("state1_2")
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by state count" {
@@ -110,7 +110,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 state()
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by state type" {
@@ -122,7 +122,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialDataState<Int>(defaultData = 0)
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by generic DataState type" {
@@ -134,7 +134,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialDataState<Int>(defaultData = 0)
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by DataState defaultData" {
@@ -146,7 +146,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialDataState<Int>(defaultData = 1)
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by transition" {
@@ -160,7 +160,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 initialState()
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by transition name" {
@@ -176,7 +176,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 }
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by transition event" {
@@ -192,7 +192,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 }
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by transition count" {
@@ -209,7 +209,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 }
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by transition type" {
@@ -225,7 +225,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 }
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by child mode" {
@@ -237,7 +237,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 state()
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by HistoryType" {
@@ -251,7 +251,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 historyState(historyType = HistoryType.SHALLOW)
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
 
         "structure hash code is affected by ${QueuePendingEventHandler::class.simpleName}" {
@@ -265,7 +265,7 @@ class GetStructureHashCodeVisitorTest : StringSpec({
                 pendingEventHandler = throwingPendingEventHandler()
             }
 
-            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+            machine.structureHashCode shouldNotBe machine2.structureHashCode
         }
     }
 })

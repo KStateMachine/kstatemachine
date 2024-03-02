@@ -382,5 +382,24 @@ class StateMachineTest : StringSpec({
                 verifySequence { callbacks.onStopped(machine) }
             }
         }
+
+        "hasProcessedEvents flag indicates processing of the first (except StartEvent) event" {
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState()
+                machine.hasProcessedEvents shouldBe false
+                onStarted {
+                    machine.hasProcessedEvents shouldBe false
+                }
+            }
+            machine.hasProcessedEvents shouldBe false
+            machine.processEvent(SwitchEvent)
+            machine.hasProcessedEvents shouldBe true
+            machine.stop()
+            machine.hasProcessedEvents shouldBe true
+            machine.start()
+            machine.hasProcessedEvents shouldBe false
+            machine.processEvent(SwitchEvent)
+            machine.hasProcessedEvents shouldBe true
+        }
     }
 })

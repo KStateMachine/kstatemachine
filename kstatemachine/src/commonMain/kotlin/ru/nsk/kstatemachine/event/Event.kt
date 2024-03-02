@@ -5,9 +5,11 @@ import ru.nsk.kstatemachine.state.FinalDataState
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.statemachine.undo
 
 /**
  * Base interface for events which may trigger transitions of [StateMachine]
+ * Events are expected to be immutable subjects by design.
  */
 interface Event
 
@@ -19,7 +21,7 @@ interface DataEvent<out D : Any> : Event {
 }
 
 /**
- * User may call [StateMachine.processEventBlocking] with [UndoEvent] as alternative to calling machine.undo()
+ * User may call [StateMachine.processEvent] with [UndoEvent] as alternative to calling [StateMachine.undo]
  */
 object UndoEvent : Event
 

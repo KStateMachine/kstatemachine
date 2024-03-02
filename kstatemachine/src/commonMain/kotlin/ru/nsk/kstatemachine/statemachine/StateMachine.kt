@@ -7,6 +7,7 @@ import ru.nsk.kstatemachine.event.DestroyEvent
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.event.UndoEvent
+import ru.nsk.kstatemachine.persist.EventRecorder
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.State
@@ -46,6 +47,11 @@ interface StateMachine : State {
     val isRunning: Boolean
 
     /**
+     * Indicates that machine is started and has clear initial state (has not processed any events yet)
+     */
+    val hasProcessedEvents: Boolean
+
+    /**
      * Indicates that machine was destroyed. There is no way to restore machine instance from this state.
      * Once machine became destroyed it is not usable anymore.
      */
@@ -54,6 +60,8 @@ interface StateMachine : State {
     val machineListeners: Collection<Listener>
 
     val coroutineAbstraction: CoroutineAbstraction
+
+    val eventRecorder: EventRecorder
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -144,6 +152,9 @@ interface StateMachine : State {
          * If set to false an exception will be thrown on state reuse attempt.
          */
         val autoDestroyOnStatesReuse: Boolean = true,
+        /**
+         * Enables Undo transition
+         */
         val isUndoEnabled: Boolean = false,
         /**
          * If set to true, when multiple transitions match event the first matching transition is selected.
@@ -156,6 +167,11 @@ interface StateMachine : State {
          * if it contains states or transitions with null or blank names
          */
         val requireNonBlankNames: Boolean = false,
+        /**
+         * Enables incoming events recording in order to restore [StateMachine] later.
+         * Use [StateMachine.eventRecorder] to access the recording result.
+         */
+        val recordEvents: Boolean = false,
     )
 }
 
@@ -228,6 +244,7 @@ fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.ru
 
 /**
  * Allows to mutate some properties, which is necessary during setup, before machine is started
+ * Those properties are not passed through [StateMachine]'s constructor to make DSL syntax more nice and readable.
  */
 interface BuildingStateMachine : StateMachine {
     override var logger: StateMachine.Logger

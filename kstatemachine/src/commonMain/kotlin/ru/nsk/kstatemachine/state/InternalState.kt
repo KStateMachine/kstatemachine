@@ -74,7 +74,9 @@ internal suspend fun <E : Event> InternalState.findTransitionsByEvent(event: E):
     return transitions.filter { it.isMatchingEvent(event) } as List<InternalTransition<E>>
 }
 
-internal suspend fun <E : Event> InternalState.findUniqueResolvedTransition(eventAndArgument: EventAndArgument<E>): ResolvedTransition<E>? {
+internal suspend fun <E : Event> InternalState.findUniqueResolvedTransition(
+    eventAndArgument: EventAndArgument<E>
+): ResolvedTransition<E>? {
     val policy = DefaultPolicy(eventAndArgument)
     val transitions = findTransitionsByEvent(eventAndArgument.event)
         .map { it to it.produceTargetStateDirection(policy) }

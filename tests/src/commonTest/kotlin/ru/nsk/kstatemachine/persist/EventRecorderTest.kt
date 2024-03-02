@@ -3,18 +3,18 @@ package ru.nsk.kstatemachine.persist
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainInOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.FirstEvent
 import ru.nsk.kstatemachine.SecondEvent
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.state.initialState
-import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
-import ru.nsk.kstatemachine.statemachine.createStdLibStateMachine
-import ru.nsk.kstatemachine.statemachine.destroy
-import ru.nsk.kstatemachine.statemachine.undo
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -101,30 +101,83 @@ class EventRecorderTest : StringSpec({
         shouldNotThrowAny { machine2.restoreByRecordedEventsBlocking(recordedEvents) }
     }
 
-    "check recorded events with arguments and undo" {
+    "check recorded events with arguments" {
+        val machine = createStdLibStateMachine(
+            creationArguments = CreationArguments(recordEvents = true)
+        ) {
+            initialState()
+        }
+        machine.processEvent(FirstEvent)
+        machine.processEvent(SecondEvent, 2)
+
+        val recordedEvents = machine.eventRecorder.getRecordedEvents()
+        recordedEvents.structureHashCode shouldBe machine.structureHashCode
+
+        recordedEvents.events.shouldContainExactly(
+            EventAndArgument(FirstEvent, null),
+            EventAndArgument(SecondEvent, 2),
+        )
+    }
+
+    "check recorded events and undo" {
+        val machine = createStdLibStateMachine(
+            creationArguments = CreationArguments(recordEvents = true, isUndoEnabled = true)
+        ) {
+            initialState()
+        }
+        machine.processEvent(SwitchEvent)
+        machine.undo()
+
+        val recordedEvents = machine.eventRecorder.getRecordedEvents()
+        recordedEvents.events.shouldContainExactly(
+            EventAndArgument(SwitchEvent, null),
+            EventAndArgument(UndoEvent, null),
+        )
+    }
+
+    "check recorded events with StopEvent" {
+        val machine = createStdLibStateMachine(
+            creationArguments = CreationArguments(recordEvents = true, isUndoEnabled = true)
+        ) {
+            initialState()
+        }
+        machine.processEvent(SwitchEvent)
+        machine.stop()
+
+        val recordedEvents = machine.eventRecorder.getRecordedEvents()
+        recordedEvents.events.shouldContain(EventAndArgument(SwitchEvent, null))
+        recordedEvents.events shouldHaveSize 2 // StopEvent
+    }
+
+    "check recorded events with DestroyEvent" {
+        val machine = createStdLibStateMachine(
+            creationArguments = CreationArguments(recordEvents = true, isUndoEnabled = true)
+        ) {
+            initialState()
+        }
+        machine.processEvent(SwitchEvent)
+        machine.destroy()
+
+        val recordedEvents = machine.eventRecorder.getRecordedEvents()
+        recordedEvents.events.shouldContain(EventAndArgument(SwitchEvent, null))
+        recordedEvents.events shouldHaveSize 2 // DestroyEvent
+    }
+
+    "check recorded events on restart" {
         val machine = createStdLibStateMachine(
             creationArguments = CreationArguments(recordEvents = true, isUndoEnabled = true)
         ) {
             initialState()
         }
         machine.processEvent(FirstEvent)
-        machine.processEvent(SecondEvent, 2)
-        machine.undo()
+        machine.restart()
+        machine.processEvent(SecondEvent)
 
         val recordedEvents = machine.eventRecorder.getRecordedEvents()
-        recordedEvents.structureHashCode shouldBe machine.structureHashCode
-        recordedEvents.events.shouldContainExactly(
-            EventAndArgument(FirstEvent, null),
-            EventAndArgument(SecondEvent, 2),
-            EventAndArgument(UndoEvent, null),
+        recordedEvents.events.shouldContainInOrder(
+            EventAndArgument(FirstEvent, null), // fixme should be cleared?
+            EventAndArgument(SecondEvent, null),
         )
+        recordedEvents.events shouldHaveSize 3
     }
-//
-//    "check recorded events with StopEvent" {
-//        TODO()
-//    }
-//
-//    "check recorded events with DestroyEvent" {
-//        TODO()
-//    }
 })
