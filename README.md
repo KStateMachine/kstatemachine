@@ -12,11 +12,11 @@
 [![Open Collective](https://img.shields.io/badge/open%20collective-kstatemachine-lightblue?logo=opencollective&style=flat)](https://opencollective.com/kstatemachine)
 [![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-kstatemachine-green.svg?style=flat)](https://android-arsenal.com/details/1/8276)
-[![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine%0A%0A%23kstatemachine)
-[![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnsk90%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
+[![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&hashtags=kstatemachine,kotlin,opensource)
+[![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 
-[Documentation](https://kstatemachine.github.io/kstatemachine) | [Sponsors](#sponsors-) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/nsk90/kstatemachine/discussions)
+[Documentation](https://kstatemachine.github.io/kstatemachine) | [Sponsors](#sponsors-) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)
 
 KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
@@ -59,7 +59,7 @@ State management features:
 * **[Logging](https://kstatemachine.github.io/kstatemachine/#logging)** - useful for debugging
 * **[Testable](https://kstatemachine.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered
-  by [tests](https://github.com/nsk90/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
+  by [tests](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
 
 > [!IMPORTANT]
 > SEE FULL [DOCUMENTATION HERE](https://kstatemachine.github.io/kstatemachine)
@@ -129,12 +129,12 @@ fun main() = runBlocking {
 
 ## Samples
 
-* [Simple Android 2D shooter game sample](https://github.com/nsk90/android-kstatemachine-sample)
+* [Simple Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
 
   The library itself does not depend on Android.
 
   <p align="center">
-      <img src="https://github.com/nsk90/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
+      <img src="https://github.com/kstatemachine/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
           alt="Android sample app" width="30%" height="30%"/>
   </p>
 * [Finished state sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
@@ -181,8 +181,8 @@ See [CONTRIBUTING](./CONTRIBUTING.md) file.
 
 ## Thanks to supporters
 
-[![Stargazers repo roster for @nsk90/kstatemachine](https://reporoster.com/stars/dark/nsk90/kstatemachine)](https://github.com/nsk90/kstatemachine/stargazers)
-[![Forkers repo roster for @nsk90/kstatemachine](https://reporoster.com/forks/dark/nsk90/kstatemachine)](https://github.com/nsk90/kstatemachine/network/members)
+[![Stargazers repo roster for @kstatemachine/kstatemachine](https://reporoster.com/stars/dark/kstatemachine/kstatemachine)](https://github.com/kstatemachine/kstatemachine/stargazers)
+[![Forkers repo roster for @kstatemachine/kstatemachine](https://reporoster.com/forks/dark/kstatemachine/kstatemachine)](https://github.com/kstatemachine/kstatemachine/network/members)
 
 ## License
 
