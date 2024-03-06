@@ -5,6 +5,7 @@ import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.TransitionDirection
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy
 import ru.nsk.kstatemachine.transition.noTransition
+import kotlin.reflect.KClass
 
 open class DefaultChoiceState(
     name: String? = null,
@@ -18,6 +19,7 @@ open class DefaultChoiceState(
 
 open class DefaultChoiceDataState<D : Any>(
     name: String? = null,
+    override val dataClass: KClass<D>,
     private val choiceAction: suspend EventAndArgument<*>.() -> DataState<D>,
 ) : DataState<D>, BasePseudoState(name), RedirectPseudoState {
 

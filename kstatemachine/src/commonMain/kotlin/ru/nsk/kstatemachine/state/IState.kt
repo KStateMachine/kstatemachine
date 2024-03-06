@@ -112,6 +112,8 @@ interface DataState<D : Any> : IState, DataTransitionStateApi<D> {
      * If state was not entered this property falls back to [defaultData] if it was specified
      */
     val lastData: D
+
+    val dataClass: KClass<D>
 }
 
 /**
@@ -305,15 +307,15 @@ fun IState.initialChoiceState(
     choiceAction: suspend EventAndArgument<*>.() -> State
 ) = addInitialState(DefaultChoiceState(name, choiceAction = choiceAction))
 
-fun <D : Any> IState.choiceDataState(
+inline fun <reified D : Any> IState.choiceDataState(
     name: String? = null,
-    choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addState(DefaultChoiceDataState(name, choiceAction = choiceAction))
+    noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
+) = addState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))
 
-fun <D : Any> IState.initialChoiceDataState(
+inline fun <reified D : Any> IState.initialChoiceDataState(
     name: String? = null,
-    choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addInitialState(DefaultChoiceDataState(name, choiceAction = choiceAction))
+    noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
+) = addInitialState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))
 
 fun IState.historyState(
     name: String? = null,

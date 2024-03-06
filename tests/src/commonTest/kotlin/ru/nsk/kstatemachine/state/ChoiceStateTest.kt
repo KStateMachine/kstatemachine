@@ -2,6 +2,7 @@ package ru.nsk.kstatemachine.state
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.DataEvent
@@ -61,7 +62,7 @@ class ChoiceStateTest : StringSpec({
             verifySequence { callbacks.onStateEntry(State2) }
         }
 
-        "initial choice state" {
+        "initial choiceState" {
             val callbacks = mockkCallbacks()
 
             createTestStateMachine(coroutineStarterType) {
@@ -69,6 +70,17 @@ class ChoiceStateTest : StringSpec({
                 addState(State2) { callbacks.listen(this) }
             }
             verifySequence { callbacks.onStateEntry(State2) }
+        }
+
+        "initial choiceDataState" {
+            val callbacks = mockkCallbacks()
+            lateinit var state2: DataState<Int>
+            createTestStateMachine(coroutineStarterType) {
+                initialChoiceDataState("choice") { state2 }
+                state2 = dataState(defaultData = 42) { callbacks.listen(this) }
+            }
+            verifySequence { callbacks.onStateEntry(state2) }
+            state2.data shouldBe 42
         }
 
         "initial choice state on entry parent" {

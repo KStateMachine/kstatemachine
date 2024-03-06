@@ -3,6 +3,7 @@ package ru.nsk.kstatemachine.state
 import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.state.ChildMode.EXCLUSIVE
 import ru.nsk.kstatemachine.transition.TransitionParams
+import kotlin.reflect.KClass
 
 /** inline constructor function */
 inline fun <reified D : Any> defaultDataState(
@@ -26,6 +27,7 @@ open class DefaultDataState<D : Any>(
         get() = checkNotNull(_lastData ?: defaultData) {
             "Last data is not available yet in $this, and default data not provided"
         }
+    override val dataClass: KClass<D> get() = dataExtractor.dataClass
 
     override suspend fun onDoEnter(transitionParams: TransitionParams<*>) {
         fun assign(data: D?) {

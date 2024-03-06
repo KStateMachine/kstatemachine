@@ -292,7 +292,7 @@ class CoroutinesTest : StringSpec({
         statesFlow.first().shouldContainExactlyInAnyOrder(state2)
     }
 
-    "f:context switching" {
+    "context switching" {
         println(""+ Thread.currentThread() + Thread.currentThread().hashCode() )
         val scope = CoroutineScope(EmptyCoroutineContext)
         val scope1 = CoroutineScope(Dispatchers.Default)
