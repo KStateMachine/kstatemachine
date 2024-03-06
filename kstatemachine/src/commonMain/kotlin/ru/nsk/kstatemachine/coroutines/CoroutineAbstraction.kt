@@ -50,16 +50,12 @@ suspend fun CoroutineAbstraction.createStateMachine(
     name: String?,
     childMode: ChildMode,
     start: Boolean,
-    autoDestroyOnStatesReuse: Boolean,
-    enableUndo: Boolean,
-    doNotThrowOnMultipleTransitionsMatch: Boolean,
+    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,
     childMode,
-    autoDestroyOnStatesReuse,
-    enableUndo,
-    doNotThrowOnMultipleTransitionsMatch,
+    creationArguments,
     this,
 ).apply {
     init()

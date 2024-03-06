@@ -113,6 +113,7 @@ val machine = createStateMachine(
 ```
 
 By default, factory functions start state machine. You can control it using `start` argument.
+All overloads accept optional argument `CreationArguments` which allows to change some options.
 
 Subsequent samples will use `createStateMachine()` function, but you can choose that one which fits your needs.
 
@@ -422,8 +423,8 @@ like this `machine.processEvent(UndoEvent)`. State Machine will roll back last t
 to previous state (except target-less transitions).
 This API might be called as many times as needed.
 To implement this feature library stores transitions in a stack, it takes memory,
-so this feature is disabled by default and must be enabled explicitly using `createStateMachine(enableUndo = true)`
-argument.
+so this feature is disabled by default and must be enabled explicitly using 
+`createStateMachine(creationArguments = CreationArguments(isUndoEnabled = true))` argument.
 
 Undo functionality is implemented as `Event`, so it possible to call `undo()` from notification callbacks, if you use
 `QueuePendingEventHandler` (which is default) or its analog.
@@ -1065,7 +1066,7 @@ block to have a valid state references for transitions.
 Keep in mind that states are mutated by machine instance, defining them with `object` keyword (i.e. singleton) often
 makes your states live longer than machine. It is common use case when you have multiple similar machines
 that are using same singleton states sequentially. Library detects such cases automatically by default
-(see `autoDestroyOnStatesReuse` argument of `createStateMachine` function) and cleans states allowing for future reuse.
+(see `autoDestroyOnStatesReuse` argument of `CreationArguments` structure) and cleans states allowing for future reuse.
 You can disable automatic machine destruction on state reuse, and call `StateMachine.destroy()` manually if required,
 or just do not use `object` keyword for defining states.
 If you have your own `DefaultState` subclasses that are singletons and has data fields, use

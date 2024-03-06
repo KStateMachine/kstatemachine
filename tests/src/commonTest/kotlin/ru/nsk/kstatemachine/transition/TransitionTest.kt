@@ -11,6 +11,8 @@ import org.junit.jupiter.api.fail
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
 class TransitionTest : StringSpec({
@@ -151,7 +153,10 @@ class TransitionTest : StringSpec({
         }
 
         "multiple matching transitions" {
-            val machine = createTestStateMachine(coroutineStarterType, doNotThrowOnMultipleTransitionsMatch = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(doNotThrowOnMultipleTransitionsMatch = true)
+            ) {
                 transition<SwitchEvent>()
                 transition<SwitchEvent>()
                 initialState()
@@ -173,7 +178,7 @@ class TransitionTest : StringSpec({
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 childMode = ChildMode.PARALLEL,
-                doNotThrowOnMultipleTransitionsMatch = true
+                creationArguments = CreationArguments(doNotThrowOnMultipleTransitionsMatch = true)
             ) {
                 state { transition<SwitchEvent>() }
                 state { transition<SwitchEvent>() }

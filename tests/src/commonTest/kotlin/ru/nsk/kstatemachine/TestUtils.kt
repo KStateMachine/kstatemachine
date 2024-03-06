@@ -82,18 +82,14 @@ fun createTestStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    autoDestroyOnStatesReuse: Boolean = true,
-    enableUndo: Boolean = false,
-    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
     init: suspend BuildingStateMachine.() -> Unit
 ) = when (coroutineStarterType) {
     CoroutineStarterType.STD_LIB -> createStdLibStateMachine(
         name,
         childMode,
         start,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
+        creationArguments,
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
@@ -101,9 +97,7 @@ fun createTestStateMachine(
         name,
         childMode,
         start,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
+        creationArguments,
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachineBlocking(
@@ -111,9 +105,7 @@ fun createTestStateMachine(
         name,
         childMode,
         start,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
+        creationArguments,
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
@@ -121,9 +113,7 @@ fun createTestStateMachine(
         name,
         childMode,
         start,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
+        creationArguments,
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
@@ -131,9 +121,7 @@ fun createTestStateMachine(
         name,
         childMode,
         start,
-        autoDestroyOnStatesReuse,
-        enableUndo,
-        doNotThrowOnMultipleTransitionsMatch,
+        creationArguments,
         init = init
     )
 }

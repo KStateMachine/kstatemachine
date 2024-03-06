@@ -22,39 +22,20 @@ suspend fun createStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    autoDestroyOnStatesReuse: Boolean = true,
-    enableUndo: Boolean = false,
-    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
     init: suspend BuildingStateMachine.() -> Unit
-) = CoroutinesLibCoroutineAbstraction(scope).createStateMachine(
-    name,
-    childMode,
-    start,
-    autoDestroyOnStatesReuse,
-    enableUndo,
-    doNotThrowOnMultipleTransitionsMatch,
-    init
-)
+) = CoroutinesLibCoroutineAbstraction(scope)
+    .createStateMachine(name, childMode, start, creationArguments, init)
 
 fun createStateMachineBlocking(
     scope: CoroutineScope,
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    autoDestroyOnStatesReuse: Boolean = true,
-    enableUndo: Boolean = false,
-    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
     init: suspend BuildingStateMachine.() -> Unit
 ) = with(CoroutinesLibCoroutineAbstraction(scope)) {
     runBlocking {
-        createStateMachine(
-            name,
-            childMode,
-            start,
-            autoDestroyOnStatesReuse,
-            enableUndo,
-            doNotThrowOnMultipleTransitionsMatch,
-            init
-        )
+        createStateMachine(name, childMode, start, creationArguments, init)
     }
 }

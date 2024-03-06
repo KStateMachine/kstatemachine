@@ -12,6 +12,7 @@ import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.event.WrappedEvent
 import ru.nsk.kstatemachine.state.UndoTestData.SwitchDataEvent
 import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.statemachine.StateMachine.*
 import ru.nsk.kstatemachine.transition.unwrappedArgument
 import ru.nsk.kstatemachine.transition.unwrappedEvent
 
@@ -31,7 +32,10 @@ class UndoTest : StringSpec({
         "undo throws with throwing PendingEventHandler" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 pendingEventHandler = throwingPendingEventHandler()
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
@@ -49,7 +53,10 @@ class UndoTest : StringSpec({
         "undo with QueuePendingEventHandler" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -64,7 +71,10 @@ class UndoTest : StringSpec({
         "undo to initial state" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -81,7 +91,10 @@ class UndoTest : StringSpec({
         "undo to initial state checking events and calling undo on initial state" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<FirstEvent> { targetState = { state2 } }
                 }
@@ -113,7 +126,10 @@ class UndoTest : StringSpec({
         "undo mixed with processEvent()" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<FirstEvent> { targetState = { state2 } }
                 }
@@ -149,7 +165,10 @@ class UndoTest : StringSpec({
             lateinit var state1: State
             lateinit var state2: State
             lateinit var state3: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -173,7 +192,10 @@ class UndoTest : StringSpec({
         "undo cross-level transition" {
             lateinit var state12: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 initialState("state1") {
                     initialState("state11") {
                         transitionOn<SwitchEvent> { targetState = { state12 } }
@@ -195,7 +217,10 @@ class UndoTest : StringSpec({
         "single undo with DataState" {
             lateinit var state12: DataState<Int>
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 initialState("state1") {
                     initialState("state11") {
                         dataTransitionOn<SwitchDataEvent, Int> { targetState = { state12 } }
@@ -221,8 +246,11 @@ class UndoTest : StringSpec({
             lateinit var state11: State
             lateinit var state12: DataState<Int>
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                logger = StateMachine.Logger { println(it()) }
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
+                logger = Logger { println(it()) }
                 initialState("state1") {
                     state11 = initialState("state11") {
                         dataTransitionOn<SwitchDataEvent, Int> { targetState = { state12 } }
@@ -259,7 +287,10 @@ class UndoTest : StringSpec({
             lateinit var state1: State
             lateinit var state2: State
 
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -289,7 +320,11 @@ class UndoTest : StringSpec({
         "undo initial state" {
             lateinit var state1: State
             lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType, start = false, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                start = false,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -316,7 +351,11 @@ class UndoTest : StringSpec({
             lateinit var state1: State
             lateinit var state2: State
 
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true, start = false) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true),
+                start = false
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
@@ -344,8 +383,11 @@ class UndoTest : StringSpec({
         }
 
         "undo ignored event" {
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
-                ignoredEventHandler = StateMachine.IgnoredEventHandler { throw TestException("test") }
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
+                ignoredEventHandler = IgnoredEventHandler { throw TestException("test") }
                 initialState("state1") {
                     transition<SwitchEvent>()
                 }
@@ -360,7 +402,10 @@ class UndoTest : StringSpec({
             lateinit var state2: State
             lateinit var state3: State
 
-            val machine = createTestStateMachine(coroutineStarterType, enableUndo = true) {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
                 state1 = initialState("state1") {
                     transitionOn<SwitchEvent> { targetState = { state2 } }
                 }

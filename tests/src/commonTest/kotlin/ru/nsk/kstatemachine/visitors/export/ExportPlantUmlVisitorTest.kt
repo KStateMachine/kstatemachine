@@ -11,6 +11,7 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.targetParallelStates
 
@@ -253,7 +254,7 @@ private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): State
 }
 
 private fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
-    return createTestStateMachine(coroutineStarterType, enableUndo = true) {
+    return createTestStateMachine(coroutineStarterType, creationArguments = CreationArguments(isUndoEnabled = true)) {
         val state1 = initialState("state1")
 
         val state2 = state("state2") {

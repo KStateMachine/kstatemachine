@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.transition.TransitionType
 
 class GetStructureHashCodeVisitorTest : StringSpec({
@@ -62,6 +63,24 @@ class GetStructureHashCodeVisitorTest : StringSpec({
 
             // should not be equal, but cannot implement it
             machine.getStructureHashCode() shouldBe machine2.getStructureHashCode()
+        }
+
+        "structure hash code is affected by CreationArguments" {
+            val machine = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = false)
+            ) {
+                initialState()
+            }
+
+            val machine2 = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(isUndoEnabled = true)
+            ) {
+                initialState()
+            }
+
+            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
         }
 
         "structure hash code is affected by state name" {

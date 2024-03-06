@@ -8,6 +8,7 @@ import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.ObjectStatesTestData.State1
 import ru.nsk.kstatemachine.state.ObjectStatesTestData.State2
 import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.StateMachine.*
 import ru.nsk.kstatemachine.statemachine.destroyBlocking
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.statemachine.stop
@@ -19,7 +20,7 @@ private object ObjectStatesTestData {
 
 /**
  * States are mutable, and it is not possible to use object states in multiple [StateMachine] instances if
- * autoDestroyOnStatesReuse argument is false.
+ * [CreationArguments.autoDestroyOnStatesReuse] argument is false.
  */
 class ObjectStatesTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -55,7 +56,10 @@ class ObjectStatesTest : StringSpec({
 })
 
 private fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroyOnStatesReuse: Boolean): StateMachine {
-    val machine = createTestStateMachine(coroutineStarterType, autoDestroyOnStatesReuse = autoDestroyOnStatesReuse) {
+    val machine = createTestStateMachine(
+        coroutineStarterType,
+        creationArguments = CreationArguments(autoDestroyOnStatesReuse = autoDestroyOnStatesReuse),
+    ) {
         addInitialState(State1) {
             transition<SwitchEvent> {
                 targetState = State2

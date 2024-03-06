@@ -1,14 +1,15 @@
 package ru.nsk.kstatemachine.statemachine
 
+import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
-import ru.nsk.kstatemachine.isSubStateOf
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
+import kotlin.reflect.KClass
 
 /**
  * Defines state machine API for internal library usage.
@@ -23,17 +24,31 @@ internal abstract class InternalStateMachine(name: String?, childMode: ChildMode
 internal class StateMachineImpl(
     name: String?,
     childMode: ChildMode,
-    override val autoDestroyOnStatesReuse: Boolean,
-    override val isUndoEnabled: Boolean,
-    override val doNotThrowOnMultipleTransitionsMatch: Boolean,
+    override val creationArguments: StateMachine.CreationArguments,
     override val coroutineAbstraction: CoroutineAbstraction,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
     override val machineListeners: Collection<StateMachine.Listener> get() = _machineListeners
     override var logger: StateMachine.Logger = StateMachine.Logger {}
+        set(value) {
+            checkPropertyNotMutedOnRunningMachine(StateMachine.Logger::class)
+            field = value
+        }
     override var ignoredEventHandler = StateMachine.IgnoredEventHandler {}
+        set(value) {
+            checkPropertyNotMutedOnRunningMachine(StateMachine.IgnoredEventHandler::class)
+            field = value
+        }
     override var pendingEventHandler: StateMachine.PendingEventHandler = queuePendingEventHandler()
+        set(value) {
+            checkPropertyNotMutedOnRunningMachine(StateMachine.PendingEventHandler::class)
+            field = value
+        }
     override var listenerExceptionHandler = StateMachine.ListenerExceptionHandler { throw it }
+        set(value) {
+            checkPropertyNotMutedOnRunningMachine(StateMachine.ListenerExceptionHandler::class)
+            field = value
+        }
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
 
@@ -63,7 +78,7 @@ internal class StateMachineImpl(
                 }
             }
         }
-        if (isUndoEnabled) {
+        if (creationArguments.isUndoEnabled) {
             val undoState = addState(UndoState())
             transition<WrappedEvent>("undo transition", undoState)
         }
@@ -152,7 +167,7 @@ internal class StateMachineImpl(
     }
 
     private fun EventAndArgument<*>.wrap(): EventAndArgument<*> {
-        return if (isUndoEnabled && event is UndoEvent) {
+        return if (creationArguments.isUndoEnabled && event is UndoEvent) {
             val wrapped = requireState<UndoState>().makeWrappedEvent()
             EventAndArgument(wrapped, argument)
         } else {
@@ -328,3 +343,6 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
         argument,
     )
 }
+
+private fun StateMachine.checkPropertyNotMutedOnRunningMachine(propertyType: KClass<*>) =
+    check(!isRunning) { "Can not change ${propertyType.simpleName} after state machine started" }

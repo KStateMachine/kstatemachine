@@ -17,7 +17,6 @@ import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.CustomDataEvent
 import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.IdEvent
 import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.NameEvent
-import kotlin.reflect.KClass
 
 private object TypesafeTransitionTestData {
     class CustomDataEvent(val value: Int) : Event

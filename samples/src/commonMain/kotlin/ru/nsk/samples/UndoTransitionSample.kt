@@ -5,6 +5,7 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.statemachine.undo
 import ru.nsk.kstatemachine.transition.unwrappedEvent
@@ -22,7 +23,10 @@ fun main() = runBlocking {
     lateinit var state2: State
     lateinit var state3: State
 
-    val machine = createStateMachine(this, enableUndo = true) {
+    val machine = createStateMachine(
+        this,
+        creationArguments = CreationArguments(isUndoEnabled = true)
+    ) {
         state1 = initialState("state1") {
             transitionOn<SwitchEvent> { targetState = { state2 } }
         }

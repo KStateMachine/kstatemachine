@@ -79,7 +79,7 @@ internal suspend fun <E : Event> InternalState.findUniqueResolvedTransition(even
     val transitions = findTransitionsByEvent(eventAndArgument.event)
         .map { it to it.produceTargetStateDirection(policy) }
         .filter { it.second !is NoTransition }
-    return if (!machine.doNotThrowOnMultipleTransitionsMatch) {
+    return if (!machine.creationArguments.doNotThrowOnMultipleTransitionsMatch) {
         check(transitions.size <= 1) { "Multiple transitions match ${eventAndArgument.event}, $transitions in $this" }
         transitions.singleOrNull()
     } else {

@@ -81,7 +81,7 @@ open class BaseStateImpl(
 
     private fun onStateReuseDetected() {
         val machine = machine
-        if (machine.autoDestroyOnStatesReuse)
+        if (machine.creationArguments.autoDestroyOnStatesReuse)
             machine.destroyBlocking()
         else
             error("State $this is already used in another machine instance")
@@ -173,7 +173,7 @@ open class BaseStateImpl(
             .filter { it !is StateMachine } // exclude nested machines
             .mapNotNull { it.recursiveFindUniqueResolvedTransition(eventAndArgument) }
             .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) } // allow transition override
-        return if (!machine.doNotThrowOnMultipleTransitionsMatch) {
+        return if (!machine.creationArguments.doNotThrowOnMultipleTransitionsMatch) {
             check(resolvedTransitions.size <= 1) {
                 "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
             }

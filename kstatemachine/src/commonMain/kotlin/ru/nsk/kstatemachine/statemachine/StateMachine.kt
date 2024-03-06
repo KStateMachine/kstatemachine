@@ -26,6 +26,11 @@ interface StateMachine : State {
     val pendingEventHandler: PendingEventHandler
 
     /**
+     * Configuration arguments which were used to create the machine
+     */
+    val creationArguments: CreationArguments
+
+    /**
      * If machine catches exception from client code (listeners callbacks) it stores it until event processing
      * completes, and passes it to this handler. That keeps machine in well-defined predictable state and allows
      * to complete all required notifications.
@@ -38,23 +43,7 @@ interface StateMachine : State {
     val isRunning: Boolean
     val machineListeners: Collection<Listener>
 
-    /**
-     * Allows the library to automatically call destroy() on current state owning machine instance if user tries
-     * to reuse its states in another machine. Usually this is a result of using object states in sequentially created
-     * similar machines. destroy() will be called on the previous machine instance.
-     * If set to false an exception will be thrown on state reuse attempt.
-     */
-    val autoDestroyOnStatesReuse: Boolean
     val isDestroyed: Boolean
-
-    val isUndoEnabled: Boolean
-
-    /**
-     * If set to true, when multiple transitions match event the first matching transition is selected.
-     * if set to false, when multiple transitions match event exception is thrown.
-     * Default if false.
-     */
-    val doNotThrowOnMultipleTransitionsMatch: Boolean
 
     val coroutineAbstraction: CoroutineAbstraction
 
@@ -138,6 +127,23 @@ interface StateMachine : State {
     fun interface ListenerExceptionHandler {
         suspend fun onException(exception: Exception)
     }
+
+    data class CreationArguments(
+        /**
+         * Allows the library to automatically call destroy() on current state owning machine instance if user tries
+         * to reuse its states in another machine. Usually this is a result of using object states in sequentially created
+         * similar machines. destroy() will be called on the previous machine instance.
+         * If set to false an exception will be thrown on state reuse attempt.
+         */
+        val autoDestroyOnStatesReuse: Boolean = true,
+        val isUndoEnabled: Boolean = false,
+        /**
+         * If set to true, when multiple transitions match event the first matching transition is selected.
+         * if set to false, when multiple transitions match event exception is thrown.
+         * Default if false.
+         */
+        val doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    )
 }
 
 fun StateMachine.startBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { start(argument) }
@@ -165,8 +171,10 @@ fun StateMachine.restartBlocking(argument: Any? = null) = coroutineAbstraction.r
  * This function has same effect as alternative syntax processEvent(UndoEvent), but throws if undo feature is not enabled.
  */
 suspend fun StateMachine.undo(argument: Any? = null): ProcessingResult = coroutineAbstraction.withContext {
-    check(isUndoEnabled) {
-        "Undo functionality is not enabled, use createStateMachine(enableUndo = true) argument to enable it."
+    check(creationArguments.isUndoEnabled) {
+        "Undo functionality is not enabled, " +
+                "use createStateMachine(creationArguments = CreationArguments(isUndoEnabled = true)) " +
+                "argument to enable it."
     }
     return@withContext processEvent(UndoEvent, argument)
 }
@@ -223,22 +231,12 @@ fun createStdLibStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    autoDestroyOnStatesReuse: Boolean = true,
-    enableUndo: Boolean = false,
-    doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine {
     return with(StdLibCoroutineAbstraction()) {
         runBlocking {
-            createStateMachine(
-                name,
-                childMode,
-                start,
-                autoDestroyOnStatesReuse,
-                enableUndo,
-                doNotThrowOnMultipleTransitionsMatch,
-                init
-            )
+            createStateMachine(name, childMode, start, creationArguments, init)
         }
     }
 }
