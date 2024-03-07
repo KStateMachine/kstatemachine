@@ -66,11 +66,8 @@ State management features:
 
 ## Sponsors ❤
 
-> [!NOTE]
-> Please, push the ⭐ if you like this project
-
 I highly appreciate that you donate or become a sponsor to support the project.
-Use ❤️ github-sponsors button to see supported methods.
+Use ❤️ github-sponsors button to see supported methods and push the ⭐ star-button if you like this project.
 
 ## Quick start sample
 
