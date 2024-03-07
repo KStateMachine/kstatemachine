@@ -1,14 +1,15 @@
 package ru.nsk.kstatemachine.statemachine
 
-import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
+import ru.nsk.kstatemachine.isSubStateOf
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
+import ru.nsk.kstatemachine.visitors.checkNonBlankNames
 import kotlin.reflect.KClass
 
 /**
@@ -122,6 +123,8 @@ internal class StateMachineImpl(
 
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
+        if (creationArguments.requireNonBlankNames)
+            checkNonBlankNames()
         checkNotDestroyed()
         check(!isRunning) { "$this is already started" }
         check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }

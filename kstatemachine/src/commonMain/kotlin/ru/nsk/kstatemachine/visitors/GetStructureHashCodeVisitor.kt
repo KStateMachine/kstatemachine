@@ -4,6 +4,7 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.HistoryState
 import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.statemachine.QueuePendingEventHandler
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.Transition
 
@@ -19,7 +20,9 @@ internal class GetStructureHashCodeVisitor : RecursiveVisitor {
 
     override fun visit(machine: StateMachine) {
         records += machine.stateInfo()
-        records += "StateMachine creationArguments:${machine.creationArguments}"
+        records += "StateMachine creationArguments:${machine.creationArguments}, " +
+                "is${QueuePendingEventHandler::class.simpleName}:" +
+                "${machine.pendingEventHandler is QueuePendingEventHandler}"
         machine.visitChildren()
     }
 

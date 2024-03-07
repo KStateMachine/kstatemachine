@@ -143,6 +143,11 @@ interface StateMachine : State {
          * Default if false.
          */
         val doNotThrowOnMultipleTransitionsMatch: Boolean = false,
+        /**
+         * If enabled, throws exception on the machine start,
+         * if it contains states or transitions with null or blank names
+         */
+        val requireNonBlankNames: Boolean = false,
     )
 }
 
