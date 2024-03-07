@@ -12,16 +12,6 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 import ru.nsk.kstatemachine.visitors.checkNonBlankNames
 import kotlin.reflect.KClass
 
-/**
- * Defines state machine API for internal library usage.
- */
-internal abstract class InternalStateMachine(name: String?, childMode: ChildMode) :
-    BuildingStateMachine, DefaultState(name, childMode) {
-    internal abstract suspend fun startFrom(states: Set<IState>, argument: Any?)
-    internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
-    internal abstract fun delayListenerException(exception: Exception)
-}
-
 internal class StateMachineImpl(
     name: String?,
     childMode: ChildMode,
@@ -64,6 +54,9 @@ internal class StateMachineImpl(
 
     private var delayedListenerException: Exception? = null
 
+    private var _areListenersMuted = false
+    override val areListenersMuted get() = _areListenersMuted
+
     init {
         transitionConditionally<StartEvent>("start transition") {
             direction = {
@@ -82,6 +75,19 @@ internal class StateMachineImpl(
         if (creationArguments.isUndoEnabled) {
             val undoState = addState(UndoState())
             transition<WrappedEvent>("undo transition", undoState)
+        }
+    }
+
+    override fun openListenersMutationSection() = object : ListenersMutationSection {
+        init {
+            check(!_areListenersMuted) {
+                "Seems ${ListenersMutationSection::class.simpleName} is already open, multiple simultaneous sections are not supported"
+            }
+            _areListenersMuted = true
+        }
+
+        override fun close() {
+            _areListenersMuted = false
         }
     }
 

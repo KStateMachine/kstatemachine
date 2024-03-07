@@ -5,6 +5,7 @@ import ru.nsk.kstatemachine.transition.TransitionParams
 
 internal suspend inline fun StateMachine.machineNotify(crossinline block: suspend StateMachine.Listener.() -> Unit) {
     this as InternalStateMachine
+    if (areListenersMuted) return
     machineListeners.toList().forEach { runDelayingException { it.block() } }
 }
 

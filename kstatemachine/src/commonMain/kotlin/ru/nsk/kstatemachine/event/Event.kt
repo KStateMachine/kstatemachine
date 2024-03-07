@@ -1,6 +1,8 @@
 package ru.nsk.kstatemachine.event
 
-import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.DataState
+import ru.nsk.kstatemachine.state.FinalDataState
+import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
@@ -57,7 +59,7 @@ internal class StartDataEventImpl<D : Any>(
 internal object StopEvent : GeneratedEvent
 
 /**
- * This event is processed even is the [StateMachine] already stopped
+ * This event is processed even if the [StateMachine] is already stopped
  */
 internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
 
@@ -68,5 +70,4 @@ internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
  * @param event original event
  * @param argument original argument
  */
-class WrappedEvent(val event: Event, val argument: Any?) :
-    Event
+class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent

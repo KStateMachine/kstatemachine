@@ -6,6 +6,7 @@ import ru.nsk.kstatemachine.transition.TransitionParams
 
 internal suspend inline fun InternalState.stateNotify(crossinline block: suspend IState.Listener.() -> Unit) {
     val machine = machine as InternalStateMachine
+    if (machine.areListenersMuted) return
     listeners.toList().forEach { machine.runDelayingException { it.block() } }
 }
 

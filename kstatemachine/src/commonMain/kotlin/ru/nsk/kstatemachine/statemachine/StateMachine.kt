@@ -21,14 +21,13 @@ import ru.nsk.kstatemachine.visitors.Visitor
 annotation class StateMachineDslMarker
 
 interface StateMachine : State {
-    val logger: Logger
-    val ignoredEventHandler: IgnoredEventHandler
-    val pendingEventHandler: PendingEventHandler
-
     /**
      * Configuration arguments which were used to create the machine
      */
     val creationArguments: CreationArguments
+    val logger: Logger
+    val ignoredEventHandler: IgnoredEventHandler
+    val pendingEventHandler: PendingEventHandler
 
     /**
      * If machine catches exception from client code (listeners callbacks) it stores it until event processing
@@ -40,10 +39,19 @@ interface StateMachine : State {
      * With your own handler you can mute or just log them for example.
      */
     val listenerExceptionHandler: ListenerExceptionHandler
-    val isRunning: Boolean
-    val machineListeners: Collection<Listener>
 
+    /**
+     * Indicates whether the machine is started or stopped.
+     */
+    val isRunning: Boolean
+
+    /**
+     * Indicates that machine was destroyed. There is no way to restore machine instance from this state.
+     * Once machine became destroyed it is not usable anymore.
+     */
     val isDestroyed: Boolean
+
+    val machineListeners: Collection<Listener>
 
     val coroutineAbstraction: CoroutineAbstraction
 

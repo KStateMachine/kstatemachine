@@ -5,7 +5,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.QueuePendingEventHandler
 import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
+import ru.nsk.kstatemachine.statemachine.queuePendingEventHandler
+import ru.nsk.kstatemachine.statemachine.throwingPendingEventHandler
 import ru.nsk.kstatemachine.transition.TransitionType
 
 class GetStructureHashCodeVisitorTest : StringSpec({
@@ -246,6 +249,20 @@ class GetStructureHashCodeVisitorTest : StringSpec({
             val machine2 = createTestStateMachine(coroutineStarterType) {
                 initialState()
                 historyState(historyType = HistoryType.SHALLOW)
+            }
+
+            machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
+        }
+
+        "structure hash code is affected by ${QueuePendingEventHandler::class.simpleName}" {
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState()
+                pendingEventHandler = queuePendingEventHandler()
+            }
+
+            val machine2 = createTestStateMachine(coroutineStarterType) {
+                initialState()
+                pendingEventHandler = throwingPendingEventHandler()
             }
 
             machine.getStructureHashCode() shouldNotBe machine2.getStructureHashCode()
