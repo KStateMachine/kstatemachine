@@ -4,3 +4,4 @@ out/
 build/
 *.iml
 local.properties
+kotlin-js-store/

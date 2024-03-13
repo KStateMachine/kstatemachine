@@ -21,6 +21,7 @@ import kotlin.reflect.KClass
 /**
  * Base interface for all kind of states.
  * Many additional methods implemented like extensions to keep this interface clean and minimalistic.
+ * States are mutable subject by the library design.
  */
 @StateMachineDslMarker
 interface IState : TransitionStateApi, VisitorAcceptor {
@@ -33,6 +34,9 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val isFinished: Boolean
     val listeners: Collection<Listener>
     val childMode: ChildMode
+    /**
+     * Might be changed only during machine setup.
+     */
     var metaInfo: MetaInfo?
 
     /**

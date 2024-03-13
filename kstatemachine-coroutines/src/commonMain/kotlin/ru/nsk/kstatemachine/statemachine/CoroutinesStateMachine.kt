@@ -26,16 +26,3 @@ suspend fun createStateMachine(
     init: suspend BuildingStateMachine.() -> Unit
 ) = CoroutinesLibCoroutineAbstraction(scope)
     .createStateMachine(name, childMode, start, creationArguments, init)
-
-fun createStateMachineBlocking(
-    scope: CoroutineScope,
-    name: String? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    start: Boolean = true,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
-    init: suspend BuildingStateMachine.() -> Unit
-) = with(CoroutinesLibCoroutineAbstraction(scope)) {
-    runBlocking {
-        createStateMachine(name, childMode, start, creationArguments, init)
-    }
-}

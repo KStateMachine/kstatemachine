@@ -1045,7 +1045,9 @@ machine.startFrom(state2)
 ## Multiplatform
 
 Starting from v0.22.0 KStateMachine has moved to Kotlin Multiplatform only with `JVM` platform support.
-In v0.22.1 `iOS` support has been added also.
+In **v0.22.1** `iOS` support has been added also, **v0.30.0** adds `js` and `wasm` targets.
+`js` and `wasm` targets do not support blocking library apis as those platforms do not have `runBlocking` support which
+is used internally.
 
 _If you need missing platform support please create a GitHub issue._
 

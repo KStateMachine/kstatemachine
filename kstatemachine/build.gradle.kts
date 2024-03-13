@@ -22,4 +22,10 @@ kotlin {
     iosArm64()
     iosX64()
     iosSimulatorArm64()
+    js {
+        browser()
+        nodejs()
+    }
+    @Suppress("OPT_IN_USAGE") // this is alpha feature
+    wasmJs()
 }
