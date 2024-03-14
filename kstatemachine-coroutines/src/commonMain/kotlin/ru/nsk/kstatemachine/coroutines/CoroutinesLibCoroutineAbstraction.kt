@@ -1,10 +1,9 @@
 package ru.nsk.kstatemachine.coroutines
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-internal class CoroutinesLibCoroutineAbstraction(private val scope: CoroutineScope) : CoroutineAbstraction {
+internal class CoroutinesLibCoroutineAbstraction(internal val scope: CoroutineScope) : CoroutineAbstraction {
     override fun <R : Any> runBlocking(block: suspend () -> R): R =
         doRunBlocking(scope.coroutineContext) { block() }
 
