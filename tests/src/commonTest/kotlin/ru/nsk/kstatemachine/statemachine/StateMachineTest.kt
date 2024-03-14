@@ -386,13 +386,17 @@ class StateMachineTest : StringSpec({
         "hasProcessedEvents flag indicates processing of the first (except StartEvent) event" {
             val machine = createTestStateMachine(coroutineStarterType) {
                 initialState()
+                transition<SwitchEvent>()
+
                 machine.hasProcessedEvents shouldBe false
                 onStarted {
                     machine.hasProcessedEvents shouldBe false
                 }
             }
             machine.hasProcessedEvents shouldBe false
-            machine.processEvent(SwitchEvent)
+            machine.processEvent(FirstEvent) shouldBe ProcessingResult.IGNORED
+            machine.hasProcessedEvents shouldBe false
+            machine.processEvent(SwitchEvent) shouldBe ProcessingResult.PROCESSED
             machine.hasProcessedEvents shouldBe true
             machine.stop()
             machine.hasProcessedEvents shouldBe true

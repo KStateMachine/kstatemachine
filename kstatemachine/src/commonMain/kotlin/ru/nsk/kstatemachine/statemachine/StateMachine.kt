@@ -133,14 +133,23 @@ interface StateMachine : State {
     }
 
     fun interface IgnoredEventHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onIgnoredEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface PendingEventHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onPendingEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface ListenerExceptionHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onException(exception: Exception)
     }
 

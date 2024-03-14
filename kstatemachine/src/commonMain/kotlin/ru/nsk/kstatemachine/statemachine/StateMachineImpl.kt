@@ -132,14 +132,15 @@ internal class StateMachineImpl(
     private suspend fun doStartFrom(event: StartEvent, argument: Any?): Unit =
         coroutineAbstraction.withContext {
             checkBeforeRunMachine()
-            // fixme loosing this params (but similary (not same target) will be recreated on transition)
+            // fixme loosing this params (but similar (not same target) will be recreated on transition)
             val eventAndArgument = EventAndArgument(event, argument)
             eventProcessingScope {
-                runCheckingExceptions {
+                val step1Result = runCheckingExceptions {
                     val transitionParams = makeStartTransitionParams(event, this, event.startState, argument)
                     runMachine(transitionParams)
-                    doProcessEvent(eventAndArgument)
+                    processStep1(eventAndArgument)
                 }
+                processStep2(eventAndArgument, step1Result)
             }
         }
 
@@ -154,7 +155,7 @@ internal class StateMachineImpl(
             requireInitialState()
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
         _hasProcessedEvents = false
@@ -163,7 +164,7 @@ internal class StateMachineImpl(
         doEnter(transitionParams)
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun doStop() {
         _isRunning = false
         recursiveStop()
@@ -202,33 +203,52 @@ internal class StateMachineImpl(
     }
 
     private suspend fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
-        if (eventAndArgument.event !is StartEvent)
-            _hasProcessedEvents = true
+        val step1Result = runCheckingExceptions {
+            processStep1(eventAndArgument)
+        }
+        return processStep2(eventAndArgument, step1Result)
+    }
 
-        _eventRecorder?.onProcessEvent(eventAndArgument) // should be done before wrapping to record not wrapped event
+    /**
+     * Should be called only from [runCheckingExceptions]
+     */
+    private suspend fun processStep1(eventAndArgument: EventAndArgument<*>): Step1Result {
+        _eventRecorder?.onProcessEvent(eventAndArgument) // should be called with not wrapped event
 
         val wrappedEventAndArgument = eventAndArgument.wrap()
-
-        val eventProcessed = runCheckingExceptions {
-            when (val event = wrappedEventAndArgument.event) {
-                is StopEvent -> {
-                    doStop()
-                    true
-                }
-                is DestroyEvent -> {
-                    if (event.stop && isRunning) doStop()
-                    doDestroy()
-                    true
-                }
-                else -> doProcessEvent(wrappedEventAndArgument)
+        val eventProcessed = when (val event = wrappedEventAndArgument.event) {
+            is StopEvent -> {
+                doStop()
+                true
             }
-        }
 
-        if (!eventProcessed) {
-            log { "$this ignored ${wrappedEventAndArgument.event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument)
+            is DestroyEvent -> {
+                if (event.stop && isRunning) doStop()
+                doDestroy()
+                true
+            }
+
+            else -> doProcessEvent(wrappedEventAndArgument)
         }
-        return if (eventProcessed) ProcessingResult.PROCESSED else ProcessingResult.IGNORED
+        return Step1Result(eventProcessed, wrappedEventAndArgument)
+    }
+
+    /**
+     * Possible exceptions from this step should reach the user (caller)
+     */
+    private suspend fun processStep2(
+        eventAndArgument: EventAndArgument<*>,
+        step1Result: Step1Result,
+    ): ProcessingResult {
+        return if (step1Result.eventProcessed) {
+            if (eventAndArgument.event !is StartEvent)
+                _hasProcessedEvents = true
+            ProcessingResult.PROCESSED
+        } else {
+            log { "$this ignored ${step1Result.wrappedEventAndArgument.event::class.simpleName}" }
+            ignoredEventHandler.onIgnoredEvent(step1Result.wrappedEventAndArgument)
+            ProcessingResult.IGNORED
+        }
     }
 
     /**
@@ -266,7 +286,11 @@ internal class StateMachineImpl(
     }
 
     /**
-     * Runs block of code that triggers notification listeners
+     * Runs block of code that internally triggers notification listeners.
+     *
+     * As listeners exceptions are delayed and may be rethrown to a caller (user) and this should not cause machine
+     * destruction.
+     * Watch [runCheckingExceptions] blocks are not nested it is not supported and wrong.
      */
     private suspend fun <R> runCheckingExceptions(block: suspend () -> R): R {
         val result: R
@@ -284,6 +308,9 @@ internal class StateMachineImpl(
         return result
     }
 
+    /**
+     * @return true if event was processed (transition was performed), false if it was ignored
+     */
     private suspend fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
         val (event, argument) = eventAndArgument
         if (isFinished) {
@@ -326,7 +353,7 @@ internal class StateMachineImpl(
      * Starts machine if it is inner state of another one machine
      */
     override suspend fun doEnter(transitionParams: TransitionParams<*>) {
-        if (!isRunning) startBlocking() else super.doEnter(transitionParams)
+        if (!isRunning) start() else super.doEnter(transitionParams)
     }
 
     override suspend fun cleanup() {
@@ -334,7 +361,7 @@ internal class StateMachineImpl(
         super.cleanup()
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun doDestroy() {
         _isDestroyed = true
         machineNotify { onDestroyed() }
@@ -345,6 +372,9 @@ internal class StateMachineImpl(
 
 internal fun StateMachine.checkNotDestroyed() = check(!isDestroyed) { "$this is already destroyed" }
 
+/**
+ * Method should be used for running code that sends notifications for outer world (calls listeners)
+ */
 internal suspend inline fun InternalStateMachine.runDelayingException(crossinline block: suspend () -> Unit) =
     try {
         block()
@@ -377,3 +407,8 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
 
 private fun StateMachine.checkPropertyNotMutedOnRunningMachine(propertyType: KClass<*>) =
     check(!isRunning) { "Can not change ${propertyType.simpleName} after state machine started" }
+
+private data class Step1Result(
+    val eventProcessed: Boolean,
+    val wrappedEventAndArgument: EventAndArgument<*>,
+)

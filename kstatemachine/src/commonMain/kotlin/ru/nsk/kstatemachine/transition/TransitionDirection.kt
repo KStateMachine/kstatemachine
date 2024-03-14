@@ -97,7 +97,7 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
         is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetState
         is HistoryState -> targetState.storedState
-        is UndoState -> targetState.popState()
+        is UndoState -> targetState.popState().firstOrNull() // fixme this is a bug, should use all set items, add test for undo multi-target transition
         else -> targetState
     }
     // when target state calculated we need to check if its entry will trigger another redirection
