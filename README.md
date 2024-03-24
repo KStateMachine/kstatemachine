@@ -35,27 +35,37 @@ Integration features are:
 
 State management features:
 
-* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/#setup-transitions) are performed by processing
+* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/#setup-transitions) are performed by
+  processing
   incoming events
 * **[Reactive](https://kstatemachine.github.io/kstatemachine/#listen-states)** - listen for machine, states,
   [state groups](https://kstatemachine.github.io/kstatemachine/#listen-group-of-states) and transitions
 * **[Guarded](https://kstatemachine.github.io/kstatemachine/#guarded-transitions)
-  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/#conditional-transitions)** - dynamic target
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/#conditional-transitions)** - dynamic
+  target
   state which is calculated in a moment of event processing depending on application business logic
 * **[Nested states](https://kstatemachine.github.io/kstatemachine/#nested-states)** - build hierarchical state machines
   (statecharts)
   with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/#cross-level-transitions) support
-* **[Composed (nested) state machines.](https://kstatemachine.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
+* **[Composed (nested) state machines.](https://kstatemachine.github.io/kstatemachine/#composed-(nested)-state-machines)
+  ** Use
   state machines as atomic child states
-* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/#pseudo-states)** for additional logic in machine behaviour
-* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/#typesafe-transitions)** - pass data in typesafe way
+* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/#pseudo-states)** for additional logic in machine
+  behaviour
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/#typesafe-transitions)** - pass data in
+  typesafe way
   from event to state
-* **[Parallel states](https://kstatemachine.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial explosion of
+* **[Parallel states](https://kstatemachine.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial
+  explosion of
   states
-* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
-* **[Optional argument](https://kstatemachine.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
+* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/#undo-transitions)** - navigate back to previous
+  state
+* **[Optional argument](https://kstatemachine.github.io/kstatemachine/#optinal-arguments)** passing for events and
+  transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/#export)** state machine structure
   to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
+* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/#persistence)**  state machine's active
+  configuration and restore it later
 * **[Logging](https://kstatemachine.github.io/kstatemachine/#logging)** - useful for debugging
 * **[Testable](https://kstatemachine.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered

@@ -7,7 +7,7 @@ import ru.nsk.kstatemachine.event.DestroyEvent
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.event.UndoEvent
-import ru.nsk.kstatemachine.persist.EventRecorder
+import ru.nsk.kstatemachine.persistence.EventRecorder
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.State
@@ -177,10 +177,21 @@ interface StateMachine : State {
          */
         val requireNonBlankNames: Boolean = false,
         /**
-         * Enables incoming events recording in order to restore [StateMachine] later.
+         * If set, enables incoming events recording in order to restore [StateMachine] later.
          * Use [StateMachine.eventRecorder] to access the recording result.
          */
-        val recordEvents: Boolean = false,
+        val eventRecordingArguments: EventRecordingArguments? = null
+    )
+
+    data class EventRecordingArguments(
+        /**
+         * If enabled removes all recorded events when detects that the machine was stopped and started again.
+         */
+        val clearRecordsOnMachineRestart: Boolean = true,
+        /**
+         * If enabled skips ignored events, supposing they do not affect restoration of the machine
+         */
+        val skipIgnoredEvents: Boolean = true,
     )
 }
 

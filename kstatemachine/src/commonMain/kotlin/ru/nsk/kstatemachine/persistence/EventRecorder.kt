@@ -1,6 +1,10 @@
-package ru.nsk.kstatemachine.persist
+package ru.nsk.kstatemachine.persistence
 
+import ru.nsk.kstatemachine.event.DestroyEvent
+import ru.nsk.kstatemachine.event.StartEvent
+import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.statemachine.StateMachine.EventRecordingArguments
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -17,20 +21,37 @@ interface EventRecorder {
  */
 data class RecordedEvents(
     val structureHashCode: Int,
-    val events: List<EventAndArgument<*>>,
+    val records: List<Record>,
+)
+
+data class Record(
+    val eventAndArgument: EventAndArgument<*>,
+    val processingResult: ProcessingResult,
 )
 
 internal class EventRecorderImpl(
-    private val machine: StateMachine
+    private val machine: StateMachine,
+    private val arguments: EventRecordingArguments
 ) : EventRecorder {
-    private val events = mutableListOf<EventAndArgument<*>>()
+    private val records = mutableListOf<Record>()
 
-    fun onProcessEvent(eventAndArgument: EventAndArgument<*>) {
-        events += eventAndArgument
+    /**
+     * Should be called with not wrapped event.
+     * Should not be called on [ProcessingResult.PENDING] events.
+     */
+    fun onProcessEvent(eventAndArgument: EventAndArgument<*>, processingResult: ProcessingResult) {
+        val lastEvent = records.lastOrNull()?.eventAndArgument?.event
+        check(lastEvent !is DestroyEvent) {
+            "Internal error, ${::onProcessEvent::name} called after " +
+                    "${DestroyEvent::class.simpleName} processing, which is considered as last possible event"
+        }
+        if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
+        if (arguments.clearRecordsOnMachineRestart && lastEvent is StopEvent) records.clear()
+        records += Record(eventAndArgument, processingResult)
     }
 
     override fun getRecordedEvents(): RecordedEvents {
-        return RecordedEvents(machine.structureHashCode, events)
+        return RecordedEvents(machine.structureHashCode, records)
     }
 }
 
@@ -39,7 +60,7 @@ data class RestorationResult(
 )
 
 data class RestoredEventResult(
-    val event: EventAndArgument<*>,
+    val record: Record,
     val processingResult: Result<ProcessingResult>,
 )
 
@@ -96,12 +117,18 @@ suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
 
     val results = mutableListOf<RestoredEventResult>()
     mutationSection.use {
-        recordedEvents.events.forEach {
-            val processingResult = runCatching { processEvent(it.event, it.argument) }
-            results += RestoredEventResult(it, processingResult)
+        recordedEvents.records.forEach {
+            val (event, argument) = it.eventAndArgument
+            if (event is StartEvent && !isRunning) { // fixme always false  isRunning is checked on method entry
+                start(argument)
+                results += RestoredEventResult(it, Result.success(ProcessingResult.PROCESSED))
+            } else {
+                val processingResult = runCatching { processEvent(event, argument) }
+                results += RestoredEventResult(it, processingResult)
+            }
         }
     }
-    RestorationResult(results)
+    RestorationResult(results)// fixme check processingResults are equal
 }
 
 /**

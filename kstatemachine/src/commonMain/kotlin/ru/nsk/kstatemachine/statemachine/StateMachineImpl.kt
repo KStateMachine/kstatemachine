@@ -3,10 +3,11 @@ package ru.nsk.kstatemachine.statemachine
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.isSubStateOf
-import ru.nsk.kstatemachine.persist.EventRecorder
-import ru.nsk.kstatemachine.persist.EventRecorderImpl
+import ru.nsk.kstatemachine.persistence.EventRecorder
+import ru.nsk.kstatemachine.persistence.EventRecorderImpl
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.statemachine.ProcessingResult.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
@@ -63,14 +64,14 @@ internal class StateMachineImpl(
     private var _areListenersMuted = false
     override val areListenersMuted get() = _areListenersMuted
 
-    private val _eventRecorder = if (creationArguments.recordEvents) EventRecorderImpl(this) else null
+    private val _eventRecorder = creationArguments.eventRecordingArguments?.let {
+        EventRecorderImpl(this, it)
+    }
+
     override val eventRecorder: EventRecorder
-        get() {
-            check(creationArguments.recordEvents) {
-                "Event recording is not enabled. Use ${CreationArguments::recordEvents.name} parameter " +
-                        "of createStateMachine() method family"
-            }
-            return _eventRecorder!!
+        get() = checkNotNull(_eventRecorder) {
+            "Event recording is not enabled. Use ${CreationArguments::eventRecordingArguments.name} parameter " +
+                    "of createStateMachine() method family, to enable it first"
         }
 
     init {
@@ -213,47 +214,50 @@ internal class StateMachineImpl(
      * Should be called only from [runCheckingExceptions]
      */
     private suspend fun processStep1(eventAndArgument: EventAndArgument<*>): Step1Result {
-        _eventRecorder?.onProcessEvent(eventAndArgument) // should be called with not wrapped event
-
         val wrappedEventAndArgument = eventAndArgument.wrap()
         val eventProcessed = when (val event = wrappedEventAndArgument.event) {
             is StopEvent -> {
                 doStop()
                 true
             }
-
             is DestroyEvent -> {
                 if (event.stop && isRunning) doStop()
                 doDestroy()
                 true
             }
-
             else -> doProcessEvent(wrappedEventAndArgument)
         }
-        return Step1Result(eventProcessed, wrappedEventAndArgument)
+        val processingResult = if (eventProcessed) PROCESSED else IGNORED
+        _eventRecorder?.onProcessEvent(eventAndArgument, processingResult)
+        return Step1Result(wrappedEventAndArgument, processingResult)
     }
 
     /**
      * Possible exceptions from this step should reach the user (caller)
+     * So it should not be called from [runCheckingExceptions]
      */
     private suspend fun processStep2(
         eventAndArgument: EventAndArgument<*>,
         step1Result: Step1Result,
     ): ProcessingResult {
-        return if (step1Result.eventProcessed) {
-            if (eventAndArgument.event !is StartEvent)
-                _hasProcessedEvents = true
-            ProcessingResult.PROCESSED
-        } else {
-            log { "$this ignored ${step1Result.wrappedEventAndArgument.event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(step1Result.wrappedEventAndArgument)
-            ProcessingResult.IGNORED
+        when (step1Result.processingResult) {
+            PROCESSED -> {
+                if (eventAndArgument.event !is StartEvent)
+                    _hasProcessedEvents = true
+            }
+            IGNORED -> {
+                log { "$this ignored ${step1Result.wrappedEventAndArgument.event::class.simpleName}" }
+                ignoredEventHandler.onIgnoredEvent(step1Result.wrappedEventAndArgument)
+            }
+            PENDING -> error("Internal error, $PENDING is not expected here")
         }
+        return step1Result.processingResult
     }
 
     /**
      * Runs block of code that processes event, and processes all pending events from queue after it if
      * [QueuePendingEventHandler] is used.
+     * This method is transparent for exceptions.
      */
     private suspend fun <R> eventProcessingScope(block: suspend () -> R): R {
         val queue = pendingEventHandler as? QueuePendingEventHandler
@@ -409,6 +413,6 @@ private fun StateMachine.checkPropertyNotMutedOnRunningMachine(propertyType: KCl
     check(!isRunning) { "Can not change ${propertyType.simpleName} after state machine started" }
 
 private data class Step1Result(
-    val eventProcessed: Boolean,
     val wrappedEventAndArgument: EventAndArgument<*>,
+    val processingResult: ProcessingResult,
 )

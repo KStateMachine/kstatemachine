@@ -6,7 +6,7 @@ import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.TransitionParams
 
-private data class StateAndEvent(val states: Set<IState>, val eventAndArgument: EventAndArgument<*>)
+private data class StateAndEvent(val targetStates: Set<IState>, val eventAndArgument: EventAndArgument<*>)
 
 internal class UndoState : BasePseudoState("undoState") {
     private val stack = mutableListOf<StateAndEvent>()
@@ -22,7 +22,7 @@ internal class UndoState : BasePseudoState("undoState") {
     }
 
     /**
-     * Called before [popState]
+     * Called before [popTargetStates]
      */
     fun makeWrappedEvent(): WrappedEvent {
         val element = stack.getOrNull(stack.size - 2)
@@ -32,9 +32,9 @@ internal class UndoState : BasePseudoState("undoState") {
             WrappedEvent(UndoEvent, null)
     }
 
-    fun popState(): Set<IState> = if (stack.size >= 2) {
+    fun popTargetStates(): Set<IState> = if (stack.size >= 2) {
         stack.removeLast()
-        stack.last().states
+        stack.last().targetStates
     } else {
         emptySet()
     }
