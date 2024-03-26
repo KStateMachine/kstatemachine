@@ -93,7 +93,7 @@ fun createTestStateMachine(
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
-        CoroutineScope(EmptyCoroutineContext),
+        CoroutineScope(EmptyCoroutineContext), // does not perform internal context switching
         name,
         childMode,
         start,

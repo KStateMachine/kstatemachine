@@ -3,8 +3,12 @@ package ru.nsk.kstatemachine.statemachine
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.isSubStateOf
+import ru.nsk.kstatemachine.persistence.EventRecorder
+import ru.nsk.kstatemachine.persistence.EventRecorderImpl
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.statemachine.ProcessingResult.*
+import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
@@ -12,20 +16,10 @@ import ru.nsk.kstatemachine.visitors.CleanupVisitor
 import ru.nsk.kstatemachine.visitors.checkNonBlankNames
 import kotlin.reflect.KClass
 
-/**
- * Defines state machine API for internal library usage.
- */
-internal abstract class InternalStateMachine(name: String?, childMode: ChildMode) :
-    BuildingStateMachine, DefaultState(name, childMode) {
-    internal abstract suspend fun startFrom(states: Set<IState>, argument: Any?)
-    internal abstract suspend fun <D : Any> startFrom(state: DataState<D>, data: D, argument: Any?)
-    internal abstract fun delayListenerException(exception: Exception)
-}
-
 internal class StateMachineImpl(
     name: String?,
     childMode: ChildMode,
-    override val creationArguments: StateMachine.CreationArguments,
+    override val creationArguments: CreationArguments,
     override val coroutineAbstraction: CoroutineAbstraction,
 ) : InternalStateMachine(name, childMode) {
     private val _machineListeners = mutableSetOf<StateMachine.Listener>()
@@ -53,16 +47,32 @@ internal class StateMachineImpl(
     private var _isDestroyed: Boolean = false
     override val isDestroyed get() = _isDestroyed
 
+    private var _isRunning = false
+    override val isRunning get() = _isRunning
+
     /**
      * Flag for event processing mechanism, which takes place in [processEventBlocking] and during [startBlocking]/[startFrom].
      * It is not possible to process new event while previous processing is incomplete.
      */
     private var isProcessingEvent = false
 
-    private var _isRunning = false
-    override val isRunning get() = _isRunning
+    private var _hasProcessedEvents: Boolean = false
+    override val hasProcessedEvents get() = _hasProcessedEvents
 
     private var delayedListenerException: Exception? = null
+
+    private var _areListenersMuted = false
+    override val areListenersMuted get() = _areListenersMuted
+
+    private val _eventRecorder = creationArguments.eventRecordingArguments?.let {
+        EventRecorderImpl(this, it)
+    }
+
+    override val eventRecorder: EventRecorder
+        get() = checkNotNull(_eventRecorder) {
+            "Event recording is not enabled. Use ${CreationArguments::eventRecordingArguments.name} parameter " +
+                    "of createStateMachine() method family, to enable it first"
+        }
 
     init {
         transitionConditionally<StartEvent>("start transition") {
@@ -82,6 +92,19 @@ internal class StateMachineImpl(
         if (creationArguments.isUndoEnabled) {
             val undoState = addState(UndoState())
             transition<WrappedEvent>("undo transition", undoState)
+        }
+    }
+
+    override fun openListenersMutationSection() = object : ListenersMutationSection {
+        init {
+            check(!_areListenersMuted) {
+                "Seems ${ListenersMutationSection::class.simpleName} is already open, multiple simultaneous sections are not supported"
+            }
+            _areListenersMuted = true
+        }
+
+        override fun close() {
+            _areListenersMuted = false
         }
     }
 
@@ -110,14 +133,15 @@ internal class StateMachineImpl(
     private suspend fun doStartFrom(event: StartEvent, argument: Any?): Unit =
         coroutineAbstraction.withContext {
             checkBeforeRunMachine()
-            // fixme loosing this params (but similary (not same target) will be recreated on transition)
+            // fixme loosing this params (but similar (not same target) will be recreated on transition)
             val eventAndArgument = EventAndArgument(event, argument)
             eventProcessingScope {
-                runCheckingExceptions {
+                val step1Result = runCheckingExceptions {
                     val transitionParams = makeStartTransitionParams(event, this, event.startState, argument)
                     runMachine(transitionParams)
-                    doProcessEvent(eventAndArgument)
+                    processStep1(eventAndArgument)
                 }
+                processStep2(eventAndArgument, step1Result)
             }
         }
 
@@ -132,15 +156,16 @@ internal class StateMachineImpl(
             requireInitialState()
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun runMachine(transitionParams: TransitionParams<*>) {
         _isRunning = true
+        _hasProcessedEvents = false
         log { "$this started" }
         machineNotify { onStarted() }
         doEnter(transitionParams)
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun doStop() {
         _isRunning = false
         recursiveStop()
@@ -179,33 +204,60 @@ internal class StateMachineImpl(
     }
 
     private suspend fun process(eventAndArgument: EventAndArgument<*>): ProcessingResult {
+        val step1Result = runCheckingExceptions {
+            processStep1(eventAndArgument)
+        }
+        return processStep2(eventAndArgument, step1Result)
+    }
+
+    /**
+     * Should be called only from [runCheckingExceptions]
+     */
+    private suspend fun processStep1(eventAndArgument: EventAndArgument<*>): Step1Result {
         val wrappedEventAndArgument = eventAndArgument.wrap()
-
-        val eventProcessed = runCheckingExceptions {
-            when (val event = wrappedEventAndArgument.event) {
-                is StopEvent -> {
-                    doStop()
-                    true
-                }
-                is DestroyEvent -> {
-                    if (event.stop && isRunning) doStop()
-                    doDestroy()
-                    true
-                }
-                else -> doProcessEvent(wrappedEventAndArgument)
+        val eventProcessed = when (val event = wrappedEventAndArgument.event) {
+            is StopEvent -> {
+                doStop()
+                true
             }
+            is DestroyEvent -> {
+                if (event.stop && isRunning) doStop()
+                doDestroy()
+                true
+            }
+            else -> doProcessEvent(wrappedEventAndArgument)
         }
+        val processingResult = if (eventProcessed) PROCESSED else IGNORED
+        _eventRecorder?.onProcessEvent(eventAndArgument, processingResult)
+        return Step1Result(wrappedEventAndArgument, processingResult)
+    }
 
-        if (!eventProcessed) {
-            log { "$this ignored ${wrappedEventAndArgument.event::class.simpleName}" }
-            ignoredEventHandler.onIgnoredEvent(wrappedEventAndArgument)
+    /**
+     * Possible exceptions from this step should reach the user (caller)
+     * So it should not be called from [runCheckingExceptions]
+     */
+    private suspend fun processStep2(
+        eventAndArgument: EventAndArgument<*>,
+        step1Result: Step1Result,
+    ): ProcessingResult {
+        when (step1Result.processingResult) {
+            PROCESSED -> {
+                if (eventAndArgument.event !is StartEvent)
+                    _hasProcessedEvents = true
+            }
+            IGNORED -> {
+                log { "$this ignored ${step1Result.wrappedEventAndArgument.event::class.simpleName}" }
+                ignoredEventHandler.onIgnoredEvent(step1Result.wrappedEventAndArgument)
+            }
+            PENDING -> error("Internal error, $PENDING is not expected here")
         }
-        return if (eventProcessed) ProcessingResult.PROCESSED else ProcessingResult.IGNORED
+        return step1Result.processingResult
     }
 
     /**
      * Runs block of code that processes event, and processes all pending events from queue after it if
      * [QueuePendingEventHandler] is used.
+     * This method is transparent for exceptions.
      */
     private suspend fun <R> eventProcessingScope(block: suspend () -> R): R {
         val queue = pendingEventHandler as? QueuePendingEventHandler
@@ -238,7 +290,11 @@ internal class StateMachineImpl(
     }
 
     /**
-     * Runs block of code that triggers notification listeners
+     * Runs block of code that internally triggers notification listeners.
+     *
+     * As listeners exceptions are delayed and may be rethrown to a caller (user) and this should not cause machine
+     * destruction.
+     * Watch [runCheckingExceptions] blocks are not nested it is not supported and wrong.
      */
     private suspend fun <R> runCheckingExceptions(block: suspend () -> R): R {
         val result: R
@@ -256,6 +312,9 @@ internal class StateMachineImpl(
         return result
     }
 
+    /**
+     * @return true if event was processed (transition was performed), false if it was ignored
+     */
     private suspend fun <E : Event> doProcessEvent(eventAndArgument: EventAndArgument<E>): Boolean {
         val (event, argument) = eventAndArgument
         if (isFinished) {
@@ -298,7 +357,7 @@ internal class StateMachineImpl(
      * Starts machine if it is inner state of another one machine
      */
     override suspend fun doEnter(transitionParams: TransitionParams<*>) {
-        if (!isRunning) startBlocking() else super.doEnter(transitionParams)
+        if (!isRunning) start() else super.doEnter(transitionParams)
     }
 
     override suspend fun cleanup() {
@@ -306,7 +365,7 @@ internal class StateMachineImpl(
         super.cleanup()
     }
 
-    /** To be called only from [runCheckingExceptions] */
+    /** Should be called only from [runCheckingExceptions] */
     private suspend fun doDestroy() {
         _isDestroyed = true
         machineNotify { onDestroyed() }
@@ -317,6 +376,9 @@ internal class StateMachineImpl(
 
 internal fun StateMachine.checkNotDestroyed() = check(!isDestroyed) { "$this is already destroyed" }
 
+/**
+ * Method should be used for running code that sends notifications for outer world (calls listeners)
+ */
 internal suspend inline fun InternalStateMachine.runDelayingException(crossinline block: suspend () -> Unit) =
     try {
         block()
@@ -349,3 +411,8 @@ internal suspend inline fun <reified E : StartEvent> makeStartTransitionParams(
 
 private fun StateMachine.checkPropertyNotMutedOnRunningMachine(propertyType: KClass<*>) =
     check(!isRunning) { "Can not change ${propertyType.simpleName} after state machine started" }
+
+private data class Step1Result(
+    val wrappedEventAndArgument: EventAndArgument<*>,
+    val processingResult: ProcessingResult,
+)

@@ -3,7 +3,7 @@ plugins {
     `java-library`
     ru.nsk.`maven-publish`
     ru.nsk.jacoco
-    id("org.jetbrains.dokka") version Versions.kotlinDokka
+    id("org.jetbrains.dokka")
 }
 
 group = rootProject.group
@@ -22,4 +22,10 @@ kotlin {
     iosArm64()
     iosX64()
     iosSimulatorArm64()
+    js {
+        browser()
+        nodejs()
+    }
+    @Suppress("OPT_IN_USAGE") // this is alpha feature
+    wasmJs()
 }

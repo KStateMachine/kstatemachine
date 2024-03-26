@@ -7,14 +7,14 @@
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Maven Central Version](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine?logo=sonatype)](https://central.sonatype.com/artifact/io.github.nsk90/kstatemachine)
 [![JitPack](https://img.shields.io/jitpack/version/io.github.nsk90/kstatemachine?style=flat&logo=jitpack&color=brgreen)](https://jitpack.io/#nsk90/kstatemachine)
-[![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
+[![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios%20%7C%20js%20%7C%20wasm-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
 
 [![Open Collective](https://img.shields.io/badge/open%20collective-kstatemachine-lightblue?logo=opencollective&style=flat)](https://opencollective.com/kstatemachine)
+[![JetBrains support](https://img.shields.io/badge/JetBrains-support-black?style=flat&logo=jetbrains)](https://jb.gg/OpenSourceSupport)
 [![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-kstatemachine-green.svg?style=flat)](https://android-arsenal.com/details/1/8276)
 [![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&hashtags=kstatemachine,kotlin,opensource)
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
-
 
 **[Documentation](https://kstatemachine.github.io/kstatemachine) | [Sponsors](#sponsors-) | [Quick start](#quick-start-sample) | [Samples](#samples) | [Install](#install) | [Contribution](#contribution) | [License](#license) | [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
 
@@ -35,27 +35,37 @@ Integration features are:
 
 State management features:
 
-* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/#setup-transitions) are performed by processing
+* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/#setup-transitions) are performed by
+  processing
   incoming events
 * **[Reactive](https://kstatemachine.github.io/kstatemachine/#listen-states)** - listen for machine, states,
   [state groups](https://kstatemachine.github.io/kstatemachine/#listen-group-of-states) and transitions
 * **[Guarded](https://kstatemachine.github.io/kstatemachine/#guarded-transitions)
-  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/#conditional-transitions)** - dynamic target
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/#conditional-transitions)** - dynamic
+  target
   state which is calculated in a moment of event processing depending on application business logic
 * **[Nested states](https://kstatemachine.github.io/kstatemachine/#nested-states)** - build hierarchical state machines
   (statecharts)
   with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/#cross-level-transitions) support
-* **[Composed (nested) state machines.](https://kstatemachine.github.io/kstatemachine/#composed-(nested)-state-machines)** Use
+* **[Composed (nested) state machines.](https://kstatemachine.github.io/kstatemachine/#composed-(nested)-state-machines)
+  ** Use
   state machines as atomic child states
-* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/#pseudo-states)** for additional logic in machine behaviour
-* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/#typesafe-transitions)** - pass data in typesafe way
+* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/#pseudo-states)** for additional logic in machine
+  behaviour
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/#typesafe-transitions)** - pass data in
+  typesafe way
   from event to state
-* **[Parallel states](https://kstatemachine.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial explosion of
+* **[Parallel states](https://kstatemachine.github.io/kstatemachine/#parallel-states)** - avoid a combinatorial
+  explosion of
   states
-* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/#undo-transitions)** - navigate back to previous state
-* **[Optional argument](https://kstatemachine.github.io/kstatemachine/#optinal-arguments)** passing for events and transitions
+* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/#undo-transitions)** - navigate back to previous
+  state
+* **[Optional argument](https://kstatemachine.github.io/kstatemachine/#optinal-arguments)** passing for events and
+  transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/#export)** state machine structure
   to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
+* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/#persistence)**  state machine's active
+  configuration and restore it later
 * **[Logging](https://kstatemachine.github.io/kstatemachine/#logging)** - useful for debugging
 * **[Testable](https://kstatemachine.github.io/kstatemachine/#testing)** - run state machine from specified state
 * **Well tested** - all features are covered

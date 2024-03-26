@@ -6,6 +6,7 @@ import ru.nsk.kstatemachine.transition.Transition
 /**
  * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
  * Users may extend this interface to add their own [MetaInfo] implementations.
+ * Users may combine multiple [MetaInfo] interfaces into one object.
  */
 interface MetaInfo
 

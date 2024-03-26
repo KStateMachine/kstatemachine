@@ -7,6 +7,7 @@ import ru.nsk.kstatemachine.event.DestroyEvent
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.event.UndoEvent
+import ru.nsk.kstatemachine.persistence.EventRecorder
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.State
@@ -21,14 +22,13 @@ import ru.nsk.kstatemachine.visitors.Visitor
 annotation class StateMachineDslMarker
 
 interface StateMachine : State {
-    val logger: Logger
-    val ignoredEventHandler: IgnoredEventHandler
-    val pendingEventHandler: PendingEventHandler
-
     /**
      * Configuration arguments which were used to create the machine
      */
     val creationArguments: CreationArguments
+    val logger: Logger
+    val ignoredEventHandler: IgnoredEventHandler
+    val pendingEventHandler: PendingEventHandler
 
     /**
      * If machine catches exception from client code (listeners callbacks) it stores it until event processing
@@ -40,12 +40,28 @@ interface StateMachine : State {
      * With your own handler you can mute or just log them for example.
      */
     val listenerExceptionHandler: ListenerExceptionHandler
-    val isRunning: Boolean
-    val machineListeners: Collection<Listener>
 
+    /**
+     * Indicates whether the machine is started or stopped.
+     */
+    val isRunning: Boolean
+
+    /**
+     * Indicates that machine is started and has clear initial state (has not processed any events yet)
+     */
+    val hasProcessedEvents: Boolean
+
+    /**
+     * Indicates that machine was destroyed. There is no way to restore machine instance from this state.
+     * Once machine became destroyed it is not usable anymore.
+     */
     val isDestroyed: Boolean
 
+    val machineListeners: Collection<Listener>
+
     val coroutineAbstraction: CoroutineAbstraction
+
+    val eventRecorder: EventRecorder
 
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
@@ -117,14 +133,23 @@ interface StateMachine : State {
     }
 
     fun interface IgnoredEventHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onIgnoredEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface PendingEventHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onPendingEvent(eventAndArgument: EventAndArgument<*>)
     }
 
     fun interface ListenerExceptionHandler {
+        /**
+         * It is up to user to throw exception from this method or not
+         */
         suspend fun onException(exception: Exception)
     }
 
@@ -136,6 +161,9 @@ interface StateMachine : State {
          * If set to false an exception will be thrown on state reuse attempt.
          */
         val autoDestroyOnStatesReuse: Boolean = true,
+        /**
+         * Enables Undo transition
+         */
         val isUndoEnabled: Boolean = false,
         /**
          * If set to true, when multiple transitions match event the first matching transition is selected.
@@ -148,6 +176,22 @@ interface StateMachine : State {
          * if it contains states or transitions with null or blank names
          */
         val requireNonBlankNames: Boolean = false,
+        /**
+         * If set, enables incoming events recording in order to restore [StateMachine] later.
+         * Use [StateMachine.eventRecorder] to access the recording result.
+         */
+        val eventRecordingArguments: EventRecordingArguments? = null
+    )
+
+    data class EventRecordingArguments(
+        /**
+         * If enabled removes all recorded events when detects that the machine was stopped and started again.
+         */
+        val clearRecordsOnMachineRestart: Boolean = true,
+        /**
+         * If enabled skips ignored events, supposing they do not affect restoration of the machine
+         */
+        val skipIgnoredEvents: Boolean = true,
     )
 }
 
@@ -220,6 +264,7 @@ fun StateMachine.destroyBlocking(stop: Boolean = true) = coroutineAbstraction.ru
 
 /**
  * Allows to mutate some properties, which is necessary during setup, before machine is started
+ * Those properties are not passed through [StateMachine]'s constructor to make DSL syntax more nice and readable.
  */
 interface BuildingStateMachine : StateMachine {
     override var logger: StateMachine.Logger

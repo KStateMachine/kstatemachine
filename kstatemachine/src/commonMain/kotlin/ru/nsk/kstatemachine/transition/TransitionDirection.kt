@@ -91,13 +91,16 @@ private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState):
     return if (resolvedState != null) TargetState(setOf(resolvedState)) else NoTransition
 }
 
+/**
+ * @return state or null, which means no transition
+ */
 private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
     val resolvedTarget = when (targetState) {
         // We can return here to optimize out double initialPseudoState resolution,
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
         is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetState
         is HistoryState -> targetState.storedState
-        is UndoState -> targetState.popState()
+        is UndoState -> targetState.popTargetStates().firstOrNull() // fixme this is a bug, should use all set items, add test for undo multi-target transition
         else -> targetState
     }
     // when target state calculated we need to check if its entry will trigger another redirection
@@ -106,7 +109,7 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
         val initialPseudoState = resolvedTarget.findInitialPseudoState()
         if (initialPseudoState == null) resolvedTarget else recursiveResolveTargetState(initialPseudoState)
     } else {
-        null // means no transition
+        null
     }
 }
 

@@ -9,6 +9,7 @@ internal suspend inline fun InternalTransition<*>.transitionNotify(
     crossinline block: suspend Transition.Listener.() -> Unit
 ) {
     val machine = sourceState.machine as InternalStateMachine
+    if (machine.areListenersMuted) return
     listeners.toList().forEach { machine.runDelayingException { it.block() } }
 }
 

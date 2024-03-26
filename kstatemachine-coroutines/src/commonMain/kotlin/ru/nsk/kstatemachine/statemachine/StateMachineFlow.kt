@@ -67,6 +67,9 @@ fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<State
     return flow.asSharedFlow()
 }
 
+/**
+ * Provides active states as [Flow]
+ */
 fun StateMachine.activeStatesFlow() : StateFlow<Set<IState>> {
     val flow = MutableStateFlow(activeStates())
     onTransitionComplete { _, activeStates -> flow.emit(activeStates) }

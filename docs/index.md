@@ -52,6 +52,8 @@
     * [PlantUML](#plantuml)
     * [Mermaid](#mermaid)
     * [Controlling export output](#controlling-export-output)
+* [Persistence](#persistence)
+    * [Event recording](#event-recording)
 * [Testing](#testing)
 * [Multiplatform](#multiplatform)
 * [Consider using Kotlin sealed classes](#consider-using-kotlin-sealed-classes)
@@ -423,7 +425,7 @@ like this `machine.processEvent(UndoEvent)`. State Machine will roll back last t
 to previous state (except target-less transitions).
 This API might be called as many times as needed.
 To implement this feature library stores transitions in a stack, it takes memory,
-so this feature is disabled by default and must be enabled explicitly using 
+so this feature is disabled by default and must be enabled explicitly using
 `createStateMachine(creationArguments = CreationArguments(isUndoEnabled = true))` argument.
 
 Undo functionality is implemented as `Event`, so it possible to call `undo()` from notification callbacks, if you use
@@ -786,6 +788,8 @@ createStateMachine(scope) {
 }
 ```
 
+The library provides implementation of such throwing handler by `throwingIgnoredEventHandler()` function.
+
 ### Pending events
 
 Pending events are such events that are posted for processing while another event is already processing, for example
@@ -867,7 +871,7 @@ conditions, it is not correct.
 Even `Dispatchers.Default.limitedParallelism(1)` that seems to be ok at glance,
 does not provide guarantee that each coroutine will be executed on the same single thread, it only limits the amount of
 used threads. So race condition still takes place, as nothing forces threads, running on different processor cores,
-to update variable values in their processor core caches, so outdated values could be used from core cache. Other words, 
+to update variable values in their processor core caches, so outdated values could be used from core cache. Other words,
 one thread does not to know about variable changes made by other one. This known as __visibility guarantee__,
 that `volatile` keyword provides on `jvm`.
 
@@ -1024,6 +1028,34 @@ state("State1") {
 
 See [PlantUML with MetaInfo export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
 
+## Persistence
+
+**Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
+JSON text, and possibly saving it into some persistent storage like file or sending by network.
+**Restoration** is a process of restoring the `StateMachine` from the serializable representation.
+
+There are several kinds or levels of  `StateMachine` persistence (serialization). Let's look at sample use cases:
+
+1) **Structure + configuration** - Create `StateMachine` on some process/host and send its structure and
+   active configuration by network to another process/host.
+   The receiver can dynamically create the same `StateMachine` instance in the same state as original one.
+2) **Configuration only** - Both original and restored `StateMachine` instances are crated by identical static code
+   (in a single or multiple different processes/hosts). Only active configuration can be saved and restored.
+
+Case 1 currently lacks built-in support by the library (you can open an issue if you need something like that).
+Case 2 in turn may be reached in two different ways:
+
+1) **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine` and
+   applying them to restored one.
+2) **Event recording** - serializing all incoming events, and applying them later on new `StateMachine` instance,
+   which should lead it into the same state as original. This also allows to execute library callbacks (listeners)
+   if necessary, which is not possible with state persistence approach.
+   _Currently only this approach has built-in support._
+
+### Event recording
+
+WIP
+
 ## Testing
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
@@ -1045,7 +1077,9 @@ machine.startFrom(state2)
 ## Multiplatform
 
 Starting from v0.22.0 KStateMachine has moved to Kotlin Multiplatform only with `JVM` platform support.
-In v0.22.1 `iOS` support has been added also.
+In **v0.22.1** `iOS` support has been added also, **v0.30.0** adds `js` and `wasm` targets.
+`js` and `wasm` targets do not support blocking library apis as those platforms do not have `runBlocking` support which
+is used internally.
 
 _If you need missing platform support please create a GitHub issue._
 

@@ -1,11 +1,15 @@
 package ru.nsk.kstatemachine.event
 
-import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.DataState
+import ru.nsk.kstatemachine.state.FinalDataState
+import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.statemachine.undo
 
 /**
  * Base interface for events which may trigger transitions of [StateMachine]
+ * Events are expected to be immutable subjects by design.
  */
 interface Event
 
@@ -17,7 +21,7 @@ interface DataEvent<out D : Any> : Event {
 }
 
 /**
- * User may call [StateMachine.processEventBlocking] with [UndoEvent] as alternative to calling machine.undo()
+ * User may call [StateMachine.processEvent] with [UndoEvent] as alternative to calling [StateMachine.undo]
  */
 object UndoEvent : Event
 
@@ -57,7 +61,7 @@ internal class StartDataEventImpl<D : Any>(
 internal object StopEvent : GeneratedEvent
 
 /**
- * This event is processed even is the [StateMachine] already stopped
+ * This event is processed even if the [StateMachine] is already stopped
  */
 internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
 
@@ -68,5 +72,4 @@ internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
  * @param event original event
  * @param argument original argument
  */
-class WrappedEvent(val event: Event, val argument: Any?) :
-    Event
+class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
