@@ -788,6 +788,8 @@ createStateMachine(scope) {
 }
 ```
 
+The library provides implementation of such throwing handler by `throwingIgnoredEventHandler()` function.
+
 ### Pending events
 
 Pending events are such events that are posted for processing while another event is already processing, for example

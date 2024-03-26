@@ -59,6 +59,10 @@ data class RestorationResult(
     val results: List<RestoredEventResult>
 )
 
+fun RestorationResult.hasNoErrors(): Boolean {
+    return results.firstOrNull { it.processingResult.isFailure } == null
+}
+
 data class RestoredEventResult(
     val record: Record,
     val processingResult: Result<ProcessingResult>,
@@ -90,6 +94,10 @@ suspend fun StateMachine.restoreByRecordedEvents(
 /**
  * May be called on started ([StateMachine.isRunning] == true) [StateMachine] only,
  * and returns [RestorationResult] allowing to inspect how the restoration was processed.
+ *
+ * There is no way on library side to decide if some exceptions during event processing are errors or not.
+ * For instance [StateMachine] may be configured with [throwingIgnoredEventHandler] so some exceptions might
+ * be expected and are not really errors.
  */
 suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
     recordedEvents: RecordedEvents,
@@ -113,19 +121,15 @@ suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
         }
 
     this as InternalStateMachine
-    val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
-
     val results = mutableListOf<RestoredEventResult>()
+    val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
     mutationSection.use {
-        recordedEvents.records.forEach {
-            val (event, argument) = it.eventAndArgument
-            if (event is StartEvent && !isRunning) { // fixme always false  isRunning is checked on method entry
-                start(argument)
-                results += RestoredEventResult(it, Result.success(ProcessingResult.PROCESSED))
-            } else {
-                val processingResult = runCatching { processEvent(event, argument) }
-                results += RestoredEventResult(it, processingResult)
-            }
+        for (record in recordedEvents.records) {
+            val (event, argument) = record.eventAndArgument
+            if (event is StartEvent)
+                continue // fixme вызов start мог иметь argument что с ним делать?
+            val processingResult = runCatching { processEvent(event, argument) }
+            results += RestoredEventResult(record, processingResult)
         }
     }
     RestorationResult(results)// fixme check processingResults are equal
