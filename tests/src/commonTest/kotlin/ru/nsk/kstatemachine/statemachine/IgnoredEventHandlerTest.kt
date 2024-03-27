@@ -15,6 +15,18 @@ import ru.nsk.kstatemachine.transition.noTransition
 
 class IgnoredEventHandlerTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
+        "throwing ignored event handler" {
+            val machine = createTestStateMachine(coroutineStarterType) {
+                initialState("first")
+
+                ignoredEventHandler = throwingIgnoredEventHandler()
+            }
+
+            shouldThrow<IllegalStateException> {
+                machine.processEvent(SwitchEvent)
+            }
+        }
+
         "ignored event handler" {
             val callbacks = mockkCallbacks()
 

@@ -161,7 +161,7 @@ internal class StateMachineImpl(
         _isRunning = true
         _hasProcessedEvents = false
         log { "$this started" }
-        machineNotify { onStarted() }
+        machineNotify { onStarted(transitionParams) }
         doEnter(transitionParams)
     }
 

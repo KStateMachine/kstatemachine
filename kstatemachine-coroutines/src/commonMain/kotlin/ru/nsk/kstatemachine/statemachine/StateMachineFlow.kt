@@ -7,7 +7,11 @@ import ru.nsk.kstatemachine.state.activeStates
 import ru.nsk.kstatemachine.transition.TransitionParams
 
 sealed class StateMachineNotification(val machine: StateMachine) {
-    class Started(machine: StateMachine) : StateMachineNotification(machine)
+    class Started(
+        val transitionParams: TransitionParams<*>,
+        machine: StateMachine
+    ) : StateMachineNotification(machine)
+
     class TransitionTriggered(
         val transitionParams: TransitionParams<*>,
         machine: StateMachine
@@ -45,7 +49,7 @@ fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<State
     val machine = this
     val flow = MutableSharedFlow<StateMachineNotification>(replay = replay)
     addListener(object : StateMachine.Listener {
-        override suspend fun onStarted() = flow.emit(Started(machine))
+        override suspend fun onStarted(transitionParams: TransitionParams<*>) = flow.emit(Started(transitionParams, machine))
         override suspend fun onTransitionTriggered(transitionParams: TransitionParams<*>) =
             flow.emit(TransitionTriggered(transitionParams, machine))
 
@@ -70,7 +74,7 @@ fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<State
 /**
  * Provides active states as [Flow]
  */
-fun StateMachine.activeStatesFlow() : StateFlow<Set<IState>> {
+fun StateMachine.activeStatesFlow(): StateFlow<Set<IState>> {
     val flow = MutableStateFlow(activeStates())
     onTransitionComplete { _, activeStates -> flow.emit(activeStates) }
     return flow.asStateFlow()

@@ -94,7 +94,7 @@ interface StateMachine : State {
         /**
          * Notifies that state machine started (entered initial state).
          */
-        suspend fun onStarted() = Unit
+        suspend fun onStarted(transitionParams: TransitionParams<*>) = Unit
 
         /**
          * This method is called when any transition is triggered/performed.
