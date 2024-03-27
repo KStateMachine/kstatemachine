@@ -104,7 +104,7 @@ interface StateMachine : State {
         /**
          * Same as [onTransitionTriggered] but called after transition is complete and provides set of current active states.
          */
-        suspend fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
+        suspend fun onTransitionComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) = Unit
 
         /**
          * Notifies about any child state entry (including nested states).

@@ -143,7 +143,7 @@ class StateMachineTest : StringSpec({
                     state22 = initialState("state22")
                 }
 
-                onTransitionComplete { transitionParams, activeStates ->
+                onTransitionComplete { activeStates, transitionParams ->
                     when (transitionParams.event) {
                         is StartEvent -> activeStates.shouldContainExactlyInAnyOrder(state1)
                         SwitchEvent -> {

@@ -145,12 +145,12 @@ inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(
 
 inline fun <reified E : Event> TransitionBuilder<E>.onComplete(
     // arg names are provided for better syntax highlighting
-    crossinline block: suspend (transitionParams: TransitionParams<E>, activeStates: Set<IState>) -> Unit
+    crossinline block: suspend (activeStates: Set<IState>, transitionParams: TransitionParams<E>) -> Unit
 ): Transition.Listener {
     return object : Transition.Listener {
         @Suppress("UNCHECKED_CAST")
-        override suspend fun onComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
-            block(transitionParams as TransitionParams<E>, activeStates)
+        override suspend fun onComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) =
+            block(activeStates, transitionParams as TransitionParams<E>)
     }.also { listeners += it }
 }
 

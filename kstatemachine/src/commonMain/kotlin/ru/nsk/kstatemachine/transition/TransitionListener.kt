@@ -22,9 +22,9 @@ inline fun <reified E : Event> Transition<E>.onTriggered(
 })
 
 inline fun <reified E : Event> Transition<E>.onComplete(
-    crossinline block: suspend (TransitionParams<E>, Set<IState>) -> Unit
+    crossinline block: suspend (activeStates: Set<IState>, TransitionParams<E>) -> Unit
 ) = addListener(object : Transition.Listener {
     @Suppress("UNCHECKED_CAST")
-    override suspend fun onComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
-        block(transitionParams as TransitionParams<E>, activeStates)
+    override suspend fun onComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) =
+        block(activeStates, transitionParams as TransitionParams<E>)
 })

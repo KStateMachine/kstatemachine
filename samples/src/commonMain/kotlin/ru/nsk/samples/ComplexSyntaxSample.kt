@@ -79,7 +79,7 @@ fun main(): Unit = runBlocking {
                 }
                 // Access info from a State subclass
                 onTriggered { println("Switching state with info: ${this@yellowState.info}") }
-                onComplete { _, activeStates -> println("Transition complete: $activeStates") }
+                onComplete { activeStates, _ -> println("Transition complete: $activeStates") }
             }
         }
 
@@ -120,7 +120,7 @@ fun main(): Unit = runBlocking {
                         "on ${it.event} with argument: ${it.argument}"
             )
         }
-        onTransitionComplete { transitionParams, activeStates ->
+        onTransitionComplete { activeStates, transitionParams ->
             println("Transition from ${transitionParams.transition.sourceState}, active states: $activeStates")
         }
         onStateEntry { state, _ -> println("Entered state $state") }

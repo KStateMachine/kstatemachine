@@ -21,10 +21,10 @@ inline fun StateMachine.onTransitionTriggered(crossinline block: suspend StateMa
     })
 
 inline fun StateMachine.onTransitionComplete(
-    crossinline block: suspend StateMachine.(TransitionParams<*>, activeStates: Set<IState>) -> Unit
+    crossinline block: suspend StateMachine.(activeStates: Set<IState>, TransitionParams<*>) -> Unit
 ) = addListener(object : StateMachine.Listener {
-    override suspend fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
-        block(transitionParams, activeStates)
+    override suspend fun onTransitionComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) =
+        block(activeStates, transitionParams)
 })
 
 inline fun StateMachine.onStateEntry(

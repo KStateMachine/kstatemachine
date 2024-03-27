@@ -18,8 +18,8 @@ sealed class StateMachineNotification(val machine: StateMachine) {
     ) : StateMachineNotification(machine)
 
     class TransitionComplete(
-        val transitionParams: TransitionParams<*>,
         val activeStates: Set<IState>,
+        val transitionParams: TransitionParams<*>,
         machine: StateMachine
     ) : StateMachineNotification(machine)
 
@@ -53,8 +53,8 @@ fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<State
         override suspend fun onTransitionTriggered(transitionParams: TransitionParams<*>) =
             flow.emit(TransitionTriggered(transitionParams, machine))
 
-        override suspend fun onTransitionComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) =
-            flow.emit(TransitionComplete(transitionParams, activeStates, machine))
+        override suspend fun onTransitionComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) =
+            flow.emit(TransitionComplete(activeStates, transitionParams, machine))
 
         override suspend fun onStateEntry(state: IState, transitionParams: TransitionParams<*>) =
             flow.emit(StateEntry(state, transitionParams, machine))
@@ -76,6 +76,6 @@ fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<State
  */
 fun StateMachine.activeStatesFlow(): StateFlow<Set<IState>> {
     val flow = MutableStateFlow(activeStates())
-    onTransitionComplete { _, activeStates -> flow.emit(activeStates) }
+    onTransitionComplete { activeStates, _ -> flow.emit(activeStates) }
     return flow.asStateFlow()
 }

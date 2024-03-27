@@ -52,7 +52,7 @@ interface Transition<E : Event> : VisitorAcceptor {
         /**
          * Triggered after transition is complete and provides set of current active states
          */
-        suspend fun onComplete(transitionParams: TransitionParams<*>, activeStates: Set<IState>) = Unit
+        suspend fun onComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) = Unit
     }
 }
 

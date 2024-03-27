@@ -347,8 +347,8 @@ internal class StateMachineImpl(
         recursiveAfterTransitionComplete(transitionParams)
 
         val activeStates = activeStates()
-        transition.transitionNotify { onComplete(transitionParams, activeStates) }
-        machineNotify { onTransitionComplete(transitionParams, activeStates) }
+        transition.transitionNotify { onComplete(activeStates, transitionParams) }
+        machineNotify { onTransitionComplete(activeStates, transitionParams) }
 
         return true
     }
