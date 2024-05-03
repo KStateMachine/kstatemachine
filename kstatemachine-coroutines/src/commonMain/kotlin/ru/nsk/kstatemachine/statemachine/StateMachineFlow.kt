@@ -1,5 +1,6 @@
 package ru.nsk.kstatemachine.statemachine
 
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
 import ru.nsk.kstatemachine.state.IState
@@ -45,11 +46,21 @@ sealed class StateMachineNotification(val machine: StateMachine) {
     class Destroyed(machine: StateMachine) : StateMachineNotification(machine)
 }
 
-fun StateMachine.stateMachineNotificationFlow(replay: Int = 0): SharedFlow<StateMachineNotification> {
+fun StateMachine.stateMachineNotificationFlow(
+    replay: Int = 0,
+    extraBufferCapacity: Int = 0,
+    onBufferOverflow: BufferOverflow = BufferOverflow.SUSPEND
+): SharedFlow<StateMachineNotification> {
     val machine = this
-    val flow = MutableSharedFlow<StateMachineNotification>(replay = replay)
+    val flow = MutableSharedFlow<StateMachineNotification>(
+        replay = replay,
+        extraBufferCapacity = extraBufferCapacity,
+        onBufferOverflow
+    )
     addListener(object : StateMachine.Listener {
-        override suspend fun onStarted(transitionParams: TransitionParams<*>) = flow.emit(Started(transitionParams, machine))
+        override suspend fun onStarted(transitionParams: TransitionParams<*>) =
+            flow.emit(Started(transitionParams, machine))
+
         override suspend fun onTransitionTriggered(transitionParams: TransitionParams<*>) =
             flow.emit(TransitionTriggered(transitionParams, machine))
 

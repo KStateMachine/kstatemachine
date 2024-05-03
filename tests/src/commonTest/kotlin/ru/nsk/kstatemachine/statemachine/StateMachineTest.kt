@@ -405,5 +405,42 @@ class StateMachineTest : StringSpec({
             machine.processEvent(SwitchEvent)
             machine.hasProcessedEvents shouldBe true
         }
+
+        "processEventByAsync()" {
+            val machine = createStateMachine(this) {
+                initialState()
+                transition<SwitchEvent>()
+            }
+            val deferred = machine.processEventByAsync(SwitchEvent)
+            deferred.await() shouldBe ProcessingResult.PROCESSED
+        }
+
+        "processEventByLaunch()" {
+            val machine = createStateMachine(this) {
+                initialState()
+                transition<SwitchEvent>()
+            }
+            machine.processEventByLaunch(SwitchEvent)
+        }
+
+        "negative processEventByAsync() throws" {
+            val machine = createStdLibStateMachine {
+                initialState()
+                transition<SwitchEvent>()
+            }
+            shouldThrow<IllegalArgumentException> {
+                machine.processEventByAsync(SwitchEvent)
+            }
+        }
+
+        "negative processEventByLaunch() throws" {
+            val machine = createStdLibStateMachine {
+                initialState()
+                transition<SwitchEvent>()
+            }
+            shouldThrow<IllegalArgumentException> {
+                machine.processEventByLaunch(SwitchEvent)
+            }
+        }
     }
 })

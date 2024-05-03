@@ -36,6 +36,9 @@ suspend fun createStateMachine(
  *
  * This API requires [StateMachine]'s [CoroutineScope] so it throws if called on
  * machines created by [createStdLibStateMachine].
+ *
+ * This method is not suspendable like original [StateMachine.processEvent],
+ * so it can be called from any context easily.
  */
 fun StateMachine.processEventByLaunch(event: Event, argument: Any? = null) {
     val coroutineAbstraction = coroutineAbstraction
@@ -51,6 +54,9 @@ fun StateMachine.processEventByLaunch(event: Event, argument: Any? = null) {
  *
  * This API requires [StateMachine]'s [CoroutineScope] so it throws if called on
  * machines created by [createStdLibStateMachine].
+ *
+ * This method is not suspendable like original [StateMachine.processEvent],
+ * so it can be called from any context easily.
  */
 fun StateMachine.processEventByAsync(event: Event, argument: Any? = null): Deferred<ProcessingResult> {
     val coroutineAbstraction = coroutineAbstraction
