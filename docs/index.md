@@ -639,13 +639,43 @@ Choice state allows to select target state depending on some condition. When tra
 triggered, choice function is evaluated and machine goes to resulting state:
 
 ```kotlin
+class SomeEvent(val value: Int) : Event
+
 choiceState {
-    if (event.value > 3) State1 else State2
+    when (event) {
+        is SomeEvent -> { // cast is necessary as we don't know event type here
+            if (someEvent.value > 3) State1 else State2
+        }
+        else -> { /*...*/
+        }
+    }
 }
 ```
 
-There is also `choiceDataState()` function available for choosing between `DataState`s. You can define `dataTransition`
+There is also `choiceDataState()` function available for choosing between `DataState`s of same type. You can define `dataTransition`
 to target such pseudo data state.
+
+```kotlin
+class IntEvent(override val data: Int) : DataEvent<Int>
+
+lateinit var intState1: DataState<Int>
+lateinit var intState2: DataState<Int>
+
+createStateMachine(/*...*/) {
+    // ...
+    val choice = choiceDataState("data choice") {
+        val intEvent = event as? IntEvent // cast is necessary as we don't know event type here
+        if (intEvent?.data == 42) intState1 else intState2 // attempt of using state of other type will not compile
+    }
+    
+    // here is a major reason to use choiceDataState(), to specify it as a target of dataTransition()
+    dataTransition<IntEvent, Int> { targetState = choice }
+    
+    intState1 = dataState<Int>("intState1")
+    intState2 = dataState<Int>("intState2")
+
+}
+```
 
 You can use `choiceState` even on initial state branch.
 Note that `choiceState` can not be active, so if the library performs a transition and finds that `choiceState` is
