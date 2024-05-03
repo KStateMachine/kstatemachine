@@ -20,6 +20,8 @@
     * [Conditional transitions](#conditional-transitions)
     * [Transition targeting multiple states](#transition-targeting-multiple-states)
     * [Transition event type matching](#transition-event-type-matching)
+* [Event](#event)
+    * [Event processing](#event-processing)
 * [Undo transitions](#undo-transitions)
 * [Logging](#logging)
 * [Finishing states and state machine](#finishing-states-and-state-machine)
@@ -103,7 +105,8 @@ First we create a state machine with one of those factory functions:
 
 * `createStateMachine()` suspendable version (from `kstatemachine-coroutines` artifact)
 * `createStateMachineBlocking()` blocking version (from `kstatemachine-coroutines` artifact)
-* `createStdLibStateMachine()` - creates machine without Kotlin Coroutines support (from `kstatemachine` artifact)
+* `createStdLibStateMachine()` - creates StateMachine instance without Kotlin Coroutines support
+  (from `kstatemachine` artifact)
 
 ```kotlin
 val machine = createStateMachine(
@@ -418,6 +421,31 @@ There are two predefined event matchers:
 
 You can define your own matchers by subclassing `EventMatcher` class.
 
+## Event
+
+All events that can be processed by the library are subclassed from `Event` class.
+User defined events often contain properties that serve like data inputs for your StateMachine.
+
+Conceptually events notify a StateMachine about out world changes.
+Generally it is not recommends to confuse them with commands, see [do not section](#do-not) for details.
+
+### Event processing
+
+When a StateMachine is created configured and started it is ready to process incoming events.
+It is done with `processEvent()` functions family.
+
+* `processEvent()` - suspendable version
+* `processEventBlocking()` - blocking version. Not suspendable, uses `kotlinx.coroutines.runBlocking`
+  internally if you use StateMachine with coroutines support. Or just runs code in-place for StdLib StateMachine
+  instance.
+* `processEventByLaunch()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, uses StateMachine's
+  `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
+  Cannot be used with StdLib StateMachine instance (throws in this case).
+* `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, uses StateMachine's
+  `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
+  Returns`kotlinx.coroutines.Deffered` with `ProcessingResult`.
+  Cannot be used with StdLib StateMachine instance (throws in this case).
+
 ## Undo transitions
 
 Transitions may be undone with `StateMachine.undo()` function or alternatively by sending special `UndoEvent` to machine
@@ -652,7 +680,8 @@ choiceState {
 }
 ```
 
-There is also `choiceDataState()` function available for choosing between `DataState`s of same type. You can define `dataTransition`
+There is also `choiceDataState()` function available for choosing between `DataState`s of same type. You can
+define `dataTransition`
 to target such pseudo data state.
 
 ```kotlin
@@ -667,10 +696,10 @@ createStateMachine(/*...*/) {
         val intEvent = event as? IntEvent // cast is necessary as we don't know event type here
         if (intEvent?.data == 42) intState1 else intState2 // attempt of using state of other type will not compile
     }
-    
+
     // here is a major reason to use choiceDataState(), to specify it as a target of dataTransition()
     dataTransition<IntEvent, Int> { targetState = choice }
-    
+
     intState1 = dataState<Int>("intState1")
     intState2 = dataState<Int>("intState2")
 

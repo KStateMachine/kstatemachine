@@ -1,13 +1,12 @@
 package ru.nsk.kstatemachine.statemachine
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import ru.nsk.kstatemachine.coroutines.CoroutinesLibCoroutineAbstraction
 import ru.nsk.kstatemachine.coroutines.createStateMachine
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.ChildMode
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Suspendable analog of [createStdLibStateMachine] function, with Kotlin Coroutines support.
@@ -40,13 +39,18 @@ suspend fun createStateMachine(
  * This method is not suspendable like original [StateMachine.processEvent],
  * so it can be called from any context easily.
  */
-fun StateMachine.processEventByLaunch(event: Event, argument: Any? = null) {
+fun StateMachine.processEventByLaunch(
+    event: Event,
+    argument: Any? = null,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    coroutineStart: CoroutineStart = CoroutineStart.DEFAULT,
+) {
     val coroutineAbstraction = coroutineAbstraction
     require(coroutineAbstraction is CoroutinesLibCoroutineAbstraction) {
         "${::processEventByLaunch.name} API may be called on ${StateMachine::class.simpleName} " +
                 "created with coroutines support only"
     }
-    coroutineAbstraction.scope.launch { processEvent(event, argument) }
+    coroutineAbstraction.scope.launch(coroutineContext, coroutineStart) { processEvent(event, argument) }
 }
 
 /**
@@ -58,11 +62,16 @@ fun StateMachine.processEventByLaunch(event: Event, argument: Any? = null) {
  * This method is not suspendable like original [StateMachine.processEvent],
  * so it can be called from any context easily.
  */
-fun StateMachine.processEventByAsync(event: Event, argument: Any? = null): Deferred<ProcessingResult> {
+fun StateMachine.processEventByAsync(
+    event: Event,
+    argument: Any? = null,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
+    coroutineStart: CoroutineStart = CoroutineStart.DEFAULT,
+): Deferred<ProcessingResult> {
     val coroutineAbstraction = coroutineAbstraction
     require(coroutineAbstraction is CoroutinesLibCoroutineAbstraction) {
         "${::processEventByAsync.name} API may be called on ${StateMachine::class.simpleName} " +
                 "created with coroutines support only"
     }
-    return coroutineAbstraction.scope.async { processEvent(event, argument) }
+    return coroutineAbstraction.scope.async(coroutineContext, coroutineStart) { processEvent(event, argument) }
 }
