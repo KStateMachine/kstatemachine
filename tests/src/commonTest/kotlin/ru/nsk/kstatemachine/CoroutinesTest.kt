@@ -16,6 +16,8 @@ import ru.nsk.kstatemachine.transition.onTriggered
 import ru.nsk.kstatemachine.transition.stay
 import kotlin.coroutines.EmptyCoroutineContext
 
+
+@OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 class CoroutinesTest : StringSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
     "call suspend functions from major listeners and callbacks" {
@@ -113,7 +115,8 @@ class CoroutinesTest : StringSpec({
     }
 
     "threaded context preserving by suspend methods called from threads" {
-        val scope = CoroutineScope(newSingleThreadContext("test thread"))
+        val context = newSingleThreadContext("test thread")
+        val scope = CoroutineScope(context)
         try {
             val thread = runBlocking(scope.coroutineContext) { Thread.currentThread() }
             println(thread)
@@ -127,6 +130,7 @@ class CoroutinesTest : StringSpec({
             }
         } finally {
             scope.cancel()
+            context.close()
         }
     }
 
@@ -171,7 +175,8 @@ class CoroutinesTest : StringSpec({
 
                 withContext(machineScope.coroutineContext) {
                     // OK again as we switched context explicitly before accessing property
-                    if (machine.isRunning) { /* do something */
+                    if (machine.isRunning) {
+                        Unit// do something
                     }
                     check(Thread.currentThread() == machineThread)
                 }

@@ -10,9 +10,9 @@ object Versions {
     const val jacocoTool = "0.8.11"
 
     // compatibility
-    const val jdkVersion = 8
-    const val languageVersion = "1.5"
-    const val apiVersion = "1.5"
+    const val jdkVersion = 11
+    const val languageVersion = "1.6"
+    const val apiVersion = "1.6"
 
     // dependencies
     const val coroutinesCore = "1.8.0"
