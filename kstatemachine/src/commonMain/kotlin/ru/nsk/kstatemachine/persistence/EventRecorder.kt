@@ -59,17 +59,55 @@ data class RestorationResult(
     val results: List<RestoredEventResult>
 )
 
-fun RestorationResult.hasNoErrors(): Boolean {
-    return results.firstOrNull { it.processingResult.isFailure } == null
-}
-
 data class RestoredEventResult(
     val record: Record,
     val processingResult: Result<ProcessingResult>,
+    val warnings: List<Exception>,
 )
 
+fun interface RestorationResultValidator {
+    /**
+     * Throws if validation is not passed
+     */
+    fun validate(result: RestorationResult)
+}
+
 /**
- * Processes [RecordedEvents] with purpose of restoring [StateMachine] state as it was before.
+ * Completely skips validation
+ */
+object EmptyValidator : RestorationResultValidator {
+    override fun validate(result: RestorationResult) = Unit
+}
+
+/**
+ * Does not allow warnings or failed processing results
+ */
+object StrictValidator : RestorationResultValidator {
+    override fun validate(result: RestorationResult) {
+        result.results.forEach {
+            if (it.warnings.isNotEmpty()) {
+                throw RestorationResultValidationException(
+                    "The ${RestorationResult::class.simpleName} contains warnings",
+                    result,
+                )
+            }
+            if (it.processingResult.isFailure) {
+                throw RestorationResultValidationException(
+                    "The ${RestorationResult::class.simpleName} contains failed processing result",
+                    result,
+                )
+            }
+        }
+    }
+}
+
+class RestorationResultValidationException(
+    message: String,
+    val result: RestorationResult
+) : RuntimeException(message)
+
+/**
+ * Processes [RecordedEvents] with purpose of restoring a [StateMachine] to a state configuration as it was before.
  *
  * @param muteListeners listeners are not triggered by default,
  * as I assume that client code reactions were already processed before.
@@ -81,12 +119,18 @@ suspend fun StateMachine.restoreByRecordedEvents(
     recordedEvents: RecordedEvents,
     muteListeners: Boolean = true,
     disableStructureHashCodeCheck: Boolean = false,
+    validator: RestorationResultValidator = StrictValidator,
 ): Unit = coroutineAbstraction.withContext {
     if (isRunning) {
-        restoreRunningMachineByRecordedEvents(recordedEvents, muteListeners, disableStructureHashCodeCheck)
+        restoreRunningMachineByRecordedEvents(recordedEvents, muteListeners, disableStructureHashCodeCheck, validator)
     } else {
         onStarted {
-            restoreRunningMachineByRecordedEvents(recordedEvents, muteListeners, disableStructureHashCodeCheck)
+            restoreRunningMachineByRecordedEvents(
+                recordedEvents,
+                muteListeners,
+                disableStructureHashCodeCheck,
+                validator,
+            )
         }
     }
 }
@@ -103,6 +147,7 @@ suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
     recordedEvents: RecordedEvents,
     muteListeners: Boolean = true,
     disableStructureHashCodeCheck: Boolean = false,
+    validator: RestorationResultValidator = StrictValidator,
 ): RestorationResult = coroutineAbstraction.withContext {
     check(isRunning) {
         "$this is not running, ${::restoreRunningMachineByRecordedEvents.name}() operation only makes sense on " +
@@ -125,14 +170,20 @@ suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
     val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
     mutationSection.use {
         for (record in recordedEvents.records) {
+            val warnings = mutableListOf<Exception>()
             val (event, argument) = record.eventAndArgument
             if (event is StartEvent)
                 continue // fixme вызов start мог иметь argument что с ним делать?
             val processingResult = runCatching { processEvent(event, argument) }
-            results += RestoredEventResult(record, processingResult)
+            val actualResult = processingResult.getOrNull() // fixme может вернуться panding, надо пропускать?
+            if (actualResult != null && actualResult != record.processingResult)
+                warnings += IllegalStateException("Recorded and actual processing results does not match")
+            results += RestoredEventResult(record, processingResult, warnings)
         }
     }
-    RestorationResult(results)// fixme check processingResults are equal
+    RestorationResult(results).also {
+        validator.validate(it)
+    }
 }
 
 /**
