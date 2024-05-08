@@ -62,7 +62,7 @@ data class RestorationResult(
 data class RestoredEventResult(
     val record: Record,
     val processingResult: Result<ProcessingResult>,
-    val warnings: List<Exception>,
+    val warnings: List<RestorationWarningException>,
 )
 
 fun interface RestorationResultValidator {
@@ -87,14 +87,14 @@ object StrictValidator : RestorationResultValidator {
         result.results.forEach {
             if (it.warnings.isNotEmpty()) {
                 throw RestorationResultValidationException(
-                    "The ${RestorationResult::class.simpleName} contains warnings",
                     result,
+                    "The ${RestorationResult::class.simpleName} contains warnings",
                 )
             }
             if (it.processingResult.isFailure) {
                 throw RestorationResultValidationException(
-                    "The ${RestorationResult::class.simpleName} contains failed processing result",
                     result,
+                    "The ${RestorationResult::class.simpleName} contains failed processing result",
                 )
             }
         }
@@ -102,9 +102,21 @@ object StrictValidator : RestorationResultValidator {
 }
 
 class RestorationResultValidationException(
+    val result: RestorationResult,
     message: String,
-    val result: RestorationResult
-) : RuntimeException(message)
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)
+
+enum class WarningType {
+    ProcessingResultNotMatch,
+    PendingEventMightBeIgnored,
+}
+
+class RestorationWarningException(
+    val warningType: WarningType,
+    message: String,
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)
 
 /**
  * Processes [RecordedEvents] with purpose of restoring a [StateMachine] to a state configuration as it was before.
@@ -170,14 +182,29 @@ suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
     val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
     mutationSection.use {
         for (record in recordedEvents.records) {
-            val warnings = mutableListOf<Exception>()
+            val warnings = mutableListOf<RestorationWarningException>()
             val (event, argument) = record.eventAndArgument
             if (event is StartEvent)
                 continue // fixme вызов start мог иметь argument что с ним делать?
             val processingResult = runCatching { processEvent(event, argument) }
-            val actualResult = processingResult.getOrNull() // fixme может вернуться panding, надо пропускать?
-            if (actualResult != null && actualResult != record.processingResult)
-                warnings += IllegalStateException("Recorded and actual processing results does not match")
+            val actualResult = processingResult.getOrNull()
+            if (actualResult != null && actualResult != record.processingResult) {
+                if (actualResult == ProcessingResult.PENDING) {
+                    if (pendingEventHandler !is QueuePendingEventHandler)
+                        warnings += RestorationWarningException(
+                            WarningType.PendingEventMightBeIgnored,
+                            "Actual result is ${ProcessingResult.PENDING}, " +
+                                    "but the ${StateMachine::class.simpleName} is NOT configured " +
+                                    "with ${QueuePendingEventHandler::class::simpleName}, which potentially means that " +
+                                    "the event {${record.eventAndArgument.event}} might be silently ignored",
+                        )
+                } else {
+                    warnings += RestorationWarningException(
+                        WarningType.ProcessingResultNotMatch,
+                        "Recorded (${record.processingResult}) and actual ($actualResult) processing results does not match",
+                    )
+                }
+            }
             results += RestoredEventResult(record, processingResult, warnings)
         }
     }

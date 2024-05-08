@@ -178,6 +178,7 @@ interface StateMachine : State {
         val requireNonBlankNames: Boolean = false,
         /**
          * If set, enables incoming events recording in order to restore [StateMachine] later.
+         * By default, event recording is disabled.
          * Use [StateMachine.eventRecorder] to access the recording result.
          */
         val eventRecordingArguments: EventRecordingArguments? = null

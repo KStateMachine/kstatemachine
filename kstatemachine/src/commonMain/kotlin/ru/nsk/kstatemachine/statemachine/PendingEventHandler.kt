@@ -24,7 +24,11 @@ interface QueuePendingEventHandler : StateMachine.PendingEventHandler {
 private class QueuePendingEventHandlerImpl(private val machine: StateMachine) : QueuePendingEventHandler {
     private val queue = ArrayDeque<EventAndArgument<*>>()
 
-    override suspend fun checkEmpty() = check(queue.isEmpty()) { "Event queue is not empty, internal error" }
+    override suspend fun checkEmpty() = check(queue.isEmpty()) {
+        "Event queue is not empty, internal error (should never happen). " +
+                "Double check that you don't break multi-threading usage rules, if you see this error. " +
+                "Usually it is related to concurrent collection modification."
+    }
 
     override suspend fun onPendingEvent(eventAndArgument: EventAndArgument<*>) {
         machine.log {
