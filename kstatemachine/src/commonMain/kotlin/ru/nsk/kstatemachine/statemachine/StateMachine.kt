@@ -3,10 +3,9 @@ package ru.nsk.kstatemachine.statemachine
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.coroutines.StdLibCoroutineAbstraction
 import ru.nsk.kstatemachine.coroutines.createStateMachine
+import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.event.DestroyEvent
-import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StopEvent
-import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.persistence.EventRecorder
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.state.IState
@@ -47,7 +46,7 @@ interface StateMachine : State {
     val isRunning: Boolean
 
     /**
-     * Indicates that machine is started and has clear initial state (has not processed any events yet)
+     * Indicates that machine is started and has clear initial state (has not processed any events but [StartEvent] yet)
      */
     val hasProcessedEvents: Boolean
 

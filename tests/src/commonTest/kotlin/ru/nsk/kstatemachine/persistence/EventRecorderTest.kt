@@ -1,6 +1,5 @@
 package ru.nsk.kstatemachine.persistence
 
-import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
@@ -118,7 +117,7 @@ class EventRecorderTest : StringSpec({
             recordedEvents.records shouldHaveSize 3 // DestroyEvent
         }
 
-        "check recorded events on restart without ${EventRecordingArguments::clearRecordsOnMachineRestart::name} flag" {
+        "check recorded events on restart without ${EventRecordingArguments::clearRecordsOnMachineRestart.name} flag" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 creationArguments = CreationArguments(
@@ -145,7 +144,7 @@ class EventRecorderTest : StringSpec({
             recordedEvents.records shouldHaveSize 5
         }
 
-        "check recorded events on restart with ${EventRecordingArguments::clearRecordsOnMachineRestart::name} flag (default)" {
+        "check recorded events on restart with ${EventRecordingArguments::clearRecordsOnMachineRestart.name} flag (default)" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
@@ -167,7 +166,7 @@ class EventRecorderTest : StringSpec({
             recordedEvents.records shouldHaveSize 2
         }
 
-        "check recorded events with ${EventRecordingArguments::skipIgnoredEvents::name} flag (default)" {
+        "check recorded events with ${EventRecordingArguments::skipIgnoredEvents.name} flag (default)" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
@@ -182,7 +181,7 @@ class EventRecorderTest : StringSpec({
             recordedEvents.records shouldHaveSize 1
         }
 
-        "check recorded events without ${EventRecordingArguments::skipIgnoredEvents::name} flag" {
+        "check recorded events without ${EventRecordingArguments::skipIgnoredEvents.name} flag" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 creationArguments = CreationArguments(

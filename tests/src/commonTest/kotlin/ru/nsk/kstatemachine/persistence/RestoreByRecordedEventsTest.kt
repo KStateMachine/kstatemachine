@@ -6,6 +6,7 @@ import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.mpp.start
 import io.mockk.called
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -13,32 +14,12 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.StateMachine.*
 import ru.nsk.kstatemachine.statemachine.destroy
+import ru.nsk.kstatemachine.statemachine.stop
+import ru.nsk.kstatemachine.statemachine.undo
 
 class RestoreByRecordedEventsTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "negative check ${StateMachine::restoreRunningMachineByRecordedEvents.name} on not running machine throws" {
-            val recordedEvents = RecordedEvents(0, emptyList())
-
-            val machine = createTestStateMachine(coroutineStarterType, start = false) {
-                initialState()
-                shouldThrowWithMessage<IllegalStateException>(
-                    "$machine is not running, ${StateMachine::restoreRunningMachineByRecordedEvents.name}() " +
-                            "operation only makes sense on created and started ${StateMachine::class.simpleName}, " +
-                            "please call it after the machine is started"
-                ) { restoreRunningMachineByRecordedEvents(recordedEvents) }
-            }
-            val message = "$machine is not running, ${StateMachine::restoreRunningMachineByRecordedEvents.name}() " +
-                    "operation only makes sense on created and started ${StateMachine::class.simpleName}, " +
-                    "please call it after the machine is started"
-            shouldThrowWithMessage<IllegalStateException>(message) {
-                machine.restoreRunningMachineByRecordedEvents(recordedEvents)
-            }
-            shouldThrowWithMessage<IllegalStateException>(message) {
-                machine.restoreRunningMachineByRecordedEventsBlocking(recordedEvents)
-            }
-        }
-
-        "negative check ${StateMachine::restoreRunningMachineByRecordedEvents.name} on destroyed machine throws" {
+        "negative check ${StateMachine::restoreByRecordedEvents.name} on destroyed machine throws" {
             val recordedEvents = RecordedEvents(0, emptyList())
 
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -47,11 +28,11 @@ class RestoreByRecordedEventsTest : StringSpec({
             machine.destroy(stop = false)
 
             shouldThrowWithMessage<IllegalStateException>("$machine is already destroyed") {
-                machine.restoreRunningMachineByRecordedEvents(recordedEvents)
+                machine.restoreByRecordedEvents(recordedEvents)
             }
         }
 
-        "negative check ${StateMachine::restoreRunningMachineByRecordedEvents.name} on machine that already processed events throws" {
+        "negative check ${StateMachine::restoreByRecordedEvents.name} on machine that already processed events throws" {
             val recordedEvents = RecordedEvents(0, emptyList())
 
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -61,10 +42,10 @@ class RestoreByRecordedEventsTest : StringSpec({
             machine.processEvent(SwitchEvent)
 
             shouldThrowWithMessage<IllegalStateException>(
-                "$machine has already processed events, ${StateMachine::restoreRunningMachineByRecordedEvents.name}() " +
-                        "operation only makes sense on initially clear ${StateMachine::class.simpleName}, please call it before " +
-                        "processing any other events"
-            ) { machine.restoreRunningMachineByRecordedEvents(recordedEvents) }
+                "$machine has already processed events, ${StateMachine::restoreByRecordedEvents.name}() operation only makes " +
+                        "sense on initially clear ${StateMachine::class.simpleName}, please call it before " +
+                        "processing any other events (or even before start - optionally)"
+            ) { machine.restoreByRecordedEvents(recordedEvents) }
         }
 
         "check event restoration on different machines without structure check" {
@@ -96,7 +77,10 @@ class RestoreByRecordedEventsTest : StringSpec({
             val machine2 = createTestStateMachine(coroutineStarterType) {
                 initialState()
             }
-            shouldThrow<IllegalStateException> {
+            shouldThrowWithMessage<IllegalStateException>(
+                "$machine2 structure seems to be different from recorded original one, you can disable this " +
+                        "error by the disableStructureHashCodeCheck argument if you are sure that it is correct"
+            ) {
                 machine2.restoreByRecordedEventsBlocking(recordedEvents)
             }
         }
@@ -175,89 +159,142 @@ class RestoreByRecordedEventsTest : StringSpec({
             }
         }
 
-        "restore the machine that is not running yet (processes all events as pending)" {
+        "restore the machine that is using Undo feature" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = CreationArguments(
+                    isUndoEnabled = true,
+                    eventRecordingArguments = EventRecordingArguments()
+                )
             ) {
-                initialState()
-                val state = state()
-                transition<SwitchEvent>(targetState = state)
+                initialState("first")
+                val secondState = state("second")
+                transition<SwitchEvent>(targetState = secondState)
             }
             machine1.processEvent(SwitchEvent)
+            machine1.undo()
             val recordedEvents = machine1.eventRecorder.getRecordedEvents()
 
-            lateinit var state: State
+            lateinit var firstState: State
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                start = false,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = CreationArguments(
+                    isUndoEnabled = true,
+                    eventRecordingArguments = EventRecordingArguments()
+                )
             ) {
-                initialState()
-                state = state()
-                transition<SwitchEvent>(targetState = state)
+                firstState = initialState("first")
+                val secondState = state("second")
+                transition<SwitchEvent>(targetState = secondState)
             }
-            machine2.restoreByRecordedEvents(recordedEvents, muteListeners = false)
-            machine2.start()
-            machine2.activeStates().shouldContainExactly(state)
+            machine2.restoreByRecordedEvents(recordedEvents)
+            machine2.activeStates().shouldContainExactly(firstState)
         }
 
-        "restore the machine that is not running yet with non queued PendingEventHandler (processes all events as pending)" {
+        "negative restore the machine started with argument" {
             val machine1 = createTestStateMachine(
-                coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
-            ) {
-                pendingEventHandler = PendingEventHandler {}
-                initialState()
-                val state = state()
-                transition<SwitchEvent>(targetState = state)
-            }
-            machine1.processEvent(SwitchEvent)
-            val recordedEvents = machine1.eventRecorder.getRecordedEvents()
-
-            lateinit var state: State
-            val machine2 = createTestStateMachine(
                 coroutineStarterType,
                 start = false,
                 creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
             ) {
-                pendingEventHandler = PendingEventHandler {}
-                initialState()
-                state = state()
-                transition<SwitchEvent>(targetState = state)
+                val firstState = state("first")
+                val secondState = state("second")
+                initialChoiceState {
+                    if (argument == 42) firstState else secondState
+                }
             }
-            machine2.restoreByRecordedEvents(recordedEvents, muteListeners = false)
-            val exception = shouldThrow<RestorationResultValidationException> {
-                machine2.start()
+            machine1.start(42)
+            machine1.processEvent(SwitchEvent)
+            val recordedEvents = machine1.eventRecorder.getRecordedEvents()
+
+            lateinit var firstState: State
+            val machine2 = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+            ) {
+                firstState = state("first")
+                val secondState = state("second")
+                initialChoiceState {
+                    if (argument == 42) firstState else secondState
+                }
             }
-            exception.result.results.single().warnings.single().warningType shouldBe WarningType.PendingEventMightBeIgnored
+            shouldThrowWithMessage<IllegalStateException>(
+                "The ${StateMachine::class.simpleName} is already started, but " +
+                        "the ${RecordedEvents::class.simpleName} contains an argument for " +
+                        "${StateMachine::start.name} method. " +
+                        "To restore such machine, " +
+                        "do not start it before calling ${StateMachine::restoreByRecordedEvents.name}"
+            ) { machine2.restoreByRecordedEvents(recordedEvents) }
+            machine2.isRunning shouldBe true
+            machine2.isDestroyed shouldBe false
         }
 
-        "restore the machine that is not running yet with default QueuedPendingEventHandler (processes all events as pending)" {
+        "restore the machine started with argument" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
-            ) {
-                initialState()
-                val state = state()
-                transition<SwitchEvent>(targetState = state)
-            }
-            machine1.processEvent(SwitchEvent)
-            val recordedEvents = machine1.eventRecorder.getRecordedEvents()
-
-            lateinit var state: State
-            val machine2 = createTestStateMachine(
-                coroutineStarterType,
+                name = "machine1",
                 start = false,
                 creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
             ) {
-                initialState()
-                state = state()
-                transition<SwitchEvent>(targetState = state)
+                val firstState = state("first1")
+                val secondState = state("second1")
+                initialChoiceState {
+                    if (argument == 42) firstState else secondState
+                }
             }
-            machine2.restoreByRecordedEvents(recordedEvents, muteListeners = false)
-            machine2.start()
-            machine2.activeStates().shouldContainExactly(state)
+            machine1.start(42)
+            machine1.processEvent(SwitchEvent)
+            val recordedEvents = machine1.eventRecorder.getRecordedEvents()
+
+            lateinit var firstState: State
+            val machine2 = createTestStateMachine(
+                coroutineStarterType,
+                name = "machine2",
+                start = false,
+                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+            ) {
+                firstState = state("first2")
+                val secondState = state("second2")
+                initialChoiceState {
+                    if (argument == 42) firstState else secondState
+                }
+            }
+            machine2.restoreByRecordedEvents(recordedEvents, disableStructureHashCodeCheck = true)
+            machine2.activeStates().shouldContainExactly(firstState)
+        }
+
+        "restore the machine with multiple starts" {
+            lateinit var secondState: State
+            val machine1 = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(
+                    eventRecordingArguments = EventRecordingArguments(clearRecordsOnMachineRestart = false)
+                )
+            ) {
+                val firstState = state("first")
+                secondState = state("second")
+                initialChoiceState {
+                    if (argument != 42) firstState else secondState
+                }
+            }
+            machine1.stop()
+            machine1.start(42)
+            machine1.activeStates().shouldContainExactly(secondState)
+            val recordedEvents = machine1.eventRecorder.getRecordedEvents()
+
+            val machine2 = createTestStateMachine(
+                coroutineStarterType,
+                creationArguments = CreationArguments(
+                    eventRecordingArguments = EventRecordingArguments(clearRecordsOnMachineRestart = false)
+                )
+            ) {
+                val firstState = state("first")
+                secondState = state("second")
+                initialChoiceState {
+                    if (argument != 42) firstState else secondState
+                }
+            }
+            machine2.restoreByRecordedEvents(recordedEvents)
         }
     }
 })

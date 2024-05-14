@@ -174,9 +174,12 @@ internal class StateMachineImpl(
     }
 
     override suspend fun processEvent(event: Event, argument: Any?): ProcessingResult {
+        check(event !is StartEvent) {
+            "Incorrect ${StartEvent::class.simpleName} usage. Use ${::start.name}() method instead"
+        }
         return coroutineAbstraction.withContext {
             checkNotDestroyed()
-            check(isRunning || event is DestroyEvent) { "$this is not started, call start() first" }
+            check(isRunning || event is DestroyEvent) { "$this is not started, call ${::start.name}() first" }
 
             val eventAndArgument = EventAndArgument(event, argument)
 

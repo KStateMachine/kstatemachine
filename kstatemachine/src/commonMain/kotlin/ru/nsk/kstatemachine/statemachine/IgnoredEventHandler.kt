@@ -8,7 +8,7 @@ fun StateMachine.throwingIgnoredEventHandler(): StateMachine.IgnoredEventHandler
     return StateMachine.IgnoredEventHandler {
         error(
             "${this@throwingIgnoredEventHandler} received ${it.event} that is going to be ignored. " +
-                    "The machine was configured with ${StateMachine::throwingIgnoredEventHandler::name}, " +
+                    "The machine was configured with ${StateMachine::throwingIgnoredEventHandler.name}, " +
                     "that forbids such behaviour."
         )
     }

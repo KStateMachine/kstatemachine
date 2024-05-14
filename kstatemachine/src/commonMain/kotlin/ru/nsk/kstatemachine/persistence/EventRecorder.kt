@@ -42,7 +42,7 @@ internal class EventRecorderImpl(
     fun onProcessEvent(eventAndArgument: EventAndArgument<*>, processingResult: ProcessingResult) {
         val lastEvent = records.lastOrNull()?.eventAndArgument?.event
         check(lastEvent !is DestroyEvent) {
-            "Internal error, ${::onProcessEvent::name} called after " +
+            "Internal error, ${::onProcessEvent.name} called after " +
                     "${DestroyEvent::class.simpleName} processing, which is considered as last possible event"
         }
         if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
@@ -89,12 +89,14 @@ object StrictValidator : RestorationResultValidator {
                 throw RestorationResultValidationException(
                     result,
                     "The ${RestorationResult::class.simpleName} contains warnings",
+                    it.warnings.first(),
                 )
             }
             if (it.processingResult.isFailure) {
                 throw RestorationResultValidationException(
                     result,
                     "The ${RestorationResult::class.simpleName} contains failed processing result",
+                    it.processingResult.exceptionOrNull(),
                 )
             }
         }
@@ -120,9 +122,15 @@ class RestorationWarningException(
 
 /**
  * Processes [RecordedEvents] with purpose of restoring a [StateMachine] to a state configuration as it was before.
+ * Starts the [StateMachine] if necessary and returns [RestorationResult] allowing to inspect
+ * how the restoration was processed.
+ *
+ * There is no way on library side to decide if some exceptions during event processing are errors or not.
+ * For instance [StateMachine] may be configured with [throwingIgnoredEventHandler] so some exceptions might
+ * be expected and are not really errors.
  *
  * @param muteListeners listeners are not triggered by default,
- * as I assume that client code reactions were already processed before.
+ * as we assume that client code reactions were already processed before.
  * @param disableStructureHashCodeCheck allows to skip the machine structure check
  * to force processing of [RecordedEvents]. Note that running the same event sequence on similar machines but having
  * different structureHashCode value, may produce different results more likely.
@@ -132,97 +140,75 @@ suspend fun StateMachine.restoreByRecordedEvents(
     muteListeners: Boolean = true,
     disableStructureHashCodeCheck: Boolean = false,
     validator: RestorationResultValidator = StrictValidator,
-): Unit = coroutineAbstraction.withContext {
-    if (isRunning) {
-        restoreRunningMachineByRecordedEvents(recordedEvents, muteListeners, disableStructureHashCodeCheck, validator)
-    } else {
-        onStarted {
-            restoreRunningMachineByRecordedEvents(
-                recordedEvents,
-                muteListeners,
-                disableStructureHashCodeCheck,
-                validator,
-            )
-        }
-    }
-}
-
-/**
- * May be called on started ([StateMachine.isRunning] == true) [StateMachine] only,
- * and returns [RestorationResult] allowing to inspect how the restoration was processed.
- *
- * There is no way on library side to decide if some exceptions during event processing are errors or not.
- * For instance [StateMachine] may be configured with [throwingIgnoredEventHandler] so some exceptions might
- * be expected and are not really errors.
- */
-suspend fun StateMachine.restoreRunningMachineByRecordedEvents(
-    recordedEvents: RecordedEvents,
-    muteListeners: Boolean = true,
-    disableStructureHashCodeCheck: Boolean = false,
-    validator: RestorationResultValidator = StrictValidator,
 ): RestorationResult = coroutineAbstraction.withContext {
-    check(isRunning) {
-        "$this is not running, ${::restoreRunningMachineByRecordedEvents.name}() operation only makes sense on " +
-                "created and started ${StateMachine::class.simpleName}, please call it after the machine is started"
-    }
     checkNotDestroyed()
-    check(!hasProcessedEvents) {
-        "$this has already processed events, ${::restoreRunningMachineByRecordedEvents.name}() operation only makes " +
-                "sense on initially clear ${StateMachine::class.simpleName}, please call it before " +
-                "processing any other events"
+    if (isRunning) {
+        check(!hasProcessedEvents) {
+            "$this has already processed events, ${::restoreByRecordedEvents.name}() operation only makes " +
+                    "sense on initially clear ${StateMachine::class.simpleName}, please call it before " +
+                    "processing any other events (or even before start - optionally)"
+        }
     }
 
     if (!disableStructureHashCodeCheck)
         check(structureHashCode == recordedEvents.structureHashCode) {
-            "$this structure seems to be different from recorded original one"
+            "$this structure seems to be different from recorded original one, you can disable this error by the " +
+                    "disableStructureHashCodeCheck argument if you are sure that it is correct"
         }
 
     this as InternalStateMachine
     val results = mutableListOf<RestoredEventResult>()
     val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
     mutationSection.use {
-        for (record in recordedEvents.records) {
+        recordedEvents.records.forEachIndexed iteration@{ index, record ->
             val warnings = mutableListOf<RestorationWarningException>()
             val (event, argument) = record.eventAndArgument
-            if (event is StartEvent)
-                continue // fixme вызов start мог иметь argument что с ним делать?
-            val processingResult = runCatching { processEvent(event, argument) }
-            val actualResult = processingResult.getOrNull()
-            if (actualResult != null && actualResult != record.processingResult) {
-                if (actualResult == ProcessingResult.PENDING) {
-                    if (pendingEventHandler !is QueuePendingEventHandler)
-                        warnings += RestorationWarningException(
-                            WarningType.PendingEventMightBeIgnored,
-                            "Actual result is ${ProcessingResult.PENDING}, " +
-                                    "but the ${StateMachine::class.simpleName} is NOT configured " +
-                                    "with ${QueuePendingEventHandler::class::simpleName}, which potentially means that " +
-                                    "the event {${record.eventAndArgument.event}} might be silently ignored",
-                        )
+            if (event is StartEvent) {
+                if (isRunning) {
+                    if (argument == null) {
+                        return@iteration // continue
+                    } else {
+                        if (index == 0)
+                            error(
+                                "The ${StateMachine::class.simpleName} is already started, but " +
+                                        "the ${RecordedEvents::class.simpleName} contains an argument for " +
+                                        "${StateMachine::start.name} method. " +
+                                        "To restore such machine, " +
+                                        "do not start it before calling ${::restoreByRecordedEvents.name}"
+                            )
+                        else
+                            error("The machine should not be running here. Internal error. Never get here")
+                    }
                 } else {
-                    warnings += RestorationWarningException(
-                        WarningType.ProcessingResultNotMatch,
-                        "Recorded (${record.processingResult}) and actual ($actualResult) processing results does not match",
-                    )
+                    start(argument)
+                    // fixme add RestoredEventResult?
                 }
+            } else {
+                val processingResult = runCatching { processEvent(event, argument) }
+                val actualResult = processingResult.getOrNull()
+                if (actualResult != null && actualResult != record.processingResult) {
+                    if (actualResult == ProcessingResult.PENDING) {
+                        if (pendingEventHandler !is QueuePendingEventHandler)
+                            warnings += RestorationWarningException(
+                                WarningType.PendingEventMightBeIgnored,
+                                "Actual result is ${ProcessingResult.PENDING}, " +
+                                        "but the ${StateMachine::class.simpleName} is NOT configured " +
+                                        "with ${QueuePendingEventHandler::class::simpleName}, which potentially means that " +
+                                        "the event {${record.eventAndArgument.event}} might be silently ignored",
+                            )
+                    } else {
+                        warnings += RestorationWarningException(
+                            WarningType.ProcessingResultNotMatch,
+                            "Recorded (${record.processingResult}) and actual ($actualResult) processing results does not match",
+                        )
+                    }
+                }
+                results += RestoredEventResult(record, processingResult, warnings)
             }
-            results += RestoredEventResult(record, processingResult, warnings)
         }
     }
     RestorationResult(results).also {
         validator.validate(it)
-    }
-}
-
-/**
- * Blocking [restoreRunningMachineByRecordedEvents] alternative
- */
-fun StateMachine.restoreRunningMachineByRecordedEventsBlocking(
-    recordedEvents: RecordedEvents,
-    muteListeners: Boolean = true,
-    disableStructureHashCodeCheck: Boolean = false,
-): RestorationResult {
-    return coroutineAbstraction.runBlocking {
-        restoreRunningMachineByRecordedEvents(recordedEvents, muteListeners, disableStructureHashCodeCheck)
     }
 }
 
