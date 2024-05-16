@@ -5,6 +5,7 @@ import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.EventRecordingArguments
+import ru.nsk.kstatemachine.statemachine.StateMachine.PendingEventHandler
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -56,7 +57,8 @@ internal class EventRecorderImpl(
 }
 
 data class RestorationResult(
-    val results: List<RestoredEventResult>
+    val results: List<RestoredEventResult>,
+    val warnings: List<RestorationWarningException>,
 )
 
 data class RestoredEventResult(
@@ -69,21 +71,27 @@ fun interface RestorationResultValidator {
     /**
      * Throws if validation is not passed
      */
-    fun validate(result: RestorationResult)
+    fun validate(result: RestorationResult, recordedEvents: RecordedEvents, machine: StateMachine)
 }
 
 /**
  * Completely skips validation
  */
 object EmptyValidator : RestorationResultValidator {
-    override fun validate(result: RestorationResult) = Unit
+    override fun validate(result: RestorationResult, recordedEvents: RecordedEvents, machine: StateMachine) = Unit
 }
 
 /**
  * Does not allow warnings or failed processing results
  */
 object StrictValidator : RestorationResultValidator {
-    override fun validate(result: RestorationResult) {
+    override fun validate(result: RestorationResult, recordedEvents: RecordedEvents, machine: StateMachine) {
+        if (result.warnings.isNotEmpty())
+            throw RestorationResultValidationException(
+                result,
+                "The ${RestorationResult::class.simpleName} contains warnings",
+                result.warnings.first(),
+            )
         result.results.forEach {
             if (it.warnings.isNotEmpty()) {
                 throw RestorationResultValidationException(
@@ -91,8 +99,7 @@ object StrictValidator : RestorationResultValidator {
                     "The ${RestorationResult::class.simpleName} contains warnings",
                     it.warnings.first(),
                 )
-            }
-            if (it.processingResult.isFailure) {
+            } else if (it.processingResult.isFailure) {
                 throw RestorationResultValidationException(
                     result,
                     "The ${RestorationResult::class.simpleName} contains failed processing result",
@@ -111,7 +118,7 @@ class RestorationResultValidationException(
 
 enum class WarningType {
     ProcessingResultNotMatch,
-    PendingEventMightBeIgnored,
+    RecordedAndProcessedEventCountNotMatch,
 }
 
 class RestorationWarningException(
@@ -158,6 +165,7 @@ suspend fun StateMachine.restoreByRecordedEvents(
 
     this as InternalStateMachine
     val results = mutableListOf<RestoredEventResult>()
+    val commonWarnings = mutableListOf<RestorationWarningException>()
     val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
     mutationSection.use {
         recordedEvents.records.forEachIndexed iteration@{ index, record ->
@@ -166,6 +174,7 @@ suspend fun StateMachine.restoreByRecordedEvents(
             if (event is StartEvent) {
                 if (isRunning) {
                     if (argument == null) {
+                        results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
                         return@iteration // continue
                     } else {
                         if (index == 0)
@@ -176,39 +185,36 @@ suspend fun StateMachine.restoreByRecordedEvents(
                                         "To restore such machine, " +
                                         "do not start it before calling ${::restoreByRecordedEvents.name}"
                             )
-                        else
+                        else {
+                            destroy()
                             error("The machine should not be running here. Internal error. Never get here")
+                        }
                     }
                 } else {
                     start(argument)
-                    // fixme add RestoredEventResult?
+                    results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
                 }
             } else {
                 val processingResult = runCatching { processEvent(event, argument) }
                 val actualResult = processingResult.getOrNull()
                 if (actualResult != null && actualResult != record.processingResult) {
-                    if (actualResult == ProcessingResult.PENDING) {
-                        if (pendingEventHandler !is QueuePendingEventHandler)
-                            warnings += RestorationWarningException(
-                                WarningType.PendingEventMightBeIgnored,
-                                "Actual result is ${ProcessingResult.PENDING}, " +
-                                        "but the ${StateMachine::class.simpleName} is NOT configured " +
-                                        "with ${QueuePendingEventHandler::class::simpleName}, which potentially means that " +
-                                        "the event {${record.eventAndArgument.event}} might be silently ignored",
-                            )
-                    } else {
-                        warnings += RestorationWarningException(
-                            WarningType.ProcessingResultNotMatch,
-                            "Recorded (${record.processingResult}) and actual ($actualResult) processing results does not match",
-                        )
-                    }
+                    warnings += RestorationWarningException(
+                        WarningType.ProcessingResultNotMatch,
+                        "Recorded (${record.processingResult}) and actual ($actualResult) processing results does not match",
+                    )
                 }
                 results += RestoredEventResult(record, processingResult, warnings)
             }
         }
     }
-    RestorationResult(results).also {
-        validator.validate(it)
+    if (results.size != recordedEvents.records.size)
+        commonWarnings += RestorationWarningException(
+            WarningType.RecordedAndProcessedEventCountNotMatch,
+            "Recorded event count is ${recordedEvents.records.size} but the actual processed event count is " +
+                    "${results.size}. They should not differ, this should never happen",
+        )
+    RestorationResult(results, commonWarnings).also {
+        validator.validate(it, recordedEvents, this)
     }
 }
 
