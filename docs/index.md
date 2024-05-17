@@ -56,6 +56,7 @@
     * [Controlling export output](#controlling-export-output)
 * [Persistence](#persistence)
     * [Event recording](#event-recording)
+    * [Restoring StateMachine](#restoring-statemachine)
 * [Testing](#testing)
 * [Multiplatform](#multiplatform)
 * [Consider using Kotlin sealed classes](#consider-using-kotlin-sealed-classes)
@@ -938,7 +939,7 @@ that `volatile` keyword provides on `jvm`.
 
 Suspendable functions and their `Blocking` analogs internally switch current execution `СoroutineСontext`
 (from which they are called) to state machines one, using `kotlinx.coroutines.withContext` or
-`kotlinx.coroutines.runBlocking` arguments respectively.
+`kotlinx.coroutines.runBlocking` functions respectively.
 This is `CoroutineContext` preservation guarantee that the library provides.
 Note that if you created machine with the scope containing `kotlinx.coroutines.EmptyCoroutineContext` switching will not
 be performed. So if the StateMachine is created with correct (meeting above conditions) scope it is safe to call
@@ -1089,11 +1090,11 @@ See [PlantUML with MetaInfo export sample](https://github.com/nsk90/kstatemachin
 
 ## Persistence
 
-**Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
-JSON text, and possibly saving it into some persistent storage like file or sending by network.
-**Restoration** is a process of restoring the `StateMachine` from the serializable representation.
+* **Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
+  JSON text, and possibly saving it into some persistent storage like file or sending by network.
+* **Restoration** - is a process of restoring the `StateMachine` from the serializable representation.
 
-There are several kinds or levels of  `StateMachine` persistence (serialization). Let's look at sample use cases:
+There are several kinds or levels of `StateMachine` persistence (serialization). Let's look at sample use cases:
 
 1) **Structure + configuration** - Create `StateMachine` on some process/host and send its structure and
    active configuration by network to another process/host.
@@ -1113,7 +1114,44 @@ Case 2 in turn may be reached in two different ways:
 
 ### Event recording
 
-WIP
+The library supports event recording out of the box. To enable it you should use `EventRecordingArguments` in
+`CreationArguments` when creating a machine instance by `createStateMachine()` functions family. The recording process
+can be configured with `EventRecordingArguments` properties.
+
+```kotlin
+val machine = createStateMachine(
+    creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+) {
+    // ...
+}
+```
+
+When the machine had processed necessary events, and you want to save its state configuration, first you have to 
+get the recorded events:
+
+```kotlin
+val recordedEvents = machine.eventRecorder.getRecordedEvents()
+```
+
+`RecordedEvents` object now is ready to be serialized. Currently, the library does not provide an implementation 
+of serialization process, so it is up to user to write serialization code. The serialization support is planned 
+using `kotlinx.serialization` library in further `KStateMachine` versions.
+
+### Restoring StateMachine
+
+When a user wants to restore the StateMachine, he deserializes `RecordedEvents` object and
+creates StateMachine instance having exactly the same structure as original one. 
+Typically, both instances are created by the same code.
+
+Calling `restoreByRecordedEvents()` or its blocking analog `restoreByRecordedEventsBlocking()` will process
+recorded events over just created StateMachine instance.
+
+```kotlin
+machine.restoreByRecordedEvents(recordedEvents)
+```
+
+`restoreByRecordedEvents()` method will start the machine if necessary.
+You can configure restoration process by `restoreByRecordedEvents()` arguments.
 
 ## Testing
 
