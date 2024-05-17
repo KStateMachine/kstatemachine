@@ -1272,6 +1272,12 @@ dependencies {
 
     implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
+    // or JS
+    implementation("io.github.nsk90:kstatemachine-js:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-js:<Tag>")
+    // or WebAssembly (Wasm)
+    implementation("io.github.nsk90:kstatemachine-wasm-js:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-wasm-js:<Tag>")
 }
 ```
 
