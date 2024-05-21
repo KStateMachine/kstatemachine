@@ -1,3 +1,14 @@
-remote_theme: pages-themes/cayman@v0.2.0
-plugins:
-  - jekyll-remote-theme # add this line to the plugins list if you already have one
+title: KStateMachine
+description: KStateMachine is a Kotlin DSL library for creating state machines and statecharts.
+url: https://kstatemachine.github.io/kstatemachine/
+
+aux_links:
+  KStateMachine on GitHub: https://github.com/KStateMachine/kstatemachine
+
+theme: just-the-docs
+color_scheme: dark
+
+mermaid:
+  # Version of mermaid library
+  # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
+  version: "10.9.1"
