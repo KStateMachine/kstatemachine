@@ -20,5 +20,5 @@ This mechanism is extendable and users may add their own `MetaInfo` sub interfac
 Currently, the only standard implementation is `UmlMetaInfo` which is useful for export feature.
 See [controlling export output](https://kstatemachine.github.io/kstatemachine/pages/export.html#controlling-export-output).
 
-> [!NOTE]
-> `MetaInfo` considered to be immutable data by design
+{: .note }
+`MetaInfo` considered to be immutable data by design

@@ -72,8 +72,8 @@ greenState {
 }
 ```
 
-> [!NOTE]
-> Such transitions are also called internal or self-targeted.
+{: .note }
+Such transitions are also called internal or self-targeted.
 
 ## Transition type
 
@@ -267,9 +267,9 @@ state("first") {
 }
 ```
 
-> [!NOTE]
-> It is up to user to control that argument field is set from one listener. You can use some mutable data structure
-> and fill it from multiple listeners.
+{: .note }
+It is up to user to control that argument field is set from one listener. You can use some mutable data structure
+and fill it from multiple listeners.
 
 ## Inherit transitions by grouping states
 

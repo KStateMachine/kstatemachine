@@ -73,9 +73,9 @@ createStateMachine(scope) {
 }
 ```
 
-> [!NOTE]
-> `PendingEventHandler` that does nothing will not let you process pending events (they will be dropped) as it
-> leads to undefined machine state and mixed notifications.
+{: .note }
+`PendingEventHandler` that does nothing will not let you process pending events (they will be dropped) as it
+leads to undefined machine state and mixed notifications.
 
 ## Event argument
 
@@ -94,8 +94,8 @@ val machine = createStateMachine(scope) {
 machine.processEvent(TurnOn, 42)
 ```
 
-> [!NOTE]
-> Type of arguments is `Any?`, so it is not type safe ot use them.
+{: .note }
+Type of arguments is `Any?`, so it is not type safe ot use them.
 
 ## Do not
 

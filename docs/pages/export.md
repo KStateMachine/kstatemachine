@@ -16,17 +16,17 @@ The library supports export into PlantUML and Mermaid diagram drawing systems. T
 Mermaid supports fewer features then PlantUML itself.
 Please note that both of them have their own limitations and corner cases.
 
-> [!NOTE]
-> Transitions that use lambdas like `transitionConditionally()` and `transitionOn()` or `choiceState()` etc.,
-> are not exported by default.
-> You can enable their export with `unsafeCallConditionalLambdas` flag of `exportToPlantUml()`/`exportToMermaid()`
-> functions.
-> With `unsafeCallConditionalLambdas` flag set, user defined lambdas that are passed to the library to calculate next
-> state would be called during export process. This will give more complete (still not full) export output,
-> but may cause runtime errors depending on what the lambda actually do. As it may touch application data that is not
-> valid when export is running, also `event` argument will be faked by unsafe cast, so touching it
-> will cause `ClassCastException`
-> That is why `unsafeCallConditionalLambdas` flag should be considered as debug/development tool only.
+{: .note }
+Transitions that use lambdas like `transitionConditionally()` and `transitionOn()` or `choiceState()` etc.,
+are not exported by default.
+You can enable their export with `unsafeCallConditionalLambdas` flag of `exportToPlantUml()`/`exportToMermaid()`
+functions.
+With `unsafeCallConditionalLambdas` flag set, user defined lambdas that are passed to the library to calculate next
+state would be called during export process. This will give more complete (still not full) export output,
+but may cause runtime errors depending on what the lambda actually do. As it may touch application data that is not
+valid when export is running, also `event` argument will be faked by unsafe cast, so touching it
+will cause `ClassCastException`
+That is why `unsafeCallConditionalLambdas` flag should be considered as debug/development tool only.
 
 ## PlantUML
 

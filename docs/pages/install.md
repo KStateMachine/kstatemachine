@@ -67,7 +67,9 @@ Where `<Tag>` is a library version.
 You can see official docs
 about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
 
-## JitPack (deprecated)
+## JitPack 
+Deprecated
+{: .label .label-red }
 
 Currently, `JitPack` does not support Kotlin multiplatform artifacts.
 So versions starting from `0.22.0` are not available there, use `Maven Central` instead.

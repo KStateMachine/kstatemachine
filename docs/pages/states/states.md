@@ -85,9 +85,10 @@ the first triggering.
 state().onEntry(once = true) { /* ... */ }
 ```
 
-> [!NOTE]
-> It is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
-> modifications.
+
+{: .note }
+It is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
+modifications.
 
 ## Listen group of states
 
