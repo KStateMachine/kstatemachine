@@ -49,7 +49,7 @@ createStateMachine(scope) {
 ## State subclasses
 
 You can use your own `IState` subclasses with `addInitialState()`, `addState()` and `addFinalState()` functions.
-Subclass `DefaultState`, `DefaultFinalState` or their [data](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe-transitions.html) analogs `DefaultDataState`
+Subclass `DefaultState`, `DefaultFinalState` or their [data](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) analogs `DefaultDataState`
 , `DefaultFinalDataState`, then you can easily distinguish your states by type when observing state changes:
 
 ```kotlin
@@ -168,7 +168,7 @@ Note that it is not typesafe (`payload` type is `Any?`), but might be handy, as 
 each time.
 
 For use cases when you need to pass data from `Event` to `IState`, the library provides `DataState` and `DataEvent`
-concept, see [typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe-transitions.html) section.
+concept, see [typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) section.
 
 ## Finishing states and state machine
 
