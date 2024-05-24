@@ -140,7 +140,25 @@ properties you will have _3 * 3 = 9_ amount of states
 play. This feature helps to avoid combinatorial explosion of states. Using parallel states this machine will look like
 this:
 
-![Parallel states diagram](./diagrams/parallel-states.png)
+```mermaid
+---
+title: Parallel states diagram
+---
+stateDiagram-v2
+state Laptop {
+  [*] --> Charging
+  Charging --> OnBattery 
+  OnBattery --> Charging 
+  --
+  [*] --> LidOpen
+  LidOpen --> LidClosed 
+  LidClosed --> LidOpen
+  --
+  [*] --> Sleeping
+  Sleeping --> Working 
+  Working --> Sleeping 
+}
+```
 
 Set `childMode` argument of a state machine, or a state creation functions to `ChildMode.PARALLEL`. When a parent state
 with parallel child mode is entered or exited, all its child states will be simultaneously entered or exited:

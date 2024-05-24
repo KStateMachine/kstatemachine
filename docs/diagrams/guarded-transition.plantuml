@@ -1,6 +1,0 @@
-@startuml
-State1 : value: Int
-[*] -> State1
-State1 -> State2 : Guarded transition (if value > 10)
-State2 -> [*]
-@enduml 

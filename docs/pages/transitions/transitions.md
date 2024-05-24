@@ -126,7 +126,16 @@ state1 {
 
 See [guarded transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 
-![Guarded transition diagram](./diagrams/guarded-transition.png)
+```mermaid
+---
+title: Guarded transition diagram
+---
+stateDiagram-v2
+State1 
+[*] --> State1
+State1 --> State2 : Guarded transition (if State1.value > 10)
+State2 --> [*]
+```
 
 ## Conditional transitions
 
@@ -249,7 +258,7 @@ See [undo transition sample](https://github.com/nsk90/kstatemachine/tree/master/
 A transition can have any state as its target. This means that the target state does not have to be on the same level in
 the state hierarchy as the source state.
 
-![Cross-level transition diagram](./diagrams/cross-level-transition.png)
+![Cross-level transition diagram](./../../diagrams/cross-level-transition.png)
 
 ## Transition argument
 
@@ -278,7 +287,22 @@ transition for each state but with this approach complexity grows and when you a
 add this specific transition. This problem can be solved with adding parent state which defines such transition and
 groups its child states. Child states inherit there parent transitions.
 
-![Inherit transitions diagram](./diagrams/inherit-transitions.png)
+```mermaid
+---
+title: Inherit transitions diagram
+---
+stateDiagram-v2
+state State1 {    
+    [*] --> State1_1
+    State1_1 --> State1_2
+    State1_2 --> State1_3
+    State1_3 --> State1_1
+}
+
+[*] --> State1
+State1 --> FinalState : Exit
+FinalState --> [*]
+```
 
 A child state can override an inherited transition. To override parent transition child state should define any
 transition that matches the event.
