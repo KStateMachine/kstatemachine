@@ -42,7 +42,7 @@ This is how you can control a thread where state machine works. The scope is con
 Single thread `CoroutineScope` samples:
 
 ```kotlin
-CoroutineScope(newSingleThreadContext("single thread"))
+CoroutineScope(newSingleThreadContext("single thread")) // don't forget to close it
 CoroutineScope(Dispatchers.Main)
 ```
 

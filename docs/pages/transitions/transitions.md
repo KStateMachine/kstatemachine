@@ -6,13 +6,15 @@ has_children: true
 ---
 
 # Transitions
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
 created with `transition()` function:
@@ -143,29 +145,32 @@ State machine becomes more powerful tool when you can choose target state depend
 external data). Conditional transitions give you maximum flexibility on choosing target state and conditions when
 transition is triggered.
 
-There are three options to choose transition direction:
+There are fallowing options to choose transition direction:
 
 * `stay()` - transition is triggered but state is not changed;
 * `targetState(nextState)` - transition is triggered and state machine goes to the specified state;
+* `targetParallelStates(nextState1, nextState2)` transition is triggered and state machine goes to the specified
+  paralleled states see [Transition targeting multiple states](#transition-targeting-multiple-states);
 * `noTransition()` - transition is not triggered.
 
 Use `transitionConditionally()` function to create conditional transition and specify a function which makes desired
 decision:
 
 ```kotlin
+// Suppose you have a function returning some 
+// business logic value which may differ
+fun getCondition() = 0
+
 redState {
     // A conditional transition helps to control when it 
     // should be triggered and determine its target state
     transitionConditionally<GreenEvent> {
         direction = {
-            // Suppose you have a function returning some 
-            // business logic value which may differ
-            fun getCondition() = 0
-
             when (getCondition()) {
                 0 -> targetState(greenState)
                 1 -> targetState(yellowState)
-                2 -> stay()
+                2 -> targetParallelStates(parallelState1, parallelState2)
+                3 -> stay()
                 else -> noTransition()
             }
         }
@@ -200,6 +205,30 @@ state("state2", childMode = ChildMode.PARALLEL) {
     }
 }
 ```
+
+## Transition interruption
+
+Typically, to calculate whether transition processing should be performed or not, you can use a guard function, 
+described in [Guarded transitions](#guarded-transitions). In such APIs guard function is separated from `targetState`
+calculation function, sometimes it might be not convenient. So if your logic requires to mix the selection of a 
+`targetState` with the fact of triggering of the transition, it is more convenient to use `transitionConditionally()`
+as it accepts single callback method called `direction`.
+
+```kotlin
+transitionConditionally<SwitchEvent> {
+    direction = {
+        if (should) 
+            targetState(nextState) 
+        else 
+            noTransition() // transition will not be triggered at all
+    }
+}
+```
+
+Both `guard` and `direction` callbacks are marked with `suspend` keyword, so you can easily call coroutines in 
+synchronous style inside them.
+
+There is no way to interrupt a transition from `onTriggered()` notifications.
 
 ## Transition event type matching
 
