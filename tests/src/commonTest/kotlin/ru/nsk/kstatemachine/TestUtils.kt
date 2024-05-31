@@ -1,3 +1,10 @@
+/*
+ * Author: Mikhail Fedotov
+ * Github: https://github.com/KStateMachine
+ * Copyright (c) 2024.
+ * All rights reserved.
+ */
+
 @file:OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 package ru.nsk.kstatemachine
 

@@ -1,3 +1,10 @@
+/*
+ * Author: Mikhail Fedotov
+ * Github: https://github.com/KStateMachine
+ * Copyright (c) 2024.
+ * All rights reserved.
+ */
+
 package ru.nsk.kstatemachine.state
 
 import io.kotest.core.spec.style.StringSpec
