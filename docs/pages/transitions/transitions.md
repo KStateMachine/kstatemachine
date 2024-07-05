@@ -1,20 +1,17 @@
 ---
 layout: page
 title: Transitions
-nav_order: 3w
 has_children: true
 ---
 
 # Transitions
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
 created with `transition()` function:
