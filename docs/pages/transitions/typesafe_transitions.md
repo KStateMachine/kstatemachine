@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Typesafe transitions
-nav_order: 3
 parent: Transitions
 ---
 
