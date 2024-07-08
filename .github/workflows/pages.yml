@@ -37,7 +37,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run Dokka
-        run: gradlew dokkaJekyllMultiModule
+        run: ./gradlew dokkaJekyllMultiModule
         working-directory: '${{ github.workspace }}'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
