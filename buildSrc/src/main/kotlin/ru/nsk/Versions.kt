@@ -5,8 +5,8 @@ object Versions {
     const val libraryVersion = "0.30.0"
 
     // tools
-    const val kotlin = "1.9.22"
-    const val kotlinDokka = "1.9.10"
+    const val kotlin = "2.0.0"
+    const val kotlinDokka = "1.9.20"
     const val jacocoTool = "0.8.11"
 
     // compatibility
@@ -15,9 +15,9 @@ object Versions {
     const val apiVersion = "1.6"
 
     // dependencies
-    const val coroutinesCore = "1.8.0"
+    const val coroutinesCore = "1.8.1"
 
     // test dependencies   
-    const val mockk = "1.13.10"
-    const val kotest = "5.8.0"
+    const val mockk = "1.13.11"
+    const val kotest = "5.9.1"
 }
