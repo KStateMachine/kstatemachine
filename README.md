@@ -65,7 +65,7 @@ State management features:
   explosion of
   states
 * **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** - navigate back to previous
-  state
+  state (like Stack based FSMs do)
 * **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for events and
   transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** state machine structure

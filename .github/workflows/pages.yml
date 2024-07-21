@@ -37,8 +37,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run Dokka
-        run: ./gradlew dokkaJekyllMultiModule
+        run: ./gradlew dokkaHtmlMultiModule
         working-directory: '${{ github.workspace }}'
+      - name: Copy kdoc to _site
+        run: cp -R build/dokka/htmlMultiModule docs/_site/kdoc
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:

@@ -4,6 +4,7 @@ url: https://kstatemachine.github.io/kstatemachine/
 
 aux_links:
   KStateMachine on GitHub: https://github.com/KStateMachine/kstatemachine
+  KDoc: /kdoc/index.html
 
 theme: just-the-docs
 color_scheme: dark
@@ -20,3 +21,5 @@ callouts:
   note:
     title: Note
     color: purple
+
+keep_files: [kdoc]
