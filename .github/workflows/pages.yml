@@ -36,12 +36,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Run Dokka
-        run: ./gradlew dokkaHtmlMultiModule
-        working-directory: '${{ github.workspace }}'
-      - name: Copy kdoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -R build/dokka/htmlMultiModule/ docs/_site/kdoc
-        working-directory: '${{ github.workspace }}'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -52,6 +46,12 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
+      - name: Run Dokka
+        run: ./gradlew dokkaHtmlMultiModule
+        working-directory: '${{ github.workspace }}'
+      - name: Copy kdoc to _site
+        run: mkdir -p docs/_site/kdoc && cp -R build/dokka/htmlMultiModule/ docs/_site/kdoc
+        working-directory: '${{ github.workspace }}'
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
