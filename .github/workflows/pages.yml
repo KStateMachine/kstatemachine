@@ -40,7 +40,7 @@ jobs:
         run: ./gradlew dokkaHtmlMultiModule
         working-directory: '${{ github.workspace }}'
       - name: Copy kdoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -R build/dokka/htmlMultiModule docs/_site/kdoc
+        run: mkdir -p docs/_site/kdoc && cp -R build/dokka/htmlMultiModule/ docs/_site/kdoc
         working-directory: '${{ github.workspace }}'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
