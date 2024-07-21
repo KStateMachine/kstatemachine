@@ -36,6 +36,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Run Dokka
+        run: ./gradlew dokkaHtmlMultiModule
+        working-directory: '${{ github.workspace }}'
+      - name: Copy kdoc to _site
+        run: mkdir -p docs/_site/kdoc && cp -R build/dokka/htmlMultiModule/ docs/_site/kdoc
+        working-directory: '${{ github.workspace }}'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -51,12 +57,6 @@ jobs:
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
-      - name: Run Dokka
-        run: ./gradlew dokkaHtmlMultiModule
-        working-directory: '${{ github.workspace }}'
-      - name: Copy KDoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -Rv build/dokka/htmlMultiModule/ docs/_site/kdoc
-        working-directory: '${{ github.workspace }}'
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-pages-artifact@v1
