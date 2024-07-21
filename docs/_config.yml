@@ -1,10 +1,11 @@
 title: KStateMachine
 description: KStateMachine is a Kotlin DSL library for creating state machines and statecharts.
-url: https://kstatemachine.github.io/kstatemachine/
+url: https://kstatemachine.github.io
+baseurl: /kstatemachine
 
 aux_links:
   KStateMachine on GitHub: https://github.com/KStateMachine/kstatemachine
-  KDoc: /kdoc/index.html
+  KDoc: /kstatemachine/kdoc/index.html
 
 theme: just-the-docs
 color_scheme: dark

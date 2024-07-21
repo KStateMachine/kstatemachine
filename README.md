@@ -17,7 +17,7 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
-[KDoc](https://kstatemachine.github.io/kdoc/index.html) |
+[KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
 [Sponsors](#sponsors-) |
 [Quick start](#quick-start-sample) |
 [Samples](#samples) | [Install](#install) |
