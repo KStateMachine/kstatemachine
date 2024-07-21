@@ -50,7 +50,7 @@ jobs:
         run: ./gradlew dokkaHtmlMultiModule
         working-directory: '${{ github.workspace }}'
       - name: Copy kdoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -Rv build/dokka/htmlMultiModule/ docs/_site/kdoc
+        run: mkdir -p docs/_site/kdoc && cp -Rv build/dokka/htmlMultiModule/* docs/_site/kdoc
         working-directory: '${{ github.workspace }}'
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
