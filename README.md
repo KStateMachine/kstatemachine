@@ -30,7 +30,7 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 
 ## 🌏 Overview
 
-### 📦 Integration features are:
+### 📦 Integration features
 
 * **[Kotlin DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax** -
   declarative and clear state machine structure. Using without DSL is also possible.
@@ -40,7 +40,7 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 * **[Kotlin Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html) support**
 * **Zero dependency** - it is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
 
-### ⚙️ State management features:
+### ⚙️ State management features
 
 * **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
   processing
