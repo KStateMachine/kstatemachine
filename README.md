@@ -25,8 +25,8 @@
 
 # KStateMachine
 
-KStateMachine is a powerful Kotlin library with clean DSL syntax for creating complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
-and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
+KStateMachine is a powerful Kotlin Multiplatform library with clean DSL syntax for creating complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
+and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) driven by Kotlin Coroutines.
 
 ## 🌏 Overview
 
