@@ -1,7 +1,5 @@
 ![KStateMachine](./docs/kstatemachine-logo.png)
 
-# KStateMachine
-
 ![Build and test with Gradle](https://github.com/nsk90/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
@@ -16,21 +14,23 @@
 [![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&hashtags=kstatemachine,kotlin,opensource)
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
+# KStateMachine
+
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
-[Sponsors](#sponsors-) |
+[Sponsors](#sponsors) |
 [Quick start](#quick-start-sample) |
 [Samples](#samples) | [Install](#install) |
 [Contribution](#contribution) |
 [License](#license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
 
-KStateMachine is a Kotlin DSL library for creating [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
+KStateMachine is a powerful Kotlin library with clean DSL syntax for creating complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
 
-## Overview
+## 🌏 Overview
 
-Integration features are:
+### 📦 Integration features are:
 
 * **Kotlin [DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax.**
   Declarative and clear state machine structure. Using without DSL is also possible.
@@ -40,9 +40,9 @@ Integration features are:
 * **Kotlin [Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html) support.**
 * **Zero dependency.** It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
 
-State management features:
+### ⚙️ State management features:
 
-* **Event based** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
+* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
   processing
   incoming events
 * **[Reactive](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** - listen for machine, states,
@@ -66,7 +66,7 @@ State management features:
   explosion of
   states
 * **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** - navigate back to previous
-  state (like Stack based FSMs do)
+  state (like stack based FSMs do)
 * **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for events and
   transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** state machine structure
@@ -74,20 +74,26 @@ State management features:
 * **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)**  state machine's active
   configuration and restore it later
 * **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified state and enable internal logging
-* **Well tested** - all features are covered
-  by [tests](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
+* **[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)** - all features are covered
+  by tests
+
+## 📄 Documentation
 
 > [!IMPORTANT]
-> SEE FULL [DOCUMENTATION HERE](https://kstatemachine.github.io/kstatemachine)
+> * See full documentation on [website](https://kstatemachine.github.io/kstatemachine)
+> * [KDoc for classes](https://kstatemachine.github.io/kstatemachine/kdoc/index.html)
 
-## Sponsors ❤
+## ❤️ Sponsors
 
 I highly appreciate that you donate or become a sponsor to support the project.
-Use ❤️ github-sponsors button to see supported methods and push the ⭐ star-button if you like this project.
+If you find this project useful you can support it by:
 
-## Quick start sample
+* Pushing the ⭐ star-button
+* Using ❤️github-sponsors button to see supported donation methods 
 
-### Finishing traffic light
+## 🚀 Quick start sample
+
+### 🚦Finishing traffic light
 
 ```mermaid
 stateDiagram-v2
@@ -140,7 +146,7 @@ fun main() = runBlocking {
 }
 ```
 
-## Samples
+## 🧪 Samples
 
 * [Simple Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
 
@@ -167,7 +173,7 @@ fun main() = runBlocking {
 * [Complex syntax sample](./samples/src/commonMain/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
   shows many syntax variants and library possibilities, so it looks messy
 
-## Install
+## 💾 Install
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
@@ -183,20 +189,20 @@ dependencies {
 }
 ```
 
-## Build
+## 🏗️ Build
 
 Run `./gradlew build` or build with `Intellij IDEA`.
 
-## Contribution
+## 🤝 Contribution
 
 The library is in a active development phase. You are welcome to propose useful features and contribute to the project.
 See [CONTRIBUTING](./CONTRIBUTING.md) file.
 
-## Thanks to supporters
+## 🏅 Thanks to supporters
 
 [![Stargazers repo roster for @kstatemachine/kstatemachine](https://reporoster.com/stars/dark/kstatemachine/kstatemachine)](https://github.com/kstatemachine/kstatemachine/stargazers)
 [![Forkers repo roster for @kstatemachine/kstatemachine](https://reporoster.com/forks/dark/kstatemachine/kstatemachine)](https://github.com/kstatemachine/kstatemachine/network/members)
 
-## License
+## 🖋️ License
 
 Licensed under permissive [Boost Software License](./LICENSE)
