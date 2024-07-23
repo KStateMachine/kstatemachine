@@ -32,13 +32,13 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 
 ### 📦 Integration features are:
 
-* **Kotlin [DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax.**
-  Declarative and clear state machine structure. Using without DSL is also possible.
-* **Kotlin [Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines) support.**
-  Call suspendable functions within the library.
+* **[Kotlin DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax** -
+  declarative and clear state machine structure. Using without DSL is also possible.
+* **[Kotlin Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines) support** - 
+  call suspendable functions within the library.
   You can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
-* **Kotlin [Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html) support.**
-* **Zero dependency.** It is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
+* **[Kotlin Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html) support**
+* **Zero dependency** - it is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
 
 ### ⚙️ State management features:
 
