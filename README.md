@@ -14,8 +14,6 @@
 [![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&hashtags=kstatemachine,kotlin,opensource)
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 
-# KStateMachine
-
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
 [Sponsors](#sponsors) |
@@ -24,6 +22,8 @@
 [Contribution](#contribution) |
 [License](#license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
+
+# KStateMachine
 
 KStateMachine is a powerful Kotlin library with clean DSL syntax for creating complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
 and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf).
