@@ -21,6 +21,7 @@
 [Samples](#-samples) | 
 [Install](#-install) |
 [Contribution](#-contribution) |
+[Roadmap](#-roadmap) |
 [License](#-license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
 
@@ -122,12 +123,12 @@ object SwitchEvent : Event
 sealed class States : DefaultState() {
     object RedState : States()
     object YellowState : States()
-    // machine finishes when enters final state
+    // machine finishes when enters [FinalState]
     object GreenState : States(), FinalState
 }
 
 fun main() = runBlocking {
-    // create state machine and configure its states in a setup block
+    // create state machine and configure its structure in a setup block
     val machine = createStateMachine(scope = this) {
         addInitialState(RedState) {
             // add state listeners
@@ -154,10 +155,12 @@ fun main() = runBlocking {
       
         onFinished { println("Finished") }
     }
+    // you can observe state machine changes using [Flow] along with simple listeners
+    val statesFlow = machine.activeStatesFlow()
 
-    // now you can process events
-    machine.processEvent(SwitchEvent) // machine goes to YellowState
-    machine.processEvent(SwitchEvent) // machine goes to GreenState
+    // you can process events after state machine has been started even from listener callbacks
+    machine.processEvent(SwitchEvent) // machine goes to [YellowState]
+    machine.processEvent(SwitchEvent) // machine goes to [GreenState]
 }
 ```
 
@@ -212,6 +215,14 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 The library is in development phase. You are welcome to propose useful features and contribute to the project.
 See [CONTRIBUTING](./CONTRIBUTING.md) file.
+
+## 🗺️ Roadmap
+
+* Add documentation for coroutines extensions that the library provides
+* Make publication about using state machines along with `MVI`
+* Create `Intellij IDEA Plugin` for state machine visualization and edition
+* Add default implementation of Serializable Events using `kotlinx.serialization`
+* Add `Compose` sample
 
 ## 🏅 Thanks to supporters
 
