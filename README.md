@@ -122,15 +122,15 @@ object SwitchEvent : Event
 sealed class States : DefaultState() {
     object RedState : States()
     object YellowState : States()
-    /** machine finishes when enters final state */
+    // machine finishes when enters final state
     object GreenState : States(), FinalState
 }
 
 fun main() = runBlocking {
-    // Create state machine and configure its states in a setup block
+    // create state machine and configure its states in a setup block
     val machine = createStateMachine(scope = this) {
         addInitialState(RedState) {
-            // Add state listeners
+            // add state listeners
             onEntry {
                 println("Enter red")
                 // you can call suspendable code if necessary
@@ -138,10 +138,10 @@ fun main() = runBlocking {
             }
             onExit { println("Exit red") }
 
-            // Setup transition
+            // setup transition
             transition<SwitchEvent> {
                 targetState = YellowState
-                // Add transition listener
+                // add transition listener
                 onTriggered { println("Transition triggered") }
             }
         }
