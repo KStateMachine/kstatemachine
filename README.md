@@ -16,11 +16,12 @@
 
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
-[Sponsors](#sponsors) |
-[Quick start](#quick-start-sample) |
-[Samples](#samples) | [Install](#install) |
-[Contribution](#contribution) |
-[License](#license) |
+[Sponsors](#-sponsors) |
+[Quick start](#-quick-start-sample) |
+[Samples](#-samples) | 
+[Install](#-install) |
+[Contribution](#-contribution) |
+[License](#-license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
 
 # KStateMachine
@@ -97,31 +98,45 @@ If you find this project useful you can support it by:
 
 ```mermaid
 stateDiagram-v2
-    direction LR
-    [*] --> GreenState
-    GreenState --> YellowState: SwitchEvent
-    YellowState --> RedState: SwitchEvent
-    RedState --> [*]
+    direction TB
 
+    classDef red fill:#f00,color:white,font-weight:bold,stroke-width:2px,stroke:black
+    classDef yellow fill:yellow,color:black,font-weight:bold,stroke-width:2px,stroke:black
+    classDef green fill:green,color:white,font-weight:bold,stroke-width:2px,stroke:black
+
+    [*] --> RedState
+    RedState --> YellowState: SwitchEvent
+    YellowState --> GreenState: SwitchEvent
+    GreenState --> [*]
+
+    class RedState red
+    class YellowState yellow
+    class GreenState green
 ```
 
 ```kotlin
-
+// define your Events
 object SwitchEvent : Event
 
+// define your States as classes or objects
 sealed class States : DefaultState() {
-    object GreenState : States()
+    object RedState : States()
     object YellowState : States()
-    object RedState : States(), FinalState // Machine finishes when enters final state
+    /** machine finishes when enters final state */
+    object GreenState : States(), FinalState
 }
 
 fun main() = runBlocking {
     // Create state machine and configure its states in a setup block
-    val machine = createStateMachine(this) {
-        addInitialState(GreenState) {
+    val machine = createStateMachine(scope = this) {
+        addInitialState(RedState) {
             // Add state listeners
-            onEntry { println("Enter green") }
-            onExit { println("Exit green") }
+            onEntry {
+                println("Enter red")
+                // you can call suspendable code if necessary
+                delay(10)
+            }
+            onExit { println("Exit red") }
 
             // Setup transition
             transition<SwitchEvent> {
@@ -132,17 +147,17 @@ fun main() = runBlocking {
         }
 
         addState(YellowState) {
-            transition<SwitchEvent>(targetState = RedState)
+            transition<SwitchEvent>(targetState = GreenState)
         }
-
-        addFinalState(RedState)
-
+      
+        addFinalState(GreenState)
+      
         onFinished { println("Finished") }
     }
 
-    // Now we can process events
-    machine.processEvent(SwitchEvent)
-    machine.processEvent(SwitchEvent)
+    // now you can process events
+    machine.processEvent(SwitchEvent) // machine goes to YellowState
+    machine.processEvent(SwitchEvent) // machine goes to GreenState
 }
 ```
 
@@ -195,7 +210,7 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 ## 🤝 Contribution
 
-The library is in a active development phase. You are welcome to propose useful features and contribute to the project.
+The library is in development phase. You are welcome to propose useful features and contribute to the project.
 See [CONTRIBUTING](./CONTRIBUTING.md) file.
 
 ## 🏅 Thanks to supporters
