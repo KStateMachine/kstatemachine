@@ -221,7 +221,7 @@ See [CONTRIBUTING](./CONTRIBUTING.md) file.
 ## 🙋 Support
 
 I am open to answer you questions and feature requests. Fill free to use any of communication channels to
-give yor feedback.
+give your feedback.
 
 * [Slack channel](https://kotlinlang.slack.com/archives/C07DVAEKLM8) or 
   [GitHub discussions](https://github.com/kstatemachine/kstatemachine/discussions) - best for questions and discussions
