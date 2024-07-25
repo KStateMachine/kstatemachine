@@ -13,6 +13,7 @@
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-kstatemachine-green.svg?style=flat)](https://android-arsenal.com/details/1/8276)
 [![Share on X](https://img.shields.io/badge/twitter-share-white?logo=x&style=flat)](https://twitter.com/intent/tweet?text=I%20like%20KStateMachine%20library%20%0A%0Ahttps%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&hashtags=kstatemachine,kotlin,opensource)
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
+[![Slack](https://img.shields.io/badge/slack-kstatemachine-purple?logo=slack&style=flat)](https://kotlinlang.slack.com/archives/C07DVAEKLM8)
 
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
@@ -218,7 +219,6 @@ See [CONTRIBUTING](./CONTRIBUTING.md) file.
 
 ## 🗺️ Roadmap
 
-* Add documentation for coroutines extensions that the library provides
 * Make publication about using state machines along with `MVI`
 * Create `Intellij IDEA Plugin` for state machine visualization and edition
 * Add default implementation of Serializable Events using `kotlinx.serialization`
