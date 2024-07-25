@@ -116,7 +116,7 @@ fun createTestStateMachine(
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
-        CoroutineScope(newSingleThreadContext("test single thread context")),
+        CoroutineScope(newSingleThreadContext("test single thread context")), // fixme context leaks
         name,
         childMode,
         start,

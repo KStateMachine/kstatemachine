@@ -28,8 +28,8 @@ Many functions like `createStateMachine`/`start`/`stop`/`processEvent`/`undo` et
 has analogs with `Blocking` suffix which are not marked with `suspend` keyword.
 If you use KStateMachine with coroutines support you should prefer suspendable function versions.
 Note that `Blocking` versions internally use `kotlinx.coroutines.runBlocking` function which is rather dangerous and
-may cause deadlocks if used not properly. That is why you should avoid using `Blocking` APIs from coroutines and
-recursively (from library callbacks).
+may cause deadlocks if used not properly (especially recursively).
+That is why you should avoid using `Blocking` APIs from coroutines and recursively (from library callbacks).
 
 ### Use single threaded `CoroutineScope`
 
@@ -109,14 +109,6 @@ runBlocking { // defines non-empty coroutine context for state machine
     }
 }
 ```
-
-## Additional kstatemachine-coroutines artifact
-
-Contains additional functions to work with KStateMachine depending on Kotlin Coroutines library
-
-* `createStateMachine()` / `createStateMachineBlocking()` creates state machine with specified `CoroutineScope`
-* `stateMachineNotificationFlow()` returns a `SharedFlow` of all machine notifications
-* `activeStatesFlow()` returns a `StateFlow` of active machine states
 
 ## Migration guide from versions older than v0.20.0
 

@@ -17,7 +17,7 @@ nav_order: 1
 
 A state machine can be created with one of those factory functions:
 
-* `createStateMachine()` suspendable version (from `kstatemachine-coroutines` artifact)
+* `createStateMachine()` suspendable version (from `kstatemachine-coroutines` artifact), the best choice by default.
 * `createStateMachineBlocking()` blocking version (from `kstatemachine-coroutines` artifact)
 * `createStdLibStateMachine()` - creates StateMachine instance without Kotlin Coroutines support
   (from `kstatemachine` artifact)

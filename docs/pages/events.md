@@ -24,15 +24,15 @@ Generally it is not recommended to confuse them with commands, see [do not secti
 When a StateMachine is created, configured and started it is ready to process incoming events.
 It is done with `processEvent()` functions family.
 
-* `processEvent()` - suspendable version
-* `processEventBlocking()` - blocking version. Not suspendable, uses `kotlinx.coroutines.runBlocking`
+* `processEvent()` - suspendable version, synchronous
+* `processEventBlocking()` - blocking version. Not suspendable, synchronous. Uses `kotlinx.coroutines.runBlocking`
   internally if you use StateMachine with coroutines support. Or just runs code in-place for StdLib StateMachine
   instance.
-* `processEventByLaunch()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, uses StateMachine's
-  `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
+* `processEventByLaunch()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses
+  StateMachine's `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
   Cannot be used with StdLib StateMachine instance (throws in this case).
-* `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, uses StateMachine's
-  `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
+* `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses 
+  StateMachine's `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
   Returns`kotlinx.coroutines.Deffered` with `ProcessingResult`.
   Cannot be used with StdLib StateMachine instance (throws in this case).
 
