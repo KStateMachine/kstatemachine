@@ -22,6 +22,7 @@
 [Samples](#-samples) | 
 [Install](#-install) |
 [Contribution](#-contribution) |
+[Support](#-support) |
 [Roadmap](#-roadmap) |
 [License](#-license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
@@ -216,6 +217,18 @@ Run `./gradlew build` or build with `Intellij IDEA`.
 
 The library is in development phase. You are welcome to propose useful features and contribute to the project.
 See [CONTRIBUTING](./CONTRIBUTING.md) file.
+
+## 🙋 Support
+
+I am open to answer you questions and feature requests. Fill free to use any of communication channels to
+give yor feedback.
+
+* [Slack channel](https://kotlinlang.slack.com/archives/C07DVAEKLM8) or 
+  [GitHub discussions](https://github.com/kstatemachine/kstatemachine/discussions) - best for questions and discussions
+* [GitHub issues](https://github.com/KStateMachine/kstatemachine/issues) - best for bugs and feature requests
+
+If you use some other platforms to ask questions or mention the library, I recommend adding a <ins>link</ins> to this 
+GitHub project or using `#kstatemachine` tag.
 
 ## 🗺️ Roadmap
 
