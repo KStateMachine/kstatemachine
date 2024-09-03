@@ -182,7 +182,7 @@ open class BaseStateImpl(
             .ifEmpty { listOfNotNull(findUniqueResolvedTransition(eventAndArgument)) } // allow transition override
         return if (!machine.creationArguments.doNotThrowOnMultipleTransitionsMatch) {
             check(resolvedTransitions.size <= 1) {
-                "Multiple transitions match ${eventAndArgument.event}, $transitions in $this"
+                "Multiple transitions match ${eventAndArgument.event}, $resolvedTransitions in $this"
             }
             resolvedTransitions.singleOrNull()
         } else {
