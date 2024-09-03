@@ -24,114 +24,149 @@ import ru.nsk.kstatemachine.transition.targetParallelStates
 
 private const val PLANTUML_NESTED_STATES_RESULT = """@startuml
 hide empty description
-state State1
-state State3
-state State2 {
-    state Final_subState
-    state Initial_subState
+state Nested_states_StateMachine {
+    state State1
+    state State3
+    state State2 {
+        state Final_subState
+        state Initial_subState
+        
+        [*] --> Initial_subState
+        Initial_subState --> Final_subState
+        Final_subState --> [*]
+    }
     
-    [*] --> Initial_subState
-    Initial_subState --> Final_subState
-    Final_subState --> [*]
+    [*] --> State1
+    State1 --> State2 : to State2
+    State1 --> State1
+    State2 --> State3
+    State2 --> State1 : back
+    State3 --> [*]
 }
-
-[*] --> State1
-State1 --> State2 : to State2
-State1 --> State1
-State2 --> State3
-State2 --> State1 : back
-State3 --> [*]
 @enduml
 """
 
 private const val PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT = """@startuml
 hide empty description
-state State1
-state State3
-state State2 {
-    state Final_subState
-    state Initial_subState
+state Nested_states_StateMachine {
+    state State1
+    state State3
+    state State2 {
+        state Final_subState
+        state Initial_subState
+        
+        [*] --> Initial_subState
+        Initial_subState --> Final_subState : SwitchEvent
+        Final_subState --> [*]
+    }
     
-    [*] --> Initial_subState
-    Initial_subState --> Final_subState : SwitchEvent
-    Final_subState --> [*]
+    [*] --> State1
+    State1 --> State2 : to State2, SwitchEvent
+    State1 --> State1 : SwitchEvent
+    State2 --> State3 : SwitchEvent
+    State2 --> State1 : back, SwitchEvent
+    State3 --> [*]
 }
-
-[*] --> State1
-State1 --> State2 : to State2, SwitchEvent
-State1 --> State1 : SwitchEvent
-State2 --> State3 : SwitchEvent
-State2 --> State1 : back, SwitchEvent
-State3 --> [*]
 @enduml
 """
 
 private const val MERMAID_NESTED_STATES_RESULT = """stateDiagram-v2
-state State1
-state State3
-state State2 {
-    state Final_subState
-    state Initial_subState
+state Nested_states_StateMachine {
+    state State1
+    state State3
+    state State2 {
+        state Final_subState
+        state Initial_subState
+        
+        [*] --> Initial_subState
+        Initial_subState --> Final_subState
+        Final_subState --> [*]
+    }
     
-    [*] --> Initial_subState
-    Initial_subState --> Final_subState
-    Final_subState --> [*]
+    [*] --> State1
+    State1 --> State2 : to State2
+    State1 --> State1
+    State2 --> State3
+    State2 --> State1 : back
+    State3 --> [*]
 }
-
-[*] --> State1
-State1 --> State2 : to State2
-State1 --> State1
-State2 --> State3
-State2 --> State1 : back
-State3 --> [*]
 """
 
 private const val PLANTUML_PARALLEL_STATES_RESULT = """@startuml
 hide empty description
-state parallel_states {
-    state "State 1" as State1 {
-        state State_11
-        state State12
+state Parallel_states_StateMachine {
+    state parallel_states {
+        state "State 1" as State1 {
+            state State_11
+            state State12
+            
+            [*] --> State_11
+            State_11 --> State12 : to State 12
+            State12 --> State_11
+        }
+        --
+        state State2 {
+            state State21
+            state State22
+            
+            [*] --> State21
+            State21 --> State22
+            State22 --> State21
+        }
         
-        [*] --> State_11
-        State_11 --> State12 : to State 12
-        State12 --> State_11
     }
-    --
+    
+    [*] --> parallel_states
+}
+@enduml
+"""
+
+private const val PLANTUML_MACHINE_PARALLEL_MODE_RESULT = """@startuml
+hide empty description
+state Parallel_states_StateMachine {
     state State2 {
-        state State21
         state State22
+        state State21
         
         [*] --> State21
         State21 --> State22
-        State22 --> State21
     }
+    --
+    state State1
     
 }
+@enduml
+"""
 
-[*] --> parallel_states
+private const val PLANTUML_EMPTY_MACHINE_PARALLEL_MODE_RESULT = """@startuml
+hide empty description
+state Parallel_states_StateMachine {
+    
+}
 @enduml
 """
 
 private const val PLANTUML_PSEUDO_STATES_RESULT = """@startuml
 hide empty description
-state state1
-state state2 {
-    state state21 {
-        state state211
+state Pseudo_states_StateMachine {
+    state state1
+    state state2 {
+        state state21 {
+            state state211
+            
+            [*] --> state211
+        }
+        state state22
         
-        [*] --> state211
+        [*] --> state21
     }
-    state state22
+    state state3
+    state choice <<choice>>
+    state final
     
-    [*] --> state21
+    [*] --> state1
+    final --> [*]
 }
-state state3
-state choice <<choice>>
-state final
-
-[*] --> state1
-final --> [*]
 state3 --> state2[H]
 state3 --> state2[H*]
 @enduml
@@ -139,23 +174,25 @@ state3 --> state2[H*]
 
 private const val PLANTUML_UNSAFE_PSEUDO_STATES_RESULT = """@startuml
 hide empty description
-state state1
-state state2 {
-    state state21 {
-        state state211
+state Pseudo_states_StateMachine {
+    state state1
+    state state2 {
+        state state21 {
+            state state211
+            
+            [*] --> state211
+        }
+        state state22
         
-        [*] --> state211
+        [*] --> state21
     }
-    state state22
+    state state3
+    state choice <<choice>>
+    state final
     
-    [*] --> state21
+    [*] --> state1
+    final --> [*]
 }
-state state3
-state choice <<choice>>
-state final
-
-[*] --> state1
-final --> [*]
 choice --> state1
 state3 --> state2[H]
 state3 --> state2[H*]
@@ -164,34 +201,38 @@ state3 --> state2[H*]
 
 private const val PLANTUML_COMPOSED_MACHINES_RESULT = """@startuml
 hide empty description
-state outer_state1
-state inner_machine_StateMachine
-
-[*] --> outer_state1
+state outer_machine_StateMachine {
+    state outer_state1
+    state inner_machine_StateMachine
+    
+    [*] --> outer_state1
+}
 @enduml
 """
 
 private const val PLANTUML_MULTIPLE_TARGET_STATES_RESULT = """@startuml
 hide empty description
-state state1
-state state2 {
-    state state21 {
-        state state211
-        state state212
+state state_machine_StateMachine {
+    state state1
+    state state2 {
+        state state21 {
+            state state211
+            state state212
+            
+            [*] --> state211
+        }
+        --
+        state state22 {
+            state state221
+            state state222
+            
+            [*] --> state221
+        }
         
-        [*] --> state211
-    }
-    --
-    state state22 {
-        state state221
-        state state222
-        
-        [*] --> state221
     }
     
+    [*] --> state1
 }
-
-[*] --> state1
 state1 --> state212
 state1 --> state222
 @enduml
@@ -199,40 +240,42 @@ state1 --> state222
 
 private const val PLANTUML_META_INFO = """@startuml
 hide empty description
-state State_1 {
-    state State12
-    state "Choice label" as ChoiceState <<choice>>
-    note right of ChoiceState : Note 1
-    note right of ChoiceState : Note 2
+state "Nested states sm" as Meta_info_StateMachine {
+    state State_1 {
+        state State12
+        state "Choice label" as ChoiceState <<choice>>
+        note right of ChoiceState : Note 1
+        note right of ChoiceState : Note 2
+        
+        [*] --> ChoiceState
+    }
+    state "Long State 3" as State3
+    State3 : Description 1
+    State3 : Description 2
+    note right of State3 : Note 1
+    note right of State3 : Note 2
+    state "Long State 2" as State2 {
+        state "Final sub state" as FinalState
+        state Initial_subState
+        
+        [*] --> Initial_subState
+        Initial_subState --> FinalState : SwitchEvent
+        FinalState --> [*]
+    }
     
-    [*] --> ChoiceState
+    [*] --> State_1
+    State_1 --> State2 : go to State2, SwitchEvent
+    State_1 --> State_1 : self targeted, SwitchEvent
+    note on link
+        Note 1
+    end note
+    note on link
+        Note 2
+    end note
+    State2 --> State3 : That's all, SwitchEvent
+    State2 --> State_1 : back to State 1, SwitchEvent
+    State3 --> [*]
 }
-state "Long State 3" as State3
-State3 : Description 1
-State3 : Description 2
-note right of State3 : Note 1
-note right of State3 : Note 2
-state "Long State 2" as State2 {
-    state "Final sub state" as FinalState
-    state Initial_subState
-    
-    [*] --> Initial_subState
-    Initial_subState --> FinalState : SwitchEvent
-    FinalState --> [*]
-}
-
-[*] --> State_1
-State_1 --> State2 : go to State2, SwitchEvent
-State_1 --> State_1 : self targeted, SwitchEvent
-note on link
-    Note 1
-end note
-note on link
-    Note 2
-end note
-State2 --> State3 : That's all, SwitchEvent
-State2 --> State_1 : back to State 1, SwitchEvent
-State3 --> [*]
 ChoiceState --> State12
 @enduml
 """
@@ -261,7 +304,11 @@ private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): State
 }
 
 private fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
-    return createTestStateMachine(coroutineStarterType, creationArguments = CreationArguments(isUndoEnabled = true)) {
+    return createTestStateMachine(
+        coroutineStarterType,
+        name = "Pseudo states",
+        creationArguments = CreationArguments(isUndoEnabled = true)
+    ) {
         val state1 = initialState("state1")
 
         val state2 = state("state2") {
@@ -335,6 +382,25 @@ class ExportPlantUmlVisitorTest : StringSpec({
             machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
         }
 
+        "plantUml export machine with parallel mode" {
+            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {
+                state("State2") {
+                    val state22 = state("State22")
+                    initialState("State21") {
+                        transition<SwitchEvent>(targetState = state22)
+                    }
+                }
+                state("State1")
+            }
+
+            machine.exportToPlantUml() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT
+        }
+
+        "plantUml export empty machine with parallel mode" {
+            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {}
+            machine.exportToPlantUml() shouldBe PLANTUML_EMPTY_MACHINE_PARALLEL_MODE_RESULT
+        }
+
         "plantUml export with pseudo states" {
             val machine = makeChoiceMachine(coroutineStarterType)
             machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
@@ -387,7 +453,7 @@ class ExportPlantUmlVisitorTest : StringSpec({
         }
 
         "metaInfo export test" {
-            val machine = createStateMachine(this) {
+            val machine = createStateMachine(this, name = "Meta info") {
                 // label for state machine
                 metaInfo = UmlMetaInfo("Nested states sm")
 

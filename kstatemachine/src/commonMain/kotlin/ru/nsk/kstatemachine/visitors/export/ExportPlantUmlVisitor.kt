@@ -66,7 +66,12 @@ internal class ExportPlantUmlVisitor(
             MERMAID -> line("stateDiagram-v2")
         }
 
+        line("state ${machine.labelGraphName()} {")
+        ++indent
         processStateBody(machine)
+        --indent
+        line("}")
+
         crossLevelTransitions.forEach { line(it) }
 
         if (format == PLANT_UML)
