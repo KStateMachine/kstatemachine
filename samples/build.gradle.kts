@@ -14,6 +14,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":kstatemachine-coroutines"))
+                implementation(project(":kstatemachine-serialization"))
             }
         }
     }
