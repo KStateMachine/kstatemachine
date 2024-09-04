@@ -256,7 +256,7 @@ to previous state (except target-less transitions).
 This API might be called as many times as needed.
 To implement this feature library stores transitions in a stack, it takes memory,
 so this feature is disabled by default and must be enabled explicitly using
-`createStateMachine(creationArguments = CreationArguments(isUndoEnabled = true))` argument.
+`createStateMachine(creationArguments = buildCreationArguments { isUndoEnabled = true })` argument.
 Other words this feature works like stack based FSM.
 
 Undo functionality is implemented as `Event`, so it possible to call `undo()` from notification callbacks, if you use

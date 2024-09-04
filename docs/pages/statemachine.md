@@ -32,7 +32,8 @@ val machine = createStateMachine(
 ```
 
 By default, factory functions start state machine. You can control it using `start` argument.
-All overloads accept optional argument `CreationArguments` which allows to change some options.
+All overloads accept optional argument `CreationArguments` which allows to change some options. 
+Use `buildCreationArguments()` function to provide it.
 
 Subsequent samples will use `createStateMachine()` function, but you can choose that one which fits your needs.
 

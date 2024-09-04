@@ -42,7 +42,7 @@ can be configured with `EventRecordingArguments` properties.
 
 ```kotlin
 val machine = createStateMachine(
-    creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+    creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
 ) {
     // ...
 }

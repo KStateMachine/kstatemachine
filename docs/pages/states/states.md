@@ -269,7 +269,7 @@ block to have a valid state references for transitions.
 Keep in mind that states are mutated by machine instance, defining them with `object` keyword (i.e. singleton) often
 makes your states live longer than machine. It is common use case when you have multiple similar machines
 that are using same singleton states sequentially. Library detects such cases automatically by default
-(see `autoDestroyOnStatesReuse` argument of `CreationArguments` structure) and cleans states allowing for future reuse.
+(see `autoDestroyOnStatesReuse` property of `CreationArguments` interface) and cleans states allowing for future reuse.
 You can disable automatic machine destruction on state reuse, and call `StateMachine.destroy()` manually if required,
 or just do not use `object` keyword for defining states.
 If you have your own `DefaultState` subclasses that are singletons and has data fields, use
