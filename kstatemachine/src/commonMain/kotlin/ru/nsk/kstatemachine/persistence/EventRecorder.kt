@@ -7,10 +7,10 @@
 
 package ru.nsk.kstatemachine.persistence
 
+import ru.nsk.kstatemachine.VisibleForTesting
 import ru.nsk.kstatemachine.event.DestroyEvent
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.statemachine.*
-import ru.nsk.kstatemachine.statemachine.StateMachine.EventRecordingArguments
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -23,17 +23,54 @@ interface EventRecorder {
 }
 
 /**
- * This object is intended to be serialized by client code
+ * This class is intended to be serialized by client code
  */
-data class RecordedEvents(
+class RecordedEvents @VisibleForTesting constructor(
     val structureHashCode: Int,
     val records: List<Record>,
-)
+) {
 
-data class Record(
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as RecordedEvents
+
+        if (structureHashCode != other.structureHashCode) return false
+        if (records != other.records) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = structureHashCode
+        result = 31 * result + records.hashCode()
+        return result
+    }
+}
+
+class Record @VisibleForTesting constructor(
     val eventAndArgument: EventAndArgument<*>,
     val processingResult: ProcessingResult,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Record
+
+        if (eventAndArgument != other.eventAndArgument) return false
+        if (processingResult != other.processingResult) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = eventAndArgument.hashCode()
+        result = 31 * result + processingResult.hashCode()
+        return result
+    }
+}
 
 internal class EventRecorderImpl(
     private val machine: StateMachine,

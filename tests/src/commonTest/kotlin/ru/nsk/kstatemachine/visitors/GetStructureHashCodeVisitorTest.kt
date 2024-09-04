@@ -13,7 +13,7 @@ import io.kotest.matchers.shouldNotBe
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.QueuePendingEventHandler
-import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
+import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.queuePendingEventHandler
 import ru.nsk.kstatemachine.statemachine.throwingPendingEventHandler
 import ru.nsk.kstatemachine.transition.TransitionType
@@ -78,14 +78,14 @@ class GetStructureHashCodeVisitorTest : StringSpec({
         "structure hash code is affected by CreationArguments" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(isUndoEnabled = false)
+                creationArguments = buildCreationArguments { isUndoEnabled = false }
             ) {
                 initialState()
             }
 
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(isUndoEnabled = true)
+                creationArguments = buildCreationArguments { isUndoEnabled = true }
             ) {
                 initialState()
             }

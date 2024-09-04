@@ -12,7 +12,7 @@ import ru.nsk.kstatemachine.event.WrappedEvent
 import ru.nsk.kstatemachine.statemachine.StateMachineDslMarker
 
 @StateMachineDslMarker
-data class TransitionParams<E : Event>(
+data class TransitionParams<E : Event> internal constructor(
     val transition: Transition<E>,
     val direction: TransitionDirection,
     val event: E,

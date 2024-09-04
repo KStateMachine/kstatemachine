@@ -15,7 +15,6 @@ import ru.nsk.kstatemachine.persistence.EventRecorderImpl
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.*
-import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor

@@ -6,6 +6,7 @@
  */
 
 @file:OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+
 package ru.nsk.kstatemachine
 
 import io.mockk.MockKVerificationScope
@@ -15,10 +16,7 @@ import io.mockk.verifySequence
 import kotlinx.coroutines.*
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
-import ru.nsk.kstatemachine.statemachine.BuildingStateMachine
-import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.statemachine.createStateMachineBlocking
-import ru.nsk.kstatemachine.statemachine.createStdLibStateMachine
+import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.transition.TransitionBuilder
 import ru.nsk.kstatemachine.transition.onTriggered
 import kotlin.coroutines.EmptyCoroutineContext
@@ -89,7 +87,7 @@ fun createTestStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
+    creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
 ) = when (coroutineStarterType) {
     CoroutineStarterType.STD_LIB -> createStdLibStateMachine(

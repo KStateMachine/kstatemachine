@@ -158,48 +158,6 @@ interface StateMachine : State {
          */
         suspend fun onException(exception: Exception)
     }
-
-    data class CreationArguments(
-        /**
-         * Allows the library to automatically call destroy() on current state owning machine instance if user tries
-         * to reuse its states in another machine. Usually this is a result of using object states in sequentially created
-         * similar machines. destroy() will be called on the previous machine instance.
-         * If set to false an exception will be thrown on state reuse attempt.
-         */
-        val autoDestroyOnStatesReuse: Boolean = true,
-        /**
-         * Enables Undo transition
-         */
-        val isUndoEnabled: Boolean = false,
-        /**
-         * If set to true, when multiple transitions match event the first matching transition is selected.
-         * if set to false, when multiple transitions match event exception is thrown.
-         * Default if false.
-         */
-        val doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-        /**
-         * If enabled, throws exception on the machine start,
-         * if it contains states or transitions with null or blank names
-         */
-        val requireNonBlankNames: Boolean = false,
-        /**
-         * If set, enables incoming events recording in order to restore [StateMachine] later.
-         * By default, event recording is disabled.
-         * Use [StateMachine.eventRecorder] to access the recording result.
-         */
-        val eventRecordingArguments: EventRecordingArguments? = null
-    )
-
-    data class EventRecordingArguments(
-        /**
-         * If enabled removes all recorded events when detects that the machine was stopped and started again.
-         */
-        val clearRecordsOnMachineRestart: Boolean = true,
-        /**
-         * If enabled skips ignored events, supposing they do not affect restoration of the machine
-         */
-        val skipIgnoredEvents: Boolean = true,
-    )
 }
 
 fun StateMachine.startBlocking(argument: Any? = null) = coroutineAbstraction.runBlocking { start(argument) }
@@ -288,7 +246,7 @@ fun createStdLibStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
+    creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine {
     return with(StdLibCoroutineAbstraction()) {

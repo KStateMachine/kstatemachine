@@ -10,7 +10,7 @@ package ru.nsk.samples
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.metainfo.MetaInfo
-import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
+import ru.nsk.kstatemachine.metainfo.buildUmlMetaInfo
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.state.finalState
 import ru.nsk.kstatemachine.state.initialState
@@ -29,22 +29,22 @@ private object PlantUmlExportWithMetaInfoSample {
 fun main() = runBlocking {
     lateinit var state2: State
     val machine = createStateMachine(this) {
-        metaInfo = UmlMetaInfo(umlLabel = "Nested states sm")
+        metaInfo = buildUmlMetaInfo { umlLabel = "Nested states sm" }
 
         initialState("State1") {
-            metaInfo = UmlMetaInfo("State 1 Label")
+            metaInfo = buildUmlMetaInfo { umlLabel = "State 1 Label" }
             transitionOn<SwitchEvent> {
-                metaInfo = UmlMetaInfo("Transition to State 2")
+                metaInfo = buildUmlMetaInfo { umlLabel = "Transition to State 2" }
                 targetState = { state2 }
             }
         }
 
         state2 = finalState("State2") {
-            metaInfo = UmlMetaInfo(
-                umlLabel = "FinalState 2 Label",
-                umlStateDescriptions = listOf("Description 1", "Description 2"),
-                umlNotes = listOf("Note 1", "Note 2"),
-            )
+            metaInfo = buildUmlMetaInfo {
+                umlLabel = "FinalState 2 Label"
+                umlStateDescriptions = listOf("Description 1", "Description 2")
+                umlNotes = listOf("Note 1", "Note 2")
+            }
         }
     }
 

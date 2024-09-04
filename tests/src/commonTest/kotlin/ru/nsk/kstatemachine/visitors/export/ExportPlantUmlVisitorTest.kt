@@ -16,9 +16,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
+import ru.nsk.kstatemachine.metainfo.buildUmlMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
+import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.targetParallelStates
 
@@ -307,7 +308,7 @@ private fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): State
     return createTestStateMachine(
         coroutineStarterType,
         name = "Pseudo states",
-        creationArguments = CreationArguments(isUndoEnabled = true)
+        creationArguments = buildCreationArguments { isUndoEnabled = true }
     ) {
         val state1 = initialState("state1")
 
@@ -351,13 +352,13 @@ class ExportPlantUmlVisitorTest : StringSpec({
             val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
                 initialState("parallel states", ChildMode.PARALLEL) {
                     state("State1") {
-                        metaInfo = UmlMetaInfo("State 1")
+                        metaInfo = buildUmlMetaInfo { umlLabel = "State 1" }
                         val state11 = initialState("State-11")
                         val state12 = state("State12")
 
                         state11 {
                             transition<SwitchEvent> {
-                                metaInfo = UmlMetaInfo("to State 12")
+                                metaInfo = buildUmlMetaInfo { umlLabel = "to State 12" }
                                 targetState = state12
                             }
                         }
@@ -455,34 +456,34 @@ class ExportPlantUmlVisitorTest : StringSpec({
         "metaInfo export test" {
             val machine = createStateMachine(this, name = "Meta info") {
                 // label for state machine
-                metaInfo = UmlMetaInfo("Nested states sm")
+                metaInfo = buildUmlMetaInfo { umlLabel = "Nested states sm" }
 
                 val state1 = initialState("State-1")
                 val state3 = finalState("State3") {
                     // label for state
-                    metaInfo = UmlMetaInfo(
-                        umlLabel = "Long State 3",
-                        umlStateDescriptions = listOf("Description 1", "Description 2"),
-                        umlNotes = listOf("Note 1", "Note 2"),
-                    )
+                    metaInfo = buildUmlMetaInfo {
+                        umlLabel = "Long State 3"
+                        umlStateDescriptions = listOf("Description 1", "Description 2")
+                        umlNotes = listOf("Note 1", "Note 2")
+                    }
                 }
 
                 val state2 = state("State2") {
                     // label for state
-                    metaInfo = UmlMetaInfo("Long State 2")
+                    metaInfo = buildUmlMetaInfo { umlLabel = "Long State 2" }
                     transition<SwitchEvent> {
                         // label for transition
-                        metaInfo = UmlMetaInfo("That's all")
+                        metaInfo = buildUmlMetaInfo { umlLabel = "That's all" }
                         targetState = state3
                     }
                     transition<SwitchEvent>("back") {
                         // label for transition
-                        metaInfo = UmlMetaInfo("back to State 1")
+                        metaInfo = buildUmlMetaInfo { umlLabel = "back to State 1" }
                         targetState = state1
                     }
                     val finalSubState = finalState("FinalState") {
                         // label for state
-                        metaInfo = UmlMetaInfo("Final sub state")
+                        metaInfo = buildUmlMetaInfo { umlLabel = "Final sub state" }
                     }
                     initialState("Initial subState") {
                         transition<SwitchEvent> { targetState = finalSubState }
@@ -491,23 +492,23 @@ class ExportPlantUmlVisitorTest : StringSpec({
 
                 state1 {
                     transition<SwitchEvent> {
-                        metaInfo = UmlMetaInfo("go to ${state2.name}")
+                        metaInfo = buildUmlMetaInfo { umlLabel = "go to ${state2.name}" }
                         targetState = state2
                     }
                     transition<SwitchEvent>("self targeted") {
                         targetState = this@state1
-                        metaInfo = UmlMetaInfo(umlNotes = listOf("Note 1", "Note 2"))
+                        metaInfo = buildUmlMetaInfo { umlNotes = listOf("Note 1", "Note 2") }
                     }
                     transition<SwitchEvent>()
 
                     val state12 = state("State12")
                     val choiceState = initialChoiceState("ChoiceState") { state12 }
-                    choiceState.metaInfo = UmlMetaInfo(
-                        umlLabel = "Choice label",
+                    choiceState.metaInfo = buildUmlMetaInfo {
+                        umlLabel = "Choice label"
                         // no plantUml nor Mermaid can draw this
-                        umlStateDescriptions = listOf("Description 1", "Description 2"),
+                        umlStateDescriptions = listOf("Description 1", "Description 2")
                         umlNotes = listOf("Note 1", "Note 2")
-                    )
+                    }
                 }
             }
 

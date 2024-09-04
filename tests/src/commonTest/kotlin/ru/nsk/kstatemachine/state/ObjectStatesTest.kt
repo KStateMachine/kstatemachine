@@ -14,11 +14,7 @@ import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.ObjectStatesTestData.State1
 import ru.nsk.kstatemachine.state.ObjectStatesTestData.State2
-import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.statemachine.StateMachine.*
-import ru.nsk.kstatemachine.statemachine.destroyBlocking
-import ru.nsk.kstatemachine.statemachine.processEventBlocking
-import ru.nsk.kstatemachine.statemachine.stop
+import ru.nsk.kstatemachine.statemachine.*
 
 private object ObjectStatesTestData {
     object State1 : DefaultState("state1")
@@ -65,7 +61,7 @@ class ObjectStatesTest : StringSpec({
 private fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroyOnStatesReuse: Boolean): StateMachine {
     val machine = createTestStateMachine(
         coroutineStarterType,
-        creationArguments = CreationArguments(autoDestroyOnStatesReuse = autoDestroyOnStatesReuse),
+        creationArguments = buildCreationArguments { this.autoDestroyOnStatesReuse = autoDestroyOnStatesReuse },
     ) {
         addInitialState(State1) {
             transition<SwitchEvent> {

@@ -20,14 +20,17 @@ interface MetaInfo
 /**
  * Standard [MetaInfo], to control export PlantUML and Mermaid feature visualization.
  */
-interface IUmlMetaInfo : MetaInfo {
+interface UmlMetaInfo : MetaInfo {
     /**
      * Will be mapped to "long name" for [IState], and a "label" for [Transition]
+     * Default: null
      */
     val umlLabel: String?
+
     /**
      * Add description lines for [IState]
      * Does not have effect for [Transition]
+     * Default: emptyList()
      */
     val umlStateDescriptions: List<String>
 
@@ -35,16 +38,27 @@ interface IUmlMetaInfo : MetaInfo {
      * For [IState] translated to "note right of".
      * For [Transition] translated to "note on link" (supports only one note).
      * Mermaid does not support this, so it will not take any effect.
+     * Default: emptyList()
      */
     val umlNotes: List<String>
 }
 
 /**
- * [IUmlMetaInfo] Implementation is separated from its interface as a user may combine multiple [MetaInfo]
- * interfaces into one object.
+ * [UmlMetaInfo] Implementation is separated from its interface as a user may combine multiple [MetaInfo]
+ * interfaces into one object. Data class should not be exposed to public APIs due to binary compatibility, users should
+ * use [buildUmlMetaInfo] instead.
  */
-data class UmlMetaInfo(
-    override val umlLabel: String? = null,
-    override val umlStateDescriptions: List<String> = emptyList(),
-    override val umlNotes: List<String> = emptyList(),
-): IUmlMetaInfo
+interface UmlMetaInfoBuilder : UmlMetaInfo {
+    override var umlLabel: String?
+    override var umlStateDescriptions: List<String>
+    override var umlNotes: List<String>
+}
+
+private data class UmlMetaInfoBuilderImpl(
+    override var umlLabel: String? = null,
+    override var umlStateDescriptions: List<String> = emptyList(),
+    override var umlNotes: List<String> = emptyList(),
+) : UmlMetaInfoBuilder
+
+fun buildUmlMetaInfo(builder: UmlMetaInfoBuilder.() -> Unit): UmlMetaInfo =
+    UmlMetaInfoBuilderImpl().apply(builder).copy()

@@ -15,7 +15,7 @@ import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.transition
-import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
+import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 
 class RequireNonBlankNamesVisitorTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -85,7 +85,7 @@ class RequireNonBlankNamesVisitorTest : StringSpec({
         "check machine started with blank names and disabled check" {
             createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(requireNonBlankNames = false)
+                creationArguments = buildCreationArguments { requireNonBlankNames = false }
             ) {
                 initialState()
             }
@@ -95,7 +95,7 @@ class RequireNonBlankNamesVisitorTest : StringSpec({
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 start = false,
-                creationArguments = CreationArguments(requireNonBlankNames = true)
+                creationArguments = buildCreationArguments { requireNonBlankNames = true }
             ) {
                 initialState()
             }

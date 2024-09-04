@@ -22,8 +22,6 @@ import ru.nsk.kstatemachine.state.transition
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.IGNORED
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
-import ru.nsk.kstatemachine.statemachine.StateMachine.CreationArguments
-import ru.nsk.kstatemachine.statemachine.StateMachine.EventRecordingArguments
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -42,7 +40,7 @@ class EventRecorderTest : StringSpec({
         "check recorded events with arguments" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<FirstEvent>()
@@ -64,10 +62,10 @@ class EventRecorderTest : StringSpec({
         "check recorded events and undo" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    isUndoEnabled = true,
-                    eventRecordingArguments = EventRecordingArguments()
-                )
+                creationArguments = buildCreationArguments {
+                    isUndoEnabled = true
+                    eventRecordingArguments = buildEventRecordingArguments {}
+                }
             ) {
                 initialState()
                 transition<SwitchEvent>()
@@ -87,7 +85,7 @@ class EventRecorderTest : StringSpec({
         "check recorded events with StopEvent" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent>()
@@ -107,7 +105,7 @@ class EventRecorderTest : StringSpec({
         "check recorded events with DestroyEvent" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent>()
@@ -127,11 +125,11 @@ class EventRecorderTest : StringSpec({
         "check recorded events on restart without ${EventRecordingArguments::clearRecordsOnMachineRestart.name} flag" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    eventRecordingArguments = EventRecordingArguments(
-                        clearRecordsOnMachineRestart = false,
-                    )
-                )
+                creationArguments = buildCreationArguments {
+                    eventRecordingArguments = buildEventRecordingArguments {
+                        clearRecordsOnMachineRestart = false
+                    }
+                }
             ) {
                 initialState()
                 transition<FirstEvent>()
@@ -154,7 +152,7 @@ class EventRecorderTest : StringSpec({
         "check recorded events on restart with ${EventRecordingArguments::clearRecordsOnMachineRestart.name} flag (default)" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<FirstEvent>()
@@ -176,7 +174,7 @@ class EventRecorderTest : StringSpec({
         "check recorded events with ${EventRecordingArguments::skipIgnoredEvents.name} flag (default)" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
             }
@@ -191,11 +189,11 @@ class EventRecorderTest : StringSpec({
         "check recorded events without ${EventRecordingArguments::skipIgnoredEvents.name} flag" {
             val machine = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    eventRecordingArguments = EventRecordingArguments(
+                creationArguments = buildCreationArguments {
+                    eventRecordingArguments = buildEventRecordingArguments {
                         skipIgnoredEvents = false
-                    )
-                )
+                    }
+                }
             ) {
                 initialState()
             }

@@ -11,12 +11,12 @@ import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
-data class RestorationResult(
+class RestorationResult internal constructor(
     val results: List<RestoredEventResult>,
     val warnings: List<RestorationWarningException>,
 )
 
-data class RestoredEventResult(
+class RestoredEventResult internal constructor(
     val record: Record,
     val processingResult: Result<ProcessingResult>,
     val warnings: List<RestorationWarningException>,
@@ -27,7 +27,7 @@ enum class WarningType {
     RecordedAndProcessedEventCountNotMatch,
 }
 
-class RestorationWarningException(
+class RestorationWarningException internal constructor(
     val warningType: WarningType,
     message: String,
     cause: Throwable? = null,

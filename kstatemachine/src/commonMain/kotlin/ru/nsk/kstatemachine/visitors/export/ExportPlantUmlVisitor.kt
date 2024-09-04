@@ -9,7 +9,7 @@ package ru.nsk.kstatemachine.visitors.export
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.isNeighbor
-import ru.nsk.kstatemachine.metainfo.IUmlMetaInfo
+import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
@@ -44,7 +44,7 @@ internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
  *
  * Conditional transitions are partly supported with [unsafeCallConditionalLambdas] flag.
- * Uses [IUmlMetaInfo] for output sugaring.
+ * Uses [UmlMetaInfo] for output sugaring.
  */
 internal class ExportPlantUmlVisitor(
     private val format: CompatibilityFormat,
@@ -188,7 +188,7 @@ internal class ExportPlantUmlVisitor(
     }
 
     private fun IState.printStateDescriptions() {
-        val descriptions = (metaInfo as? IUmlMetaInfo)?.umlStateDescriptions.orEmpty()
+        val descriptions = (metaInfo as? UmlMetaInfo)?.umlStateDescriptions.orEmpty()
         descriptions.forEach { line("${graphName()} : $it") }
     }
 
@@ -197,8 +197,8 @@ internal class ExportPlantUmlVisitor(
     }
 
     private companion object {
-        val MetaInfo.umlNotes get() = (this as? IUmlMetaInfo)?.umlNotes.orEmpty()
-        val MetaInfo.umlLabel get() = (this as? IUmlMetaInfo)?.umlLabel
+        val MetaInfo.umlNotes get() = (this as? UmlMetaInfo)?.umlNotes.orEmpty()
+        val MetaInfo.umlLabel get() = (this as? UmlMetaInfo)?.umlLabel
 
         fun IState.graphName(): String {
             val name = (name ?: "State${hashCode()}").replace(Regex("[ -]"), "_")

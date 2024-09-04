@@ -11,6 +11,8 @@ import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.InternalState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 
+annotation class VisibleForTesting
+
 /**
  * [forEach] analog which ignores internal [StateMachine]s
  */

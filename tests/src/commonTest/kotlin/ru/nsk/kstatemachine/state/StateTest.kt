@@ -13,7 +13,7 @@ import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
-import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
+import ru.nsk.kstatemachine.metainfo.buildUmlMetaInfo
 import ru.nsk.kstatemachine.state.StateTestData.SubclassState
 import ru.nsk.kstatemachine.statemachine.destroy
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
@@ -74,11 +74,11 @@ class StateTest : StringSpec({
             lateinit var state: State
             createTestStateMachine(coroutineStarterType) {
                 state = initialState {
-                    metaInfo = UmlMetaInfo("label")
+                    metaInfo = buildUmlMetaInfo { umlLabel = "label" }
                 }
             }
             shouldThrowUnitWithMessage<IllegalStateException>("Can not change metaInfo after state machine started") {
-                state.metaInfo = UmlMetaInfo("fail label")
+                state.metaInfo = buildUmlMetaInfo { umlLabel = "fail label" }
             }
         }
 

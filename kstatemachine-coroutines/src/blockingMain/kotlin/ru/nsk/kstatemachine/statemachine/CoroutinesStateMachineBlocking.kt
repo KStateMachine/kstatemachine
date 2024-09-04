@@ -20,7 +20,7 @@ fun createStateMachineBlocking(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
+    creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
 ) = with(CoroutinesLibCoroutineAbstraction(scope)) {
     runBlocking {

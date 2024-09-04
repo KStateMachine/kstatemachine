@@ -32,7 +32,7 @@ suspend fun createStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     start: Boolean = true,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
+    creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
 ) = CoroutinesLibCoroutineAbstraction(scope)
     .createStateMachine(name, childMode, start, creationArguments, init)

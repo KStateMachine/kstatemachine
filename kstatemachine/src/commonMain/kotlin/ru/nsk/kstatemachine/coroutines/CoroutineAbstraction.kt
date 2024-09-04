@@ -8,8 +8,7 @@
 package ru.nsk.kstatemachine.coroutines
 
 import ru.nsk.kstatemachine.state.ChildMode
-import ru.nsk.kstatemachine.statemachine.BuildingStateMachine
-import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachineImpl
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
@@ -57,7 +56,7 @@ suspend fun CoroutineAbstraction.createStateMachine(
     name: String?,
     childMode: ChildMode,
     start: Boolean,
-    creationArguments: StateMachine.CreationArguments = StateMachine.CreationArguments(),
+    creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
 ): StateMachine = StateMachineImpl(
     name,

@@ -8,21 +8,16 @@
 package ru.nsk.kstatemachine.persistence
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import io.kotest.mpp.start
 import io.mockk.called
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
-import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.*
-import ru.nsk.kstatemachine.statemachine.destroy
-import ru.nsk.kstatemachine.statemachine.stop
-import ru.nsk.kstatemachine.statemachine.undo
 
 class RestoreByRecordedEventsTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -58,7 +53,7 @@ class RestoreByRecordedEventsTest : StringSpec({
         "check event restoration on different machines without structure check" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
             }
@@ -75,7 +70,7 @@ class RestoreByRecordedEventsTest : StringSpec({
         "negative check event restoration on different machines throws" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
             }
@@ -95,7 +90,7 @@ class RestoreByRecordedEventsTest : StringSpec({
         "check event recording preconditions with structure check" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
             }
@@ -103,7 +98,7 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
             }
@@ -115,7 +110,7 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent>()
@@ -125,7 +120,7 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent> {
@@ -143,7 +138,7 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent>()
@@ -153,7 +148,7 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 initialState()
                 transition<SwitchEvent> {
@@ -169,10 +164,10 @@ class RestoreByRecordedEventsTest : StringSpec({
         "restore the machine that is using Undo feature" {
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    isUndoEnabled = true,
-                    eventRecordingArguments = EventRecordingArguments()
-                )
+                creationArguments = buildCreationArguments {
+                    isUndoEnabled = true
+                    eventRecordingArguments = buildEventRecordingArguments {}
+                }
             ) {
                 initialState("first")
                 val secondState = state("second")
@@ -185,10 +180,10 @@ class RestoreByRecordedEventsTest : StringSpec({
             lateinit var firstState: State
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    isUndoEnabled = true,
-                    eventRecordingArguments = EventRecordingArguments()
-                )
+                creationArguments = buildCreationArguments {
+                    isUndoEnabled = true
+                    eventRecordingArguments = buildEventRecordingArguments {}
+                }
             ) {
                 firstState = initialState("first")
                 val secondState = state("second")
@@ -202,7 +197,7 @@ class RestoreByRecordedEventsTest : StringSpec({
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
                 start = false,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 val firstState = state("first")
                 val secondState = state("second")
@@ -217,7 +212,7 @@ class RestoreByRecordedEventsTest : StringSpec({
             lateinit var firstState: State
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 firstState = state("first")
                 val secondState = state("second")
@@ -241,7 +236,7 @@ class RestoreByRecordedEventsTest : StringSpec({
                 coroutineStarterType,
                 name = "machine1",
                 start = false,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 val firstState = state("first1")
                 val secondState = state("second1")
@@ -258,7 +253,7 @@ class RestoreByRecordedEventsTest : StringSpec({
                 coroutineStarterType,
                 name = "machine2",
                 start = false,
-                creationArguments = CreationArguments(eventRecordingArguments = EventRecordingArguments())
+                creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
                 firstState = state("first2")
                 val secondState = state("second2")
@@ -274,9 +269,9 @@ class RestoreByRecordedEventsTest : StringSpec({
             lateinit var secondState: State
             val machine1 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    eventRecordingArguments = EventRecordingArguments(clearRecordsOnMachineRestart = false)
-                )
+                creationArguments = buildCreationArguments {
+                    eventRecordingArguments = buildEventRecordingArguments { clearRecordsOnMachineRestart = false }
+                }
             ) {
                 val firstState = state("first")
                 secondState = state("second")
@@ -291,9 +286,9 @@ class RestoreByRecordedEventsTest : StringSpec({
 
             val machine2 = createTestStateMachine(
                 coroutineStarterType,
-                creationArguments = CreationArguments(
-                    eventRecordingArguments = EventRecordingArguments(clearRecordsOnMachineRestart = false)
-                )
+                creationArguments = buildCreationArguments {
+                    eventRecordingArguments = buildEventRecordingArguments { clearRecordsOnMachineRestart = false }
+                }
             ) {
                 val firstState = state("first")
                 secondState = state("second")
