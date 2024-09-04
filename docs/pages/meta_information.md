@@ -19,6 +19,7 @@ The library provides `metaInfo` property for `IState` and `Transition` types.
 This mechanism is extendable and users may add their own `MetaInfo` sub interfaces/classes if necessary.
 Currently, the only standard implementation is `UmlMetaInfo` which is useful for export feature.
 See [controlling export output](https://kstatemachine.github.io/kstatemachine/pages/export.html#controlling-export-output).
+You can build it using `buildUmlMetaInfo()` function.
 
 {: .note }
 `MetaInfo` considered to be immutable data by design

@@ -64,15 +64,16 @@ See [Mermaid nested states export sample](https://github.com/nsk90/kstatemachine
 
 ## Controlling export output
 
-To beautify and enrich export output, you can use `UmlMetaInfo` for both `IState` and `Transition`:
+To beautify and enrich export output, you can use `UmlMetaInfo` for both `IState` and `Transition`. It can be built 
+with `buildUmlMetaInfo()` function:
 
 ```kotlin
 state("State1") {
-    metaInfo = UmlMetaInfo(
-        umlLabel = "State 1 long label",
-        umlStateDescriptions = listOf("Description 1", "Description 2"),
-        umlNotes = listOf("Note 1", "Note 2"),
-    )
+    metaInfo = buildUmlMetaInfo {
+        umlLabel = "State 1 long label"
+        umlStateDescriptions = listOf("Description 1", "Description 2")
+        umlNotes = listOf("Note 1", "Note 2")
+    }
 }
 ```
 
