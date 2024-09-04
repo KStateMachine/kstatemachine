@@ -24,7 +24,8 @@ abstract class TransitionBuilder<E : Event>(protected val name: String?, protect
     var type = TransitionType.LOCAL
     var metaInfo: MetaInfo? = null
 
-    abstract fun build(): Transition<E>
+    @PublishedApi
+    internal abstract fun build(): Transition<E>
 }
 
 abstract class BaseGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
@@ -36,6 +37,7 @@ abstract class GuardedTransitionBuilder<E : Event, S : IState>(name: String?, so
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
     var targetState: S? = null
 
+    @PublishedApi
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = {
             when (it) {
@@ -59,6 +61,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
     lateinit var targetState: suspend EventAndArgument<E>.() -> S
 
+    @PublishedApi
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = { policy ->
             when (policy) {
@@ -82,6 +85,7 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
     TransitionBuilder<E>(name, sourceState) {
     lateinit var direction: suspend EventAndArgument<E>.() -> TransitionDirection
 
+    @PublishedApi
     override fun build(): Transition<E> {
         val direction: TransitionDirectionProducer<E> = { policy ->
             when (policy) {
@@ -114,6 +118,7 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
     /** User should initialize this filed */
     lateinit var targetState: DataState<D>
 
+    @PublishedApi
     override fun build(): Transition<E> {
         require(this::targetState.isInitialized) { "targetState should be set in this transition builder" }
         val direction: TransitionDirectionProducer<E> = { policy ->

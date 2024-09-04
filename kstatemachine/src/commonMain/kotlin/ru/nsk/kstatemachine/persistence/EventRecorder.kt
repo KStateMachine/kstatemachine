@@ -94,6 +94,6 @@ internal class EventRecorderImpl(
     }
 
     override fun getRecordedEvents(): RecordedEvents {
-        return RecordedEvents(machine.structureHashCode, records)
+        return RecordedEvents(machine.structureHashCode, records.toList() /* defensive copy */)
     }
 }
