@@ -41,7 +41,7 @@ println(machine.exportToPlantUml())
 
 Copy/paste resulting output to [Plant UML online editor](http://www.plantuml.com/plantuml/)
 
-See [PlantUML nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
+See [PlantUML nested states export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportSample.kt)
 
 ## Mermaid
 
@@ -60,7 +60,7 @@ println(machine.exportToMermaid())
   to view diagrams directly in IDE for file types: `.mmd` and `.mermaid`.
 * or copy/paste resulting output to [Mermaid live editor](https://mermaid.live/)
 
-See [Mermaid nested states export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
+See [Mermaid nested states export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MermaidExportSample.kt)
 
 ## Controlling export output
 
@@ -77,5 +77,5 @@ state("State1") {
 }
 ```
 
-See [PlantUML with MetaInfo export sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
+See [PlantUML with MetaInfo export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
 

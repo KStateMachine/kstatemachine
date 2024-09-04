@@ -124,7 +124,7 @@ state1 {
 }
 ```
 
-See [guarded transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
+See [guarded transition sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 
 ```mermaid
 ---
@@ -279,7 +279,7 @@ state {
 }
 ```
 
-See [undo transition sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
+See [undo transition sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)
 
 ## Cross-level transitions
 
