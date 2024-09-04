@@ -7,6 +7,7 @@ object Versions {
     // tools
     const val kotlin = "2.0.0"
     const val kotlinDokka = "1.9.20"
+    const val kotlinBinaryCompatibilityValidator = "0.16.3"
     const val jacocoTool = "0.8.11"
 
     // compatibility

@@ -1,0 +1,67 @@
+public final class ru/nsk/kstatemachine/statemachine/CoroutinesStateMachineBlockingKt {
+	public static final fun createStateMachineBlocking (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public static synthetic fun createStateMachineBlocking$default (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lru/nsk/kstatemachine/statemachine/StateMachine;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/CoroutinesStateMachineKt {
+	public static final fun createStateMachine (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createStateMachine$default (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun processEventByAsync (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineStart;)Lkotlinx/coroutines/Deferred;
+	public static synthetic fun processEventByAsync$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineStart;ILjava/lang/Object;)Lkotlinx/coroutines/Deferred;
+	public static final fun processEventByLaunch (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineStart;)V
+	public static synthetic fun processEventByLaunch$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineStart;ILjava/lang/Object;)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineFlowKt {
+	public static final fun activeStatesFlow (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lkotlinx/coroutines/flow/StateFlow;
+	public static final fun stateMachineNotificationFlow (Lru/nsk/kstatemachine/statemachine/StateMachine;IILkotlinx/coroutines/channels/BufferOverflow;)Lkotlinx/coroutines/flow/SharedFlow;
+	public static synthetic fun stateMachineNotificationFlow$default (Lru/nsk/kstatemachine/statemachine/StateMachine;IILkotlinx/coroutines/channels/BufferOverflow;ILjava/lang/Object;)Lkotlinx/coroutines/flow/SharedFlow;
+}
+
+public abstract class ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public synthetic fun <init> (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getMachine ()Lru/nsk/kstatemachine/statemachine/StateMachine;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$Destroyed : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$Started : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$StateEntry : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$StateExit : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$StateFinished : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$Stopped : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$TransitionComplete : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getActiveStates ()Ljava/util/Set;
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineNotification$TransitionTriggered : ru/nsk/kstatemachine/statemachine/StateMachineNotification {
+	public fun <init> (Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public final fun getTransitionParams ()Lru/nsk/kstatemachine/transition/TransitionParams;
+}
+

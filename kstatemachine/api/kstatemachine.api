@@ -1,0 +1,915 @@
+public final class ru/nsk/kstatemachine/LibraryUtilsKt {
+	public static final fun isNeighbor (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;)Z
+	public static final fun isSubStateOf (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;)Z
+}
+
+public abstract interface annotation class ru/nsk/kstatemachine/VisibleForTesting : java/lang/annotation/Annotation {
+}
+
+public abstract interface class ru/nsk/kstatemachine/coroutines/CoroutineAbstraction {
+	public abstract fun runBlocking (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun withContext (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/coroutines/CoroutineAbstractionKt {
+	public static final fun createStateMachine (Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createStateMachine$default (Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/DataEvent : ru/nsk/kstatemachine/event/Event {
+	public abstract fun getData ()Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/DataExtractor {
+	public abstract fun extract (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun extractFinishedEvent (Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/event/FinishedEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getDataClass ()Lkotlin/reflect/KClass;
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/Event {
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/EventMatcher {
+	public static final field Companion Lru/nsk/kstatemachine/event/EventMatcher$Companion;
+	public abstract fun getEventClass ()Lkotlin/reflect/KClass;
+	public abstract fun match (Lru/nsk/kstatemachine/event/Event;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/event/EventMatcher$Companion {
+}
+
+public final class ru/nsk/kstatemachine/event/EventMatcherKt {
+	public static final fun finishedEventMatcher (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/event/EventMatcher;
+}
+
+public final class ru/nsk/kstatemachine/event/FinishedEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getState ()Lru/nsk/kstatemachine/state/IState;
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/GeneratedEvent : ru/nsk/kstatemachine/event/Event {
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/StartEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public abstract fun getStartState ()Lru/nsk/kstatemachine/state/IState;
+}
+
+public final class ru/nsk/kstatemachine/event/UndoEvent : ru/nsk/kstatemachine/event/Event {
+	public static final field INSTANCE Lru/nsk/kstatemachine/event/UndoEvent;
+}
+
+public final class ru/nsk/kstatemachine/event/WrappedEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public fun <init> (Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
+	public final fun getArgument ()Ljava/lang/Object;
+	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/MetaInfo {
+}
+
+public final class ru/nsk/kstatemachine/metainfo/MetaInfoKt {
+	public static final fun buildUmlMetaInfo (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/metainfo/UmlMetaInfo;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/UmlMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+	public abstract fun getUmlLabel ()Ljava/lang/String;
+	public abstract fun getUmlNotes ()Ljava/util/List;
+	public abstract fun getUmlStateDescriptions ()Ljava/util/List;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/UmlMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/UmlMetaInfo {
+	public abstract fun getUmlLabel ()Ljava/lang/String;
+	public abstract fun getUmlNotes ()Ljava/util/List;
+	public abstract fun getUmlStateDescriptions ()Ljava/util/List;
+	public abstract fun setUmlLabel (Ljava/lang/String;)V
+	public abstract fun setUmlNotes (Ljava/util/List;)V
+	public abstract fun setUmlStateDescriptions (Ljava/util/List;)V
+}
+
+public final class ru/nsk/kstatemachine/persistence/EmptyValidator : ru/nsk/kstatemachine/persistence/RestorationResultValidator {
+	public static final field INSTANCE Lru/nsk/kstatemachine/persistence/EmptyValidator;
+	public fun validate (Lru/nsk/kstatemachine/persistence/RestorationResult;Lru/nsk/kstatemachine/persistence/RecordedEvents;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/persistence/EventRecorder {
+	public abstract fun getRecordedEvents ()Lru/nsk/kstatemachine/persistence/RecordedEvents;
+}
+
+public final class ru/nsk/kstatemachine/persistence/Record {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEventAndArgument ()Lru/nsk/kstatemachine/transition/EventAndArgument;
+	public final fun getProcessingResult ()Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public fun hashCode ()I
+}
+
+public final class ru/nsk/kstatemachine/persistence/RecordedEvents {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRecords ()Ljava/util/List;
+	public final fun getStructureHashCode ()I
+	public fun hashCode ()I
+}
+
+public final class ru/nsk/kstatemachine/persistence/RestorationResult {
+	public final fun getResults ()Ljava/util/List;
+	public final fun getWarnings ()Ljava/util/List;
+}
+
+public final class ru/nsk/kstatemachine/persistence/RestorationResultValidationException : java/lang/RuntimeException {
+	public fun <init> (Lru/nsk/kstatemachine/persistence/RestorationResult;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Lru/nsk/kstatemachine/persistence/RestorationResult;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getResult ()Lru/nsk/kstatemachine/persistence/RestorationResult;
+}
+
+public abstract interface class ru/nsk/kstatemachine/persistence/RestorationResultValidator {
+	public abstract fun validate (Lru/nsk/kstatemachine/persistence/RestorationResult;Lru/nsk/kstatemachine/persistence/RecordedEvents;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+}
+
+public final class ru/nsk/kstatemachine/persistence/RestorationWarningException : java/lang/RuntimeException {
+	public final fun getWarningType ()Lru/nsk/kstatemachine/persistence/WarningType;
+}
+
+public final class ru/nsk/kstatemachine/persistence/RestoreByRecordedEventsKt {
+	public static final fun restoreByRecordedEvents (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/RecordedEvents;ZZLru/nsk/kstatemachine/persistence/RestorationResultValidator;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun restoreByRecordedEvents$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/RecordedEvents;ZZLru/nsk/kstatemachine/persistence/RestorationResultValidator;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun restoreByRecordedEventsBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/RecordedEvents;ZZ)V
+	public static synthetic fun restoreByRecordedEventsBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/RecordedEvents;ZZILjava/lang/Object;)V
+}
+
+public final class ru/nsk/kstatemachine/persistence/RestoredEventResult {
+	public final fun getProcessingResult-d1pmJ48 ()Ljava/lang/Object;
+	public final fun getRecord ()Lru/nsk/kstatemachine/persistence/Record;
+	public final fun getWarnings ()Ljava/util/List;
+}
+
+public final class ru/nsk/kstatemachine/persistence/StrictValidator : ru/nsk/kstatemachine/persistence/RestorationResultValidator {
+	public static final field INSTANCE Lru/nsk/kstatemachine/persistence/StrictValidator;
+	public fun validate (Lru/nsk/kstatemachine/persistence/RestorationResult;Lru/nsk/kstatemachine/persistence/RecordedEvents;Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+}
+
+public final class ru/nsk/kstatemachine/persistence/WarningType : java/lang/Enum {
+	public static final field ProcessingResultNotMatch Lru/nsk/kstatemachine/persistence/WarningType;
+	public static final field RecordedAndProcessedEventCountNotMatch Lru/nsk/kstatemachine/persistence/WarningType;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/persistence/WarningType;
+	public static fun values ()[Lru/nsk/kstatemachine/persistence/WarningType;
+}
+
+public class ru/nsk/kstatemachine/state/BaseStateImpl : ru/nsk/kstatemachine/state/InternalState {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;)V
+	public fun addListener (Lru/nsk/kstatemachine/state/IState$Listener;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public fun addState (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/IState;
+	public fun addTransition (Lru/nsk/kstatemachine/transition/Transition;)Lru/nsk/kstatemachine/transition/Transition;
+	public fun asState ()Lru/nsk/kstatemachine/state/BaseStateImpl;
+	public synthetic fun asState ()Lru/nsk/kstatemachine/state/IState;
+	public fun getChildMode ()Lru/nsk/kstatemachine/state/ChildMode;
+	public synthetic fun getInitialState ()Lru/nsk/kstatemachine/state/IState;
+	public fun getInitialState ()Lru/nsk/kstatemachine/state/InternalState;
+	public synthetic fun getInternalParent ()Lru/nsk/kstatemachine/state/InternalNode;
+	public fun getInternalParent ()Lru/nsk/kstatemachine/state/InternalState;
+	public fun getListeners ()Ljava/util/Collection;
+	public fun getMachine ()Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public fun getMetaInfo ()Lru/nsk/kstatemachine/metainfo/MetaInfo;
+	public fun getName ()Ljava/lang/String;
+	public fun getPayload ()Ljava/lang/Object;
+	public fun getStates ()Ljava/util/Set;
+	public fun getTransitions ()Ljava/util/Set;
+	public fun isActive ()Z
+	public fun isFinished ()Z
+	protected fun onDoEnter (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun onDoExit (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun removeListener (Lru/nsk/kstatemachine/state/IState$Listener;)V
+	public fun setInitialState (Lru/nsk/kstatemachine/state/IState;)V
+	public fun setMetaInfo (Lru/nsk/kstatemachine/metainfo/MetaInfo;)V
+	public fun setPayload (Ljava/lang/Object;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class ru/nsk/kstatemachine/state/ChildMode : java/lang/Enum {
+	public static final field EXCLUSIVE Lru/nsk/kstatemachine/state/ChildMode;
+	public static final field PARALLEL Lru/nsk/kstatemachine/state/ChildMode;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/state/ChildMode;
+	public static fun values ()[Lru/nsk/kstatemachine/state/ChildMode;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/DataState : ru/nsk/kstatemachine/state/DataTransitionStateApi, ru/nsk/kstatemachine/state/IState {
+	public abstract fun getData ()Ljava/lang/Object;
+	public abstract fun getDataClass ()Lkotlin/reflect/KClass;
+	public abstract fun getDefaultData ()Ljava/lang/Object;
+	public abstract fun getLastData ()Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/DataState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/DataState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/DataState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/DataTransitionStateApi : ru/nsk/kstatemachine/state/TransitionStateApi {
+}
+
+public class ru/nsk/kstatemachine/state/DefaultDataState : ru/nsk/kstatemachine/state/BaseStateImpl, ru/nsk/kstatemachine/state/DataState {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lru/nsk/kstatemachine/state/ChildMode;Lru/nsk/kstatemachine/event/DataExtractor;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Lru/nsk/kstatemachine/state/ChildMode;Lru/nsk/kstatemachine/event/DataExtractor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getData ()Ljava/lang/Object;
+	public fun getDataClass ()Lkotlin/reflect/KClass;
+	public fun getDefaultData ()Ljava/lang/Object;
+	public fun getLastData ()Ljava/lang/Object;
+	public fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun onDoEnter (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun onDoExit (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public class ru/nsk/kstatemachine/state/DefaultFinalDataState : ru/nsk/kstatemachine/state/DefaultDataState, ru/nsk/kstatemachine/state/FinalDataState {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Lru/nsk/kstatemachine/event/DataExtractor;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Lru/nsk/kstatemachine/event/DataExtractor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public class ru/nsk/kstatemachine/state/DefaultFinalState : ru/nsk/kstatemachine/state/DefaultState, ru/nsk/kstatemachine/state/FinalState {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public class ru/nsk/kstatemachine/state/DefaultState : ru/nsk/kstatemachine/state/BaseStateImpl, ru/nsk/kstatemachine/state/State {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;)V
+	public synthetic fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/FinalDataState : ru/nsk/kstatemachine/state/DataState, ru/nsk/kstatemachine/state/IFinalState {
+}
+
+public final class ru/nsk/kstatemachine/state/FinalDataState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/FinalDataState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/FinalDataState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/FinalDataState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/FinalDataState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/FinalState : ru/nsk/kstatemachine/state/IFinalState, ru/nsk/kstatemachine/state/State {
+}
+
+public final class ru/nsk/kstatemachine/state/FinalState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/FinalState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/FinalState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/FinalState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/FinalState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/GroupListener {
+	public abstract fun unsubscribe ()V
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/HistoryState : ru/nsk/kstatemachine/state/PseudoState {
+	public abstract fun getDefaultState ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getHistoryType ()Lru/nsk/kstatemachine/state/HistoryType;
+	public abstract fun getStoredState ()Lru/nsk/kstatemachine/state/IState;
+}
+
+public final class ru/nsk/kstatemachine/state/HistoryState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/HistoryState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/HistoryState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/HistoryState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/HistoryState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/HistoryType : java/lang/Enum {
+	public static final field DEEP Lru/nsk/kstatemachine/state/HistoryType;
+	public static final field SHALLOW Lru/nsk/kstatemachine/state/HistoryType;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/state/HistoryType;
+	public static fun values ()[Lru/nsk/kstatemachine/state/HistoryType;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/IFinalState : ru/nsk/kstatemachine/state/IState {
+}
+
+public final class ru/nsk/kstatemachine/state/IFinalState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/IFinalState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/IFinalState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/IFinalState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/IFinalState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/IState : ru/nsk/kstatemachine/state/TransitionStateApi, ru/nsk/kstatemachine/visitors/VisitorAcceptor {
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public abstract fun addListener (Lru/nsk/kstatemachine/state/IState$Listener;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public abstract fun addState (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getChildMode ()Lru/nsk/kstatemachine/state/ChildMode;
+	public abstract fun getInitialState ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getListeners ()Ljava/util/Collection;
+	public abstract fun getMachine ()Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public abstract fun getMetaInfo ()Lru/nsk/kstatemachine/metainfo/MetaInfo;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getParent ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getPayload ()Ljava/lang/Object;
+	public abstract fun getStates ()Ljava/util/Set;
+	public abstract fun isActive ()Z
+	public abstract fun isFinished ()Z
+	public abstract fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun removeListener (Lru/nsk/kstatemachine/state/IState$Listener;)V
+	public abstract fun setInitialState (Lru/nsk/kstatemachine/state/IState;)V
+	public abstract fun setMetaInfo (Lru/nsk/kstatemachine/metainfo/MetaInfo;)V
+	public abstract fun setPayload (Ljava/lang/Object;)V
+}
+
+public final class ru/nsk/kstatemachine/state/IState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static synthetic fun addState$default (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState;
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/IState$Listener {
+	public abstract fun onEntry (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onExit (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onFinished (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/IState$Listener$DefaultImpls {
+	public static fun onEntry (Lru/nsk/kstatemachine/state/IState$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onExit (Lru/nsk/kstatemachine/state/IState$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onFinished (Lru/nsk/kstatemachine/state/IState$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/IStateKt {
+	public static final fun activeStates (Lru/nsk/kstatemachine/state/IState;Z)Ljava/util/Set;
+	public static synthetic fun activeStates$default (Lru/nsk/kstatemachine/state/IState;ZILjava/lang/Object;)Ljava/util/Set;
+	public static final fun addFinalState (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IFinalState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/IFinalState;
+	public static synthetic fun addFinalState$default (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IFinalState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/IFinalState;
+	public static final fun addInitialState (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/IState;
+	public static synthetic fun addInitialState$default (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState;
+	public static final fun choiceState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/state/pseudo/DefaultChoiceState;
+	public static synthetic fun choiceState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/pseudo/DefaultChoiceState;
+	public static final fun finalState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/DefaultFinalState;
+	public static synthetic fun finalState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/DefaultFinalState;
+	public static final fun findState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Z)Lru/nsk/kstatemachine/state/IState;
+	public static final fun findState (Lru/nsk/kstatemachine/state/IState;Lkotlin/reflect/KClass;Z)Lru/nsk/kstatemachine/state/IState;
+	public static synthetic fun findState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;ZILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState;
+	public static synthetic fun findState$default (Lru/nsk/kstatemachine/state/IState;Lkotlin/reflect/KClass;ZILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState;
+	public static final fun historyState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/HistoryType;)Lru/nsk/kstatemachine/state/pseudo/DefaultHistoryState;
+	public static synthetic fun historyState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/HistoryType;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/pseudo/DefaultHistoryState;
+	public static final fun initialChoiceState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/state/pseudo/DefaultChoiceState;
+	public static synthetic fun initialChoiceState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/pseudo/DefaultChoiceState;
+	public static final fun initialFinalState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/DefaultFinalState;
+	public static synthetic fun initialFinalState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/DefaultFinalState;
+	public static final fun initialState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/DefaultState;
+	public static synthetic fun initialState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/DefaultState;
+	public static final fun invoke (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)V
+	public static final fun log (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun machineOrNull (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public static final fun requireInitialState (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/state/IState;
+	public static final fun requireState (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Z)Lru/nsk/kstatemachine/state/IState;
+	public static synthetic fun requireState$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;ZILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState;
+	public static final fun state (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/DefaultState;
+	public static synthetic fun state$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/DefaultState;
+}
+
+public abstract class ru/nsk/kstatemachine/state/InternalState : ru/nsk/kstatemachine/state/IState, ru/nsk/kstatemachine/state/InternalNode {
+	public fun <init> ()V
+	public fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public abstract fun getInternalParent ()Lru/nsk/kstatemachine/state/InternalState;
+	public fun getParent ()Lru/nsk/kstatemachine/state/IState;
+	public fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/PseudoState : ru/nsk/kstatemachine/state/State {
+}
+
+public final class ru/nsk/kstatemachine/state/PseudoState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/PseudoState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/PseudoState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/PseudoState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/PseudoState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/RedirectPseudoState : ru/nsk/kstatemachine/state/PseudoState {
+	public abstract fun resolveTargetState (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/RedirectPseudoState$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/RedirectPseudoState;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/RedirectPseudoState;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/RedirectPseudoState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/RedirectPseudoState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/State : ru/nsk/kstatemachine/state/IState {
+}
+
+public final class ru/nsk/kstatemachine/state/State$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/state/State;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/state/State;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/state/StateGroupListenerKt {
+	public static final fun onActiveAllOf (Ljava/util/Set;ZLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static final fun onActiveAllOf (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static synthetic fun onActiveAllOf$default (Ljava/util/Set;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static synthetic fun onActiveAllOf$default (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static final fun onActiveAnyOf (Ljava/util/Set;ZLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static final fun onActiveAnyOf (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static synthetic fun onActiveAnyOf$default (Ljava/util/Set;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/GroupListener;
+	public static synthetic fun onActiveAnyOf$default (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/GroupListener;
+}
+
+public final class ru/nsk/kstatemachine/state/StateListenerKt {
+	public static final fun onEntry (Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function3;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public static synthetic fun onEntry$default (Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public static final fun onExit (Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function3;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public static synthetic fun onExit$default (Lru/nsk/kstatemachine/state/IState;ZLkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public static final fun onFinished (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function3;)Lru/nsk/kstatemachine/state/IState$Listener;
+}
+
+public abstract interface class ru/nsk/kstatemachine/state/TransitionStateApi {
+	public abstract fun addTransition (Lru/nsk/kstatemachine/transition/Transition;)Lru/nsk/kstatemachine/transition/Transition;
+	public abstract fun asState ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getTransitions ()Ljava/util/Set;
+}
+
+public final class ru/nsk/kstatemachine/state/TransitionStateApiKt {
+	public static final fun findTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun requireTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;)Lru/nsk/kstatemachine/transition/Transition;
+}
+
+public class ru/nsk/kstatemachine/state/pseudo/BasePseudoState : ru/nsk/kstatemachine/state/BaseStateImpl, ru/nsk/kstatemachine/state/PseudoState {
+	public fun <init> (Ljava/lang/String;)V
+	public fun addListener (Lru/nsk/kstatemachine/state/IState$Listener;)Ljava/lang/Void;
+	public synthetic fun addListener (Lru/nsk/kstatemachine/state/IState$Listener;)Lru/nsk/kstatemachine/state/IState$Listener;
+	public fun addState (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)Ljava/lang/Void;
+	public synthetic fun addState (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/state/IState;
+	public fun addTransition (Lru/nsk/kstatemachine/transition/Transition;)Ljava/lang/Void;
+	public synthetic fun addTransition (Lru/nsk/kstatemachine/transition/Transition;)Lru/nsk/kstatemachine/transition/Transition;
+}
+
+public class ru/nsk/kstatemachine/state/pseudo/DefaultChoiceDataState : ru/nsk/kstatemachine/state/pseudo/BasePseudoState, ru/nsk/kstatemachine/state/DataState, ru/nsk/kstatemachine/state/RedirectPseudoState {
+	public fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getData ()Ljava/lang/Object;
+	public fun getDataClass ()Lkotlin/reflect/KClass;
+	public fun getDefaultData ()Ljava/lang/Object;
+	public fun getLastData ()Ljava/lang/Object;
+	public fun resolveTargetState (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public class ru/nsk/kstatemachine/state/pseudo/DefaultChoiceState : ru/nsk/kstatemachine/state/pseudo/BasePseudoState, ru/nsk/kstatemachine/state/RedirectPseudoState {
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun resolveTargetState (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public class ru/nsk/kstatemachine/state/pseudo/DefaultHistoryState : ru/nsk/kstatemachine/state/pseudo/BasePseudoState, ru/nsk/kstatemachine/state/HistoryState {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/HistoryType;)V
+	public synthetic fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/HistoryType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDefaultState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun getHistoryType ()Lru/nsk/kstatemachine/state/HistoryType;
+	public fun getStoredState ()Lru/nsk/kstatemachine/state/IState;
+	public fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/BuildingStateMachine : ru/nsk/kstatemachine/statemachine/StateMachine {
+	public abstract fun getIgnoredEventHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler;
+	public abstract fun getListenerExceptionHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$ListenerExceptionHandler;
+	public abstract fun getLogger ()Lru/nsk/kstatemachine/statemachine/StateMachine$Logger;
+	public abstract fun getPendingEventHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler;
+	public abstract fun setIgnoredEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler;)V
+	public abstract fun setListenerExceptionHandler (Lru/nsk/kstatemachine/statemachine/StateMachine$ListenerExceptionHandler;)V
+	public abstract fun setLogger (Lru/nsk/kstatemachine/statemachine/StateMachine$Logger;)V
+	public abstract fun setPendingEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler;)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/BuildingStateMachine$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/statemachine/BuildingStateMachine;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/statemachine/BuildingStateMachine;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/statemachine/BuildingStateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/statemachine/BuildingStateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/CreationArguments {
+	public abstract fun getAutoDestroyOnStatesReuse ()Z
+	public abstract fun getDoNotThrowOnMultipleTransitionsMatch ()Z
+	public abstract fun getEventRecordingArguments ()Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;
+	public abstract fun getRequireNonBlankNames ()Z
+	public abstract fun isUndoEnabled ()Z
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/CreationArgumentsBuilder : ru/nsk/kstatemachine/statemachine/CreationArguments {
+	public abstract fun getAutoDestroyOnStatesReuse ()Z
+	public abstract fun getDoNotThrowOnMultipleTransitionsMatch ()Z
+	public abstract fun getEventRecordingArguments ()Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;
+	public abstract fun getRequireNonBlankNames ()Z
+	public abstract fun isUndoEnabled ()Z
+	public abstract fun setAutoDestroyOnStatesReuse (Z)V
+	public abstract fun setDoNotThrowOnMultipleTransitionsMatch (Z)V
+	public abstract fun setEventRecordingArguments (Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;)V
+	public abstract fun setRequireNonBlankNames (Z)V
+	public abstract fun setUndoEnabled (Z)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/CreationArgumentsKt {
+	public static final fun buildCreationArguments (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/statemachine/CreationArguments;
+	public static final fun buildEventRecordingArguments (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/EventRecordingArguments {
+	public abstract fun getClearRecordsOnMachineRestart ()Z
+	public abstract fun getSkipIgnoredEvents ()Z
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/EventRecordingArgumentsBuilder : ru/nsk/kstatemachine/statemachine/EventRecordingArguments {
+	public abstract fun getClearRecordsOnMachineRestart ()Z
+	public abstract fun getSkipIgnoredEvents ()Z
+	public abstract fun setClearRecordsOnMachineRestart (Z)V
+	public abstract fun setSkipIgnoredEvents (Z)V
+}
+
+public final class ru/nsk/kstatemachine/statemachine/IgnoredEventHandlerKt {
+	public static final fun throwingIgnoredEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/PendingEventHandlerKt {
+	public static final fun queuePendingEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/statemachine/QueuePendingEventHandler;
+	public static final fun throwingPendingEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/ProcessingResult : java/lang/Enum {
+	public static final field IGNORED Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static final field PENDING Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static final field PROCESSED Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static fun values ()[Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/QueuePendingEventHandler : ru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler {
+	public abstract fun checkEmpty (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun clear (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun nextEventAndArgument (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine : ru/nsk/kstatemachine/state/State {
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public abstract fun addListener (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public abstract fun getCoroutineAbstraction ()Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;
+	public abstract fun getCreationArguments ()Lru/nsk/kstatemachine/statemachine/CreationArguments;
+	public abstract fun getEventRecorder ()Lru/nsk/kstatemachine/persistence/EventRecorder;
+	public abstract fun getHasProcessedEvents ()Z
+	public abstract fun getIgnoredEventHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler;
+	public abstract fun getListenerExceptionHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$ListenerExceptionHandler;
+	public abstract fun getLogger ()Lru/nsk/kstatemachine/statemachine/StateMachine$Logger;
+	public abstract fun getMachineListeners ()Ljava/util/Collection;
+	public abstract fun getPendingEventHandler ()Lru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler;
+	public abstract fun isDestroyed ()Z
+	public abstract fun isRunning ()Z
+	public abstract fun processEvent (Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun removeListener (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;)V
+	public abstract fun start (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachine$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public static fun onCleanup (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun processEvent$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun start$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler {
+	public abstract fun onIgnoredEvent (Lru/nsk/kstatemachine/transition/EventAndArgument;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$Listener {
+	public abstract fun onDestroyed (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStarted (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStateEntry (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStateExit (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStateFinished (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onTransitionComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onTransitionTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachine$Listener$DefaultImpls {
+	public static fun onDestroyed (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStarted (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStateEntry (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStateExit (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStateFinished (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onStopped (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onTransitionComplete (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onTransitionTriggered (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$ListenerExceptionHandler {
+	public abstract fun onException (Ljava/lang/Exception;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$Logger {
+	public abstract fun log (Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$PendingEventHandler {
+	public abstract fun onPendingEvent (Lru/nsk/kstatemachine/transition/EventAndArgument;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class ru/nsk/kstatemachine/statemachine/StateMachineDslMarker : java/lang/annotation/Annotation {
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineKt {
+	public static final fun createStdLibStateMachine (Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public static synthetic fun createStdLibStateMachine$default (Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lru/nsk/kstatemachine/statemachine/StateMachine;
+	public static final fun destroy (Lru/nsk/kstatemachine/statemachine/StateMachine;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun destroy$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun destroyBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Z)V
+	public static synthetic fun destroyBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZILjava/lang/Object;)V
+	public static final fun processEventBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static synthetic fun processEventBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static final fun restart (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun restart$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun restartBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;)V
+	public static synthetic fun restartBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static final fun startBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;)V
+	public static synthetic fun startBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static final fun stop (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun stopBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public static final fun undo (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun undo$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun undoBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;)Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+	public static synthetic fun undoBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/statemachine/ProcessingResult;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/StateMachineListenerKt {
+	public static final fun onDestroyed (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onStarted (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function3;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onStateEntry (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function4;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onStateExit (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function4;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onStateFinished (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function4;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onStopped (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onTransitionComplete (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function4;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+	public static final fun onTransitionTriggered (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/jvm/functions/Function3;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
+}
+
+public final class ru/nsk/kstatemachine/testing/Testing {
+	public static final field INSTANCE Lru/nsk/kstatemachine/testing/Testing;
+	public final fun startFrom (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/String;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun startFrom (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/util/Set;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun startFrom (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/DataState;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun startFrom (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun startFrom (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun startFrom$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/String;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun startFrom$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/util/Set;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun startFrom$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/DataState;Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun startFrom$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun startFrom$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun startFromBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/String;Ljava/lang/Object;)V
+	public final fun startFromBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/util/Set;Ljava/lang/Object;)V
+	public final fun startFromBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/DataState;Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun startFromBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
+	public final fun startFromBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
+	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/util/Set;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/DataState;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;ILjava/lang/Object;)V
+	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;ILjava/lang/Object;)V
+}
+
+public abstract class ru/nsk/kstatemachine/transition/BaseGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/TransitionBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public final fun getGuard ()Lkotlin/jvm/functions/Function2;
+	public final fun setGuard (Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/ConditionalTransitionBuilder : ru/nsk/kstatemachine/transition/TransitionBuilder {
+	public field direction Lkotlin/jvm/functions/Function2;
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getDirection ()Lkotlin/jvm/functions/Function2;
+	public final fun setDirection (Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/DataGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/BaseGuardedTransitionBuilder {
+	public field targetState Lru/nsk/kstatemachine/state/DataState;
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getTargetState ()Lru/nsk/kstatemachine/state/DataState;
+	public final fun setTargetState (Lru/nsk/kstatemachine/state/DataState;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/DataGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/GuardedTransitionOnBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+}
+
+public class ru/nsk/kstatemachine/transition/DefaultTransition : ru/nsk/kstatemachine/transition/InternalTransition {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/EventMatcher;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/EventMatcher;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;)V
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/EventMatcher;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/metainfo/MetaInfo;)V
+	public fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public fun addListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)Lru/nsk/kstatemachine/transition/Transition$Listener;
+	public fun getArgument ()Ljava/lang/Object;
+	public fun getEventMatcher ()Lru/nsk/kstatemachine/event/EventMatcher;
+	public fun getListeners ()Ljava/util/Collection;
+	public fun getMetaInfo ()Lru/nsk/kstatemachine/metainfo/MetaInfo;
+	public fun getName ()Ljava/lang/String;
+	public synthetic fun getSourceState ()Lru/nsk/kstatemachine/state/IState;
+	public fun getSourceState ()Lru/nsk/kstatemachine/state/InternalState;
+	public fun getType ()Lru/nsk/kstatemachine/transition/TransitionType;
+	public fun isMatchingEvent (Lru/nsk/kstatemachine/event/Event;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun produceTargetStateDirection (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun removeListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)V
+	public fun setArgument (Ljava/lang/Object;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class ru/nsk/kstatemachine/transition/EventAndArgument {
+	public fun <init> (Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
+	public final fun component1 ()Lru/nsk/kstatemachine/event/Event;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)Lru/nsk/kstatemachine/transition/EventAndArgument;
+	public static synthetic fun copy$default (Lru/nsk/kstatemachine/transition/EventAndArgument;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/EventAndArgument;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArgument ()Ljava/lang/Object;
+	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class ru/nsk/kstatemachine/transition/GuardedTransitionBuilder : ru/nsk/kstatemachine/transition/BaseGuardedTransitionBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getTargetState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun setTargetState (Lru/nsk/kstatemachine/state/IState;)V
+}
+
+public abstract class ru/nsk/kstatemachine/transition/GuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/BaseGuardedTransitionBuilder {
+	public field targetState Lkotlin/jvm/functions/Function2;
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getTargetState ()Lkotlin/jvm/functions/Function2;
+	public final fun setTargetState (Lkotlin/jvm/functions/Function2;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/transition/InternalTransition : ru/nsk/kstatemachine/transition/Transition {
+	public abstract fun getSourceState ()Lru/nsk/kstatemachine/state/InternalState;
+	public abstract fun produceTargetStateDirection (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/transition/InternalTransition$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/transition/InternalTransition;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/transition/InternalTransition;Lru/nsk/kstatemachine/visitors/Visitor;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/transition/Transition : ru/nsk/kstatemachine/visitors/VisitorAcceptor {
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public abstract fun addListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)Lru/nsk/kstatemachine/transition/Transition$Listener;
+	public abstract fun getArgument ()Ljava/lang/Object;
+	public abstract fun getEventMatcher ()Lru/nsk/kstatemachine/event/EventMatcher;
+	public abstract fun getListeners ()Ljava/util/Collection;
+	public abstract fun getMetaInfo ()Lru/nsk/kstatemachine/metainfo/MetaInfo;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getSourceState ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getType ()Lru/nsk/kstatemachine/transition/TransitionType;
+	public abstract fun isMatchingEvent (Lru/nsk/kstatemachine/event/Event;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun removeListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)V
+	public abstract fun setArgument (Ljava/lang/Object;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/Transition$DefaultImpls {
+	public static fun accept (Lru/nsk/kstatemachine/transition/Transition;Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun accept (Lru/nsk/kstatemachine/transition/Transition;Lru/nsk/kstatemachine/visitors/Visitor;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/transition/Transition$Listener {
+	public abstract fun onComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/transition/Transition$Listener$DefaultImpls {
+	public static fun onComplete (Lru/nsk/kstatemachine/transition/Transition$Listener;Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun onTriggered (Lru/nsk/kstatemachine/transition/Transition$Listener;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class ru/nsk/kstatemachine/transition/TransitionBuilder {
+	public field eventMatcher Lru/nsk/kstatemachine/event/EventMatcher;
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public abstract fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getEventMatcher ()Lru/nsk/kstatemachine/event/EventMatcher;
+	public final fun getListeners ()Ljava/util/List;
+	public final fun getMetaInfo ()Lru/nsk/kstatemachine/metainfo/MetaInfo;
+	protected final fun getName ()Ljava/lang/String;
+	protected final fun getSourceState ()Lru/nsk/kstatemachine/state/IState;
+	public final fun getType ()Lru/nsk/kstatemachine/transition/TransitionType;
+	public final fun setEventMatcher (Lru/nsk/kstatemachine/event/EventMatcher;)V
+	public final fun setMetaInfo (Lru/nsk/kstatemachine/metainfo/MetaInfo;)V
+	public final fun setType (Lru/nsk/kstatemachine/transition/TransitionType;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/transition/TransitionDirection {
+	public abstract fun getTargetState ()Lru/nsk/kstatemachine/state/IState;
+	public abstract fun getTargetStates ()Ljava/util/Set;
+}
+
+public final class ru/nsk/kstatemachine/transition/TransitionDirection$DefaultImpls {
+	public static fun getTargetState (Lru/nsk/kstatemachine/transition/TransitionDirection;)Lru/nsk/kstatemachine/state/IState;
+}
+
+public final class ru/nsk/kstatemachine/transition/TransitionDirectionKt {
+	public static final fun noTransition ()Lru/nsk/kstatemachine/transition/TransitionDirection;
+	public static final fun stay ()Lru/nsk/kstatemachine/transition/TransitionDirection;
+	public static final fun targetParallelStates (Lru/nsk/kstatemachine/transition/EventAndArgument;Ljava/util/Set;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun targetParallelStates (Lru/nsk/kstatemachine/transition/EventAndArgument;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun targetState (Lru/nsk/kstatemachine/transition/EventAndArgument;Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class ru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy {
+	public abstract fun targetState (Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun targetStateOrStay (Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/transition/TransitionParams {
+	public final fun component1 ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun component2 ()Lru/nsk/kstatemachine/transition/TransitionDirection;
+	public final fun component3 ()Lru/nsk/kstatemachine/event/Event;
+	public final fun component4 ()Ljava/lang/Object;
+	public final fun copy (Lru/nsk/kstatemachine/transition/Transition;Lru/nsk/kstatemachine/transition/TransitionDirection;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)Lru/nsk/kstatemachine/transition/TransitionParams;
+	public static synthetic fun copy$default (Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/transition/Transition;Lru/nsk/kstatemachine/transition/TransitionDirection;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/TransitionParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArgument ()Ljava/lang/Object;
+	public final fun getDirection ()Lru/nsk/kstatemachine/transition/TransitionDirection;
+	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
+	public final fun getTransition ()Lru/nsk/kstatemachine/transition/Transition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class ru/nsk/kstatemachine/transition/TransitionParamsKt {
+	public static final fun getUnwrappedArgument (Lru/nsk/kstatemachine/transition/TransitionParams;)Ljava/lang/Object;
+	public static final fun getUnwrappedEvent (Lru/nsk/kstatemachine/transition/TransitionParams;)Lru/nsk/kstatemachine/event/Event;
+}
+
+public final class ru/nsk/kstatemachine/transition/TransitionType : java/lang/Enum {
+	public static final field EXTERNAL Lru/nsk/kstatemachine/transition/TransitionType;
+	public static final field LOCAL Lru/nsk/kstatemachine/transition/TransitionType;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/transition/TransitionType;
+	public static fun values ()[Lru/nsk/kstatemachine/transition/TransitionType;
+}
+
+public final class ru/nsk/kstatemachine/transition/UnitGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/GuardedTransitionBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/UnitGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/GuardedTransitionOnBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/visitors/CoVisitor {
+	public abstract fun visit (Lru/nsk/kstatemachine/state/IState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun visit (Lru/nsk/kstatemachine/statemachine/StateMachine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun visit (Lru/nsk/kstatemachine/transition/Transition;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/visitors/GetStructureHashCodeVisitorKt {
+	public static final fun getStructureHashCode (Lru/nsk/kstatemachine/statemachine/StateMachine;)I
+}
+
+public final class ru/nsk/kstatemachine/visitors/RequireNonBlankNamesVisitorKt {
+	public static final fun checkNonBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public static final fun hasBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;)Z
+}
+
+public abstract interface class ru/nsk/kstatemachine/visitors/Visitor {
+	public abstract fun visit (Lru/nsk/kstatemachine/state/IState;)V
+	public abstract fun visit (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
+	public abstract fun visit (Lru/nsk/kstatemachine/transition/Transition;)V
+}
+
+public abstract interface class ru/nsk/kstatemachine/visitors/VisitorAcceptor {
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+}
+
+public final class ru/nsk/kstatemachine/visitors/export/ExportPlantUmlVisitorKt {
+	public static final fun exportToPlantUml (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun exportToPlantUml$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun exportToPlantUmlBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZ)Ljava/lang/String;
+	public static synthetic fun exportToPlantUmlBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class ru/nsk/kstatemachine/visitors/export/ExportToMermaidKt {
+	public static final fun exportToMermaid (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun exportToMermaid$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun exportToMermaidBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZ)Ljava/lang/String;
+	public static synthetic fun exportToMermaidBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZZILjava/lang/Object;)Ljava/lang/String;
+}
+
