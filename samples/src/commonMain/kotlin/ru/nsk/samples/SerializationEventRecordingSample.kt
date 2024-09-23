@@ -69,7 +69,6 @@ private suspend fun CoroutineScope.persistStep(jsonFormat: Json): String {
 }
 
 private suspend fun CoroutineScope.restoreStep(jsonFormat: Json, recordedEventsJson: String): StateMachine {
-    // use special serializer from kstatemachine-serialization artifact
     val recordedEvents = jsonFormat.decodeFromString<RecordedEvents>(recordedEventsJson)
 
     val restoredMachine = createMachine()
@@ -86,7 +85,8 @@ fun main(): Unit = runBlocking {
     val jsonFormat = Json {
         serializersModule = SerializersModule {
             ignoreUnknownKeys = true
-            // register library provided serializer for RecordedEvents and its internals
+            // use special library provided serializer for RecordedEvents and its internals
+            // from kstatemachine-serialization artifact
             contextual(RecordedEventsSerializer)
 
             polymorphic(Event::class) {
@@ -100,8 +100,9 @@ fun main(): Unit = runBlocking {
     val recordedEventsJson = persistStep(jsonFormat)
     println(recordedEventsJson)
 
-    // assume we need to restore our machine some time later
+    // assume we need to restore the machine some time later
     val restoredMachine = restoreStep(jsonFormat, recordedEventsJson)
 
+    // restoredMachine is in the same state as original one
     check(restoredMachine.activeStates().single().name == "State3")
 }

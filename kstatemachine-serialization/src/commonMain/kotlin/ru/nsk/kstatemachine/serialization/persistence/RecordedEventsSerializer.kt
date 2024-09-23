@@ -17,8 +17,6 @@ import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.serializer
 import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.event.StartEvent
-import ru.nsk.kstatemachine.event.StartEventImpl
 import ru.nsk.kstatemachine.persistence.Record
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.statemachine.ProcessingResult
@@ -61,7 +59,7 @@ object RecordedEventsSerializer : KSerializer<RecordedEvents> {
     }
 }
 
-object RecordSerializer : KSerializer<Record> {
+private object RecordSerializer : KSerializer<Record> {
     override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.persistence.Record") {
         element("eventAndArgument", EventAndArgumentSerializer.descriptor)
         element<ProcessingResult>("processingResult")
@@ -104,7 +102,7 @@ object RecordSerializer : KSerializer<Record> {
     }
 }
 
-object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
+private object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
     override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.transition.EventAndArgument") {
         element("event", PolymorphicSerializer(Event::class).descriptor)
         element("argument", PolymorphicSerializer(Any::class).descriptor, isOptional = true)
@@ -142,29 +140,29 @@ object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
     }
 }
 
-// fixme should I serialize generatedEvents??
-object StartEventSerializer : KSerializer<StartEvent> {
-    override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.StartEvent") {
-        element<String>("startState")
-    }
-
-    override fun serialize(encoder: Encoder, value: StartEvent) {
-        encoder.encodeStructure(descriptor) {
-            encodeStringElement(descriptor, 0, requireNotNull(value.startState.name) {
-                "StartEvent must have a name"
-            })
-        }
-    }
-
-    override fun deserialize(decoder: Decoder): StartEvent {
-        return decoder.decodeStructure(descriptor) {
-            if (decodeSequentially()) {
-                StartEventImpl(emptySet())
-            } else {
-                TODO()
-            }
-        }
-    }
-}
+//// fixme should I serialize generatedEvents??
+//private object StartEventSerializer : KSerializer<StartEvent> {
+//    override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.StartEvent") {
+//        element<String>("startState")
+//    }
+//
+//    override fun serialize(encoder: Encoder, value: StartEvent) {
+//        encoder.encodeStructure(descriptor) {
+//            encodeStringElement(descriptor, 0, requireNotNull(value.startState.name) {
+//                "StartEvent must have a name"
+//            })
+//        }
+//    }
+//
+//    override fun deserialize(decoder: Decoder): StartEvent {
+//        return decoder.decodeStructure(descriptor) {
+//            if (decodeSequentially()) {
+//                StartEventImpl(emptySet())
+//            } else {
+//                TODO()
+//            }
+//        }
+//    }
+//}
 
 private fun <T : Any> makeNullPointerFailure(message: String): Result<T> = Result.failure(NullPointerException(message))
