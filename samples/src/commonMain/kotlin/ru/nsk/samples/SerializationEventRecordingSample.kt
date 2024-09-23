@@ -9,7 +9,6 @@
 
 package ru.nsk.samples
 
-import jdk.jfr.consumer.RecordedEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -86,6 +85,7 @@ private suspend fun CoroutineScope.restoreStep(jsonFormat: Json, recordedEventsJ
 fun main(): Unit = runBlocking {
     val jsonFormat = Json {
         serializersModule = SerializersModule {
+            ignoreUnknownKeys = true
             // register library provided serializer for RecordedEvents and its internals
             contextual(RecordedEventsSerializer)
 

@@ -14,10 +14,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
-import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.encoding.*
 import kotlinx.serialization.serializer
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StartEvent
@@ -48,7 +45,17 @@ object RecordedEventsSerializer : KSerializer<RecordedEvents> {
                     decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer)),
                 )
             } else {
-                TODO()
+                var structureHashCode = 0
+                var records = emptyList<Record>()
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> structureHashCode = decodeIntElement(descriptor, 0)
+                        1 -> records = decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer))
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                RecordedEvents(structureHashCode, records)
             }
         }
     }
@@ -62,7 +69,7 @@ object RecordSerializer : KSerializer<Record> {
 
     override fun serialize(encoder: Encoder, value: Record) {
         encoder.encodeStructure(RecordedEventsSerializer.descriptor) {
-            encodeSerializableElement(descriptor, 0, EventAndArgumentSerializer,  value.eventAndArgument)
+            encodeSerializableElement(descriptor, 0, EventAndArgumentSerializer, value.eventAndArgument)
             encodeSerializableElement(descriptor, 1, serializer<ProcessingResult>(), value.processingResult)
         }
     }
@@ -75,7 +82,23 @@ object RecordSerializer : KSerializer<Record> {
                     decodeSerializableElement(descriptor, 1, serializer<ProcessingResult>()),
                 )
             } else {
-                TODO()
+                var eventAndArgument =
+                    makeNullPointerFailure<EventAndArgument<*>>("required eventAndArgument property is absent")
+                var processingResult =
+                    makeNullPointerFailure<ProcessingResult>("required processingResult property is absent")
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> eventAndArgument = Result.success(
+                            decodeSerializableElement(descriptor, 0, EventAndArgumentSerializer)
+                        )
+                        1 -> processingResult = Result.success(
+                            decodeSerializableElement(descriptor, 1, serializer<ProcessingResult>())
+                        )
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                Record(eventAndArgument.getOrThrow(), processingResult.getOrThrow())
             }
         }
     }
@@ -99,10 +122,21 @@ object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
             if (decodeSequentially()) {
                 EventAndArgument(
                     decodeSerializableElement(descriptor, 0, serializer<Event>()),
-                    decodeNullableSerializableElement(descriptor, 0, PolymorphicSerializer(Any::class)),
+                    decodeNullableSerializableElement(descriptor, 1, PolymorphicSerializer(Any::class)),
                 )
             } else {
-                TODO()
+                var event = makeNullPointerFailure<Event>("required event property is absent")
+                var argument: Any? = null
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> event = Result.success(decodeSerializableElement(descriptor, 0, serializer<Event>()))
+                        1 -> argument =
+                            decodeNullableSerializableElement(descriptor, 1, PolymorphicSerializer(Any::class))
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                EventAndArgument(event.getOrThrow(), argument)
             }
         }
     }
@@ -132,3 +166,5 @@ object StartEventSerializer : KSerializer<StartEvent> {
         }
     }
 }
+
+private fun <T : Any> makeNullPointerFailure(message: String): Result<T> = Result.failure(NullPointerException(message))
