@@ -168,7 +168,7 @@ fun main() = runBlocking {
 
 ## 🧪 Samples
 
-* [Simple Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
+* [Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
 
   The library itself does not depend on Android.
 
@@ -176,6 +176,7 @@ fun main() = runBlocking {
       <img src="https://github.com/kstatemachine/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
           alt="Android sample app" width="30%" height="30%"/>
   </p>
+* [Compose 2D shooter game sample](https://github.com/KStateMachine/compose-kstatemachine-sample)
 * [Finished state sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
 * [Transition on FinishedEvent sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventSample.kt)
 * [FinishedEvent using with DataState sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventDataStateSample.kt)
@@ -190,7 +191,7 @@ fun main() = runBlocking {
 * [Guarded transition sample](./samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 * [Cross-level transition sample](./samples/src/commonMain/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)
 * [Typesafe transition sample](./samples/src/commonMain/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)
-* [Event recording sample](./samples/src/commonMain/kotlin/ru/nsk/samples/EventRecordingSample.kt)
+* [Event recording sample](./samples/src/commonMain/kotlin/ru/nsk/samples/SerializationEventRecordingSample.kt)
 * [Complex syntax sample](./samples/src/commonMain/kotlin/ru/nsk/samples/ComplexSyntaxSample.kt)
   shows many syntax variants and library possibilities, so it looks messy
 

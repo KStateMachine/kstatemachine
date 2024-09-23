@@ -75,4 +75,4 @@ machine.restoreByRecordedEvents(recordedEvents)
 `restoreByRecordedEvents()` method will start the machine if necessary.
 You can configure restoration process by `restoreByRecordedEvents()` arguments.
 
-See [Event recording sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/EventRecordingSample.kt)
+See [Event recording sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SerializationEventRecordingSample.kt)

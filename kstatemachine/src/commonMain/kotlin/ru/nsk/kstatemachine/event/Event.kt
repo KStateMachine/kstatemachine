@@ -7,6 +7,7 @@
 
 package ru.nsk.kstatemachine.event
 
+import ru.nsk.kstatemachine.InternalApi
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.FinalDataState
 import ru.nsk.kstatemachine.state.IState
@@ -56,7 +57,8 @@ sealed interface StartEvent : GeneratedEvent {
  * [startStates] must contain at least one state. If there are multiple states they must be sub-children of a parallel
  * state.
  */
-internal class StartEventImpl(val startStates: Set<IState>) : StartEvent {
+@InternalApi
+class StartEventImpl(val startStates: Set<IState>) : StartEvent {
     override val startState = startStates.first()
 }
 

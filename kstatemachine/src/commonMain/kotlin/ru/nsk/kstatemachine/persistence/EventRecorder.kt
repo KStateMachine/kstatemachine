@@ -9,6 +9,7 @@ package ru.nsk.kstatemachine.persistence
 
 import ru.nsk.kstatemachine.VisibleForTesting
 import ru.nsk.kstatemachine.event.DestroyEvent
+import ru.nsk.kstatemachine.event.GeneratedEvent
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.transition.EventAndArgument
@@ -90,7 +91,8 @@ internal class EventRecorderImpl(
         }
         if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
         if (arguments.clearRecordsOnMachineRestart && lastEvent is StopEvent) records.clear()
-        records += Record(eventAndArgument, processingResult)
+        if (eventAndArgument.event !is GeneratedEvent) // fixme
+            records += Record(eventAndArgument, processingResult)
     }
 
     override fun getRecordedEvents(): RecordedEvents {

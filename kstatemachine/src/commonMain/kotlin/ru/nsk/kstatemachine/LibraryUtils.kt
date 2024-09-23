@@ -14,6 +14,12 @@ import ru.nsk.kstatemachine.statemachine.StateMachine
 annotation class VisibleForTesting
 
 /**
+ * Marks public elements that should be internal, and should not be used by library users.
+ * Such elements should be internal, but they can not, usually they are public just to make library code compilable.
+ */
+annotation class InternalApi
+
+/**
  * [forEach] analog which ignores internal [StateMachine]s
  */
 internal suspend fun Iterable<InternalState>.forEachState(block: suspend (InternalState) -> Unit) {
