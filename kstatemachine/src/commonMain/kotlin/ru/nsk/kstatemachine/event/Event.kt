@@ -79,3 +79,13 @@ internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
  * @param argument original argument
  */
 class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
+
+/**
+ * Special kind of event, which is not processed by a stateMachine itself but used to
+ * represent different kinds of [GeneratedEvent] in serialized form for event recording feature.
+ */
+class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
+    enum class EventType {
+        START, START_DATA, STOP, DESTROY, FINISHED
+    }
+}

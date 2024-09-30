@@ -15,14 +15,25 @@ import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
+import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.serializer
 import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
 import ru.nsk.kstatemachine.persistence.Record
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.statemachine.ProcessingResult
 import ru.nsk.kstatemachine.transition.EventAndArgument
 
-object RecordedEventsSerializer : KSerializer<RecordedEvents> {
+val KStateMachineSerializersModule = SerializersModule {
+    contextual(RecordedEventsSerializer)
+    polymorphic(Event::class) {
+        subclass(SerializableGeneratedEvent::class, SerializableGeneratedEventSerializer)
+    }
+}
+
+private object RecordedEventsSerializer : KSerializer<RecordedEvents> {
     override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.persistence.RecordedEvents") {
         element<Int>("structureHashCode")
         element("records", ListSerializer(RecordSerializer).descriptor)
@@ -140,29 +151,35 @@ private object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
     }
 }
 
-//// fixme should I serialize generatedEvents??
-//private object StartEventSerializer : KSerializer<StartEvent> {
-//    override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.StartEvent") {
-//        element<String>("startState")
-//    }
-//
-//    override fun serialize(encoder: Encoder, value: StartEvent) {
-//        encoder.encodeStructure(descriptor) {
-//            encodeStringElement(descriptor, 0, requireNotNull(value.startState.name) {
-//                "StartEvent must have a name"
-//            })
-//        }
-//    }
-//
-//    override fun deserialize(decoder: Decoder): StartEvent {
-//        return decoder.decodeStructure(descriptor) {
-//            if (decodeSequentially()) {
-//                StartEventImpl(emptySet())
-//            } else {
-//                TODO()
-//            }
-//        }
-//    }
-//}
+private object SerializableGeneratedEventSerializer : KSerializer<SerializableGeneratedEvent> {
+    override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent") {
+        element<ProcessingResult>("eventType")
+    }
+
+    override fun serialize(encoder: Encoder, value: SerializableGeneratedEvent) {
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(descriptor, 0, serializer(), value.eventType)
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): SerializableGeneratedEvent {
+        return decoder.decodeStructure(descriptor) {
+            if (decodeSequentially()) {
+                SerializableGeneratedEvent(decodeSerializableElement(descriptor, 0, serializer()))
+            } else {
+                var eventType =
+                    makeNullPointerFailure<SerializableGeneratedEvent.EventType>("required eventType property is absent")
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> eventType = Result.success(decodeSerializableElement(descriptor, 0, serializer()))
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                SerializableGeneratedEvent(eventType.getOrThrow())
+            }
+        }
+    }
+}
 
 private fun <T : Any> makeNullPointerFailure(message: String): Result<T> = Result.failure(NullPointerException(message))

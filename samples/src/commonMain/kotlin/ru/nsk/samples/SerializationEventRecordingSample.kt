@@ -14,14 +14,11 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.contextual
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
+import kotlinx.serialization.modules.*
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.persistence.restoreByRecordedEvents
-import ru.nsk.kstatemachine.serialization.persistence.RecordedEventsSerializer
+import ru.nsk.kstatemachine.serialization.persistence.KStateMachineSerializersModule
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
@@ -83,17 +80,14 @@ private suspend fun CoroutineScope.restoreStep(jsonFormat: Json, recordedEventsJ
  */
 fun main(): Unit = runBlocking {
     val jsonFormat = Json {
-        serializersModule = SerializersModule {
-            ignoreUnknownKeys = true
-            // use special library provided serializer for RecordedEvents and its internals
-            // from kstatemachine-serialization artifact
-            contextual(RecordedEventsSerializer)
-
+        ignoreUnknownKeys = true
+        // use special library provided SerializersModule for RecordedEvents and its internals
+        // from kstatemachine-serialization artifact
+        serializersModule = KStateMachineSerializersModule + SerializersModule {
             polymorphic(Event::class) {
                 subclass(Event1::class)
                 subclass(Event2::class)
             }
-            polymorphic(Any::class)
         }
     }
 

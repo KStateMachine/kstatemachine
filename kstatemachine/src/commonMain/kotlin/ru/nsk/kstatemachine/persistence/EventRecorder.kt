@@ -8,8 +8,11 @@
 package ru.nsk.kstatemachine.persistence
 
 import ru.nsk.kstatemachine.VisibleForTesting
+import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.event.DestroyEvent
-import ru.nsk.kstatemachine.event.GeneratedEvent
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent.*
+import ru.nsk.kstatemachine.event.StartDataEventImpl
+import ru.nsk.kstatemachine.event.StartEventImpl
 import ru.nsk.kstatemachine.event.StopEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.transition.EventAndArgument
@@ -80,7 +83,7 @@ internal class EventRecorderImpl(
     private val records = mutableListOf<Record>()
 
     /**
-     * Should be called with not wrapped event.
+     * Should be called with not wrapped event in [eventAndArgument].
      * Should not be called on [ProcessingResult.PENDING] events.
      */
     fun onProcessEvent(eventAndArgument: EventAndArgument<*>, processingResult: ProcessingResult) {
@@ -91,11 +94,27 @@ internal class EventRecorderImpl(
         }
         if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
         if (arguments.clearRecordsOnMachineRestart && lastEvent is StopEvent) records.clear()
-        if (eventAndArgument.event !is GeneratedEvent) // fixme
-            records += Record(eventAndArgument, processingResult)
+        records += Record(eventAndArgument.transformGeneratedEvent(), processingResult)
     }
 
     override fun getRecordedEvents(): RecordedEvents {
         return RecordedEvents(machine.structureHashCode, records.toList() /* defensive copy */)
+    }
+}
+
+private fun EventAndArgument<*>.transformGeneratedEvent(): EventAndArgument<*> {
+    return if (event is GeneratedEvent) {
+        val event = when (event) {
+            is StartEventImpl -> SerializableGeneratedEvent(EventType.START)
+            is StartDataEventImpl<*> -> SerializableGeneratedEvent(EventType.START_DATA)
+            is StopEvent -> SerializableGeneratedEvent(EventType.STOP)
+            is DestroyEvent -> SerializableGeneratedEvent(EventType.DESTROY)
+            is FinishedEvent -> TODO() // fixme ????
+            is WrappedEvent -> error("Never get here")
+            is SerializableGeneratedEvent -> error("Never get here") // fixme what if user sends this event?
+        }
+        EventAndArgument(event, argument)
+    } else {
+        this
     }
 }
