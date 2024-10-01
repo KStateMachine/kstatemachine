@@ -14,12 +14,14 @@ title: Install
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
-The library consists of 2 components:
+The library consists of 3 components:
 
-* `kstatemachine` - (mandatory) state machine implementation (depends only on Kotlin Standard library)
-* `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on Kotlin Coroutines library)
+* `kstatemachine` - (mandatory) state machine implementation (depends only on **Kotlin Standard library**)
+* `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on **Kotlin Coroutines library**)
+* `kstatemachine-serialization` - (optional) add-ons for serialization (depends on **Kotlin Serialization library**). 
+  Released in `v0.32.0`
 
-Please note that starting from `v0.22.0` the library switched to Kotlin Multiplatform and artifact naming has changed.
+Please note that starting from `v0.22.0` the library switched to **Kotlin Multiplatform** and artifact naming has changed.
 
 ## Maven Central
 
@@ -31,24 +33,31 @@ dependencies {
     // multiplatform artifacts (starting from 0.22.0)
     implementation("io.github.nsk90:kstatemachine:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization:<Tag>")
     // or JVM/Android artifacts (starting from 0.22.0)
     implementation("io.github.nsk90:kstatemachine-jvm:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-jvm:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-jvm:<Tag>")
     // or iOS artifacts (starting from 0.22.1)
     implementation("io.github.nsk90:kstatemachine-iosarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iosarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-iosarm64:<Tag>")
 
     implementation("io.github.nsk90:kstatemachine-iosx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iosx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-iosx64:<Tag>")
 
     implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-iossimulatorarm64:<Tag>")
     // or JS
     implementation("io.github.nsk90:kstatemachine-js:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-js:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-js:<Tag>")
     // or WebAssembly (Wasm)
     implementation("io.github.nsk90:kstatemachine-wasm-js:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-wasm-js:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-wasm-js:<Tag>")
 }
 ```
 
@@ -58,6 +67,7 @@ dependencies {
     // multiplatform artifacts
     implementation 'io.github.nsk90:kstatemachine:<Tag>'
     implementation 'io.github.nsk90:kstatemachine-coroutines:<Tag>' // optional
+    implementation 'io.github.nsk90:kstatemachine-serialization:<Tag>' // optional
     // etc..
 }
 ```
@@ -104,6 +114,7 @@ dependencies {
     // note that group is different in second artifact, long group name also works for first artifact but not vise versa
     // it is some strange JitPack behaviour
     implementation("com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>") // optional
+    implementation("com.github.nsk90.kstatemachine:kstatemachine-serialization:<Tag>") // optional
 }
 ```
 
@@ -114,6 +125,7 @@ dependencies {
     // note that group is different in second artifact, long group name also works for first artifact but not vise versa
     // it is some strange JitPack behaviour
     implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
+    implementation 'com.github.nsk90.kstatemachine:kstatemachine-serialization:<Tag>' // optional
 }
 ```
 

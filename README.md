@@ -19,7 +19,7 @@
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
 [Sponsors](#-sponsors) |
 [Quick start](#-quick-start-sample) |
-[Samples](#-samples) | 
+[Samples](#-samples) |
 [Install](#-install) |
 [Contribution](#-contribution) |
 [Support](#-support) |
@@ -29,8 +29,10 @@
 
 # KStateMachine
 
-KStateMachine is a powerful Kotlin Multiplatform library with clean DSL syntax for creating complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
-and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) driven by Kotlin Coroutines.
+**KStateMachine** is a powerful **Kotlin Multiplatform** library with clean DSL syntax for creating
+complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
+and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) driven by 
+**Kotlin Coroutines**.
 
 ## 🌏 Overview
 
@@ -38,48 +40,71 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 
 * **[Kotlin DSL](https://kotlinlang.org/docs/type-safe-builders.html#scope-control-dslmarker) syntax** -
   declarative and clear state machine structure. Using without DSL is also possible.
-* **[Kotlin Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines) support** - 
+* **[Kotlin Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines)
+  support** -
   call suspendable functions within the library.
   You can fully use KStateMachine without Kotlin Coroutines dependency if necessary.
 * **[Kotlin Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html) support**
-* **Zero dependency** - it is written in pure Kotlin, it does not depend on any third party libraries or Android SDK.
+* **Zero dependency** - it is written in pure Kotlin, main library artifact does not depend on any third party libraries
+  or Android SDK.
 
 ### ⚙️ State management features
 
-* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
+* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)
+  ** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
   processing
   incoming events
-* **[Reactive](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** - listen for machine, states,
-  [state groups](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-group-of-states) and transitions
+* **[Reactive](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** - listen for
+  machine, states,
+  [state groups](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-group-of-states) and
+  transitions
 * **[Guarded](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#guarded-transitions)
-  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)** - dynamic
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)
+  ** - dynamic
   target
   state which is calculated in a moment of event processing depending on application business logic
-* **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** - build hierarchical state machines
+* **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** - build
+  hierarchical state machines
   (statecharts)
-  with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#cross-level-transitions) support
+  with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#cross-level-transitions)
+  support
 * **[Composed (nested) state machines](
   https://kstatemachine.github.io/kstatemachine/pages/states/states.html#composed-nested-state-machines
   )** - use state machines as atomic child states
-* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** for additional logic in machine
+* **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** for additional
+  logic in machine
   behaviour
-* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)** - pass data in
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)
+  ** - pass data in
   typesafe way
   from event to state
-* **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** - avoid a combinatorial
+* **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** - avoid a
+  combinatorial
   explosion of
   states
-* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** - navigate back to previous
-  state (like stack based FSMs do)
-* **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for events and
+*
+    *
+
+*[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)
+** - navigate back to previous
+state (like stack based FSMs do)
+
+* **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for
+  events and
   transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** state machine structure
   to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
-* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)**  state machine's active
-  configuration and restore it later
-* **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified state and enable internal logging
-* **[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)** - all features are covered
-  by tests
+* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)**  state machine's
+  active
+  configuration and restore it later. Built-in `kotlinx.serialization` support.
+* **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified
+  state and enable internal logging
+*
+    *
+
+*[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
+** - all features are covered
+by tests
 
 ## 📄 Documentation
 
@@ -93,7 +118,7 @@ I highly appreciate that you donate or become a sponsor to support the project.
 If you find this project useful you can support it by:
 
 * Pushing the ⭐ star-button
-* Using ❤️github-sponsors button to see supported donation methods 
+* Using ❤️github-sponsors button to see supported donation methods
 
 ## 🚀 Quick start sample
 
@@ -125,6 +150,7 @@ object SwitchEvent : Event
 sealed class States : DefaultState() {
     object RedState : States()
     object YellowState : States()
+
     // machine finishes when enters [FinalState]
     object GreenState : States(), FinalState
 }
@@ -152,9 +178,9 @@ fun main() = runBlocking {
         addState(YellowState) {
             transition<SwitchEvent>(targetState = GreenState)
         }
-      
+
         addFinalState(GreenState)
-      
+
         onFinished { println("Finished") }
     }
     // you can observe state machine changes using [Flow] along with simple listeners
@@ -225,11 +251,11 @@ See [CONTRIBUTING](./CONTRIBUTING.md) file.
 I am open to answer you questions and feature requests. Fill free to use any of communication channels to
 give your feedback.
 
-* [Slack channel](https://kotlinlang.slack.com/archives/C07DVAEKLM8) or 
+* [Slack channel](https://kotlinlang.slack.com/archives/C07DVAEKLM8) or
   [GitHub discussions](https://github.com/kstatemachine/kstatemachine/discussions) - best for questions and discussions
 * [GitHub issues](https://github.com/KStateMachine/kstatemachine/issues) - best for bugs and feature requests
 
-If you use some other platforms to ask questions or mention the library, I recommend adding a <ins>link</ins> to this 
+If you use some other platforms to ask questions or mention the library, I recommend adding a <ins>link</ins> to this
 GitHub project or using `#kstatemachine` tag.
 
 ## 🗺️ Roadmap
