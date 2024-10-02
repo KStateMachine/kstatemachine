@@ -7,6 +7,7 @@
 
 package ru.nsk.kstatemachine.persistence
 
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
 import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.visitors.structureHashCode
@@ -83,29 +84,41 @@ suspend fun StateMachine.restoreByRecordedEvents(
         recordedEvents.records.forEachIndexed iteration@{ index, record ->
             val warnings = mutableListOf<RestorationWarningException>()
             val (event, argument) = record.eventAndArgument
-            if (event is StartEvent) {
-                if (isRunning) {
-                    if (argument == null) {
-                        results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
-                        return@iteration // continue
-                    } else {
-                        if (index == 0)
-                            error(
-                                "The ${StateMachine::class.simpleName} is already started, but " +
-                                        "the ${RecordedEvents::class.simpleName} contains an argument for " +
-                                        "${StateMachine::start.name} method. " +
-                                        "To restore such machine, " +
-                                        "do not start it before calling ${::restoreByRecordedEvents.name}"
-                            )
-                        else {
-                            destroy()
-                            error("The machine should not be running here. Internal error. Never get here")
+            if (event is SerializableGeneratedEvent) {
+                when (event.eventType) {
+                    SerializableGeneratedEvent.EventType.START,
+                    SerializableGeneratedEvent.EventType.START_DATA -> {
+                        if (isRunning) {
+                            if (argument == null) {
+                                results += RestoredEventResult(
+                                    record,
+                                    Result.success(ProcessingResult.PROCESSED),
+                                    warnings
+                                )
+                                return@iteration // continue
+                            } else {
+                                if (index == 0)
+                                    error(
+                                        "The ${StateMachine::class.simpleName} is already started, but " +
+                                                "the ${RecordedEvents::class.simpleName} contains an argument for " +
+                                                "${StateMachine::start.name} method. " +
+                                                "To restore such machine, " +
+                                                "do not start it before calling ${::restoreByRecordedEvents.name}"
+                                    )
+                                else {
+                                    destroy()
+                                    error("The machine should not be running here. Internal error. Never get here")
+                                }
+                            }
+                        } else {
+                            start(argument)
                         }
                     }
-                } else {
-                    start(argument)
-                    results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
+                    SerializableGeneratedEvent.EventType.STOP -> stop()
+                    SerializableGeneratedEvent.EventType.DESTROY -> destroy()
+                    SerializableGeneratedEvent.EventType.FINISHED -> TODO()
                 }
+                results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
             } else {
                 val processingResult = runCatching { processEvent(event, argument) }
                 val actualResult = processingResult.getOrNull()

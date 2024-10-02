@@ -15,7 +15,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.event.StartEvent
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
 import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.transition
@@ -52,7 +52,7 @@ class EventRecorderTest : StringSpec({
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
             recordedEvents.structureHashCode shouldBe machine.structureHashCode
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContainInOrder(
                 Record(EventAndArgument(FirstEvent, null), PROCESSED),
                 Record(EventAndArgument(SecondEvent, 2), PROCESSED),
@@ -75,7 +75,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContainInOrder(
                 Record(EventAndArgument(SwitchEvent, null), PROCESSED),
                 Record(EventAndArgument(UndoEvent, null), PROCESSED),
@@ -95,7 +95,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContain(
                 Record(EventAndArgument(SwitchEvent, null), PROCESSED),
             )
@@ -115,7 +115,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContain(
                 Record(EventAndArgument(SwitchEvent, null), PROCESSED),
             )
@@ -141,7 +141,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContainInOrder(
                 Record(EventAndArgument(FirstEvent, null), PROCESSED),
                 Record(EventAndArgument(SecondEvent, null), PROCESSED),
@@ -164,7 +164,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContain(
                 Record(EventAndArgument(SecondEvent, null), PROCESSED),
             )
@@ -182,7 +182,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records shouldHaveSize 1
         }
 
@@ -201,7 +201,7 @@ class EventRecorderTest : StringSpec({
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
-            recordedEvents.records.first().eventAndArgument.event.shouldBeInstanceOf<StartEvent>()
+            recordedEvents.firstEventShouldBeStart()
             recordedEvents.records.shouldContain(
                 Record(EventAndArgument(SwitchEvent, null), IGNORED),
             )
@@ -209,3 +209,9 @@ class EventRecorderTest : StringSpec({
         }
     }
 })
+
+private fun RecordedEvents.firstEventShouldBeStart() {
+    val firstEvent = records.first().eventAndArgument.event
+    firstEvent.shouldBeInstanceOf<SerializableGeneratedEvent>()
+    firstEvent.eventType shouldBe SerializableGeneratedEvent.EventType.START
+}

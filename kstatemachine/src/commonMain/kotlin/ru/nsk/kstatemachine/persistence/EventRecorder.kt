@@ -51,6 +51,8 @@ class RecordedEvents @VisibleForTesting constructor(
         result = 31 * result + records.hashCode()
         return result
     }
+
+    override fun toString() = "RecordedEvents(structureHashCode=$structureHashCode, records=$records)"
 }
 
 class Record @VisibleForTesting constructor(
@@ -74,6 +76,8 @@ class Record @VisibleForTesting constructor(
         result = 31 * result + processingResult.hashCode()
         return result
     }
+
+    override fun toString() = "Record(eventAndArgument=$eventAndArgument, processingResult=$processingResult)"
 }
 
 internal class EventRecorderImpl(
@@ -88,12 +92,14 @@ internal class EventRecorderImpl(
      */
     fun onProcessEvent(eventAndArgument: EventAndArgument<*>, processingResult: ProcessingResult) {
         val lastEvent = records.lastOrNull()?.eventAndArgument?.event
-        check(lastEvent !is DestroyEvent) {
+        val lastEventType = (lastEvent as? SerializableGeneratedEvent)?.eventType
+
+        check(lastEventType != EventType.DESTROY) {
             "Internal error, ${::onProcessEvent.name} called after " +
                     "${DestroyEvent::class.simpleName} processing, which is considered as last possible event"
         }
         if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
-        if (arguments.clearRecordsOnMachineRestart && lastEvent is StopEvent) records.clear()
+        if (arguments.clearRecordsOnMachineRestart && lastEventType == EventType.STOP) records.clear()
         records += Record(eventAndArgument.transformGeneratedEvent(), processingResult)
     }
 
