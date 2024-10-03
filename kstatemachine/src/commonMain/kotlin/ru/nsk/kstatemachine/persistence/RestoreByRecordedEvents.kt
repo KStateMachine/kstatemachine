@@ -85,9 +85,8 @@ suspend fun StateMachine.restoreByRecordedEvents(
             val warnings = mutableListOf<RestorationWarningException>()
             val (event, argument) = record.eventAndArgument
             if (event is SerializableGeneratedEvent) {
-                when (event.eventType) {
-                    SerializableGeneratedEvent.EventType.START,
-                    SerializableGeneratedEvent.EventType.START_DATA -> {
+                when (val eventType = event.eventType) {
+                    SerializableGeneratedEvent.EventType.Start -> {
                         if (isRunning) {
                             if (argument == null) {
                                 results += RestoredEventResult(
@@ -114,9 +113,9 @@ suspend fun StateMachine.restoreByRecordedEvents(
                             start(argument)
                         }
                     }
-                    SerializableGeneratedEvent.EventType.STOP -> stop()
-                    SerializableGeneratedEvent.EventType.DESTROY -> destroy()
-                    SerializableGeneratedEvent.EventType.FINISHED -> TODO()
+                    SerializableGeneratedEvent.EventType.Stop -> stop()
+                    is SerializableGeneratedEvent.EventType.Destroy -> destroy(eventType.stop)
+                    SerializableGeneratedEvent.EventType.Finished -> TODO()
                 }
                 results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
             } else {

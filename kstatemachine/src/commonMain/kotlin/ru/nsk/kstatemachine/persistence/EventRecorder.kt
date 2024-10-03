@@ -94,12 +94,12 @@ internal class EventRecorderImpl(
         val lastEvent = records.lastOrNull()?.eventAndArgument?.event
         val lastEventType = (lastEvent as? SerializableGeneratedEvent)?.eventType
 
-        check(lastEventType != EventType.DESTROY) {
+        check(lastEventType !is EventType.Destroy) {
             "Internal error, ${::onProcessEvent.name} called after " +
                     "${DestroyEvent::class.simpleName} processing, which is considered as last possible event"
         }
         if (arguments.skipIgnoredEvents && processingResult == ProcessingResult.IGNORED) return
-        if (arguments.clearRecordsOnMachineRestart && lastEventType == EventType.STOP) records.clear()
+        if (arguments.clearRecordsOnMachineRestart && lastEventType == EventType.Stop) records.clear()
         records += Record(eventAndArgument.transformGeneratedEvent(), processingResult)
     }
 
@@ -111,13 +111,12 @@ internal class EventRecorderImpl(
 private fun EventAndArgument<*>.transformGeneratedEvent(): EventAndArgument<*> {
     return if (event is GeneratedEvent) {
         val event = when (event) {
-            is StartEventImpl -> SerializableGeneratedEvent(EventType.START)
-            is StartDataEventImpl<*> -> SerializableGeneratedEvent(EventType.START_DATA)
-            is StopEvent -> SerializableGeneratedEvent(EventType.STOP)
-            is DestroyEvent -> SerializableGeneratedEvent(EventType.DESTROY)
+            is StartEvent -> SerializableGeneratedEvent(EventType.Start)
+            is StopEvent -> SerializableGeneratedEvent(EventType.Stop)
+            is DestroyEvent -> SerializableGeneratedEvent(EventType.Destroy(event.stop))
             is FinishedEvent -> TODO() // fixme ????
             is WrappedEvent -> error("Never get here")
-            is SerializableGeneratedEvent -> error("Never get here") // fixme what if user sends this event?
+            is SerializableGeneratedEvent -> error("Never get here, SerializableGeneratedEvent should not be processed") // fixme what if user sends this event?
         }
         EventAndArgument(event, argument)
     } else {

@@ -216,6 +216,7 @@ fun StateMachine.stopBlocking() = coroutineAbstraction.runBlocking { stop() }
 
 /**
  * Destroys machine structure clearing all listeners, states etc.
+ * This a terminal operation, means that machine cannot be used anymore.
  */
 suspend fun StateMachine.destroy(stop: Boolean = true) = coroutineAbstraction.withContext {
     if (isDestroyed) return@withContext

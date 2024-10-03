@@ -12,8 +12,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.onTriggered
+import ru.nsk.kstatemachine.visitors.export.exportToPlantUml
 
 class FinishedEventTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -34,7 +37,7 @@ class FinishedEventTest : StringSpec({
                 transitionOn<FinishedEvent> { targetState = { state2 } }
             }
 
-            machine.processEventBlocking(SwitchEvent)
+            machine.processEvent(SwitchEvent)
 
             verifySequence { callbacks.onStateFinished(machine) }
             machine.isFinished shouldBe true
@@ -59,13 +62,44 @@ class FinishedEventTest : StringSpec({
                 }
             }
 
-            machine.processEventBlocking(SwitchEvent)
+            machine.processEvent(SwitchEvent)
 
             verifySequence {
                 callbacks.onStateFinished(state1)
                 callbacks.onStateEntry(state2)
             }
+            state1.isActive shouldBe false
             state1.isFinished shouldBe false
+            machine.isFinished shouldBe false
+        }
+
+        "FinishedEvent relies on queuePendingEventHandler" {
+            val callbacks = mockkCallbacks()
+            lateinit var state1: State
+            lateinit var state2: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                pendingEventHandler = StateMachine.PendingEventHandler { /*ignore FinishedEvent*/ }
+                state1 = initialState("state1") {
+                    val final = finalState("final")
+                    initialState("state11") {
+                        transition<SwitchEvent>(targetState = final)
+                    }
+
+                    onFinished { callbacks.onStateFinished(this) }
+                    transitionOn<FinishedEvent> { targetState = { state2 } }
+                }
+                state2 = state("state2") {
+                    callbacks.listen(this)
+                }
+            }
+
+            machine.processEvent(SwitchEvent)
+
+            verifySequence {
+                callbacks.onStateFinished(state1)
+            }
+            state1.isActive shouldBe true
+            state1.isFinished shouldBe true
             machine.isFinished shouldBe false
         }
 
@@ -97,7 +131,7 @@ class FinishedEventTest : StringSpec({
                     }
                 }
             }
-            machine.processEventBlocking(IntEvent(intData))
+            machine.processEvent(IntEvent(intData))
             verifySequence {
                 callbacks.onTransitionTriggered(ofType<FinishedEvent>())
             }

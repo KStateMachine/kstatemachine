@@ -84,8 +84,11 @@ class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
  * Special kind of event, which is not processed by a stateMachine itself but used to
  * represent different kinds of [GeneratedEvent] in serialized form for event recording feature.
  */
-class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
-    enum class EventType {
-        START, START_DATA, STOP, DESTROY, FINISHED
+data class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
+    sealed interface EventType {
+        object Start: EventType// fixme am I going deserialize singletons?
+        object Stop: EventType
+        class Destroy(val stop: Boolean) : EventType
+        object Finished: EventType
     }
 }
