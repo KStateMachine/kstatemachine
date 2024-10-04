@@ -17,13 +17,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.mpp.start
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.FinishedEvent
 import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
 import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.event.WrappedEvent
-import ru.nsk.kstatemachine.state.initialChoiceState
-import ru.nsk.kstatemachine.state.initialState
-import ru.nsk.kstatemachine.state.state
-import ru.nsk.kstatemachine.state.transition
+import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.IGNORED
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
@@ -181,24 +179,23 @@ class EventRecorderTest : StringSpec({
         }
 
         "check recorded events with FinishedEvent" {
-            TODO()
+            lateinit var state2: State
             val machine = createTestStateMachine(
                 coroutineStarterType,
                 creationArguments = buildCreationArguments { eventRecordingArguments = buildEventRecordingArguments {} }
             ) {
-                initialState()
-                transition<SwitchEvent>()
+                state2 = state("state2")
+                initialState("state1") {
+                    initialFinalState()
+                    transition<FinishedEvent>(targetState = state2)
+                }
             }
-            machine.processEvent(SwitchEvent)
-            machine.destroy()
 
             val recordedEvents = machine.eventRecorder.getRecordedEvents()
 
             recordedEvents.firstEventShouldBeStart()
-            recordedEvents.records.shouldContain(
-                Record(EventAndArgument(SwitchEvent, null), PROCESSED),
-            )
-            recordedEvents.records shouldHaveSize 3 // DestroyEvent
+            recordedEvents.records shouldHaveSize 1
+            machine.activeStates().shouldContainExactly(state2)
         }
 
         "check recorded events on restart without ${EventRecordingArguments::clearRecordsOnMachineRestart.name} flag" {

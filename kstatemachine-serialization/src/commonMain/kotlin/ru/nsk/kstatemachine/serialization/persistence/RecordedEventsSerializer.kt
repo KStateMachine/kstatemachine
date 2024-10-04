@@ -153,7 +153,7 @@ private object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
 
 private object SerializableGeneratedEventSerializer : KSerializer<SerializableGeneratedEvent> {
     override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent") {
-        element<ProcessingResult>("eventType")
+        element<SerializableGeneratedEvent.EventType>("eventType")
     }
 
     override fun serialize(encoder: Encoder, value: SerializableGeneratedEvent) {
