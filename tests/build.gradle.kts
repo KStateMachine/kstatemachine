@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization") version Versions.kotlin
 }
 
 group = rootProject.group
