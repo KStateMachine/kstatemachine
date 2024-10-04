@@ -115,7 +115,6 @@ suspend fun StateMachine.restoreByRecordedEvents(
                     }
                     SerializableGeneratedEvent.EventType.Stop -> stop()
                     is SerializableGeneratedEvent.EventType.Destroy -> destroy(eventType.stop)
-                    SerializableGeneratedEvent.EventType.Finished -> TODO()
                 }
                 results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
             } else {

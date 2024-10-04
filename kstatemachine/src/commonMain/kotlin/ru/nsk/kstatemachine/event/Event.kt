@@ -89,6 +89,5 @@ data class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent
         object Start: EventType// fixme am I going deserialize singletons?
         object Stop: EventType
         class Destroy(val stop: Boolean) : EventType
-        object Finished: EventType
     }
 }
