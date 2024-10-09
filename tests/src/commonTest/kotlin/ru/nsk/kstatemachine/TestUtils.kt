@@ -79,6 +79,7 @@ enum class CoroutineStarterType {
     COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER,
 }
 
+private val singleThreadContext = newSingleThreadContext("test single thread context") // fixme context leaks
 /**
  * Wraps [createStdLibStateMachine] so it can be easily switched to [createStdLibStateMachine]
  */
@@ -114,7 +115,7 @@ fun createTestStateMachine(
         init = init
     )
     CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
-        CoroutineScope(newSingleThreadContext("test single thread context")), // fixme context leaks
+        CoroutineScope(singleThreadContext),
         name,
         childMode,
         start,

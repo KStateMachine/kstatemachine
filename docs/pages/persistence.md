@@ -55,9 +55,9 @@ get the recorded events:
 val recordedEvents = machine.eventRecorder.getRecordedEvents()
 ```
 
-`RecordedEvents` object now is ready to be serialized. Currently, the library does not provide an implementation 
-of serialization process, so it is up to user to write serialization code. The serialization support is planned 
-using `kotlinx.serialization` library in further `KStateMachine` versions.
+`RecordedEvents` object now is ready to be serialized. The library provides an implementation 
+of serialization process using `kotlinx.serialization` library starting from `KStateMachine` version `v0.32.0`.
+Alternatively you can use some other serialization library to serialize `RecordedEvents` object by your own.
 
 ## Restoring StateMachine
 

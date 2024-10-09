@@ -14,7 +14,7 @@ title: Install
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
-The library consists of 3 components:
+The library consists of the fallowing components (artifacts):
 
 * `kstatemachine` - (mandatory) state machine implementation (depends only on **Kotlin Standard library**)
 * `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on **Kotlin Coroutines library**)

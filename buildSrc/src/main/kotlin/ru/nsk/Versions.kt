@@ -17,7 +17,7 @@ object Versions {
 
     // dependencies
     const val coroutinesCore = "1.8.1"
-    const val serialization = "1.7.2"
+    const val serialization = "1.7.3"
 
     // test dependencies   
     const val mockk = "1.13.11"

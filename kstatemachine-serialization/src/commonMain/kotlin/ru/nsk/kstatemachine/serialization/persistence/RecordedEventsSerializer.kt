@@ -9,18 +9,17 @@
 
 package ru.nsk.kstatemachine.serialization.persistence
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.serializer
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType
 import ru.nsk.kstatemachine.persistence.Record
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.statemachine.ProcessingResult
@@ -30,6 +29,16 @@ val KStateMachineSerializersModule = SerializersModule {
     contextual(RecordedEventsSerializer)
     polymorphic(Event::class) {
         subclass(SerializableGeneratedEvent::class, SerializableGeneratedEventSerializer)
+    }
+
+    contextual(SerializableGeneratedEventEventTypeStartSerializer)
+    polymorphic(EventType::class) {
+        subclass(EventType.Start::class, SerializableGeneratedEventEventTypeStartSerializer)
+        subclass(EventType.Stop::class, SerializableGeneratedEventEventTypeStopSerializer)
+        subclass(
+            EventType.Destroy::class,
+            SerializableGeneratedEventEventTypeDestroySerializer
+        )
     }
 }
 
@@ -48,7 +57,7 @@ private object RecordedEventsSerializer : KSerializer<RecordedEvents> {
 
     override fun deserialize(decoder: Decoder): RecordedEvents {
         return decoder.decodeStructure(descriptor) {
-            if (decodeSequentially()) { // sequential decoding protocol
+            if (decodeSequentially()) {
                 RecordedEvents(
                     structureHashCode = decodeIntElement(descriptor, 0),
                     decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer)),
@@ -153,31 +162,114 @@ private object EventAndArgumentSerializer : KSerializer<EventAndArgument<*>> {
 
 private object SerializableGeneratedEventSerializer : KSerializer<SerializableGeneratedEvent> {
     override val descriptor = buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent") {
-        element<SerializableGeneratedEvent.EventType>("eventType")
+        element("eventType", PolymorphicSerializer(EventType::class).descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: SerializableGeneratedEvent) {
         encoder.encodeStructure(descriptor) {
-            encodeSerializableElement(descriptor, 0, serializer(), value.eventType)
+            encodeSerializableElement(descriptor, 0, PolymorphicSerializer(EventType::class), value.eventType)
         }
     }
 
     override fun deserialize(decoder: Decoder): SerializableGeneratedEvent {
         return decoder.decodeStructure(descriptor) {
             if (decodeSequentially()) {
-                SerializableGeneratedEvent(decodeSerializableElement(descriptor, 0, serializer()))
+                SerializableGeneratedEvent(
+                    decodeSerializableElement(descriptor, 0, PolymorphicSerializer(EventType::class))
+                )
             } else {
                 var eventType =
-                    makeNullPointerFailure<SerializableGeneratedEvent.EventType>("required eventType property is absent")
+                    makeNullPointerFailure<EventType>("required eventType property is absent")
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
-                        0 -> eventType = Result.success(decodeSerializableElement(descriptor, 0, serializer()))
+                        0 -> eventType = Result.success(
+                            decodeSerializableElement(descriptor, 0, PolymorphicSerializer(EventType::class))
+                        )
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
                     }
                 }
                 SerializableGeneratedEvent(eventType.getOrThrow())
             }
+        }
+    }
+}
+
+private object SerializableGeneratedEventEventTypeStartSerializer : KSerializer<EventType.Start> {
+    @OptIn(InternalSerializationApi::class)
+    override val descriptor = buildClassSerialDescriptor(
+        "ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Start",
+    ) {
+        element<Boolean>("ignore_fix_bug")
+    }
+
+    override fun serialize(encoder: Encoder, value: EventType.Start) {
+        encoder.encodeStructure(descriptor) {
+            encodeBooleanElement(descriptor, 0, false)
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): EventType.Start {
+        return decoder.decodeStructure(descriptor) {
+            var eventType =
+                makeNullPointerFailure<Boolean>("required eventType property is absent")
+            while (true) {
+                when (val index = decodeElementIndex(descriptor)) {
+                    0 -> eventType = Result.success(
+                        decodeBooleanElement(descriptor, 0)
+                    )
+                    CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
+            EventType.Start
+        }
+    }
+}
+
+private object SerializableGeneratedEventEventTypeStopSerializer : KSerializer<EventType.Stop> {
+    override val descriptor =
+        buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Stop")
+
+    override fun serialize(encoder: Encoder, value: EventType.Stop) {
+        encoder.encodeStructure(descriptor) {}
+    }
+
+    override fun deserialize(decoder: Decoder): EventType.Stop {
+        return decoder.decodeStructure(descriptor) {
+            EventType.Stop
+        }
+    }
+}
+
+private object SerializableGeneratedEventEventTypeDestroySerializer : KSerializer<EventType.Destroy> {
+    override val descriptor =
+        buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Destroy") {
+            element<Boolean>("stop")
+        }
+
+    override fun serialize(encoder: Encoder, value: EventType.Destroy) {
+        encoder.encodeStructure(descriptor) {
+            encodeBooleanElement(descriptor, 0, value.stop)
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): EventType.Destroy {
+        return decoder.decodeStructure(descriptor) {
+            if (decodeSequentially()) {
+                EventType.Destroy(decodeBooleanElement(descriptor, 0))
+            } else {
+                var stop = makeNullPointerFailure<Boolean>("required stop property is absent")
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> stop = Result.success(decodeBooleanElement(descriptor, 0))
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
+                }
+                EventType.Destroy(stop.getOrThrow())
+            }
+
         }
     }
 }

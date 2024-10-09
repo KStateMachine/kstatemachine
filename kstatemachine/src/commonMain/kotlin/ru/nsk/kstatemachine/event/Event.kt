@@ -86,7 +86,7 @@ class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
  */
 data class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
     sealed interface EventType {
-        object Start: EventType// fixme am I going deserialize singletons?
+        object Start: EventType
         object Stop: EventType
         class Destroy(val stop: Boolean) : EventType
     }
