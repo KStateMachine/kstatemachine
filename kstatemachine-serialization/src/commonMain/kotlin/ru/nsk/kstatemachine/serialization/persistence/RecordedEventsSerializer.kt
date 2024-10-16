@@ -11,6 +11,7 @@ package ru.nsk.kstatemachine.serialization.persistence
 
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.nullable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
@@ -195,29 +196,27 @@ private object SerializableGeneratedEventSerializer : KSerializer<SerializableGe
     }
 }
 
+/**
+ * See an issue https://github.com/Kotlin/kotlinx.serialization/issues/2830
+ */
 private object SerializableGeneratedEventEventTypeStartSerializer : KSerializer<EventType.Start> {
-    @OptIn(InternalSerializationApi::class)
     override val descriptor = buildClassSerialDescriptor(
         "ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Start",
     ) {
-        element<Boolean>("ignore_fix_bug")
+        element("ignore_this_field", Boolean.serializer().nullable.descriptor, isOptional = true)
     }
 
     override fun serialize(encoder: Encoder, value: EventType.Start) {
         encoder.encodeStructure(descriptor) {
-            encodeBooleanElement(descriptor, 0, false)
+            encodeNullableSerializableElement(descriptor, 0, Boolean.serializer().nullable, null)
         }
     }
 
     override fun deserialize(decoder: Decoder): EventType.Start {
         return decoder.decodeStructure(descriptor) {
-            var eventType =
-                makeNullPointerFailure<Boolean>("required eventType property is absent")
             while (true) {
                 when (val index = decodeElementIndex(descriptor)) {
-                    0 -> eventType = Result.success(
-                        decodeBooleanElement(descriptor, 0)
-                    )
+                    0 -> decodeNullableSerializableElement(descriptor, 0, Boolean.serializer().nullable) // ignore
                     CompositeDecoder.DECODE_DONE -> break
                     else -> error("Unexpected index: $index")
                 }
@@ -227,16 +226,30 @@ private object SerializableGeneratedEventEventTypeStartSerializer : KSerializer<
     }
 }
 
+/**
+ * See an issue https://github.com/Kotlin/kotlinx.serialization/issues/2830
+ */
 private object SerializableGeneratedEventEventTypeStopSerializer : KSerializer<EventType.Stop> {
     override val descriptor =
-        buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Stop")
+        buildClassSerialDescriptor("ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType.Stop") {
+            element("ignore_this_field", Boolean.serializer().nullable.descriptor, isOptional = true)
+        }
 
     override fun serialize(encoder: Encoder, value: EventType.Stop) {
-        encoder.encodeStructure(descriptor) {}
+        encoder.encodeStructure(descriptor) {
+            encodeNullableSerializableElement(descriptor, 0, Boolean.serializer().nullable, null)
+        }
     }
 
     override fun deserialize(decoder: Decoder): EventType.Stop {
         return decoder.decodeStructure(descriptor) {
+            while (true) {
+                when (val index = decodeElementIndex(descriptor)) {
+                    0 -> decodeNullableSerializableElement(descriptor, 0, Boolean.serializer().nullable) // ignore
+                    CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
             EventType.Stop
         }
     }

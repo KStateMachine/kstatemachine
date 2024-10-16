@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-package ru.nsk.kstatemachine
+package ru.nsk.kstatemachine.coroutines
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -15,8 +15,11 @@ import io.mockk.verifySequence
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
+import ru.nsk.kstatemachine.SecondEvent
+import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
 import ru.nsk.kstatemachine.event.StartEvent
+import ru.nsk.kstatemachine.mockkCallbacks
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.transition.onTriggered

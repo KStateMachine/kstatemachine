@@ -5,14 +5,13 @@
  * All rights reserved.
  */
 
-package ru.nsk.kstatemachine.serialization
+package ru.nsk.kstatemachine.serialization.persistence
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -22,10 +21,8 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.persistence.restoreByRecordedEvents
-import ru.nsk.kstatemachine.serialization.persistence.KStateMachineSerializersModule
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
