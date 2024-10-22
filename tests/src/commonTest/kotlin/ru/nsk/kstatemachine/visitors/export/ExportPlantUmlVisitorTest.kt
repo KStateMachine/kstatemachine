@@ -281,7 +281,7 @@ ChoiceState --> State12
 @enduml
 """
 
-private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
+private suspend fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
     return createTestStateMachine(coroutineStarterType, name = "Nested states") {
         val state1 = initialState("State1")
         val state3 = finalState("State3")
@@ -304,7 +304,7 @@ private fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): State
     }
 }
 
-private fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
+private suspend fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
     return createTestStateMachine(
         coroutineStarterType,
         name = "Pseudo states",

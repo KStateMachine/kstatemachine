@@ -135,7 +135,7 @@ class CompositionStateMachinesTest : StringSpec({
     }
 })
 
-private fun composition(coroutineStarterType: CoroutineStarterType, startInnerMachineOnSetup: Boolean) {
+private suspend fun composition(coroutineStarterType: CoroutineStarterType, startInnerMachineOnSetup: Boolean) {
     val callbacks = mockkCallbacks()
 
     val outerState1 = DefaultState("Outer state1")

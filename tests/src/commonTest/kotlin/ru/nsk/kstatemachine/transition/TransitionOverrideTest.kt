@@ -76,7 +76,9 @@ class TransitionOverrideTest : StringSpec({
     }
 })
 
-private inline fun <reified E : Event> overrideParentTransitionWithEventType(coroutineStarterType: CoroutineStarterType) {
+private suspend inline fun <reified E : Event> overrideParentTransitionWithEventType(
+    coroutineStarterType: CoroutineStarterType
+) {
     val callbacks = mockkCallbacks()
 
     lateinit var state2: State
@@ -107,7 +109,7 @@ private inline fun <reified E : Event> overrideParentTransitionWithEventType(cor
     }
 }
 
-private fun overrideWithDirection(
+private suspend fun overrideWithDirection(
     coroutineStarterType: CoroutineStarterType,
     callbacks: Callbacks,
     childDirection: TransitionDirection
