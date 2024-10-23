@@ -31,15 +31,10 @@ val KStateMachineSerializersModule = SerializersModule {
     polymorphic(Event::class) {
         subclass(SerializableGeneratedEvent::class, SerializableGeneratedEventSerializer)
     }
-
-    contextual(SerializableGeneratedEventEventTypeStartSerializer)
     polymorphic(EventType::class) {
         subclass(EventType.Start::class, SerializableGeneratedEventEventTypeStartSerializer)
         subclass(EventType.Stop::class, SerializableGeneratedEventEventTypeStopSerializer)
-        subclass(
-            EventType.Destroy::class,
-            SerializableGeneratedEventEventTypeDestroySerializer
-        )
+        subclass(EventType.Destroy::class, SerializableGeneratedEventEventTypeDestroySerializer)
     }
 }
 

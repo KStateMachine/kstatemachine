@@ -80,7 +80,6 @@ private suspend fun CoroutineScope.restoreStep(jsonFormat: Json, recordedEventsJ
  */
 fun main(): Unit = runBlocking {
     val jsonFormat = Json {
-        ignoreUnknownKeys = true
         // use special, library provided SerializersModule for RecordedEvents and its internals
         // from kstatemachine-serialization artifact
         serializersModule = KStateMachineSerializersModule + SerializersModule {
