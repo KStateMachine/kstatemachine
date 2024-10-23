@@ -4,15 +4,13 @@ title: Persistence
 ---
 
 # Persistence
-
 {: .no_toc }
 
 ## Table of contents
-
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 * **Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
   JSON text, and possibly saving it into some persistent storage like a file or sending by a network.
