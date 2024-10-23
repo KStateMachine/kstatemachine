@@ -3,7 +3,7 @@ layout: page
 title: Persistence
 ---
 
-# Persistence
+# Persistence (Serialization)
 {: .no_toc }
 
 ## Table of contents
@@ -58,7 +58,8 @@ val recordedEvents = machine.eventRecorder.getRecordedEvents()
 `RecordedEvents` object now is ready to be serialized. The library provides an implementation
 of serialization process using `kotlinx.serialization` library starting from `KStateMachine` version `v0.32.0`.
 
-Initialize serialization format (JSON for instance):
+Initialize serialization format (JSON for instance) using `KStateMachineSerializersModule`. This module contains
+serialization routines for library classes.
 
 ```kotlin
     val jsonFormat = Json {
