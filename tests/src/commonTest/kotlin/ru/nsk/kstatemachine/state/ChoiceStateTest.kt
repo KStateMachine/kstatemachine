@@ -13,6 +13,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.DataEvent
+import ru.nsk.kstatemachine.event.defaultDataExtractor
+import ru.nsk.kstatemachine.state.ChoiceStateTestData.IntEvent
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State2
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -22,6 +24,8 @@ import ru.nsk.kstatemachine.statemachine.processEventBlocking
 private object ChoiceStateTestData {
     object State1 : DefaultState()
     object State2 : DefaultState()
+
+    class IntEvent(override val data: Int) : DataEvent<Int>
 }
 
 class ChoiceStateTest : StringSpec({
@@ -154,6 +158,22 @@ class ChoiceStateTest : StringSpec({
                 callbacks.onStateExit(intState1)
                 callbacks.onStateEntry(intState2)
             }
+        }
+
+
+        "Try reproduce https://github.com/KStateMachine/kstatemachine/issues/101" {
+            lateinit var state3: State
+            val machine = createTestStateMachine(coroutineStarterType) {
+                state3 = state("state3")
+                val state2 = dataState<Int>("dataState3") {
+                    initialChoiceState { state3 }
+                }
+                initialState("state1") {
+                    dataTransition<IntEvent, Int> { targetState = state2 }
+                }
+            }
+            machine.processEvent(IntEvent(42))
+            machine.activeStates().shouldContainExactly(state3)
         }
     }
 })
