@@ -223,6 +223,7 @@ dependencies {
     // multiplatform artifacts, where <Tag> is a library version.
     implementation("io.github.nsk90:kstatemachine:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization:<Tag>")
 }
 ```
 
