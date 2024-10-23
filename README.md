@@ -50,8 +50,7 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 
 ### ⚙️ State management features
 
-* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)
-  ** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
+* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
   processing
   incoming events
 * **[Reactive](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** - listen for
@@ -59,8 +58,7 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
   [state groups](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-group-of-states) and
   transitions
 * **[Guarded](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#guarded-transitions)
-  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)
-  ** - dynamic
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)** - dynamic
   target
   state which is calculated in a moment of event processing depending on application business logic
 * **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** - build
@@ -74,19 +72,14 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 * **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** for additional
   logic in machine
   behaviour
-* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)
-  ** - pass data in
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)** - pass data in
   typesafe way
   from event to state
 * **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** - avoid a
   combinatorial
   explosion of
   states
-*
-    *
-
-*[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)
-** - navigate back to previous
+* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** - navigate back to previous
 state (like stack based FSMs do)
 
 * **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for
@@ -99,11 +92,7 @@ state (like stack based FSMs do)
   configuration and restore it later. Built-in `kotlinx.serialization` support.
 * **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified
   state and enable internal logging
-*
-    *
-
-*[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
-** - all features are covered
+* **[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)** - all features are covered
 by tests
 
 ## 📄 Documentation
@@ -262,8 +251,6 @@ GitHub project or using `#kstatemachine` tag.
 
 * Make publication about using state machines along with `MVI`
 * Create `Intellij IDEA Plugin` for state machine visualization and edition
-* Add default implementation of Serializable Events using `kotlinx.serialization`
-* Add `Compose` sample
 
 ## 🏅 Thanks to supporters
 
