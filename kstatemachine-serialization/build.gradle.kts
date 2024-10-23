@@ -1,8 +1,8 @@
 plugins {
     kotlin("multiplatform")
     `java-library`
-    // ru.nsk.`maven-publish` wip, no publishing yet
-    // id("org.jetbrains.dokka")
+    ru.nsk.`maven-publish`
+    id("org.jetbrains.dokka")
     kotlin("plugin.serialization") version Versions.kotlin
 }
 
