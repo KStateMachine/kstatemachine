@@ -19,7 +19,8 @@ import ru.nsk.kstatemachine.event.UndoEvent
 import ru.nsk.kstatemachine.event.WrappedEvent
 import ru.nsk.kstatemachine.state.UndoTestData.SwitchDataEvent
 import ru.nsk.kstatemachine.statemachine.*
-import ru.nsk.kstatemachine.statemachine.StateMachine.*
+import ru.nsk.kstatemachine.statemachine.StateMachine.IgnoredEventHandler
+import ru.nsk.kstatemachine.statemachine.StateMachine.Logger
 import ru.nsk.kstatemachine.transition.unwrappedArgument
 import ru.nsk.kstatemachine.transition.unwrappedEvent
 

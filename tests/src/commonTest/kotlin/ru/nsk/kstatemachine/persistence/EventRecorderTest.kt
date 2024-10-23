@@ -15,7 +15,6 @@ import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.mpp.start
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.FinishedEvent
 import ru.nsk.kstatemachine.event.SerializableGeneratedEvent

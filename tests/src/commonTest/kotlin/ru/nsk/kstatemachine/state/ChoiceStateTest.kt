@@ -13,7 +13,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.DataEvent
-import ru.nsk.kstatemachine.event.defaultDataExtractor
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.IntEvent
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State2

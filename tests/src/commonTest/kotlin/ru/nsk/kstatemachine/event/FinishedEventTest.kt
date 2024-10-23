@@ -13,10 +13,7 @@ import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.statemachine.processEventBlocking
-import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.onTriggered
-import ru.nsk.kstatemachine.visitors.export.exportToPlantUml
 
 class FinishedEventTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->

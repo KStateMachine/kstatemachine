@@ -17,15 +17,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import ru.nsk.kstatemachine.SecondEvent
 import ru.nsk.kstatemachine.SwitchEvent
-import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
 import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.mockkCallbacks
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
 import ru.nsk.kstatemachine.transition.onTriggered
 import ru.nsk.kstatemachine.transition.stay
 import kotlin.coroutines.EmptyCoroutineContext
-
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 class CoroutinesTest : StringSpec({

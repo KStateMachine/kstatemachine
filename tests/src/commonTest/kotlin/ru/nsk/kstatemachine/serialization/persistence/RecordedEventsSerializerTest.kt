@@ -14,8 +14,6 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.nullable
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encodeToString
@@ -27,7 +25,6 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.persistence.restoreByRecordedEvents
 import ru.nsk.kstatemachine.state.*

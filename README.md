@@ -87,7 +87,7 @@ state (like stack based FSMs do)
   transitions
 * **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** state machine structure
   to [PlantUML](https://plantuml.com/) and [Mermaid](https://mermaid.js.org/) diagrams
-* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)**  state machine's
+* **[Persist (serialize)](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)** state machine's
   active
   configuration and restore it later. Built-in `kotlinx.serialization` support.
 * **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified
@@ -223,7 +223,6 @@ dependencies {
     // multiplatform artifacts, where <Tag> is a library version.
     implementation("io.github.nsk90:kstatemachine:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-serialization:<Tag>")
 }
 ```
 

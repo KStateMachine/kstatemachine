@@ -8,7 +8,6 @@
 package ru.nsk.kstatemachine.persistence
 
 import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
-import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
