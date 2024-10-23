@@ -12,8 +12,14 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
@@ -21,6 +27,7 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.event.SerializableGeneratedEvent.EventType
 import ru.nsk.kstatemachine.persistence.RecordedEvents
 import ru.nsk.kstatemachine.persistence.restoreByRecordedEvents
 import ru.nsk.kstatemachine.state.*
@@ -40,6 +47,36 @@ private class IntData(val value: Int)
 
 @Serializable
 private class IntDataEvent(override val data: IntData) : DataEvent<IntData>
+
+/**
+ * Primitives cannot be serialized in polymorphic context with default serializers.
+ */
+private object StringPolymorphicSerializer : KSerializer<String> {
+
+    override val descriptor = buildClassSerialDescriptor("com.sample.kotlin.String") {
+            element<String>("value")
+        }
+
+    override fun serialize(encoder: Encoder, value: String) {
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(descriptor, 0, value)
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): String {
+        return decoder.decodeStructure(descriptor) {
+            var value = Result.failure<String>(NullPointerException("value is absent"))
+            while (true) {
+                when (val index = decodeElementIndex(descriptor)) {
+                    0 -> value = Result.success(decodeStringElement(descriptor, 0))
+                    CompositeDecoder.DECODE_DONE -> break
+                    else -> error("Unexpected index: $index")
+                }
+            }
+            value.getOrThrow()
+        }
+    }
+}
 
 class RecordedEventsSerializerTest : StringSpec({
     "Serialize and restore state machine with RecordedEvents" {
@@ -70,15 +107,15 @@ class RecordedEventsSerializerTest : StringSpec({
                     subclass(Event1::class)
                     subclass(Event2::class)
                 }
-//                polymorphic(Any::class) {
-//                    subclass(String::class) // fixme add primitive serializers
-//                }
+                polymorphic(Any::class) {
+                    subclass(String::class, StringPolymorphicSerializer) // for arg
+                }
             }
         }
 
         val originalMachine = createMachine()
         originalMachine.processEvent(Event1(42))
-        originalMachine.processEvent(Event2("text"), )// fixme add "arg"
+        originalMachine.processEvent(Event2("text"), "arg")
         val recordedEvents = originalMachine.eventRecorder.getRecordedEvents()
         val recordedEventsJson = jsonFormat.encodeToString(recordedEvents)
         println(recordedEventsJson)

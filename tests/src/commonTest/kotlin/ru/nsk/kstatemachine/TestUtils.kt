@@ -80,7 +80,7 @@ enum class CoroutineStarterType {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-private val singleThreadContext = newSingleThreadContext("test single thread context") // fixme context leaks
+private val singleThreadContext = newSingleThreadContext("test single thread context") // context leaks
 /**
  * Wraps [createStdLibStateMachine] so it can be easily switched to [createStdLibStateMachine]
  */

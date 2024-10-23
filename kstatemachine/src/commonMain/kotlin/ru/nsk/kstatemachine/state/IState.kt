@@ -97,7 +97,6 @@ suspend fun <S : IState> IState.addState(state: S, init: StateBlock<S>? = null):
     return state
 }
 
-
 enum class ChildMode { EXCLUSIVE, PARALLEL }
 enum class HistoryType {
     /** Records only immediate child states */

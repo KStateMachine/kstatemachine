@@ -64,17 +64,19 @@ private object RecordedEventsSerializer : KSerializer<RecordedEvents> {
                     decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer)),
                 )
             } else {
-                var structureHashCode = 0
-                var records = emptyList<Record>()
+                var structureHashCode = makeNullPointerFailure<Int>("required structureHashCode property is absent")
+                var records = makeNullPointerFailure<List<Record>>("required records property is absent")
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
-                        0 -> structureHashCode = decodeIntElement(descriptor, 0)
-                        1 -> records = decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer))
+                        0 -> structureHashCode = Result.success(decodeIntElement(descriptor, 0))
+                        1 -> records = Result.success(
+                            decodeSerializableElement(descriptor, 1, ListSerializer(RecordSerializer))
+                        )
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
                     }
                 }
-                RecordedEvents(structureHashCode, records)
+                RecordedEvents(structureHashCode.getOrThrow(), records.getOrThrow())
             }
         }
     }
@@ -179,8 +181,7 @@ private object SerializableGeneratedEventSerializer : KSerializer<SerializableGe
                     decodeSerializableElement(descriptor, 0, PolymorphicSerializer(EventType::class))
                 )
             } else {
-                var eventType =
-                    makeNullPointerFailure<EventType>("required eventType property is absent")
+                var eventType = makeNullPointerFailure<EventType>("required eventType property is absent")
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
                         0 -> eventType = Result.success(
