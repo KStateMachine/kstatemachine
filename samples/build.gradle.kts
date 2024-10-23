@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform")
     application
+    kotlin("plugin.serialization") version Versions.kotlin
 }
 
 group = rootProject.group
@@ -14,6 +15,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":kstatemachine-coroutines"))
+                implementation(project(":kstatemachine-serialization"))
+
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}")
             }
         }
     }

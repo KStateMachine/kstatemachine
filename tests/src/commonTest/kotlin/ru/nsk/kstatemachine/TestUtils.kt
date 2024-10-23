@@ -79,10 +79,12 @@ enum class CoroutineStarterType {
     COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER,
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
+private val singleThreadContext = newSingleThreadContext("test single thread context") // context leaks
 /**
  * Wraps [createStdLibStateMachine] so it can be easily switched to [createStdLibStateMachine]
  */
-fun createTestStateMachine(
+suspend fun createTestStateMachine(
     coroutineStarterType: CoroutineStarterType,
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -97,7 +99,7 @@ fun createTestStateMachine(
         creationArguments,
         init = init
     )
-    CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachineBlocking(
+    CoroutineStarterType.COROUTINES_LIB_EMPTY_CONTEXT -> createStateMachine(
         CoroutineScope(EmptyCoroutineContext), // does not perform internal context switching
         name,
         childMode,
@@ -105,7 +107,7 @@ fun createTestStateMachine(
         creationArguments,
         init = init
     )
-    CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachineBlocking(
+    CoroutineStarterType.COROUTINES_LIB_UNCONFINED_DISPATCHER -> createStateMachine(
         CoroutineScope(Dispatchers.Unconfined),
         name,
         childMode,
@@ -113,15 +115,15 @@ fun createTestStateMachine(
         creationArguments,
         init = init
     )
-    CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachineBlocking(
-        CoroutineScope(newSingleThreadContext("test single thread context")), // fixme context leaks
+    CoroutineStarterType.COROUTINES_LIB_SINGLE_THREAD_DISPATCHER -> createStateMachine(
+        CoroutineScope(singleThreadContext),
         name,
         childMode,
         start,
         creationArguments,
         init = init
     )
-    CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachineBlocking(
+    CoroutineStarterType.COROUTINES_LIB_DEFAULT_LIMITED_DISPATCHER -> createStateMachine(
         CoroutineScope(Dispatchers.Default.limitedParallelism(1)), // does not guarantee same thread for each task
         name,
         childMode,

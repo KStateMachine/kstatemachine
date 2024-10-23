@@ -16,6 +16,7 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.state.DefaultState
 import ru.nsk.kstatemachine.state.addInitialState
+import ru.nsk.kstatemachine.state.addState
 import ru.nsk.kstatemachine.state.transitionConditionally
 import ru.nsk.kstatemachine.statemachine.onTransitionTriggered
 import ru.nsk.kstatemachine.statemachine.processEventBlocking

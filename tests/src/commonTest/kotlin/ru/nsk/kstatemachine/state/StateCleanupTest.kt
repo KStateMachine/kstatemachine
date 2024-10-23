@@ -46,6 +46,7 @@ class StateCleanupTest : StringSpec({
     }
 })
 
-private fun useInMachine(coroutineStarterType: CoroutineStarterType, state: IState) = createTestStateMachine(coroutineStarterType) {
-    addInitialState(state)
-}
+private suspend fun useInMachine(coroutineStarterType: CoroutineStarterType, state: IState) =
+    createTestStateMachine(coroutineStarterType) {
+        addInitialState(state)
+    }

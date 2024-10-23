@@ -11,7 +11,6 @@ import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.FinalDataState
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.statemachine.undo
 
 /**
@@ -80,3 +79,15 @@ internal class DestroyEvent(val stop: Boolean) : GeneratedEvent
  * @param argument original argument
  */
 class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
+
+/**
+ * Special kind of event, which is not processed by a stateMachine itself but used to
+ * represent different kinds of [GeneratedEvent] in serialized form for event recording feature.
+ */
+data class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
+    sealed interface EventType {
+        object Start: EventType
+        object Stop: EventType
+        class Destroy(val stop: Boolean) : EventType
+    }
+}

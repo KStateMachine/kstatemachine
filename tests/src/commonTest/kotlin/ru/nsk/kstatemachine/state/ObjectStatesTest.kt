@@ -58,7 +58,7 @@ class ObjectStatesTest : StringSpec({
     }
 })
 
-private fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroyOnStatesReuse: Boolean): StateMachine {
+private suspend fun useInMachine(coroutineStarterType: CoroutineStarterType, autoDestroyOnStatesReuse: Boolean): StateMachine {
     val machine = createTestStateMachine(
         coroutineStarterType,
         creationArguments = buildCreationArguments { this.autoDestroyOnStatesReuse = autoDestroyOnStatesReuse },

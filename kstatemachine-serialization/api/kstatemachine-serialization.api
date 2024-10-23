@@ -1,0 +1,4 @@
+public final class ru/nsk/kstatemachine/serialization/persistence/RecordedEventsSerializerKt {
+	public static final fun getKStateMachineSerializersModule ()Lkotlinx/serialization/modules/SerializersModule;
+}
+

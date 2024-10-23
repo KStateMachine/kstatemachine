@@ -50,17 +50,17 @@ publishing {
                 "KStateMachine is a Kotlin DSL library for creating state machines and " +
                         "hierarchical state machines (statecharts)."
             )
-            url.set("https://github.com/nsk90/kstatemachine")
+            url.set("https://github.com/KStateMachine/kstatemachine")
             inceptionYear.set("2020")
 
             issueManagement {
                 system.set("GitHub")
-                url.set("https://github.com/nsk90/kstatemachine/issues")
+                url.set("https://github.com/KStateMachine/kstatemachine/issues")
             }
             licenses {
                 license {
                     name.set("Boost Software License 1.0")
-                    url.set("https://raw.githubusercontent.com/nsk90/kstatemachine/master/LICENSE")
+                    url.set("https://raw.githubusercontent.com/KStateMachine/kstatemachine/master/LICENSE")
                     distribution.set("repo")
                 }
             }
@@ -73,9 +73,9 @@ publishing {
                 }
             }
             scm {
-                url.set("https://github.com/nsk90/kstatemachine")
-                connection.set("scm:git:git://github.com/nsk90/kstatemachine.git")
-                developerConnection.set("scm:git:ssh://git@github.com/nsk90/kstatemachine.git")
+                url.set("https://github.com/KStateMachine/kstatemachine")
+                connection.set("scm:git:git://github.com/KStateMachine/kstatemachine.git")
+                developerConnection.set("scm:git:ssh://git@github.com/KStateMachine/kstatemachine.git")
             }
         }
     }

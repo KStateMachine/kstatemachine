@@ -17,7 +17,6 @@ import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
-import ru.nsk.kstatemachine.statemachine.StateMachine.*
 
 class RestoreByRecordedEventsTest : StringSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->

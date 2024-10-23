@@ -56,7 +56,7 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     fun <L : Listener> addListener(listener: L): L
     fun removeListener(listener: Listener)
 
-    fun <S : IState> addState(state: S, init: StateBlock<S>? = null): S
+    fun <S : IState> addState(state: S): S
 
     /**
      * Initial child state is required if child mode is [ChildMode.EXCLUSIVE] and a state has children
@@ -89,6 +89,12 @@ interface IState : TransitionStateApi, VisitorAcceptor {
          */
         suspend fun onFinished(transitionParams: TransitionParams<*>) = Unit
     }
+}
+
+suspend fun <S : IState> IState.addState(state: S, init: StateBlock<S>? = null): S {
+    addState(state)
+    if (init != null) state.init()
+    return state
 }
 
 enum class ChildMode { EXCLUSIVE, PARALLEL }
@@ -155,7 +161,7 @@ interface HistoryState : PseudoState {
     val storedState: IState
 }
 
-typealias StateBlock<S> = S.() -> Unit
+typealias StateBlock<S> = suspend S.() -> Unit
 
 suspend fun IState.log(lazyMessage: () -> String) {
     machineOrNull()?.logger?.log(lazyMessage)
@@ -230,7 +236,7 @@ fun <S : IState> IState.findState(`class`: KClass<S>, recursive: Boolean = true)
 inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
     requireNotNull(findState<S>(recursive)) { "State ${S::class.simpleName} not found" }
 
-operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
+suspend operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 
 fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else parent?.machineOrNull()
 
@@ -238,13 +244,13 @@ fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else 
  * @param name is optional and is useful for getting state instance after state machine setup
  * with [IState.findState] and for debugging.
  */
-fun IState.state(
+suspend fun IState.state(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     init: StateBlock<State>? = null
 ) = addState(DefaultState(name, childMode), init)
 
-inline fun <reified D : Any> IState.dataState(
+suspend inline fun <reified D : Any> IState.dataState(
     name: String? = null,
     defaultData: D? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -255,7 +261,7 @@ inline fun <reified D : Any> IState.dataState(
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
  */
-fun IState.initialState(
+suspend fun IState.initialState(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
     init: StateBlock<State>? = null
@@ -264,7 +270,7 @@ fun IState.initialState(
 /**
  * @param defaultData is necessary for initial [DataState]
  */
-inline fun <reified D : Any> IState.initialDataState(
+suspend inline fun <reified D : Any> IState.initialDataState(
     name: String? = null,
     defaultData: D,
     childMode: ChildMode = ChildMode.EXCLUSIVE,
@@ -275,7 +281,7 @@ inline fun <reified D : Any> IState.initialDataState(
 /**
  * A shortcut for [IState.addState] and [IState.setInitialState] calls
  */
-fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? = null): S {
+suspend fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? = null): S {
     addState(state, init)
     setInitialState(state)
     return state
@@ -285,23 +291,23 @@ fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? = null): 
  * Helper method for adding final states. This is exactly the same as simply call [IState.addState] but makes
  * code more self expressive.
  */
-fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null) =
+suspend fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null) =
     addState(state, init)
 
-fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+suspend fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addFinalState(DefaultFinalState(name), init)
 
-fun IState.initialFinalState(name: String? = null, init: StateBlock<FinalState>? = null) =
+suspend fun IState.initialFinalState(name: String? = null, init: StateBlock<FinalState>? = null) =
     addInitialState(DefaultFinalState(name), init)
 
-inline fun <reified D : Any> IState.finalDataState(
+suspend inline fun <reified D : Any> IState.finalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
     noinline init: StateBlock<FinalDataState<D>>? = null
 ) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 
-inline fun <reified D : Any> IState.initialFinalDataState(
+suspend inline fun <reified D : Any> IState.initialFinalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
@@ -313,7 +319,7 @@ fun IState.choiceState(
     choiceAction: suspend EventAndArgument<*>.() -> State
 ) = addState(DefaultChoiceState(name, choiceAction = choiceAction))
 
-fun IState.initialChoiceState(
+suspend fun IState.initialChoiceState(
     name: String? = null,
     choiceAction: suspend EventAndArgument<*>.() -> State
 ) = addInitialState(DefaultChoiceState(name, choiceAction = choiceAction))
@@ -323,7 +329,7 @@ inline fun <reified D : Any> IState.choiceDataState(
     noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
 ) = addState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))
 
-inline fun <reified D : Any> IState.initialChoiceDataState(
+suspend inline fun <reified D : Any> IState.initialChoiceDataState(
     name: String? = null,
     noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
 ) = addInitialState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))

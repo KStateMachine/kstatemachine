@@ -19,7 +19,7 @@ open class BasePseudoState(name: String?) : BaseStateImpl(name, ChildMode.EXCLUS
     override fun <L : IState.Listener> addListener(listener: L) =
         throw UnsupportedOperationException("PseudoState $this can not have listeners")
 
-    override fun <S : IState> addState(state: S, init: StateBlock<S>?) =
+    override fun <S : IState> addState(state: S) =
         throw UnsupportedOperationException("PseudoState $this can not have child states")
 
 

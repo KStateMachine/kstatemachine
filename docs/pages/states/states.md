@@ -208,7 +208,7 @@ sealed class States : DefaultState() {
 }
 ```
 
-See [Finished state sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
+See [Finished state sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
 
 Finishing of states and state machines is treated little differently.
 State machine that was finished stops processing incoming events.
@@ -250,16 +250,16 @@ Notifications about finishing are available in two forms:
 
    If `FinalState` that triggered `FinishedEvent` is also a `DataState` then its `data` field will be copied
    into `FinishedEvent`.
-   See [transition on FinishedEvent sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventSample.kt)
+   See [transition on FinishedEvent sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventSample.kt)
 
 ## Consider using Kotlin `sealed` classes
 
 With sealed classes for states and events your state machine structure may look simpler. Try to compare this two samples
 they both are doing the same thing but using of sealed classes makes code self explaining:
 
-[Minimal sealed classes sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
+[Minimal sealed classes sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSealedClassesSample.kt)
 vs
-[Minimal syntax sample](https://github.com/nsk90/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
+[Minimal syntax sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/MinimalSyntaxSample.kt)
 
 Also sealed classes eliminate need of using `lateinit` states variables or reordering of states in state machine setup
 block to have a valid state references for transitions.

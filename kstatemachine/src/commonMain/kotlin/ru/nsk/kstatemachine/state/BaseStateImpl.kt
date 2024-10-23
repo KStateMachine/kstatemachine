@@ -103,7 +103,7 @@ open class BaseStateImpl(
         data.listeners.remove(listener)
     }
 
-    override fun <S : IState> addState(state: S, init: StateBlock<S>?): S {
+    override fun <S : IState> addState(state: S): S {
         if (machineOrNull()?.isRunning == true) error("Can not add state after state machine started")
         if (childMode == PARALLEL) {
             require(state !is IFinalState) { "Can not add IFinalState in parallel child mode" }
@@ -117,8 +117,6 @@ open class BaseStateImpl(
         state as InternalState
         require(data.states.add(state)) { "$state already added" }
         state.setParent(this)
-
-        if (init != null) state.init()
         return state
     }
 

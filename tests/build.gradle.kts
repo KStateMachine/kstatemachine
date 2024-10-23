@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization") version Versions.kotlin
 }
 
 group = rootProject.group
@@ -17,6 +18,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(project(":kstatemachine-coroutines"))
+                implementation(project(":kstatemachine-serialization"))
 
                 implementation("io.kotest:kotest-assertions-core:${Versions.kotest}")
                 implementation("io.kotest:kotest-framework-datatest:${Versions.kotest}")
