@@ -1,4 +1,4 @@
-![KStateMachine](./docs/kstatemachine-logo.png)
+# KStateMachine
 
 ![Build and test with Gradle](https://github.com/KStateMachine/kstatemachine/workflows/Build%20and%20test%20with%20Gradle/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nsk90_kstatemachine&metric=alert_status)](https://sonarcloud.io/dashboard?id=nsk90_kstatemachine)
@@ -15,6 +15,8 @@
 [![Share on Reddit](https://img.shields.io/badge/reddit-share-red?logo=reddit&style=flat)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fkstatemachine%2Fkstatemachine&title=I%20like%20KStateMachine%20library)
 [![Slack](https://img.shields.io/badge/slack-kstatemachine-purple?logo=slack&style=flat)](https://kotlinlang.slack.com/archives/C07DVAEKLM8)
 
+![KStateMachine](./docs/kstatemachine-logo.png)
+
 **[Documentation](https://kstatemachine.github.io/kstatemachine) |
 [KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) |
 [Sponsors](#-sponsors) |
@@ -26,8 +28,6 @@
 [Roadmap](#-roadmap) |
 [License](#-license) |
 [Discussions](https://github.com/kstatemachine/kstatemachine/discussions)**
-
-# KStateMachine
 
 **KStateMachine** is a powerful **Kotlin Multiplatform** library with clean DSL syntax for creating
 complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
