@@ -15,6 +15,8 @@ import io.kotest.data.table
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.metainfo.buildCompositeMetaInfo
 import ru.nsk.kstatemachine.metainfo.buildUmlMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -280,6 +282,16 @@ ChoiceState --> State12
 @enduml
 """
 
+private const val PLANTUML_COMPOSITE_META_INFO = """@startuml
+hide empty description
+state "Nested states sm" as Meta_info_StateMachine {
+    state State1
+    
+    [*] --> State1
+}
+@enduml
+"""
+
 private suspend fun makeNestedMachine(coroutineStarterType: CoroutineStarterType): StateMachine {
     return createTestStateMachine(coroutineStarterType, name = "Nested states") {
         val state1 = initialState("State1")
@@ -515,6 +527,29 @@ class ExportPlantUmlVisitorTest : StringSpec({
                 showEventLabels = true,
                 unsafeCallConditionalLambdas = true
             ) shouldBe PLANTUML_META_INFO
+        }
+
+        "CompositeMetaInfo vararg export test" {
+            val machine = createStateMachine(this, name = "Meta info") {
+                // label for state machine
+                metaInfo = buildCompositeMetaInfo(
+                    buildUmlMetaInfo { umlLabel = "Nested states sm" },
+                    object : MetaInfo {} // just a stub
+                )
+                initialState("State1")
+            }
+            machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
+        }
+
+        "CompositeMetaInfo export test" {
+            val machine = createStateMachine(this, name = "Meta info") {
+                // label for state machine
+                metaInfo = buildCompositeMetaInfo {
+                    metaInfoSet = setOf(buildUmlMetaInfo { umlLabel = "Nested states sm" })
+                }
+                initialState("State1")
+            }
+            machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
         }
     }
 })

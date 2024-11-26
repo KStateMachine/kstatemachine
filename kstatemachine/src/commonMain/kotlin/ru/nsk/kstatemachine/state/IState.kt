@@ -288,7 +288,7 @@ suspend fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? =
 }
 
 /**
- * Helper method for adding final states. This is exactly the same as simply call [IState.addState] but makes
+ * Helper dsl method for adding final states. This is exactly the same as simply call [IState.addState] but makes
  * code more self expressive.
  */
 suspend fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null) =

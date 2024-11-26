@@ -13,52 +13,44 @@ import ru.nsk.kstatemachine.transition.Transition
 /**
  * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
  * Users may extend this interface to add their own [MetaInfo] implementations.
- * Users may combine multiple [MetaInfo] interfaces into one object.
+ * Users may combine multiple [MetaInfo] derived interfaces into single object or use [CompositeMetaInfo] instead.
  */
 interface MetaInfo
 
 /**
- * Standard [MetaInfo], to control export PlantUML and Mermaid feature visualization.
+ * Allows to specify multiple [MetaInfo] objects.
+ * It might be simpler than constructing single object implementing multiple [MetaInfo] derived interfaces.
+ * Nesting [CompositeMetaInfo] into each other is not supported.
  */
-interface UmlMetaInfo : MetaInfo {
+interface CompositeMetaInfo : MetaInfo {
     /**
-     * Will be mapped to "long name" for [IState], and a "label" for [Transition]
-     * Default: null
+     * Default: emptySet()
      */
-    val umlLabel: String?
-
-    /**
-     * Add description lines for [IState]
-     * Does not have effect for [Transition]
-     * Default: emptyList()
-     */
-    val umlStateDescriptions: List<String>
-
-    /**
-     * For [IState] translated to "note right of".
-     * For [Transition] translated to "note on link" (supports only one note).
-     * Mermaid does not support this, so it will not take any effect.
-     * Default: emptyList()
-     */
-    val umlNotes: List<String>
+    val metaInfoSet: Set<MetaInfo>
 }
 
-/**
- * [UmlMetaInfo] Implementation is separated from its interface as a user may combine multiple [MetaInfo]
- * interfaces into one object. Data class should not be exposed to public APIs due to binary compatibility, users should
- * use [buildUmlMetaInfo] instead.
- */
-interface UmlMetaInfoBuilder : UmlMetaInfo {
-    override var umlLabel: String?
-    override var umlStateDescriptions: List<String>
-    override var umlNotes: List<String>
+internal inline fun <reified M : MetaInfo> MetaInfo.findMetaInfo(): M? {
+    return when (this) {
+        is M -> this
+        is CompositeMetaInfo -> metaInfoSet.singleOrNull { it is M } as? M
+        else -> null
+    }
 }
 
-private data class UmlMetaInfoBuilderImpl(
-    override var umlLabel: String? = null,
-    override var umlStateDescriptions: List<String> = emptyList(),
-    override var umlNotes: List<String> = emptyList(),
-) : UmlMetaInfoBuilder
+interface CompositeMetaInfoBuilder : CompositeMetaInfo {
+    override var metaInfoSet: Set<MetaInfo>
+}
 
-fun buildUmlMetaInfo(builder: UmlMetaInfoBuilder.() -> Unit): UmlMetaInfo =
-    UmlMetaInfoBuilderImpl().apply(builder).copy()
+private data class CompositeMetaInfoBuilderImpl(
+    override var metaInfoSet: Set<MetaInfo> = emptySet()
+) : CompositeMetaInfoBuilder
+
+fun buildCompositeMetaInfo(builder: CompositeMetaInfoBuilder.() -> Unit): CompositeMetaInfo =
+    CompositeMetaInfoBuilderImpl().apply(builder).copy()
+
+fun buildCompositeMetaInfo(metaInfo1: MetaInfo, metaInfo2: MetaInfo, vararg infos: MetaInfo): CompositeMetaInfo =
+    CompositeMetaInfoBuilderImpl(infos.toMutableSet().apply {
+        add(metaInfo1)
+        add(metaInfo2)
+    })
+

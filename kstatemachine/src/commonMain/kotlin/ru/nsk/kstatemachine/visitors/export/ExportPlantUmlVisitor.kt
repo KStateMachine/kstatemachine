@@ -11,6 +11,7 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.isNeighbor
 import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.metainfo.findMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -197,8 +198,8 @@ internal class ExportPlantUmlVisitor(
     }
 
     private companion object {
-        val MetaInfo.umlNotes get() = (this as? UmlMetaInfo)?.umlNotes.orEmpty()
-        val MetaInfo.umlLabel get() = (this as? UmlMetaInfo)?.umlLabel
+        val MetaInfo.umlNotes get() = findMetaInfo<UmlMetaInfo>()?.umlNotes.orEmpty()
+        val MetaInfo.umlLabel get() = findMetaInfo<UmlMetaInfo>()?.umlLabel
 
         fun IState.graphName(): String {
             val name = (name ?: "State${hashCode()}").replace(Regex("[ -]"), "_")
