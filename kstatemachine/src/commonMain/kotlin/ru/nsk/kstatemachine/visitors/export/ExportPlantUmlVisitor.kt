@@ -22,6 +22,7 @@ import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.InternalTransition
+import ru.nsk.kstatemachine.transition.NoTransition
 import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionDirection
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy
@@ -48,18 +49,9 @@ internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
 
 private data class TargetStateInfo(
     val description: String?,
+    /** Might be empty - means [NoTransition] */
     val targetStates: Set<InternalState>,
-) {
-    init {
-        require(targetStates.isNotEmpty()) { "targetStates must be non-empty." }
-    }
-
-    /**
-     * PlantUML cant draw multiple target transitions.
-     * So I have to simplify it to just use first state.
-     */
-    val targetState get() = targetStates.first()
-}
+)
 
 /**
  * Export state machine to Plant UML language format.
@@ -110,9 +102,13 @@ internal class ExportPlantUmlVisitor(
                         state.resolveTargetState(policy)
                     }
                     state.printStateNotes()
-                    targetStateInfoList.forEach { targetStateInfo ->
-                        //todo use description
-                        crossLevelTransitions += "${state.graphName()} --> ${targetStateInfo.targetState.targetGraphName()}"
+                    for (targetStateInfo in targetStateInfoList) {
+                        // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
+                        for (targetState in targetStateInfo.targetStates) {
+                            crossLevelTransitions += "${state.graphName()} --> " +
+                                    targetState.targetGraphName() +
+                                    transitionLabel(targetStateInfo.description)
+                        }
                     }
                 }
                 else -> {
@@ -146,15 +142,18 @@ internal class ExportPlantUmlVisitor(
         val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
             transition.produceTargetStateDirection(policy)
         }
-        targetStateInfoList.forEach { targetStateInfo -> // actually plantUml may not understand multiple transitions
-            //todo use description
-            val transitionString =
-                "$sourceState --> ${targetStateInfo.targetState.targetGraphName()}${transitionLabel(transition)}"
+        for (targetStateInfo in targetStateInfoList) {
+            // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
+            for (targetState in targetStateInfo.targetStates) {
+                val transitionString = "$sourceState --> " +
+                        targetState.targetGraphName() +
+                        transitionLabel(transition, targetStateInfo.description)
 
-            if (transition.sourceState.isNeighbor(targetStateInfo.targetState))
-                line(transitionString)
-            else
-                crossLevelTransitions += transitionString
+                if (transition.sourceState.isNeighbor(targetState))
+                    line(transitionString)
+                else
+                    crossLevelTransitions += transitionString
+            }
         }
 
         if (format != MERMAID) { // Mermaid does not support this
@@ -199,10 +198,16 @@ internal class ExportPlantUmlVisitor(
                         TargetStateInfo(it.description, it.internalTargetStates)
                     }
                 } else {
-                    stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
+                    stateInfoList += TargetStateInfo(
+                        null,
+                        block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates
+                    )
                 }
             } else {
-                stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
+                stateInfoList += TargetStateInfo(
+                    null,
+                    block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates
+                )
             }
         } else {
             stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
@@ -242,6 +247,7 @@ internal class ExportPlantUmlVisitor(
         if (initialState != null)
             line("$STAR --> ${initialState.graphName()}")
 
+        //FIXME why I skipped own transitions??? and why i getting children transitions here?
         // visit transitions
         states.flatMap { it.transitions }.forEach { visit(it) }
 
@@ -252,13 +258,16 @@ internal class ExportPlantUmlVisitor(
 
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
 
-    private fun transitionLabel(transition: Transition<*>): String {
+    private fun transitionLabel(transition: Transition<*>, description: String?): String {
         val text = listOfNotNull(
             transition.metaInfo?.umlLabel ?: transition.name,
             transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
+            description,
         ).joinToString()
-        return " : $text".takeIf { text.isNotBlank() } ?: ""
+        return transitionLabel(text)
     }
+
+    private fun transitionLabel(text: String?) = " : $text".takeIf { text?.isNotBlank() == true } ?: ""
 
     private fun IState.printStateDescriptions() {
         val descriptions = (metaInfo as? UmlMetaInfo)?.umlStateDescriptions.orEmpty()

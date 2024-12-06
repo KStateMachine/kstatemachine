@@ -236,8 +236,8 @@ state state_machine_StateMachine {
     
     [*] --> state1
 }
-state1 --> state212
-state1 --> state222
+state1 --> state212 : SwitchEvent
+state1 --> state222 : SwitchEvent
 @enduml
 """
 
@@ -436,7 +436,10 @@ class ExportPlantUmlVisitorTest : StringSpec({
                 }
             }
 
-            machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_RESULT
+            machine.exportToPlantUml(
+                showEventLabels = true,
+                unsafeCallConditionalLambdas = true
+            ) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_RESULT
         }
 
         "plantUml export multiple target states, disable by metadata" {
