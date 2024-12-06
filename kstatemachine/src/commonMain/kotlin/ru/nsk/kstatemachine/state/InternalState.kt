@@ -27,7 +27,7 @@ internal fun InternalNode.requireParentNode(): InternalNode =
 /**
  * Defines state API for internal library usage. All states must implement this class.
  * Unfortunately cannot use interface for this purpose.
- * This is safe to cast any [IState] to [InternalState] by design.
+ * This is safe to cast any [IState] to [InternalState] by design for internal library implementation.
  */
 abstract class InternalState : IState, InternalNode {
     override val parent: IState? get() = internalParent

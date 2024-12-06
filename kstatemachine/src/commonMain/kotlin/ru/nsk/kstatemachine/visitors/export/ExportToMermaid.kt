@@ -7,6 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors.export
 
+import ru.nsk.kstatemachine.metainfo.ExportMetaInfo
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.visitors.export.CompatibilityFormat.MERMAID
 
@@ -16,7 +17,8 @@ import ru.nsk.kstatemachine.visitors.export.CompatibilityFormat.MERMAID
  *
  * [showEventLabels] prints event types for transitions
  * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
- * this may give more complete output, but may be not safe.
+ * this may give more complete output, but may be not safe ([ClassCastException] may be thrown).
+ * See [ExportMetaInfo] for more info.
  */
 suspend fun StateMachine.exportToMermaid(
     showEventLabels: Boolean = false,

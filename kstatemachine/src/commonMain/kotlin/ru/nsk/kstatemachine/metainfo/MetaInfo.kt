@@ -29,7 +29,7 @@ interface CompositeMetaInfo : MetaInfo {
     val metaInfoSet: Set<MetaInfo>
 }
 
-internal inline fun <reified M : MetaInfo> MetaInfo.findMetaInfo(): M? {
+internal inline fun <reified M : MetaInfo> MetaInfo?.findMetaInfo(): M? {
     return when (this) {
         is M -> this
         is CompositeMetaInfo -> metaInfoSet.singleOrNull { it is M } as? M

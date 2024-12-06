@@ -9,8 +9,13 @@ package ru.nsk.kstatemachine.visitors.export
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.isNeighbor
+import ru.nsk.kstatemachine.metainfo.EventAndArgumentResolutionHint
+import ru.nsk.kstatemachine.metainfo.ExportMetaInfo
+import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
 import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.metainfo.ResolutionHint
+import ru.nsk.kstatemachine.metainfo.StateResolutionHint
 import ru.nsk.kstatemachine.metainfo.findMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
@@ -18,6 +23,7 @@ import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.InternalTransition
 import ru.nsk.kstatemachine.transition.Transition
+import ru.nsk.kstatemachine.transition.TransitionDirection
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.CollectTargetStatesPolicy
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.UnsafeCollectTargetStatesPolicy
@@ -39,6 +45,21 @@ private const val CHOICE = "<<choice>>"
 internal object ExportPlantUmlEvent : Event
 
 internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
+
+private data class TargetStateInfo(
+    val description: String?,
+    val targetStates: Set<InternalState>,
+) {
+    init {
+        require(targetStates.isNotEmpty()) { "targetStates must be non-empty." }
+    }
+
+    /**
+     * PlantUML cant draw multiple target transitions.
+     * So I have to simplify it to just use first state.
+     */
+    val targetState get() = targetStates.first()
+}
 
 /**
  * Export state machine to Plant UML language format.
@@ -85,12 +106,13 @@ internal class ExportPlantUmlVisitor(
                 is HistoryState, is UndoState -> return
                 is RedirectPseudoState -> {
                     line("state ${state.labelGraphName()} $CHOICE")
-                    @Suppress("UNCHECKED_CAST")
-                    val targetStates = state.resolveTargetState(makeDirectionProducerPolicy<Event>())
-                        .targetStates as Set<InternalState>
+                    val targetStateInfoList = executeDirectionProducerPolicy<Event>(state.metaInfo) { policy ->
+                        state.resolveTargetState(policy)
+                    }
                     state.printStateNotes()
-                    targetStates.forEach { targetState ->
-                        crossLevelTransitions += "${state.graphName()} --> ${targetState.targetGraphName()}"
+                    targetStateInfoList.forEach { targetStateInfo ->
+                        //todo use description
+                        crossLevelTransitions += "${state.graphName()} --> ${targetStateInfo.targetState.targetGraphName()}"
                     }
                 }
                 else -> {
@@ -121,14 +143,15 @@ internal class ExportPlantUmlVisitor(
         transition as InternalTransition<E>
 
         val sourceState = transition.sourceState.graphName()
+        val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
+            transition.produceTargetStateDirection(policy)
+        }
+        targetStateInfoList.forEach { targetStateInfo -> // actually plantUml may not understand multiple transitions
+            //todo use description
+            val transitionString =
+                "$sourceState --> ${targetStateInfo.targetState.targetGraphName()}${transitionLabel(transition)}"
 
-        @Suppress("UNCHECKED_CAST")
-        val targetStates = transition.produceTargetStateDirection(makeDirectionProducerPolicy()).targetStates
-                as Set<InternalState>
-        targetStates.forEach { targetState -> // actually plantUml may not understand multiple transitions
-            val transitionString = "$sourceState --> ${targetState.targetGraphName()}${transitionLabel(transition)}"
-
-            if (transition.sourceState.isNeighbor(targetState))
+            if (transition.sourceState.isNeighbor(targetStateInfo.targetState))
                 line(transitionString)
             else
                 crossLevelTransitions += transitionString
@@ -143,13 +166,62 @@ internal class ExportPlantUmlVisitor(
         }
     }
 
-    private fun <E : Event> makeDirectionProducerPolicy(): TransitionDirectionProducerPolicy<E> {
-        return if (unsafeCallConditionalLambdas) {
-            @Suppress("UNCHECKED_CAST") // this is unsafe by design
-            UnsafeCollectTargetStatesPolicy(EventAndArgument(ExportPlantUmlEvent as E, null))
+    /**
+     * We should call conditional lambdas if [hasUnsafeCallConditionalLambdas] is true and use user provided
+     * [ResolutionHint]s to extend output.
+     */
+    private suspend fun <E : Event> executeDirectionProducerPolicy(
+        metaInfo: MetaInfo?,
+        block: suspend (TransitionDirectionProducerPolicy<E>) -> TransitionDirection
+    ): List<TargetStateInfo> {
+        val stateInfoList = mutableListOf<TargetStateInfo>()
+        if (metaInfo.hasUnsafeCallConditionalLambdas) {
+            val exportMetaInfo = metaInfo.findMetaInfo<ExportMetaInfo>()
+            if (exportMetaInfo != null) {
+                val hintMap = exportMetaInfo.resolutionHints.groupBy {
+                    when (it) {
+                        is EventAndArgumentResolutionHint -> EventAndArgumentResolutionHint::class
+                        is StateResolutionHint -> StateResolutionHint::class
+                    }
+                }
+                if (hintMap.isNotEmpty()) {
+                    hintMap[EventAndArgumentResolutionHint::class]?.mapTo(stateInfoList) {
+                        it as EventAndArgumentResolutionHint
+                        @Suppress("UNCHECKED_CAST")
+                        val eventAndArgument = it.eventAndArgument as EventAndArgument<E>
+                        TargetStateInfo(
+                            it.description,
+                            block(makeDirectionProducerPolicy<E>(metaInfo, eventAndArgument)).internalTargetStates
+                        )
+                    }
+                    hintMap[StateResolutionHint::class]?.mapTo(stateInfoList) {
+                        it as StateResolutionHint
+                        TargetStateInfo(it.description, it.internalTargetStates)
+                    }
+                } else {
+                    stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
+                }
+            } else {
+                stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
+            }
         } else {
-            CollectTargetStatesPolicy()
+            stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
         }
+        return stateInfoList
+    }
+
+    private val MetaInfo?.hasUnsafeCallConditionalLambdas: Boolean
+        get() = unsafeCallConditionalLambdas && findMetaInfo<IgnoreUnsafeCallConditionalLambdasMetaInfo>() == null
+
+    private fun <E : Event> makeDirectionProducerPolicy(
+        metaInfo: MetaInfo?,
+        @Suppress("UNCHECKED_CAST") // this is unsafe by design
+        eventAndArgument: EventAndArgument<E> = EventAndArgument(ExportPlantUmlEvent as E, null)
+    ): TransitionDirectionProducerPolicy<E> {
+        return if (metaInfo.hasUnsafeCallConditionalLambdas)
+            UnsafeCollectTargetStatesPolicy(eventAndArgument)
+        else
+            CollectTargetStatesPolicy()
     }
 
     private suspend fun processStateBody(state: IState) {
@@ -225,13 +297,17 @@ internal class ExportPlantUmlVisitor(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+private val TransitionDirection.internalTargetStates get() = targetStates as Set<InternalState>
+
 /**
  * Export [StateMachine] to PlantUML state diagram
  * @see <a href="https://plantuml.com/">PlantUML</a>
  *
  * [showEventLabels] prints event types for transitions
  * [unsafeCallConditionalLambdas] will call conditional lambdas which can touch application data,
- * this may give more complete output, but may be not safe.
+ * this may give more complete output, but may be not safe ([ClassCastException] may be thrown).
+ *  * See [ExportMetaInfo] for more info.
  */
 suspend fun StateMachine.exportToPlantUml(
     showEventLabels: Boolean = false,

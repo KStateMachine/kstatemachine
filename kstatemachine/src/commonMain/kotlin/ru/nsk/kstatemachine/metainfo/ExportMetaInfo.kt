@@ -9,12 +9,62 @@ package ru.nsk.kstatemachine.metainfo
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
-import ru.nsk.kstatemachine.transition.TransitionDirection
+import ru.nsk.kstatemachine.state.InternalState
+import ru.nsk.kstatemachine.state.RedirectPseudoState
+import ru.nsk.kstatemachine.transition.EventAndArgument
 
+/**
+ * Hint to be used with [ExportMetaInfo]
+ */
 sealed interface ResolutionHint
-class StateResolutionHint(targetState: IState) : ResolutionHint
-class EventResolutionHint(event: Event) : ResolutionHint
-class DirectionResolutionHint(direction: TransitionDirection) : ResolutionHint
+
+/**
+ * To be used with state/transition constructions where some conditional lambda should return [IState] type.
+ * If the hint takes an effect (applied correctly), the conditional lambda will not be called even if
+ * [unsafeCallConditionalLambdas] is true.
+ * You can specify multiple [StateResolutionHint] instances for the same construction to cover all internal branches.
+ * User is responsible to provide correct hints.
+ */
+class StateResolutionHint(
+    val description: String,
+    /** Allows to specify parallel target states */
+    val targetStates: Set<IState>,
+) : ResolutionHint {
+    constructor(
+        description: String,
+        targetState: IState,
+    ) : this(description, setOf(targetState))
+
+    init {
+        require(targetStates.isNotEmpty()) {
+            "targetStates must be non-empty, use single state or multiple states for parallel transitions"
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    internal val internalTargetStates: Set<InternalState> get() = targetStates as Set<InternalState>
+}
+
+/**
+ * To be used with state/transition constructions where some conditional lambda uses [EventAndArgument] instance.
+ * If the hint takes an effect (applied correctly) and [unsafeCallConditionalLambdas] flag is true the conditional lambda
+ * will be called with specified [EventAndArgument] instead of default fake ([ExportPlantUmlEvent]).
+ * You can specify multiple [EventAndArgumentResolutionHint] instances for the same construction to cover all internal branches.
+ * User is responsible to provide correct hints.
+ */
+class EventAndArgumentResolutionHint(
+    val description: String,
+    val event: Event,
+    val argument: Any? = null
+) : ResolutionHint {
+    val eventAndArgument = EventAndArgument(event, argument)
+}
+
+/**
+ * Allows to ignore an effect of export's feature [unsafeCallConditionalLambdas] flag for certain conditional transition
+ * or conditional state [RedirectPseudoState]. Conditional lambda will not be called if this meta info is applied.
+ */
+object IgnoreUnsafeCallConditionalLambdasMetaInfo : MetaInfo
 
 /**
  * Standard [MetaInfo], to control unsafe export feature.
