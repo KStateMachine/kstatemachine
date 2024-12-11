@@ -44,6 +44,11 @@ choiceState --> State1 : if (true)
 choiceState --> State2
 State1 --> State11 : if (event.value == 42)
 State1 --> State12 : else
+ExportMetaInfoStateMachine_StateMachine --> State2 : when 2
+ExportMetaInfoStateMachine_StateMachine --> State1 : when 1
+ExportMetaInfoStateMachine_StateMachine --> State1 : when 3
+ExportMetaInfoStateMachine_StateMachine --> State2 : when 3
+ExportMetaInfoStateMachine_StateMachine --> ExportMetaInfoStateMachine_StateMachine : when 4
 @enduml
 """
 
@@ -65,6 +70,11 @@ choiceState --> State1 : if (true)
 choiceState --> State2
 State1 --> State11 : ValueEvent1, if (event.value == 42)
 State1 --> State12 : ValueEvent1, else
+ExportMetaInfoStateMachine_StateMachine --> State2 : ValueEvent2, when 2
+ExportMetaInfoStateMachine_StateMachine --> State1 : ValueEvent2, when 1
+ExportMetaInfoStateMachine_StateMachine --> State1 : ValueEvent2, when 3
+ExportMetaInfoStateMachine_StateMachine --> State2 : ValueEvent2, when 3
+ExportMetaInfoStateMachine_StateMachine --> ExportMetaInfoStateMachine_StateMachine : ValueEvent2, when 4
 @enduml
 """
 

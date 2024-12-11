@@ -19,7 +19,9 @@ import ru.nsk.kstatemachine.metainfo.StateResolutionHint
 import ru.nsk.kstatemachine.metainfo.findMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.statemachine.START_TRANSITION_NAME
 import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.UNDO_TRANSITION_NAME
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.InternalTransition
 import ru.nsk.kstatemachine.transition.NoTransition
@@ -53,6 +55,8 @@ private data class TargetStateInfo(
     val targetStates: Set<InternalState>,
 )
 
+private val internalTransitions = listOf(START_TRANSITION_NAME, UNDO_TRANSITION_NAME)
+
 /**
  * Export state machine to Plant UML language format.
  * @see <a href="https://plantuml.com/ru/state-diagram">Plant UML state diagram</a>
@@ -83,6 +87,9 @@ internal class ExportPlantUmlVisitor(
         line("state ${machine.labelGraphName()} {")
         ++indent
         processStateBody(machine)
+        machine.transitions.forEach {
+            if (it.name !in internalTransitions) visit(it)
+        }
         --indent
         line("}")
 
@@ -247,9 +254,10 @@ internal class ExportPlantUmlVisitor(
         if (initialState != null)
             line("$STAR --> ${initialState.graphName()}")
 
-        //FIXME why I skipped own transitions??? and why i getting children transitions here?
-        // visit transitions
-        states.flatMap { it.transitions }.forEach { visit(it) }
+        // visit transitions, skipping internal StateMachines
+        states.flatMap {
+            if (it !is StateMachine) it.transitions else emptySet()
+        }.forEach { visit(it) }
 
         // add finish transitions
         states.filterIsInstance<IFinalState>()

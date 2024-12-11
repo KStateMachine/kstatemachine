@@ -7,6 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors.export
 
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.data.forAll
 import io.kotest.data.headers
@@ -210,6 +211,7 @@ state outer_machine_StateMachine {
     
     [*] --> outer_state1
 }
+outer_machine_StateMachine -> outer_machine_StateMachine
 @enduml
 """
 
@@ -402,10 +404,12 @@ class ExportPlantUmlVisitorTest : StringSpec({
             val inner = createTestStateMachine(coroutineStarterType, name = "inner machine") {
                 initialState("inner state1")
                 state("inner state2")
+                transition<SecondEvent>() // should be ignored
             }
             val outer = createTestStateMachine(coroutineStarterType, name = "outer machine") {
                 initialState("outer state1")
                 addState(inner)
+                transition<FirstEvent>()
             }
 
             outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT

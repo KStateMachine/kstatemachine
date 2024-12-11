@@ -10,6 +10,7 @@ package ru.nsk.kstatemachine.statemachine
 import ru.nsk.kstatemachine.coroutines.CoroutineAbstraction
 import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.isSubStateOf
+import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
 import ru.nsk.kstatemachine.persistence.EventRecorder
 import ru.nsk.kstatemachine.persistence.EventRecorderImpl
 import ru.nsk.kstatemachine.state.*
@@ -21,6 +22,9 @@ import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 import ru.nsk.kstatemachine.visitors.checkNonBlankNames
 import kotlin.reflect.KClass
+
+internal const val START_TRANSITION_NAME = "start transition"
+internal const val UNDO_TRANSITION_NAME = "undo transition"
 
 internal class StateMachineImpl(
     name: String?,
@@ -81,7 +85,7 @@ internal class StateMachineImpl(
         }
 
     init {
-        transitionConditionally<StartEvent>("start transition") {
+        transitionConditionally<StartEvent>(START_TRANSITION_NAME) {
             direction = {
                 when (event) {
                     is StartEventImpl -> {
@@ -94,10 +98,11 @@ internal class StateMachineImpl(
                     is StartDataEventImpl<*> -> targetState(event.startState)
                 }
             }
+            metaInfo = IgnoreUnsafeCallConditionalLambdasMetaInfo
         }
         if (creationArguments.isUndoEnabled) {
             val undoState = addState(UndoState())
-            transition<WrappedEvent>("undo transition", undoState)
+            transition<WrappedEvent>(UNDO_TRANSITION_NAME, undoState)
         }
     }
 
