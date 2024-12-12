@@ -19,7 +19,6 @@ import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.statemachine.StateMachine.PendingEventHandler
 import ru.nsk.kstatemachine.transition.EventAndArgument
-import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.Visitor

@@ -14,6 +14,9 @@ import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 
+/**
+ * Caller should check subclass to recognise/distinguish [NoTransition] and [Stay] cases.
+ */
 sealed interface TransitionDirection {
     /**
      * Already resolved target state of conditional transition or [PseudoState] computation

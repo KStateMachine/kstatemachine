@@ -91,11 +91,57 @@ public final class ru/nsk/kstatemachine/event/WrappedEvent : ru/nsk/kstatemachin
 	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
 }
 
+public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+	public abstract fun getMetaInfoSet ()Ljava/util/Set;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/CompositeMetaInfo {
+	public abstract fun getMetaInfoSet ()Ljava/util/Set;
+	public abstract fun setMetaInfoSet (Ljava/util/Set;)V
+}
+
+public final class ru/nsk/kstatemachine/metainfo/EventAndArgumentResolutionHint : ru/nsk/kstatemachine/metainfo/ResolutionHint {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
+	public synthetic fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getArgument ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
+	public final fun getEventAndArgument ()Lru/nsk/kstatemachine/transition/EventAndArgument;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+	public abstract fun getResolutionHints ()Ljava/util/Set;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/ExportMetaInfo {
+	public abstract fun getResolutionHints ()Ljava/util/Set;
+	public abstract fun setResolutionHints (Ljava/util/Set;)V
+}
+
+public final class ru/nsk/kstatemachine/metainfo/ExportMetaInfoKt {
+	public static final fun buildExportMetaInfo (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/metainfo/ExportMetaInfo;
+}
+
+public final class ru/nsk/kstatemachine/metainfo/IgnoreUnsafeCallConditionalLambdasMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+	public static final field INSTANCE Lru/nsk/kstatemachine/metainfo/IgnoreUnsafeCallConditionalLambdasMetaInfo;
+}
+
 public abstract interface class ru/nsk/kstatemachine/metainfo/MetaInfo {
 }
 
 public final class ru/nsk/kstatemachine/metainfo/MetaInfoKt {
-	public static final fun buildUmlMetaInfo (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/metainfo/UmlMetaInfo;
+	public static final fun buildCompositeMetaInfo (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/metainfo/CompositeMetaInfo;
+	public static final fun buildCompositeMetaInfo (Lru/nsk/kstatemachine/metainfo/MetaInfo;Lru/nsk/kstatemachine/metainfo/MetaInfo;[Lru/nsk/kstatemachine/metainfo/MetaInfo;)Lru/nsk/kstatemachine/metainfo/CompositeMetaInfo;
+}
+
+public abstract interface class ru/nsk/kstatemachine/metainfo/ResolutionHint {
+}
+
+public final class ru/nsk/kstatemachine/metainfo/StateResolutionHint : ru/nsk/kstatemachine/metainfo/ResolutionHint {
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;)V
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getTargetStates ()Ljava/util/Set;
 }
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/UmlMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
@@ -111,6 +157,10 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/UmlMetaInfoBuilder
 	public abstract fun setUmlLabel (Ljava/lang/String;)V
 	public abstract fun setUmlNotes (Ljava/util/List;)V
 	public abstract fun setUmlStateDescriptions (Ljava/util/List;)V
+}
+
+public final class ru/nsk/kstatemachine/metainfo/UmlMetaInfoKt {
+	public static final fun buildUmlMetaInfo (Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/metainfo/UmlMetaInfo;
 }
 
 public final class ru/nsk/kstatemachine/persistence/EmptyValidator : ru/nsk/kstatemachine/persistence/RestorationResultValidator {
