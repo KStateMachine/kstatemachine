@@ -55,6 +55,7 @@ state "Nested states sm" as Meta_info_StateMachine {
     note on link
         Note 2
     end note
+    State_1 --> State_1 : SwitchEvent
     State2 --> State3 : That's all, SwitchEvent
     State2 --> State_1 : back to State 1, SwitchEvent
     State3 --> [*]

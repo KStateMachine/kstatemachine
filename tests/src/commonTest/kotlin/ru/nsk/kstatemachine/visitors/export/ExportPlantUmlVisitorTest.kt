@@ -7,7 +7,6 @@
 
 package ru.nsk.kstatemachine.visitors.export
 
-import io.kotest.core.spec.style.FreeSpec
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.data.forAll
 import io.kotest.data.headers
@@ -17,13 +16,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldNotBeInstanceOf
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
-import ru.nsk.kstatemachine.metainfo.MetaInfo
-import ru.nsk.kstatemachine.metainfo.buildCompositeMetaInfo
 import ru.nsk.kstatemachine.metainfo.buildUmlMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
-import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.targetParallelStates
 
 private const val PLANTUML_NESTED_STATES_RESULT = """@startuml
@@ -42,6 +38,7 @@ state Nested_states_StateMachine {
     
     [*] --> State1
     State1 --> State2 : to State2
+    State1 --> State1
     State1 --> State1
     State2 --> State3
     State2 --> State1 : back
@@ -67,6 +64,7 @@ state Nested_states_StateMachine {
     [*] --> State1
     State1 --> State2 : to State2, SwitchEvent
     State1 --> State1 : SwitchEvent
+    State1 --> State1 : SwitchEvent
     State2 --> State3 : SwitchEvent
     State2 --> State1 : back, SwitchEvent
     State3 --> [*]
@@ -89,6 +87,7 @@ state Nested_states_StateMachine {
     
     [*] --> State1
     State1 --> State2 : to State2
+    State1 --> State1
     State1 --> State1
     State2 --> State3
     State2 --> State1 : back
@@ -210,8 +209,8 @@ state outer_machine_StateMachine {
     state inner_machine_StateMachine
     
     [*] --> outer_state1
+    outer_machine_StateMachine --> outer_machine_StateMachine
 }
-outer_machine_StateMachine -> outer_machine_StateMachine
 @enduml
 """
 

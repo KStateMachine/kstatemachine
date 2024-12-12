@@ -25,6 +25,8 @@ import ru.nsk.kstatemachine.statemachine.UNDO_TRANSITION_NAME
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.InternalTransition
 import ru.nsk.kstatemachine.transition.NoTransition
+import ru.nsk.kstatemachine.transition.Stay
+import ru.nsk.kstatemachine.transition.TargetState
 import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionDirection
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy
@@ -51,8 +53,7 @@ internal enum class CompatibilityFormat { PLANT_UML, MERMAID }
 
 private data class TargetStateInfo(
     val description: String?,
-    /** Might be empty - means [NoTransition] */
-    val targetStates: Set<InternalState>,
+    val transitionDirection: TransitionDirection,
 )
 
 private val internalTransitions = listOf(START_TRANSITION_NAME, UNDO_TRANSITION_NAME)
@@ -109,12 +110,22 @@ internal class ExportPlantUmlVisitor(
                         state.resolveTargetState(policy)
                     }
                     state.printStateNotes()
+                    val stateGraphName = state.graphName()
                     for (targetStateInfo in targetStateInfoList) {
-                        // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
-                        for (targetState in targetStateInfo.targetStates) {
-                            crossLevelTransitions += "${state.graphName()} --> " +
-                                    targetState.targetGraphName() +
+                        val transitionDirection = targetStateInfo.transitionDirection
+                        when (transitionDirection) {
+                            NoTransition -> continue
+                            // not possible actually, as it is an infinite loop
+                            Stay -> crossLevelTransitions += "$stateGraphName --> $stateGraphName" +
                                     transitionLabel(targetStateInfo.description)
+                            is TargetState -> {
+                                // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
+                                @Suppress("UNCHECKED_CAST")
+                                for (targetState in targetStateInfo.transitionDirection.targetStates as Set<InternalState>) {
+                                    crossLevelTransitions += "$stateGraphName --> ${targetState.targetGraphName()}" +
+                                            transitionLabel(targetStateInfo.description)
+                                }
+                            }
                         }
                     }
                 }
@@ -145,21 +156,31 @@ internal class ExportPlantUmlVisitor(
     override suspend fun <E : Event> visit(transition: Transition<E>) {
         transition as InternalTransition<E>
 
-        val sourceState = transition.sourceState.graphName()
+        val sourceStateGraphName = transition.sourceState.graphName()
         val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
             transition.produceTargetStateDirection(policy)
         }
         for (targetStateInfo in targetStateInfoList) {
-            // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
-            for (targetState in targetStateInfo.targetStates) {
-                val transitionString = "$sourceState --> " +
-                        targetState.targetGraphName() +
-                        transitionLabel(transition, targetStateInfo.description)
+            val transitionDirection = targetStateInfo.transitionDirection
+            when (transitionDirection) {
+                NoTransition -> continue
+                Stay -> line(
+                    "$sourceStateGraphName --> $sourceStateGraphName" +
+                            transitionLabel(transition, targetStateInfo.description)
+                )
+                is TargetState -> {
+                    // PlantUML cant draw multi-target transitions. So I have to simply loop through all the targets.
+                    @Suppress("UNCHECKED_CAST")
+                    for (targetState in transitionDirection.targetStates as Set<InternalState>) {
+                        val transitionString = "$sourceStateGraphName --> ${targetState.targetGraphName()}" +
+                                transitionLabel(transition, targetStateInfo.description)
 
-                if (transition.sourceState.isNeighbor(targetState))
-                    line(transitionString)
-                else
-                    crossLevelTransitions += transitionString
+                        if (transition.sourceState.isNeighbor(targetState))
+                            line(transitionString)
+                        else
+                            crossLevelTransitions += transitionString
+                    }
+                }
             }
         }
 
@@ -197,27 +218,27 @@ internal class ExportPlantUmlVisitor(
                         val eventAndArgument = it.eventAndArgument as EventAndArgument<E>
                         TargetStateInfo(
                             it.description,
-                            block(makeDirectionProducerPolicy<E>(metaInfo, eventAndArgument)).internalTargetStates
+                            block(makeDirectionProducerPolicy<E>(metaInfo, eventAndArgument))
                         )
                     }
                     hintMap[StateResolutionHint::class]?.mapTo(stateInfoList) {
                         it as StateResolutionHint
-                        TargetStateInfo(it.description, it.internalTargetStates)
+                        TargetStateInfo(it.description, TargetState(it.targetStates))
                     }
                 } else {
                     stateInfoList += TargetStateInfo(
                         null,
-                        block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates
+                        block(makeDirectionProducerPolicy<E>(metaInfo))
                     )
                 }
             } else {
                 stateInfoList += TargetStateInfo(
                     null,
-                    block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates
+                    block(makeDirectionProducerPolicy<E>(metaInfo))
                 )
             }
         } else {
-            stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)).internalTargetStates)
+            stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)))
         }
         return stateInfoList
     }
@@ -313,9 +334,6 @@ internal class ExportPlantUmlVisitor(
         }
     }
 }
-
-@Suppress("UNCHECKED_CAST")
-private val TransitionDirection.internalTargetStates get() = targetStates as Set<InternalState>
 
 /**
  * Export [StateMachine] to PlantUML state diagram

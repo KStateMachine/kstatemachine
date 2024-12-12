@@ -40,9 +40,6 @@ class StateResolutionHint(
             "targetStates must be non-empty, use single state or multiple states for parallel transitions"
         }
     }
-
-    @Suppress("UNCHECKED_CAST")
-    internal val internalTargetStates: Set<InternalState> get() = targetStates as Set<InternalState>
 }
 
 /**
