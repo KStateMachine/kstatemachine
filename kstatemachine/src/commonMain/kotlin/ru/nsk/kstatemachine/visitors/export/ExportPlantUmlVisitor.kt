@@ -299,7 +299,7 @@ internal class ExportPlantUmlVisitor(
     private fun transitionLabel(text: String?) = " : $text".takeIf { text?.isNotBlank() == true } ?: ""
 
     private fun IState.printStateDescriptions() {
-        val descriptions = (metaInfo as? UmlMetaInfo)?.umlStateDescriptions.orEmpty()
+        val descriptions = metaInfo.findMetaInfo<UmlMetaInfo>()?.umlStateDescriptions.orEmpty()
         descriptions.forEach { line("${graphName()} : $it") }
     }
 

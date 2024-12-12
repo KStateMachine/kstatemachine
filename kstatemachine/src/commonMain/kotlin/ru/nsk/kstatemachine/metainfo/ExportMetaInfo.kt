@@ -9,7 +9,6 @@ package ru.nsk.kstatemachine.metainfo
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
-import ru.nsk.kstatemachine.state.InternalState
 import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.transition.EventAndArgument
 

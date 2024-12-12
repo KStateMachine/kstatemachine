@@ -21,6 +21,7 @@ interface MetaInfo
  * Allows to specify multiple [MetaInfo] objects.
  * It might be simpler than constructing single object implementing multiple [MetaInfo] derived interfaces.
  * Nesting [CompositeMetaInfo] into each other is not supported.
+ * Only one instance of certain [MetaInfo] subtype should be specified.
  */
 interface CompositeMetaInfo : MetaInfo {
     /**
@@ -29,7 +30,10 @@ interface CompositeMetaInfo : MetaInfo {
     val metaInfoSet: Set<MetaInfo>
 }
 
-internal inline fun <reified M : MetaInfo> MetaInfo?.findMetaInfo(): M? {
+/**
+ * Helper method for getting [MetaInfo] of specified type
+ */
+inline fun <reified M : MetaInfo> MetaInfo?.findMetaInfo(): M? {
     return when (this) {
         is M -> this
         is CompositeMetaInfo -> metaInfoSet.singleOrNull { it is M } as? M
