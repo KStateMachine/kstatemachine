@@ -21,58 +21,8 @@ Please note that both of them have their own limitations and corner cases.
 {: .note }
 Transitions that use lambdas like `transitionConditionally()` and `transitionOn()` or `choiceState()` etc.,
 are not exported by default.
-You can enable their export with `unsafeCallConditionalLambdas` flag of `exportToPlantUml()`/`exportToMermaid()`
-functions.
-With `unsafeCallConditionalLambdas` flag set, user defined lambdas that are passed to the library to calculate next
-state would be called during export process. This will give more complete (still not full) export output,
-but may cause runtime errors depending on what the lambda actually do. As it may touch application data that is not
-valid when export is running, also `event` argument will be faked by unsafe cast, so touching it
-will cause `ClassCastException`
-That is why `unsafeCallConditionalLambdas` flag should be considered as debug/development tool only.
-The library provides additional `MetaInfo` objects that might be used along with `unsafeCallConditionalLambdas` flag
-to provide complete output (with a help of a user).
-
-* `IgnoreUnsafeCallConditionalLambdasMetaInfo` allows to ignore `unsafeCallConditionalLambdas` flag for some state or
-  transition. Corresponding lambda will not be executed.
-* `ExportMetaInfoBuilder` (is built by `buildExportMetaInfo` function) allows a user to manually specify hint
-  information (list of hints) for the library to print complete export output. 
-  User is responsible to specify correct information.
-  There is `StateResolutionHint` which is useful to specify target states (so lambda execution is not needed)
-  and `EventAndArgumentResolutionHint` allowing to specify `Event` and argument, which will be used to execute a 
-  conditional lambda. This allows to bypass limitations of default behaviour with fake event.
-
-  Here are some usage samples:
-  ```kotlin
-  class ValueEvent(val value: Int) : Event
-  
-  transitionConditionally<ValueEvent> {
-      direction = {
-          when (event.value) {
-              1 -> targetState(state1)
-              2 -> targetState(state2)
-              3 -> targetParallelStates(state1, state2)
-              4 -> stay()
-              else -> noTransition()
-          }
-      }
-      metaInfo = buildExportMetaInfo {
-          resolutionHints = setOf(
-              // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
-              StateResolutionHint("when 1", state1), 
-              // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
-              EventAndArgumentResolutionHint("when 2", ValueEvent(2)),
-              // you can specify set of states that represents parallel target states
-              StateResolutionHint("when 3", setOf(state1, state2)), 
-              // describes stay() behaviour without calling "direction" lambda
-              StateResolutionHint("when 4", this@createStateMachine),
-              // resolves to stay() by calling "direction" lambda
-              EventAndArgumentResolutionHint("when 4", ValueEvent(4)),
-              // useless, does not affect export output as it resolves to noTransition()
-              EventAndArgumentResolutionHint("else", ValueEvent(5)),
-          )
-      }
-  }
-  ```
+See [export with unsafeCallConditionalLambdas flag](#export-with-unsafecallconditionallambdas-flag) section how to
+handle such constructions.
 
 ## PlantUML
 
@@ -111,7 +61,8 @@ See [Mermaid nested states export sample](https://github.com/KStateMachine/kstat
 ## Controlling export output
 
 To beautify and enrich export output, you can use `UmlMetaInfo` for both `IState` and `Transition`. It can be built
-with `buildUmlMetaInfo()` function:
+with `buildUmlMetaInfo()` function.
+It allows to add notes and labels to your state diagrams.
 
 ```kotlin
 state("State1") {
@@ -125,3 +76,68 @@ state("State1") {
 
 See [PlantUML with MetaInfo export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
 
+## Export with `unsafeCallConditionalLambdas` flag
+
+Transitions that use lambdas like `transitionConditionally()` and `transitionOn()` or `choiceState()` etc.,
+are not exported by default.
+
+You can enable their export with `unsafeCallConditionalLambdas` flag of `exportToPlantUml()`/`exportToMermaid()`
+functions.
+With `unsafeCallConditionalLambdas` flag set, user defined lambdas that are passed to the library to calculate next
+state would be called during export process. This will give more complete (still not full) export output,
+but may cause runtime errors depending on what the lambda actually do. As it may touch application data that is not
+valid when export is running, also `event` argument will be faked with `ExportPlantUmlEvent` by unsafe cast, so touching
+it will cause `ClassCastException`.
+
+That is why `unsafeCallConditionalLambdas` flag should be considered as debug/development tool only.
+
+The library provides additional `MetaInfo` objects that might be used along with `unsafeCallConditionalLambdas` flag
+to provide complete output (with a help of a user).
+
+* `IgnoreUnsafeCallConditionalLambdasMetaInfo` allows to ignore `unsafeCallConditionalLambdas` flag for some state or
+  transition. Corresponding lambda will not be executed.
+* `ExportMetaInfo` (is built by `buildExportMetaInfo` function) allows a user to manually specify hint
+  information (list of `ResolutionHint` objects) for the library to print complete export output.
+  User is responsible to specify correct information.
+
+### Resolution hints
+
+* There is `StateResolutionHint` which is useful to specify target states. So lambda execution is not needed.
+  This hint works even without `unsafeCallConditionalLambdas` flag.
+* And `EventAndArgumentResolutionHint` allowing to specify `Event` and argument, which will be used to execute a
+  conditional lambda. This allows to bypass limitations of default behaviour with fake `ExportPlantUmlEvent`.
+  This hint works only if `unsafeCallConditionalLambdas` flag is `true`.
+
+Here are some samples using resolution hints:
+
+```kotlin
+  class ValueEvent(val value: Int) : Event
+
+transitionConditionally<ValueEvent> {
+    direction = {
+        when (event.value) {
+            1 -> targetState(state1)
+            2 -> targetState(state2)
+            3 -> targetParallelStates(state1, state2)
+            4 -> stay()
+            else -> noTransition()
+        }
+    }
+    metaInfo = buildExportMetaInfo {
+        resolutionHints = setOf(
+            // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
+            StateResolutionHint("when 1", state1),
+            // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
+            EventAndArgumentResolutionHint("when 2", ValueEvent(2)),
+            // you can specify set of states that represents parallel target states
+            StateResolutionHint("when 3", setOf(state1, state2)),
+            // describes stay() behaviour without calling "direction" lambda
+            StateResolutionHint("when 4", this@createStateMachine),
+            // resolves to stay() by calling "direction" lambda
+            EventAndArgumentResolutionHint("when 4", ValueEvent(4)),
+            // useless, does not affect export output as it resolves to noTransition()
+            EventAndArgumentResolutionHint("else", ValueEvent(5)),
+        )
+    }
+}
+```
