@@ -111,8 +111,9 @@ to provide complete output (with a help of a user).
 Here are some samples using resolution hints:
 
 ```kotlin
-  class ValueEvent(val value: Int) : Event
+class ValueEvent(val value: Int) : Event
 
+// ...
 transitionConditionally<ValueEvent> {
     direction = {
         when (event.value) {
