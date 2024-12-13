@@ -7,6 +7,8 @@
 
 package ru.nsk.kstatemachine.metainfo
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
@@ -18,7 +20,6 @@ import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.invoke
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transition
-import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.visitors.export.exportToPlantUml
 
 private const val PLANTUML_META_INFO = """@startuml
@@ -162,6 +163,32 @@ class UmlMetaInfoTest : StringSpec({
                 initialState("State1")
             }
             machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
+        }
+
+        "Negative CompositeMetaInfo nesting" {
+            shouldThrowWithMessage<IllegalStateException>("CompositeMetaInfo cannot nest each other") {
+                createTestStateMachine(coroutineStarterType) {
+                    metaInfo = buildCompositeMetaInfo(
+                        buildCompositeMetaInfo {},
+                        buildUmlMetaInfo {}
+                    )
+                    initialState("State1")
+                }
+            }
+        }
+
+        "Negative MetaInfo cannot be repeated more than once" {
+            shouldThrowWithMessage<IllegalStateException>("MetaInfo ${buildUmlMetaInfo {}::class} is repeated more than once") {
+                createTestStateMachine(coroutineStarterType) {
+                    transition<SwitchEvent> {
+                        metaInfo = buildCompositeMetaInfo(
+                            buildUmlMetaInfo { umlLabel = "text1" },
+                            buildUmlMetaInfo { umlLabel = "text2" }
+                        )
+                    }
+                    initialState("State1")
+                }
+            }
         }
     }
 })

@@ -18,6 +18,7 @@ import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.*
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
+import ru.nsk.kstatemachine.visitors.CheckMetaInfoStructureVisitor
 import ru.nsk.kstatemachine.visitors.CheckUniqueNamesVisitor
 import ru.nsk.kstatemachine.visitors.CleanupVisitor
 import ru.nsk.kstatemachine.visitors.checkNonBlankNames
@@ -158,6 +159,7 @@ internal class StateMachineImpl(
 
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
+        accept(CheckMetaInfoStructureVisitor())
         if (creationArguments.requireNonBlankNames)
             checkNonBlankNames()
         checkNotDestroyed()

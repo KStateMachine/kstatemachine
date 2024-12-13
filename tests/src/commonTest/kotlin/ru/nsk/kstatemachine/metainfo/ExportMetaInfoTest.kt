@@ -78,6 +78,29 @@ ExportMetaInfoStateMachine_StateMachine --> ExportMetaInfoStateMachine_StateMach
 @enduml
 """
 
+private const val EXPORT_META_INFO_WITHOUT_UNSAFE_CALL_CONDITIONAL_LAMBDAS_TEST = """@startuml
+hide empty description
+state ExportMetaInfoStateMachine_StateMachine {
+    state State1 {
+        state State11
+        state State12
+        
+        [*] --> State11
+    }
+    state State2
+    state choiceState <<choice>>
+    
+    [*] --> State1
+}
+choiceState --> State1 : if (true)
+choiceState --> State2
+ExportMetaInfoStateMachine_StateMachine --> State1 : when 1
+ExportMetaInfoStateMachine_StateMachine --> State1 : when 3
+ExportMetaInfoStateMachine_StateMachine --> State2 : when 3
+ExportMetaInfoStateMachine_StateMachine --> ExportMetaInfoStateMachine_StateMachine : when 4
+@enduml
+"""
+
 private object ExportMetaInfoTestData {
     class ValueEvent1(val value: Int) : Event
     class ValueEvent2(val value: Int) : Event
@@ -143,6 +166,11 @@ class ExportMetaInfoTest : StringSpec({
                 showEventLabels = true,
                 unsafeCallConditionalLambdas = true
             ) shouldBe EXPORT_META_INFO_WITH_LABELS_TEST
+        }
+
+        "ExportMetaInfo test without unsafeCallConditionalLambdas flag" {
+            val machine = createTestMachine(coroutineStarterType)
+            machine.exportToPlantUml() shouldBe EXPORT_META_INFO_WITHOUT_UNSAFE_CALL_CONDITIONAL_LAMBDAS_TEST
         }
     }
 })

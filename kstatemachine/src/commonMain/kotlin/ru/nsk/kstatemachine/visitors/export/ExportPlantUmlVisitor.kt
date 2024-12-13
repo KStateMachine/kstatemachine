@@ -218,7 +218,7 @@ internal class ExportPlantUmlVisitor(
                         val eventAndArgument = it.eventAndArgument as EventAndArgument<E>
                         TargetStateInfo(
                             it.description,
-                            block(makeDirectionProducerPolicy<E>(metaInfo, eventAndArgument))
+                            block(makeUnsafeCollectTargetStatesPolicy<E>(eventAndArgument))
                         )
                     }
                     hintMap[StateResolutionHint::class]?.mapTo(stateInfoList) {
@@ -226,36 +226,23 @@ internal class ExportPlantUmlVisitor(
                         TargetStateInfo(it.description, TargetState(it.targetStates))
                     }
                 } else {
-                    stateInfoList += TargetStateInfo(
-                        null,
-                        block(makeDirectionProducerPolicy<E>(metaInfo))
-                    )
+                    stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy<E>()))
                 }
             } else {
-                stateInfoList += TargetStateInfo(
-                    null,
-                    block(makeDirectionProducerPolicy<E>(metaInfo))
-                )
+                stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy<E>()))
             }
         } else {
-            stateInfoList += TargetStateInfo(null, block(makeDirectionProducerPolicy<E>(metaInfo)))
+            stateInfoList += TargetStateInfo(null, block(CollectTargetStatesPolicy()))
+            metaInfo.findMetaInfo<ExportMetaInfo>()
+                ?.resolutionHints
+                ?.filterIsInstance<StateResolutionHint>()
+                ?.mapTo(stateInfoList) { TargetStateInfo(it.description, TargetState(it.targetStates)) }
         }
         return stateInfoList
     }
 
     private val MetaInfo?.hasUnsafeCallConditionalLambdas: Boolean
         get() = unsafeCallConditionalLambdas && findMetaInfo<IgnoreUnsafeCallConditionalLambdasMetaInfo>() == null
-
-    private fun <E : Event> makeDirectionProducerPolicy(
-        metaInfo: MetaInfo?,
-        @Suppress("UNCHECKED_CAST") // this is unsafe by design
-        eventAndArgument: EventAndArgument<E> = EventAndArgument(ExportPlantUmlEvent as E, null)
-    ): TransitionDirectionProducerPolicy<E> {
-        return if (metaInfo.hasUnsafeCallConditionalLambdas)
-            UnsafeCollectTargetStatesPolicy(eventAndArgument)
-        else
-            CollectTargetStatesPolicy()
-    }
 
     private suspend fun processStateBody(state: IState) {
         state.printStateDescriptions()
@@ -333,6 +320,13 @@ internal class ExportPlantUmlVisitor(
             }
         }
     }
+}
+
+private fun <E : Event> makeUnsafeCollectTargetStatesPolicy(
+    @Suppress("UNCHECKED_CAST") // this is unsafe by design
+    eventAndArgument: EventAndArgument<E> = EventAndArgument(ExportPlantUmlEvent as E, null)
+): TransitionDirectionProducerPolicy<E> {
+    return UnsafeCollectTargetStatesPolicy(eventAndArgument)
 }
 
 /**

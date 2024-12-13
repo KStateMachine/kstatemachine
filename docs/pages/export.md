@@ -33,7 +33,7 @@ The library provides additional `MetaInfo` objects that might be used along with
 to provide complete output (with a help of a user).
 
 * `IgnoreUnsafeCallConditionalLambdasMetaInfo` allows to ignore `unsafeCallConditionalLambdas` flag for some state or
-  transition
+  transition. Corresponding lambda will not be executed.
 * `ExportMetaInfoBuilder` (is built by `buildExportMetaInfo` function) allows a user to manually specify hint
   information (list of hints) for the library to print complete export output. 
   User is responsible to specify correct information.

@@ -19,14 +19,14 @@ sealed interface ResolutionHint
 
 /**
  * To be used with state/transition constructions where some conditional lambda should return [IState] type.
- * If the hint takes an effect (applied correctly), the conditional lambda will not be called even if
- * [unsafeCallConditionalLambdas] is true.
- * You can specify multiple [StateResolutionHint] instances for the same construction to cover all internal branches.
+ * This hint does not require [unsafeCallConditionalLambdas] flag to be true.
+ * You can specify multiple [StateResolutionHint] instances for the same construction to cover all internal lambda
+ * branches.
  * User is responsible to provide correct hints.
  */
 class StateResolutionHint(
     val description: String,
-    /** Allows to specify parallel target states */
+    /** Allows to specify parallel target states. Must be non-empty */
     val targetStates: Set<IState>,
 ) : ResolutionHint {
     constructor(
@@ -44,8 +44,9 @@ class StateResolutionHint(
 /**
  * To be used with state/transition constructions where some conditional lambda uses [EventAndArgument] instance.
  * If the hint takes an effect (applied correctly) and [unsafeCallConditionalLambdas] flag is true the conditional lambda
- * will be called with specified [EventAndArgument] instead of default fake ([ExportPlantUmlEvent]).
- * You can specify multiple [EventAndArgumentResolutionHint] instances for the same construction to cover all internal branches.
+ * will be called with specified [EventAndArgument] instead of default fake [ExportPlantUmlEvent].
+ * You can specify multiple [EventAndArgumentResolutionHint] instances for the same construction to cover all internal
+ * lambda branches.
  * User is responsible to provide correct hints.
  */
 class EventAndArgumentResolutionHint(

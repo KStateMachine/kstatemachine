@@ -9,6 +9,7 @@ package ru.nsk.kstatemachine.metainfo
 
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.transition.Transition
+import kotlin.collections.single
 
 /**
  * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
@@ -36,7 +37,14 @@ interface CompositeMetaInfo : MetaInfo {
 inline fun <reified M : MetaInfo> MetaInfo?.findMetaInfo(): M? {
     return when (this) {
         is M -> this
-        is CompositeMetaInfo -> metaInfoSet.singleOrNull { it is M } as? M
+        is CompositeMetaInfo -> {
+            val infos = metaInfoSet.filterIsInstance<M>()
+            when (infos.size) {
+                0 -> null
+                1 -> infos.single()
+                else -> throw IllegalArgumentException("MetaInfo set has more than one element of type ${M::class.simpleName}")
+            }
+        }
         else -> null
     }
 }
