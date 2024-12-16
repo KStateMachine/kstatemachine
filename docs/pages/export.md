@@ -127,10 +127,12 @@ transitionConditionally<ValueEvent> {
     metaInfo = buildExportMetaInfo {
         // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
         addStateResolutionHint("when 1", state1)
+        // same, but uses lazy initialization for state (if the reference is not initializied yet)
+        addLazyStateResolutionHint("when 1", lazy { state1 } )
         // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
         addEventAndArgumentResolutionHint("when 2", ValueEvent(2))
         // you can specify set of states that represents parallel target states
-        addStateResolutionHint("when 3", setOf(state1, state2))
+        addParallelStatesResolutionHint("when 3", setOf(state1, state2))
         // describes stay() behaviour without calling "direction" lambda
         addStateResolutionHint("when 4", this@createStateMachine)
         // resolves to stay() by calling "direction" lambda

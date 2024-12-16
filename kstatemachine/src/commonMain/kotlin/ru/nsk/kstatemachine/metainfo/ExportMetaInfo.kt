@@ -11,6 +11,7 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.transition.EventAndArgument
+import kotlin.jvm.JvmName
 
 /**
  * Hint to be used with [ExportMetaInfo]
@@ -27,13 +28,15 @@ sealed interface ResolutionHint
 internal class StateResolutionHint(
     val description: String,
     /** Allows to specify parallel target states. Must be non-empty */
-    val targetStates: Set<IState>,
+    lazyTargetStates: Set<Lazy<IState>>,
 ) : ResolutionHint {
     init {
-        require(targetStates.isNotEmpty()) {
+        require(lazyTargetStates.isNotEmpty()) {
             "targetStates must be non-empty, use single state or multiple states for parallel transitions"
         }
     }
+
+    val targetStates: Set<IState> by lazy { lazyTargetStates.map { it.value }.toSet() }
 }
 
 /**
@@ -77,8 +80,24 @@ interface ExportMetaInfoBuilder : ExportMetaInfo {
     /** See [StateResolutionHint] */
     fun addStateResolutionHint(description: String, targetState: IState)
 
+    /**
+     * Allows to specify state as lazy value.
+     * Lazy initializer should not be used to dynamically calculate a state.
+     * Use it only to delay state's variable access.
+     * See [StateResolutionHint]
+     */
+    fun addLazyStateResolutionHint(description: String, targetState: Lazy<IState>)
+
     /** See [StateResolutionHint] */
-    fun addStateResolutionHint(description: String, targetStates: Set<IState>)
+    fun addParallelStatesResolutionHint(description: String, targetStates: Set<IState>)
+
+    /**
+     * Allows to specify parallel states as lazy values.
+     * Lazy initializer should not be used to dynamically calculate state.
+     * Use it only to delay state's variable access.
+     * See [StateResolutionHint]
+     */
+    fun addLazyParallelStatesResolutionHint(description: String, targetStates: Set<Lazy<IState>>)
 
     /** See [EventAndArgumentResolutionHint] */
     fun addEventAndArgumentResolutionHint(description: String, event: Event, argument: Any? = null)
@@ -87,16 +106,21 @@ interface ExportMetaInfoBuilder : ExportMetaInfo {
 private data class ExportMetaInfoBuilderImpl(
     override val resolutionHints: MutableSet<ResolutionHint> = mutableSetOf<ResolutionHint>(),
 ) : ExportMetaInfoBuilder {
+    override fun addStateResolutionHint(description: String, targetState: IState) =
+        addLazyStateResolutionHint(description, lazyOf(targetState))
+
+    override fun addLazyStateResolutionHint(description: String, targetState: Lazy<IState>) =
+        addLazyParallelStatesResolutionHint(description, setOf(targetState))
+
+    override fun addParallelStatesResolutionHint(description: String, targetStates: Set<IState>) =
+        addLazyParallelStatesResolutionHint(description, targetStates.map { lazyOf(it) }.toSet())
+
+    override fun addLazyParallelStatesResolutionHint(description: String, targetStates: Set<Lazy<IState>>) {
+        resolutionHints += StateResolutionHint(description, targetStates)
+    }
+
     override fun addEventAndArgumentResolutionHint(description: String, event: Event, argument: Any?) {
         resolutionHints += EventAndArgumentResolutionHint(description, event, argument)
-    }
-
-    override fun addStateResolutionHint(description: String, targetState: IState) {
-        resolutionHints += StateResolutionHint(description, setOf(targetState))
-    }
-
-    override fun addStateResolutionHint(description: String, targetStates: Set<IState>) {
-        resolutionHints += StateResolutionHint(description, targetStates)
     }
 }
 

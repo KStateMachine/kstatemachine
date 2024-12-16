@@ -34,9 +34,6 @@ fun main() = runBlocking {
     lateinit var state2: State
     lateinit var state3: State
     val machine = createStateMachine(this) {
-        state2 = finalState("State2")
-        state3 = finalState("State3")
-
         initialState("State1") {
             transitionOn<FirstEvent> {
                 metaInfo = buildExportMetaInfo {
@@ -50,12 +47,15 @@ fun main() = runBlocking {
             transitionOn<SecondEvent> {
                 metaInfo = buildExportMetaInfo {
                     // using StateResolutionHint does not require targetState lambda call
-                    addStateResolutionHint("data == 123", state2)
-                    addStateResolutionHint("else", state3)
+                    addLazyStateResolutionHint("data == 123", lazy { state2 })
+                    addLazyStateResolutionHint("else", lazy { state3 })
                 }
                 targetState = { if (event.data == 123) state2 else state3 }
             }
         }
+
+        state2 = finalState("State2")
+        state3 = finalState("State3")
     }
 
     println(machine.exportToPlantUml(showEventLabels = true, unsafeCallConditionalLambdas = true))

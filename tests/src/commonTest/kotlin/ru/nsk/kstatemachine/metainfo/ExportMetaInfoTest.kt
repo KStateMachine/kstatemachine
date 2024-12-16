@@ -134,7 +134,7 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
             metaInfo = buildExportMetaInfo {
                 addStateResolutionHint("when 1", state1)
                 addEventAndArgumentResolutionHint("when 2", ValueEvent2(2))
-                addStateResolutionHint("when 3", setOf(state1, state2))
+                addParallelStatesResolutionHint("when 3", setOf(state1, state2))
                 addStateResolutionHint("when 4", this@createTestStateMachine)
                 addEventAndArgumentResolutionHint("else", ValueEvent2(5))
             }
@@ -142,7 +142,7 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
         val choiceState = choiceState("choiceState") { if (true) state1 else state2 }
         choiceState.metaInfo = buildExportMetaInfo {
             addStateResolutionHint("if (true)", state1)
-            addStateResolutionHint(" ", state2)
+            addLazyStateResolutionHint(" ", lazy { state2 })
         }
     }
 }

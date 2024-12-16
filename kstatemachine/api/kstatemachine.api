@@ -106,7 +106,9 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfo : r
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/ExportMetaInfo {
 	public abstract fun addEventAndArgumentResolutionHint (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
-	public abstract fun addStateResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
+	public abstract fun addLazyParallelStatesResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
+	public abstract fun addLazyStateResolutionHint (Ljava/lang/String;Lkotlin/Lazy;)V
+	public abstract fun addParallelStatesResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
 	public abstract fun addStateResolutionHint (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
 }
 
