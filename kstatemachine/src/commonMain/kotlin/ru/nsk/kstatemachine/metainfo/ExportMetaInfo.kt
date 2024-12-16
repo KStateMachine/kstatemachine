@@ -11,7 +11,6 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.transition.EventAndArgument
-import kotlin.jvm.JvmName
 
 /**
  * Hint to be used with [ExportMetaInfo]
