@@ -100,22 +100,18 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfoB
 	public abstract fun setMetaInfoSet (Ljava/util/Set;)V
 }
 
-public final class ru/nsk/kstatemachine/metainfo/EventAndArgumentResolutionHint : ru/nsk/kstatemachine/metainfo/ResolutionHint {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
-	public synthetic fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getArgument ()Ljava/lang/Object;
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getEvent ()Lru/nsk/kstatemachine/event/Event;
-	public final fun getEventAndArgument ()Lru/nsk/kstatemachine/transition/EventAndArgument;
-}
-
 public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
 	public abstract fun getResolutionHints ()Ljava/util/Set;
 }
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/ExportMetaInfo {
-	public abstract fun getResolutionHints ()Ljava/util/Set;
-	public abstract fun setResolutionHints (Ljava/util/Set;)V
+	public abstract fun addEventAndArgumentResolutionHint (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
+	public abstract fun addStateResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
+	public abstract fun addStateResolutionHint (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+}
+
+public final class ru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder$DefaultImpls {
+	public static synthetic fun addEventAndArgumentResolutionHint$default (Lru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder;Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILjava/lang/Object;)V
 }
 
 public final class ru/nsk/kstatemachine/metainfo/ExportMetaInfoKt {
@@ -135,13 +131,6 @@ public final class ru/nsk/kstatemachine/metainfo/MetaInfoKt {
 }
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/ResolutionHint {
-}
-
-public final class ru/nsk/kstatemachine/metainfo/StateResolutionHint : ru/nsk/kstatemachine/metainfo/ResolutionHint {
-	public fun <init> (Ljava/lang/String;Ljava/util/Set;)V
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
-	public final fun getDescription ()Ljava/lang/String;
-	public final fun getTargetStates ()Ljava/util/Set;
 }
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/UmlMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {

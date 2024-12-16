@@ -24,16 +24,11 @@ sealed interface ResolutionHint
  * branches.
  * User is responsible to provide correct hints.
  */
-class StateResolutionHint(
+internal class StateResolutionHint(
     val description: String,
     /** Allows to specify parallel target states. Must be non-empty */
     val targetStates: Set<IState>,
 ) : ResolutionHint {
-    constructor(
-        description: String,
-        targetState: IState,
-    ) : this(description, setOf(targetState))
-
     init {
         require(targetStates.isNotEmpty()) {
             "targetStates must be non-empty, use single state or multiple states for parallel transitions"
@@ -49,10 +44,10 @@ class StateResolutionHint(
  * lambda branches.
  * User is responsible to provide correct hints.
  */
-class EventAndArgumentResolutionHint(
+internal class EventAndArgumentResolutionHint(
     val description: String,
     val event: Event,
-    val argument: Any? = null
+    val argument: Any?
 ) : ResolutionHint {
     val eventAndArgument = EventAndArgument(event, argument)
 }
@@ -79,12 +74,31 @@ interface ExportMetaInfo : MetaInfo {
  * use [buildExportMetaInfo] instead.
  */
 interface ExportMetaInfoBuilder : ExportMetaInfo {
-    override var resolutionHints: Set<ResolutionHint>
+    /** See [StateResolutionHint] */
+    fun addStateResolutionHint(description: String, targetState: IState)
+
+    /** See [StateResolutionHint] */
+    fun addStateResolutionHint(description: String, targetStates: Set<IState>)
+
+    /** See [EventAndArgumentResolutionHint] */
+    fun addEventAndArgumentResolutionHint(description: String, event: Event, argument: Any? = null)
 }
 
 private data class ExportMetaInfoBuilderImpl(
-    override var resolutionHints: Set<ResolutionHint> = emptySet(),
-) : ExportMetaInfoBuilder
+    override val resolutionHints: MutableSet<ResolutionHint> = mutableSetOf<ResolutionHint>(),
+) : ExportMetaInfoBuilder {
+    override fun addEventAndArgumentResolutionHint(description: String, event: Event, argument: Any?) {
+        resolutionHints += EventAndArgumentResolutionHint(description, event, argument)
+    }
+
+    override fun addStateResolutionHint(description: String, targetState: IState) {
+        resolutionHints += StateResolutionHint(description, setOf(targetState))
+    }
+
+    override fun addStateResolutionHint(description: String, targetStates: Set<IState>) {
+        resolutionHints += StateResolutionHint(description, targetStates)
+    }
+}
 
 fun buildExportMetaInfo(builder: ExportMetaInfoBuilder.() -> Unit): ExportMetaInfo =
     ExportMetaInfoBuilderImpl().apply(builder).copy()

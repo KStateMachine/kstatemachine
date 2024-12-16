@@ -9,6 +9,7 @@ package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.visitors.export.exportToMermaid
@@ -18,6 +19,9 @@ private object MermaidExportSample {
     object SwitchEvent : Event
 }
 
+/**
+ * The sample shows basic Mermaid export
+ */
 fun main() = runBlocking {
     val machine = createStateMachine(this, name = "Nested states") {
         val state1 = initialState("State1")

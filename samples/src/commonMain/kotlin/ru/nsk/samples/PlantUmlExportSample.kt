@@ -18,6 +18,9 @@ private object PlantUmlExportSample {
     object SwitchEvent : Event
 }
 
+/**
+ * The sample shows basic PlantUML export
+ */
 fun main() = runBlocking {
     val machine = createStateMachine(this, "Nested states") {
         val state1 = initialState("State1")

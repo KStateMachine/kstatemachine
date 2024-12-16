@@ -74,7 +74,7 @@ state("State1") {
 }
 ```
 
-See [PlantUML with MetaInfo export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithMetaInfoSample.kt)
+See [PlantUML with UmlMetaInfo export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlExportWithUmlMetaInfoSample.kt)
 
 ## Export with `unsafeCallConditionalLambdas` flag
 
@@ -125,20 +125,20 @@ transitionConditionally<ValueEvent> {
         }
     }
     metaInfo = buildExportMetaInfo {
-        resolutionHints = setOf(
-            // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
-            StateResolutionHint("when 1", state1),
-            // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
-            EventAndArgumentResolutionHint("when 2", ValueEvent(2)),
-            // you can specify set of states that represents parallel target states
-            StateResolutionHint("when 3", setOf(state1, state2)),
-            // describes stay() behaviour without calling "direction" lambda
-            StateResolutionHint("when 4", this@createStateMachine),
-            // resolves to stay() by calling "direction" lambda
-            EventAndArgumentResolutionHint("when 4", ValueEvent(4)),
-            // useless, does not affect export output as it resolves to noTransition()
-            EventAndArgumentResolutionHint("else", ValueEvent(5)),
-        )
+        // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
+        addStateResolutionHint("when 1", state1)
+        // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
+        addEventAndArgumentResolutionHint("when 2", ValueEvent(2))
+        // you can specify set of states that represents parallel target states
+        addStateResolutionHint("when 3", setOf(state1, state2))
+        // describes stay() behaviour without calling "direction" lambda
+        addStateResolutionHint("when 4", this@createStateMachine)
+        // resolves to stay() by calling "direction" lambda
+        addEventAndArgumentResolutionHint("when 4", ValueEvent(4))
+        // useless, does not affect export output as it resolves to noTransition()
+        addEventAndArgumentResolutionHint("else", ValueEvent(5))
     }
 }
 ```
+
+See [PlantUML with ExportMetaInfo unsafe export sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/PlantUmlUnsafeExportWithExportMetaInfoSample.kt)

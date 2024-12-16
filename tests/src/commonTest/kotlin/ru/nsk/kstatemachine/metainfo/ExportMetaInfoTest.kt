@@ -114,10 +114,8 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
             transitionOn<ValueEvent1> {
                 targetState = { if (event.value == 42) state11 else state12 }
                 metaInfo = buildExportMetaInfo {
-                    resolutionHints = setOf(
-                        EventAndArgumentResolutionHint("if (event.value == 42)", ValueEvent1(42)),
-                        EventAndArgumentResolutionHint("else", ValueEvent1(0)),
-                    )
+                    addEventAndArgumentResolutionHint("if (event.value == 42)", ValueEvent1(42))
+                    addEventAndArgumentResolutionHint("else", ValueEvent1(0))
                 }
             }
         }
@@ -134,21 +132,17 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
                 }
             }
             metaInfo = buildExportMetaInfo {
-                resolutionHints = setOf(
-                    StateResolutionHint("when 1", state1),
-                    EventAndArgumentResolutionHint("when 2", ValueEvent2(2)),
-                    StateResolutionHint("when 3", setOf(state1, state2)),
-                    StateResolutionHint("when 4", this@createTestStateMachine),
-                    EventAndArgumentResolutionHint("else", ValueEvent2(5)),
-                )
+                addStateResolutionHint("when 1", state1)
+                addEventAndArgumentResolutionHint("when 2", ValueEvent2(2))
+                addStateResolutionHint("when 3", setOf(state1, state2))
+                addStateResolutionHint("when 4", this@createTestStateMachine)
+                addEventAndArgumentResolutionHint("else", ValueEvent2(5))
             }
         }
         val choiceState = choiceState("choiceState") { if (true) state1 else state2 }
         choiceState.metaInfo = buildExportMetaInfo {
-            resolutionHints = setOf(
-                StateResolutionHint("if (true)", state1),
-                StateResolutionHint(" ", state2),
-            )
+            addStateResolutionHint("if (true)", state1)
+            addStateResolutionHint(" ", state2)
         }
     }
 }
