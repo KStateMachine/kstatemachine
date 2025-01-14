@@ -181,6 +181,10 @@ fun main() = runBlocking {
 }
 ```
 
+## ✍️ Publications
+
+* [Integrating State Machines with MVI Architecture in Kotlin for Reactive Android Apps](https://medium.com/p/7327c3ff34f3)
+
 ## 🧪 Samples
 
 * [Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
@@ -251,7 +255,6 @@ GitHub project or using `#kstatemachine` tag.
 
 ## 🗺️ Roadmap
 
-* Make publication about using state machines along with `MVI`
 * Create `Intellij IDEA Plugin` for state machine visualization and edition
 
 ## 🏅 Thanks to supporters

@@ -4,15 +4,13 @@ title: Coroutines artifact
 ---
 
 # Coroutines artifact
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 This page contains information about `kstatemachine-coroutines` artifact functionality.
 Which contains the library APIs for working in `Kotlin Coroutines` environment.
