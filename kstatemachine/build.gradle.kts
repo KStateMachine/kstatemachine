@@ -1,8 +1,7 @@
 plugins {
     kotlin("multiplatform")
-    `java-library`
-    ru.nsk.`maven-publish`
-    ru.nsk.jacoco
+    //ru.nsk.`maven-publish`
+    //ru.nsk.jacoco
     id("org.jetbrains.dokka")
 }
 
@@ -22,10 +21,17 @@ kotlin {
     iosArm64()
     iosX64()
     iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    linuxX64()
+    mingwX64()
     js {
         browser()
         nodejs()
     }
     @Suppress("OPT_IN_USAGE") // this is alpha feature
-    wasmJs()
+    wasmJs {
+        browser()
+        nodejs()
+    }
 }

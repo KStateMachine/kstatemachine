@@ -1,7 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    `java-library`
-    ru.nsk.`maven-publish`
+    //ru.nsk.`maven-publish`
     id("org.jetbrains.dokka")
 }
 
@@ -21,12 +20,19 @@ kotlin {
     iosArm64()
     iosX64()
     iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+    linuxX64()
+    mingwX64()
     js {
         browser()
         nodejs()
     }
     @Suppress("OPT_IN_USAGE") // this is alpha feature
-    wasmJs()
+    wasmJs {
+        browser()
+        nodejs()
+    }
 
     applyDefaultHierarchyTemplate()
     sourceSets {
@@ -44,6 +50,9 @@ kotlin {
 
         jvmMain.get().dependsOn(blockingMain)
         iosMain.get().dependsOn(blockingMain)
+        macosMain.get().dependsOn(blockingMain)
+        linuxMain.get().dependsOn(blockingMain)
+        mingwMain.get().dependsOn(blockingMain)
 
         val wasmJsMain by getting
         wasmJsMain.dependsOn(jsCommonMain)
