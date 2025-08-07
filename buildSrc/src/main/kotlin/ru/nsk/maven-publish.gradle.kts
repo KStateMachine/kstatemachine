@@ -1,10 +1,10 @@
 package ru.nsk
 
 import Versions
+import org.gradle.kotlin.dsl.register
 import java.util.*
 
 plugins {
-    java
     `maven-publish`
     signing
 }
@@ -24,11 +24,9 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.reader())
 }
 
-afterEvaluate {
-    tasks.create<Jar>("javadocJar") {
-        archiveClassifier.set("javadoc")
-        from(tasks.named("dokkaHtml"))
-    }
+tasks.register<Jar>("javadocJar") {
+    archiveClassifier.set("javadoc")
+    from(tasks.named("dokkaHtml"))
 }
 
 publishing {
@@ -89,7 +87,7 @@ publishing {
                     username = localProperties.getProperty("mavenUsername", mavenUsername)
                     password = localProperties.getProperty("mavenPassword", mavenPassword)
                 }
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+                url = uri("https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2")
             }
         }
     }
