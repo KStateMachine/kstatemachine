@@ -11,7 +11,7 @@ object Versions {
     const val kotlinKoverPlugin = "0.9.1"
 
     // compatibility
-    const val jdkVersion = 17
+    const val jdkVersion = 21
     const val languageVersion = "1.8"
     const val apiVersion = "1.8"
 
