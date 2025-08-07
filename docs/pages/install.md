@@ -50,6 +50,22 @@ dependencies {
     implementation("io.github.nsk90:kstatemachine-iossimulatorarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-iossimulatorarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-serialization-iossimulatorarm64:<Tag>")
+    // or linux
+    implementation("io.github.nsk90:kstatemachine-linuxx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-linuxx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-linuxx64:<Tag>")  
+    // or mingw
+    implementation("io.github.nsk90:kstatemachine-mingwx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-mingwx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-mingwx64:<Tag>") 
+    // or macos 
+    implementation("io.github.nsk90:kstatemachine-macosx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-macosx64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-macosx64:<Tag>")
+
+    implementation("io.github.nsk90:kstatemachine-macosarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-macosarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-macosarm64:<Tag>")
     // or JS
     implementation("io.github.nsk90:kstatemachine-js:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-js:<Tag>")

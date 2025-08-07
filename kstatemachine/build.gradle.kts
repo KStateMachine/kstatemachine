@@ -1,8 +1,8 @@
 plugins {
     kotlin("multiplatform")
     //ru.nsk.`maven-publish`
-    //ru.nsk.jacoco
     id("org.jetbrains.dokka")
+    id("org.jetbrains.kotlinx.kover")
 }
 
 group = rootProject.group

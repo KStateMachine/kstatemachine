@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version Versions.kotlin apply false
     id("org.jetbrains.dokka") version Versions.kotlinDokka
     id("org.jetbrains.kotlinx.binary-compatibility-validator") version Versions.kotlinBinaryCompatibilityValidatorPlugin
+    id("org.jetbrains.kotlinx.kover") version Versions.kotlinKoverPlugin
 }
 
 group = Versions.libraryMavenCentralGroup

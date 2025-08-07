@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/nsk90/kstatemachine/branch/master/graph/badge.svg?token=IR2JR43FOZ)](https://codecov.io/gh/nsk90/kstatemachine)
 [![Maven Central Version](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine?logo=sonatype)](https://central.sonatype.com/artifact/io.github.nsk90/kstatemachine)
 [![JitPack](https://img.shields.io/jitpack/version/io.github.nsk90/kstatemachine?style=flat&logo=jitpack&color=brgreen)](https://jitpack.io/#nsk90/kstatemachine)
-[![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios%20%7C%20js%20%7C%20wasm-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
+[![multiplatform support](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios%20%7C%20native%20%7C%20js%20%7C%20wasm-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
 
 [![Open Collective](https://img.shields.io/badge/open%20collective-kstatemachine-lightblue?logo=opencollective&style=flat)](https://opencollective.com/kstatemachine)
 [![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)

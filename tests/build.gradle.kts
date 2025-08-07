@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version Versions.kotlin
+    id("org.jetbrains.kotlinx.kover")
 }
 
 group = rootProject.group
@@ -31,4 +32,14 @@ kotlin {
             }
         }
     }
+}
+
+dependencies {
+    kover(project(":kstatemachine"))
+    kover(project(":kstatemachine-coroutines"))
+    kover(project(":kstatemachine-serialization"))
+}
+
+kover.reports.verify.rule {
+    minBound(87)
 }

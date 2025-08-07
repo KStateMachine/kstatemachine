@@ -3,6 +3,7 @@ plugins {
     //ru.nsk.`maven-publish`
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization") version Versions.kotlin
+    id("org.jetbrains.kotlinx.kover")
 }
 
 group = rootProject.group
