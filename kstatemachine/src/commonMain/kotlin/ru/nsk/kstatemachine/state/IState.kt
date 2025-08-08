@@ -123,17 +123,29 @@ interface DataState<D : Any> : IState, DataTransitionStateApi<D> {
     val defaultData: D?
 
     /**
-     * This property might be accessed only while this state is active
+     * This property might be accessed only while this state is active, throws otherwise
      */
     val data: D
 
     /**
      * Similar to [data] but its value is not cleared when state finishes.
-     * If state was not entered this property falls back to [defaultData] if it was specified
+     * If state was not entered this property falls back to [defaultData] if it was specified or throws
      */
     val lastData: D
 
     val dataClass: KClass<D>
+}
+
+/**
+ * Mutable version of [DefaultDataState]. Allows to update [data] value manually using [setData] method.
+ */
+interface MutableDataState<D : Any> : DataState<D> {
+    /**
+     * Updates [data] and [lastData] values.
+     * Note that [data] can be set only if the state is active.
+     * If the state is not active only [lastData] will be updated.
+     */
+    fun setData(data: D)
 }
 
 /**
@@ -143,6 +155,7 @@ interface DataState<D : Any> : IState, DataTransitionStateApi<D> {
 interface IFinalState : IState
 interface FinalState : IFinalState, State
 interface FinalDataState<D : Any> : IFinalState, DataState<D>
+interface FinalMutableDataState<D : Any> : IFinalState, MutableDataState<D>
 
 /**
  * Pseudo state is a state that machine passes automatically without explicit event. It cannot be active.
