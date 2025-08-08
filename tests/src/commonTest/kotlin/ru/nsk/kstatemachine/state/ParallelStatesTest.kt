@@ -8,10 +8,12 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
 import io.kotest.matchers.should
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -24,22 +26,24 @@ class ParallelStatesTest : FreeSpec({
             "initial state in parallel mode negative" {
                 createTestStateMachine(coroutineStarterType) {
                     initialState(childMode = ChildMode.PARALLEL) {
-                        shouldThrow<IllegalStateException> { initialState() }
+                        shouldThrowWithMessage<IllegalStateException>(
+                            "Can not set initial state in parallel child mode"
+                        ) { initialState() }
                     }
                 }
             }
 
             "final or pseudo state in parallel mode negative" {
                 createTestStateMachine(coroutineStarterType, childMode = ChildMode.PARALLEL) {
-                    shouldThrow<IllegalArgumentException> {
-                        finalState()
-                    }
-                    shouldThrow<IllegalArgumentException> {
-                        choiceState { error("test") }
-                    }
-                    shouldThrow<IllegalArgumentException> {
-                        historyState()
-                    }
+                    shouldThrowWithMessage<IllegalArgumentException>(
+                        "Can not add IFinalState in parallel child mode"
+                    ) { finalState() }
+                    shouldThrowWithMessage<IllegalArgumentException>(
+                        "Can not add PseudoState in parallel child mode"
+                    ) { choiceState { error("test") } }
+                    shouldThrowWithMessage<IllegalArgumentException>(
+                        "Can not add PseudoState in parallel child mode"
+                    ) { historyState() }
                 }
             }
 
@@ -154,7 +158,7 @@ class ParallelStatesTest : FreeSpec({
 
                 shouldThrow<IllegalStateException> {
                     machine.processEventBlocking(SwitchEvent)
-                }
+                }.message shouldStartWith "Multiple transitions match"
             }
 
             "process event by parallel states" {

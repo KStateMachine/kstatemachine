@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.verifySequence
@@ -352,9 +352,9 @@ class CrossLevelTransitionTest : FreeSpec({
                         state21 = initialState("state21")
                     }
                 }
-                shouldThrow<IllegalStateException> {
-                    machine.processEvent(SwitchEvent)
-                }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Transitioning to targetState DefaultState(state21) from another state machine is not possible"
+                ) { machine.processEvent(SwitchEvent) }
             }
         }
     }

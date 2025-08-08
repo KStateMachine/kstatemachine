@@ -7,7 +7,6 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -36,7 +35,9 @@ class TypesafeTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
             "initial DataState negative" {
-                shouldThrow<Exception> {
+                shouldThrowWithMessage<Exception>(
+                    "Last data is not available yet in DefaultDataState(state1), and default data not provided"
+                ) {
                     createTestStateMachine(coroutineStarterType) {
                         addInitialState(defaultDataState<String>("state1"))
                     }
@@ -75,7 +76,11 @@ class TypesafeTransitionTest : FreeSpec({
 
                     state2 = dataState("state2") {
                         onEntry { data shouldBe testName }
-                        onExit { shouldThrow<IllegalStateException> { data } }
+                        onExit {
+                            shouldThrowWithMessage<IllegalStateException>(
+                                "Data is not set. Is DefaultDataState(state2) state active?"
+                            ) { data }
+                        }
                         transition<SwitchEvent> { targetState = state3 }
                     }
 
@@ -84,13 +89,17 @@ class TypesafeTransitionTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<IllegalStateException> { state2.data }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Data is not set. Is DefaultDataState(state2) state active?"
+                ) { state2.data }
 
                 machine.processEventBlocking(NameEvent(testName))
                 state2.data shouldBe testName
 
                 machine.processEventBlocking(SwitchEvent)
-                shouldThrow<IllegalStateException> { state2.data }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Data is not set. Is DefaultDataState(state2) state active?"
+                ) { state2.data }
             }
 
             "multiple data states" {
@@ -115,7 +124,9 @@ class TypesafeTransitionTest : FreeSpec({
                 val id = 42
                 machine.processEventBlocking(IdEvent(id))
 
-                shouldThrow<IllegalStateException> { state2.data }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Data is not set. Is DefaultDataState(state2) state active?"
+                ) { state2.data }
                 state3.data shouldBe id
             }
 
@@ -223,7 +234,9 @@ class TypesafeTransitionTest : FreeSpec({
             }
 
             "target-less data transition inside nonDataState negative" {
-                shouldThrow<IllegalArgumentException> {
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "targetState should be set in this transition builder"
+                ) {
                     createTestStateMachine(coroutineStarterType) {
                         initialState("state1") {
                             dataTransition<IdEvent, Int> {}

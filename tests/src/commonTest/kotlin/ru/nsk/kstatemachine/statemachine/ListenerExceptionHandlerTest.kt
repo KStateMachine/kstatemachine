@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.statemachine
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
@@ -19,7 +19,7 @@ class ListenerExceptionHandlerTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
             "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
-                shouldThrow<TestException> {
+                shouldThrowWithMessage<TestException>("test exception") {
                     createTestStateMachine(coroutineStarterType) {
                         logger = StateMachine.Logger { println(it()) }
 
@@ -37,7 +37,7 @@ class ListenerExceptionHandlerTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<TestException> { machine.startBlocking() }
+                shouldThrowWithMessage<TestException>("test exception") { machine.startBlocking() }
                 machine.isDestroyed shouldBe false
             }
 
@@ -54,7 +54,7 @@ class ListenerExceptionHandlerTest : FreeSpec({
                         callbacks.listen(this)
                     }
                 }
-                shouldThrow<TestException> { machine.startBlocking() }
+                shouldThrowWithMessage<TestException>("test exception") { machine.startBlocking() }
 
                 verifySequence {
                     callbacks.onStarted(machine)
@@ -64,7 +64,7 @@ class ListenerExceptionHandlerTest : FreeSpec({
             }
 
             "default ListenerExceptionHandler rethrows exception from onStarted() on start() call" {
-                shouldThrow<TestException> {
+                shouldThrowWithMessage<TestException>("test exception") {
                     createTestStateMachine(coroutineStarterType) {
                         onStarted { testError() }
 
@@ -82,7 +82,9 @@ class ListenerExceptionHandlerTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<TestException> { machine.startFromBlocking(state2) }
+                shouldThrowWithMessage<TestException>(
+                    "test exception"
+                ) { machine.startFromBlocking(state2) }
                 machine.isDestroyed shouldBe false
             }
 
@@ -92,7 +94,9 @@ class ListenerExceptionHandlerTest : FreeSpec({
                     onStopped { testError() }
                 }
 
-                shouldThrow<TestException> { machine.stopBlocking() }
+                shouldThrowWithMessage<TestException>(
+                    "test exception"
+                ) { machine.stopBlocking() }
                 machine.stopBlocking() // does nothing
                 machine.isDestroyed shouldBe false
             }
@@ -129,7 +133,7 @@ class ListenerExceptionHandlerTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<TestException> {
+                shouldThrowWithMessage<TestException>("test exception") {
                     machine.processEventBlocking(SwitchEvent)
                 }
 

@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.statemachine
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
@@ -86,7 +86,7 @@ class PendingEventHandlerTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<TestException> { machine.startBlocking() }
+                shouldThrowWithMessage<TestException>("test") { machine.startBlocking() }
 
                 machine.processEventBlocking(SecondEvent)
             }
@@ -100,7 +100,9 @@ class PendingEventHandlerTest : FreeSpec({
                         transition<SwitchEvent> {
                             targetState = second
                             onTriggered {
-                                shouldThrow<TestException> { this@createTestStateMachine.processEvent(SwitchEvent) }
+                                shouldThrowWithMessage<TestException>(
+                                    "Already processing"
+                                ) { this@createTestStateMachine.processEvent(SwitchEvent) }
                             }
                         }
                     }

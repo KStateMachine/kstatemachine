@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -32,8 +32,12 @@ class AccessorsApiTest : FreeSpec({
 
                 state.requireTransition("first transition") shouldBeSameInstanceAs firstTransition
                 state.requireTransition<SecondEvent>() shouldBeSameInstanceAs secondTransition
-                shouldThrow<IllegalArgumentException> { state.requireTransition("some transition") }
-                shouldThrow<IllegalArgumentException> { state.requireTransition<SwitchEvent>() }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "Transition some transition not found"
+                ) { state.requireTransition("some transition") }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "Transition for SwitchEvent not found"
+                ) { state.requireTransition<SwitchEvent>() }
             }
 
             "requireState()" {
@@ -46,7 +50,9 @@ class AccessorsApiTest : FreeSpec({
 
                 machine.requireState("first") shouldBeSameInstanceAs first
                 machine.requireState("second", recursive = false) shouldBeSameInstanceAs second
-                shouldThrow<IllegalArgumentException> { machine.requireState("third") }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "State third not found"
+                ) { machine.requireState("third") }
             }
 
             "requireState() recursive" {
@@ -59,9 +65,9 @@ class AccessorsApiTest : FreeSpec({
                 }
 
                 machine.requireState("firstNested") shouldBeSameInstanceAs firstNested
-                shouldThrow<IllegalArgumentException> {
-                    machine.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
-                }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "State firstNested not found"
+                ) { machine.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested }
                 first.requireState("firstNested", recursive = false) shouldBeSameInstanceAs firstNested
             }
 
@@ -87,12 +93,20 @@ class AccessorsApiTest : FreeSpec({
                 machine.requireState<FirstState>().value shouldBe first.value
                 machine.requireState<SecondState>(recursive = false) shouldBeSameInstanceAs second
 
-                shouldThrow<IllegalArgumentException> { machine.requireState<ThirdInnerState>(recursive = false) }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "State ThirdInnerState not found"
+                ) { machine.requireState<ThirdInnerState>(recursive = false) }
                 machine.requireState<ThirdInnerState>() shouldBeSameInstanceAs third
 
-                shouldThrow<IllegalArgumentException> { machine.requireState<UnusedSubclassState>() }
-                shouldThrow<IllegalArgumentException> { machine.requireState<State>() }
-                shouldThrow<IllegalArgumentException> { machine.requireState<SubclassState>() }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "State UnusedSubclassState not found"
+                ) { machine.requireState<UnusedSubclassState>() }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "More than one state matches State"
+                ) { machine.requireState<State>() }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "More than one state matches SubclassState"
+                ) { machine.requireState<SubclassState>() }
             }
 
             "requireState() of nested machine not allowed" {
@@ -105,7 +119,9 @@ class AccessorsApiTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<IllegalArgumentException> { machine.requireState("nested") }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "State nested not found"
+                ) { machine.requireState("nested") }
             }
         }
     }

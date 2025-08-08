@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.coroutines
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -71,7 +71,9 @@ class CoroutinesTest : FreeSpec({
     }
 
     "using coroutines with std lib throws" {
-        shouldThrow<IllegalStateException> {
+        shouldThrowWithMessage<IllegalStateException>(
+            "Seems that you are trying to use Kotlin Coroutines library from KStateMachine callbacks, use kstatemachine-coroutines support library to make that work"
+        ) {
             createStdLibStateMachine {
                 initialState()
                 onStarted { delay(100) }

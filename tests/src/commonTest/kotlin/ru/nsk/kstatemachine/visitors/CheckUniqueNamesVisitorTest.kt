@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
@@ -20,7 +20,7 @@ class CheckUniqueNamesVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
             "do not allow transitions with same name" {
-                shouldThrow<IllegalStateException> {
+                shouldThrowWithMessage<IllegalStateException>("Transition name is not unique: transition") {
                     createTestStateMachine(coroutineStarterType) {
                         initialState {
                             transition<SwitchEvent>("transition")
@@ -31,7 +31,9 @@ class CheckUniqueNamesVisitorTest : FreeSpec({
             }
 
             "do not allow nested states with same name" {
-                shouldThrow<IllegalStateException> {
+                shouldThrowWithMessage<IllegalStateException>(
+                    "State name is not unique: first"
+                ) {
                     createTestStateMachine(coroutineStarterType, name = "first") {
                         initialState("first")
                     }
@@ -39,7 +41,7 @@ class CheckUniqueNamesVisitorTest : FreeSpec({
             }
 
             "do not allow same names in machine as atomic state" {
-                shouldThrow<IllegalStateException> {
+                shouldThrowWithMessage<IllegalStateException>("State name is not unique: first") {
                     createTestStateMachine(coroutineStarterType, name = "first") {
                         initialState {
                             addInitialState(createTestStateMachine(coroutineStarterType, name = "first") {

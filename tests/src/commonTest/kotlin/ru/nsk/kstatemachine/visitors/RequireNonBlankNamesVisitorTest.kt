@@ -10,6 +10,7 @@ package ru.nsk.kstatemachine.visitors
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -30,7 +31,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 machine.hasBlankNames() shouldBe true
                 shouldThrow<IllegalStateException> {
                     machine.checkNonBlankNames()
-                }
+                }.message shouldStartWith "There were blank names in states"
             }
 
             "check machine blank name" {
@@ -43,7 +44,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 machine.hasBlankNames() shouldBe true
                 shouldThrow<IllegalStateException> {
                     machine.checkNonBlankNames()
-                }
+                }.message shouldStartWith "There were blank names in states"
             }
 
             "check state blank name" {
@@ -56,7 +57,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 machine.hasBlankNames() shouldBe true
                 shouldThrow<IllegalStateException> {
                     machine.checkNonBlankNames()
-                }
+                }.message shouldStartWith "There were blank names in states"
             }
 
             "check transition blank name" {
@@ -69,7 +70,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 machine.hasBlankNames() shouldBe true
                 shouldThrow<IllegalStateException> {
                     machine.checkNonBlankNames()
-                }
+                }.message shouldStartWith "There were blank names in states"
             }
 
             "check machine without blank names" {
@@ -102,7 +103,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 }
                 shouldThrow<IllegalStateException> {
                     machine.start()
-                }
+                }.message shouldStartWith "There were blank names in states"
             }
         }
     }

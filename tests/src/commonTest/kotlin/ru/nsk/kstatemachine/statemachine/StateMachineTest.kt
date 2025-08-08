@@ -8,7 +8,8 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.throwables.shouldThrowUnit
+import io.kotest.assertions.throwables.shouldThrowUnitWithMessage
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.data.forAll
 import io.kotest.data.headers
@@ -16,6 +17,7 @@ import io.kotest.data.row
 import io.kotest.data.table
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -41,7 +43,9 @@ class StateMachineTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
             "no initial state" {
-                shouldThrow<IllegalStateException> {
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Initial state is not set, call setInitialState() first"
+                ) {
                     createTestStateMachine(coroutineStarterType) {}
                 }
             }
@@ -189,7 +193,9 @@ class StateMachineTest : FreeSpec({
                         transition<SwitchEvent>()
                         val listener = object : IState.Listener {}
                         addListener(listener)
-                        shouldThrow<IllegalArgumentException> { addListener(listener) }
+                        shouldThrow<IllegalArgumentException> {
+                            addListener(listener)
+                        }.message shouldEndWith "is already added"
                         removeListener(listener)
                     }
                 }
@@ -203,7 +209,9 @@ class StateMachineTest : FreeSpec({
 
                     val listener = object : StateMachine.Listener {}
                     addListener(listener)
-                    shouldThrow<IllegalArgumentException> { addListener(listener) }
+                    shouldThrow<IllegalArgumentException> {
+                        addListener(listener)
+                    }.message shouldEndWith "is already added"
                     removeListener(listener)
                 }
             }
@@ -214,7 +222,9 @@ class StateMachineTest : FreeSpec({
                         val transition = transition<SwitchEvent>()
                         val listener = object : Transition.Listener {}
                         transition.addListener(listener)
-                        shouldThrow<IllegalArgumentException> { transition.addListener(listener) }
+                        shouldThrow<IllegalArgumentException> {
+                            transition.addListener(listener)
+                        }.message shouldEndWith "is already added"
                         transition.removeListener(listener)
                     }
                 }
@@ -224,7 +234,9 @@ class StateMachineTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState("first")
                 }
-                shouldThrow<IllegalStateException> { machine.state() }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Can not add state after state machine started"
+                ) { machine.state() }
             }
 
             "set initial state after start" {
@@ -233,16 +245,18 @@ class StateMachineTest : FreeSpec({
                     first = initialState("first")
                 }
 
-                shouldThrowUnit<IllegalStateException> { machine.setInitialState(first) }
+                shouldThrowUnitWithMessage<IllegalStateException>(
+                    "Can not change initial state after state machine started"
+                ) { machine.setInitialState(first) }
             }
 
             "process event before started" {
-                val machine = createTestStateMachine(coroutineStarterType, start = false) {
+                val machine = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("first")
                 }
-                shouldThrow<IllegalStateException> {
-                    machine.processEventBlocking(SwitchEvent)
-                }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "StateMachineImpl(machine) is not started, call start() first"
+                ) { machine.processEventBlocking(SwitchEvent) }
             }
 
             "onStarted() listener" {
@@ -437,9 +451,9 @@ class StateMachineTest : FreeSpec({
                     initialState()
                     transition<SwitchEvent>()
                 }
-                shouldThrow<IllegalArgumentException> {
-                    machine.processEventByAsync(SwitchEvent)
-                }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "processEventByAsync API may be called on StateMachine created with coroutines support only"
+                ) { machine.processEventByAsync(SwitchEvent) }
             }
 
             "negative processEventByLaunch() throws" {
@@ -447,9 +461,9 @@ class StateMachineTest : FreeSpec({
                     initialState()
                     transition<SwitchEvent>()
                 }
-                shouldThrow<IllegalArgumentException> {
-                    machine.processEventByLaunch(SwitchEvent)
-                }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "processEventByLaunch API may be called on StateMachine created with coroutines support only"
+                ) { machine.processEventByLaunch(SwitchEvent) }
             }
         }
     }

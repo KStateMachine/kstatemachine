@@ -8,9 +8,11 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.types.shouldBeInstanceOf
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.DataEvent
@@ -35,7 +37,9 @@ class UndoTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState()
                 }
-                shouldThrow<IllegalStateException> { machine.undo() }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Undo functionality is not enabled, use createStateMachine(creationArguments = CreationArguments(isUndoEnabled = true)) argument to enable it."
+                ) { machine.undo() }
             }
 
             "undo throws with throwing PendingEventHandler" {
@@ -50,7 +54,11 @@ class UndoTest : FreeSpec({
                         transitionOn<SwitchEvent> { targetState = { state2 } }
                     }
                     state2 = state("state2") {
-                        onEntry { shouldThrow<IllegalStateException> { machine.undo() } }
+                        onEntry {
+                            shouldThrow<IllegalStateException> {
+                                machine.undo()
+                            }.message shouldEndWith "Do not call processEvent() from notification listeners or use queuePendingEventHandler()"
+                        }
                     }
                 }
 
@@ -245,7 +253,9 @@ class UndoTest : FreeSpec({
                 state12.data shouldBe 42
                 machine.processEventBlocking(SwitchEvent)
                 machine.activeStates().shouldContain(state2)
-                shouldThrow<IllegalStateException> { state12.data }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Data is not set. Is DefaultDataState(state12) state active?"
+                ) { state12.data }
                 machine.undoBlocking()
                 machine.activeStates().shouldContain(state12)
                 state12.data shouldBe 42
@@ -403,7 +413,7 @@ class UndoTest : FreeSpec({
                 }
                 machine.processEventBlocking(SwitchEvent)
                 machine.undoBlocking()
-                shouldThrow<TestException> { machine.undoBlocking() }
+                shouldThrowWithMessage<TestException>("test") { machine.undoBlocking() }
             }
 
             "undo from onEntry(), this uses event queue" {

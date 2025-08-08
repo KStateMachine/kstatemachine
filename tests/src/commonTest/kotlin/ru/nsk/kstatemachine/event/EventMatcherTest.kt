@@ -8,7 +8,6 @@
 package ru.nsk.kstatemachine.event
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.called
@@ -109,10 +108,9 @@ class EventMatcherTest : FreeSpec({
                     }
                 }
 
-                val exception = shouldThrow<IllegalStateException> {
+                shouldThrow<IllegalStateException> {
                     machine.processEventBlocking(HierarchyEventL2())
-                }
-                exception.message shouldStartWith "Multiple transitions match"
+                }.message shouldStartWith "Multiple transitions match"
             }
         }
     }

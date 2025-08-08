@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -102,7 +102,9 @@ class NestedStateTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<IllegalStateException> { machine.startBlocking() }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Initial state is not set, call setInitialState() first"
+                ) { machine.startBlocking() }
             }
 
             "reenter initial nested state" {

@@ -8,8 +8,10 @@
 package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.confirmVerified
 import io.mockk.verify
@@ -29,7 +31,9 @@ class TransitionTest : FreeSpec({
                 createTestStateMachine(coroutineStarterType) {
                     state1 = initialState()
                 }
-                shouldThrow<IllegalStateException> { state1.transition<SwitchEvent>() }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Can not add transition after state machine started"
+                ) { state1.transition<SwitchEvent>() }
             }
 
             "transition direction" {
@@ -127,17 +131,19 @@ class TransitionTest : FreeSpec({
             }
 
             "transition to free state, negative" {
-                val freeState = DefaultState()
+                val freeState = DefaultState("freeState")
                 val machine = createTestStateMachine(coroutineStarterType, name = "outer") {
                     initialState {
                         transitionOn<SwitchEvent> { targetState = { freeState } } // invalid
                     }
                 }
-                shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Transitioning to targetState DefaultState(freeState) from another state machine is not possible"
+                ) { machine.processEventBlocking(SwitchEvent) }
             }
 
             "transition to non machine state, negative" {
-                val otherMachine = createTestStateMachine(coroutineStarterType) {
+                val otherMachine = createTestStateMachine(coroutineStarterType, "otherMachine") {
                     initialState()
                 }
                 val machine = createTestStateMachine(coroutineStarterType, name = "outer") {
@@ -146,7 +152,9 @@ class TransitionTest : FreeSpec({
                     }
                 }
 
-                shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Transitioning to targetState StateMachineImpl(otherMachine) from another state machine is not possible"
+                ) { machine.processEventBlocking(SwitchEvent) }
             }
 
             "multiple matching transitions negative" {
@@ -156,7 +164,9 @@ class TransitionTest : FreeSpec({
                     initialState()
                 }
 
-                shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
+                shouldThrow<IllegalStateException> {
+                    machine.processEventBlocking(SwitchEvent)
+                }.message shouldStartWith "Multiple transitions match"
             }
 
             "multiple matching transitions" {
@@ -178,7 +188,9 @@ class TransitionTest : FreeSpec({
                     state { transition<SwitchEvent>() }
                 }
 
-                shouldThrow<IllegalStateException> { machine.processEventBlocking(SwitchEvent) }
+                shouldThrow<IllegalStateException> {
+                    machine.processEventBlocking(SwitchEvent)
+                }.message shouldStartWith "Multiple transitions match"
             }
 
             "parallel multiple matching transitions" {

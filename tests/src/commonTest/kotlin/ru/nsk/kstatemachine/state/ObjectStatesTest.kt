@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
@@ -30,8 +30,12 @@ class ObjectStatesTest : FreeSpec({
         "$coroutineStarterType" - {
             "multiple usage of object states throws" {
                 val machine = useInMachine(coroutineStarterType, false)
-                shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, false) }
-                shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "State State1(state1) is already used in another machine instance"
+                ) { useInMachine(coroutineStarterType, false) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "State State1(state1) is already used in another machine instance"
+                ) { useInMachine(coroutineStarterType, true) }
                 machine.destroyBlocking()
             }
 
@@ -48,7 +52,9 @@ class ObjectStatesTest : FreeSpec({
             "multiple usage of object states throws if current machine forbids auto destroy" {
                 useInMachine(coroutineStarterType, true)
                 val machine = useInMachine(coroutineStarterType, false)
-                shouldThrow<IllegalStateException> { useInMachine(coroutineStarterType, true) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "State State1(state1) is already used in another machine instance"
+                ) { useInMachine(coroutineStarterType, true) }
                 machine.destroyBlocking()
             }
 

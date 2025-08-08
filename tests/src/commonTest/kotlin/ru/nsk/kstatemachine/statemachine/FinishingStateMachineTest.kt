@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.statemachine
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -41,14 +41,16 @@ class FinishingStateMachineTest : FreeSpec({
 
             "restart machine after finish" {
                 val callbacks = mockkCallbacks()
-                val machine = createTestStateMachine(coroutineStarterType) {
+                val machine = createTestStateMachine(coroutineStarterType, "machine") {
                     initialFinalState("final")
                     transition<SwitchEvent> { callbacks.listen(this) }
                 }
                 machine.isFinished shouldBe true
                 machine.processEventBlocking(SwitchEvent)
                 confirmVerified(callbacks)
-                shouldThrow<IllegalStateException> { machine.startBlocking() }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "StateMachineImpl(machine) is already started"
+                ) { machine.startBlocking() }
                 machine.restartBlocking()
             }
 

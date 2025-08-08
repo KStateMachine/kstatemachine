@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.datatest.withData
 import io.mockk.called
@@ -229,8 +229,12 @@ class StateGroupListenerTest : FreeSpec({
                     addState(State2)
                 }
 
-                shouldThrow<IllegalArgumentException> { onActiveAllOf(State1, State1, State1) { /*nothing*/ } }
-                shouldThrow<IllegalArgumentException> { onActiveAnyOf(State1, State1, State1) { /*nothing*/ } }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
+                ) { onActiveAllOf(State1, State1, State1) { /*nothing*/ } }
+                shouldThrowWithMessage<IllegalArgumentException>(
+                    "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
+                ) { onActiveAnyOf(State1, State1, State1) { /*nothing*/ } }
             }
         }
     }

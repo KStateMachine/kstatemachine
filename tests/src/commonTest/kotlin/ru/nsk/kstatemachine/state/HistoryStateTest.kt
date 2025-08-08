@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
@@ -24,11 +24,15 @@ class HistoryStateTest : FreeSpec({
             "history state cannot have listeners" {
                 createTestStateMachine(coroutineStarterType) {
                     initialState()
-                    val history = historyState()
-                    shouldThrow<UnsupportedOperationException> {
+                    val history = historyState("history")
+                    shouldThrowWithMessage<UnsupportedOperationException>(
+                        "PseudoState DefaultHistoryState(history) can not have listeners"
+                    ) {
                         history.onEntry {}
                     }
-                    shouldThrow<UnsupportedOperationException> {
+                    shouldThrowWithMessage<UnsupportedOperationException>(
+                        "PseudoState DefaultHistoryState(history) can not have listeners"
+                    ) {
                         history.onExit {}
                     }
                 }
@@ -38,10 +42,12 @@ class HistoryStateTest : FreeSpec({
                 createTestStateMachine(coroutineStarterType) {
                     lateinit var innerState: State
                     initialState {
-                        innerState = initialState()
+                        innerState = initialState("outerState")
                     }
-                    shouldThrow<IllegalArgumentException> {
-                        historyState(defaultState = innerState)
+                    shouldThrowWithMessage<IllegalArgumentException>(
+                        "Default state DefaultState(outerState) is not a neighbour of DefaultHistoryState(history)"
+                    ) {
+                        historyState("history", defaultState = innerState)
                     }
                 }
             }

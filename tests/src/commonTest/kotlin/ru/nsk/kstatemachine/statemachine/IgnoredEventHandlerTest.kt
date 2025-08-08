@@ -8,8 +8,10 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -32,7 +34,7 @@ class IgnoredEventHandlerTest : FreeSpec({
 
                 shouldThrow<IllegalStateException> {
                     machine.processEvent(SwitchEvent)
-                }
+                }.message shouldEndWith "The machine was configured with throwingIgnoredEventHandler, that forbids such behaviour."
             }
 
             "ignored event handler" {
@@ -55,11 +57,13 @@ class IgnoredEventHandlerTest : FreeSpec({
                     initialState("first")
 
                     ignoredEventHandler = StateMachine.IgnoredEventHandler {
-                        testError("unexpected ${it.event}")
+                        testError("unexpected ${it.event::class.simpleName}")
                     }
                 }
 
-                shouldThrow<TestException> { machine.processEventBlocking(SwitchEvent) }
+                shouldThrowWithMessage<TestException>(
+                    "unexpected SwitchEvent"
+                ) { machine.processEventBlocking(SwitchEvent) }
                 machine.isDestroyed shouldBe false
             }
 

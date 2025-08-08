@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.statemachine
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -131,7 +131,9 @@ class CompositionStateMachinesTest : FreeSpec({
                     addState(inner)
                 }
 
-                shouldThrow<IllegalStateException> { outer.processEventBlocking(SwitchEvent) }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Transitioning to targetState DefaultState(inner-state2) from another state machine is not possible"
+                ) { outer.processEventBlocking(SwitchEvent) }
             }
         }
     }
