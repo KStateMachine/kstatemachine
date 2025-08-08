@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import ru.nsk.kstatemachine.*
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.statemachine.queuePendingEventHandler
 import ru.nsk.kstatemachine.statemachine.throwingPendingEventHandler
 import ru.nsk.kstatemachine.transition.TransitionType
 
-class GetStructureHashCodeVisitorTest : StringSpec({
+class GetStructureHashCodeVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "structure hash code should be the same if called twice" {
             val machine = createTestStateMachine(coroutineStarterType) {

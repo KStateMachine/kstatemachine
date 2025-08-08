@@ -8,13 +8,13 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.transition.Transition
 
-class AccessorsApiTest : StringSpec({
+class AccessorsApiTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "requireTransition()" {
             val state = object : DefaultState() {}

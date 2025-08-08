@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.event
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -15,7 +15,7 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.onTriggered
 
-class FinishedEventTest : StringSpec({
+class FinishedEventTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "FinishedEvent in machine is not working as machine ignores events" {
             val callbacks = mockkCallbacks()

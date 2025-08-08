@@ -9,7 +9,7 @@ package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.data.forAll
 import io.kotest.data.headers
 import io.kotest.data.row
@@ -37,7 +37,7 @@ private object StateMachineTestData {
     object OffEvent : Event
 }
 
-class StateMachineTest : StringSpec({
+class StateMachineTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "no initial state" {
             shouldThrow<IllegalStateException> {

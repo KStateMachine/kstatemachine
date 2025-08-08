@@ -7,14 +7,14 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.transition.TransitionType.EXTERNAL
 import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
 
-class ExternalTransitionTest : StringSpec({
+class ExternalTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "external transition on machine level" {
             val callbacks = mockkCallbacks()

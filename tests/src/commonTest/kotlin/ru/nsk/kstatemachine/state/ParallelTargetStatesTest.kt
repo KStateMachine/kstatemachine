@@ -9,7 +9,7 @@ package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
@@ -17,7 +17,7 @@ import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.transition.targetParallelStates
 
-class ParallelTargetStatesTest : StringSpec({
+class ParallelTargetStatesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "transition targets multiple parallel states children" {
             val callbacks = mockkCallbacks()

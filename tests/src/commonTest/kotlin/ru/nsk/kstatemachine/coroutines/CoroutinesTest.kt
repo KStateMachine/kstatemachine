@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.coroutines
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
@@ -27,7 +27,7 @@ import ru.nsk.kstatemachine.transition.stay
 import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-class CoroutinesTest : StringSpec({
+class CoroutinesTest : FreeSpec({
     /** Coroutines manipulations like withContext or launch from coroutineScope make test fail. */
     "call suspend functions from major listeners and callbacks" {
         val machine = createStdLibStateMachine {

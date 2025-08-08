@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verify
@@ -31,7 +31,7 @@ private object TypesafeTransitionTestData {
     class IdEvent(override val data: Int) : DataEvent<Int>
 }
 
-class TypesafeTransitionTest : StringSpec({
+class TypesafeTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "initial DataState negative" {
             shouldThrow<Exception> {

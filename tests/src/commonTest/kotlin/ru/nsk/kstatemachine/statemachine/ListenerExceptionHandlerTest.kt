@@ -8,14 +8,14 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.*
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.testing.Testing.startFromBlocking
 
-class ListenerExceptionHandlerTest : StringSpec({
+class ListenerExceptionHandlerTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "default ListenerExceptionHandler rethrows exception from state onEntry() on start() call" {
             shouldThrow<TestException> {

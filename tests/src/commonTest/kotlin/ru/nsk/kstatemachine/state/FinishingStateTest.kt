@@ -7,14 +7,14 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class FinishingStateTest : StringSpec({
+class FinishingStateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "reenter finished branch" {
             lateinit var state11: State

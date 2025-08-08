@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -37,7 +37,7 @@ private object CustomTransitionTestData {
  * when it is triggered with [Transition.isMatchingEvent]. Currently, I do not see real use cases to do it,
  * as conditional transitions might be used for the same purpose.
  */
-class CustomTransitionTest : StringSpec({
+class CustomTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "custom transition" {
             val callbacks = mockkCallbacks()

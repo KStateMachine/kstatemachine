@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrowUnitWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
@@ -25,7 +25,7 @@ private object StateTestData {
     }
 }
 
-class StateTest : StringSpec({
+class StateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "state subclass" {
             val machine = createTestStateMachine(coroutineStarterType) {

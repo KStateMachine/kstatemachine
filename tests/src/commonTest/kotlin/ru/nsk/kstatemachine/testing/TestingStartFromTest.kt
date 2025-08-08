@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.testing
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.*
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.testing.Testing.startFromBlocking
 
 enum class ApiType { StateByReference, StateByName }
 
-class TestingStartFromTest : StringSpec({
+class TestingStartFromTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         ApiType.entries.forEach { apiType ->
             "startFromBlocking()" {

@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.metainfo
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -147,7 +147,7 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
     }
 }
 
-class ExportMetaInfoTest : StringSpec({
+class ExportMetaInfoTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "ExportMetaInfo test" {
             val machine = createTestMachine(coroutineStarterType)

@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.visitors
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -16,7 +16,7 @@ import ru.nsk.kstatemachine.state.addInitialState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.transition
 
-class CheckUniqueNamesVisitorTest : StringSpec({
+class CheckUniqueNamesVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "do not allow transitions with same name" {
             shouldThrow<IllegalStateException> {

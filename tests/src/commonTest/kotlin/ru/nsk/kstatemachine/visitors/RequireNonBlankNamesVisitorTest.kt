@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.visitors
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
@@ -17,7 +17,7 @@ import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.transition
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 
-class RequireNonBlankNamesVisitorTest : StringSpec({
+class RequireNonBlankNamesVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "check machine with multiple blank names" {
             val machine = createTestStateMachine(coroutineStarterType) {

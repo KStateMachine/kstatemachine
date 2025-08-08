@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.persistence
 
 import io.kotest.assertions.throwables.shouldThrowWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -27,7 +27,7 @@ import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
 import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
-class EventRecorderTest : StringSpec({
+class EventRecorderTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "negative event recording should be explicitly enabled" {
             val machine = createTestStateMachine(coroutineStarterType) {

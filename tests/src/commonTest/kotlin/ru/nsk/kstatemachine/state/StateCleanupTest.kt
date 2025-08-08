@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
 import io.mockk.spyk
@@ -20,7 +20,7 @@ private object StateCleanupTestData {
     class State1 : DefaultState("state1")
 }
 
-class StateCleanupTest : StringSpec({
+class StateCleanupTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "cleanup is not called" {
             val state = spyk<State1>()

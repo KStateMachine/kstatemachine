@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors.export
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.data.forAll
 import io.kotest.data.headers
 import io.kotest.data.row
@@ -317,7 +317,7 @@ private suspend fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType
     }
 }
 
-class ExportPlantUmlVisitorTest : StringSpec({
+class ExportPlantUmlVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         table(
             headers("showEventLabels", "result"),

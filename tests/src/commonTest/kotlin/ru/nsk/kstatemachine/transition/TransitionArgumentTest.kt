@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -17,7 +17,7 @@ import ru.nsk.kstatemachine.statemachine.startBlocking
 
 private const val ARGUMENT = 1
 
-class TransitionArgumentTest : StringSpec({
+class TransitionArgumentTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "transition argument" {
             val callbacks = mockkCallbacks()

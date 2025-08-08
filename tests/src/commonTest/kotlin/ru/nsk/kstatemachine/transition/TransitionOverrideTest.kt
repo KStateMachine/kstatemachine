@@ -7,14 +7,14 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class TransitionOverrideTest : StringSpec({
+class TransitionOverrideTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "override parent transition same event type" {
             overrideParentTransitionWithEventType<SwitchEvent>(coroutineStarterType)

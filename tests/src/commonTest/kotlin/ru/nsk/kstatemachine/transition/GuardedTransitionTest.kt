@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -16,7 +16,7 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class GuardedTransitionTest : StringSpec({
+class GuardedTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "guarded transition" {
             val callbacks = mockkCallbacks()

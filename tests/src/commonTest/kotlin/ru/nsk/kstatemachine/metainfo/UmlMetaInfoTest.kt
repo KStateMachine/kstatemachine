@@ -9,7 +9,7 @@ package ru.nsk.kstatemachine.metainfo
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
@@ -75,7 +75,7 @@ state "Nested states sm" as Meta_info_StateMachine {
 @enduml
 """
 
-class UmlMetaInfoTest : StringSpec({
+class UmlMetaInfoTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "metaInfo export test" {
             val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {

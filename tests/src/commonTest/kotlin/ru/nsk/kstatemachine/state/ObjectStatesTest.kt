@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -25,7 +25,7 @@ private object ObjectStatesTestData {
  * States are mutable, and it is not possible to use object states in multiple [StateMachine] instances if
  * [CreationArguments.autoDestroyOnStatesReuse] argument is false.
  */
-class ObjectStatesTest : StringSpec({
+class ObjectStatesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "multiple usage of object states throws" {
             val machine = useInMachine(coroutineStarterType, false)

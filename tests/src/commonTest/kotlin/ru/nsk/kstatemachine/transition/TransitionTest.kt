@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.confirmVerified
@@ -21,7 +21,7 @@ import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class TransitionTest : StringSpec({
+class TransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "transition add after machine start" {
             lateinit var state1: State

@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
@@ -23,7 +23,7 @@ import ru.nsk.kstatemachine.state.*
  * Inner machine is treated as atomic state by outer one.
  * Inner machine is started automatically when outer one enters it.
  */
-class CompositionStateMachinesTest : StringSpec({
+class CompositionStateMachinesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "composition, inner machine auto start on entry" { composition(coroutineStarterType, false) }
         "composition, inner machine already started" { composition(coroutineStarterType, true) }

@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.transition
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -26,7 +26,7 @@ private object ConditionalTransitionTestData {
     class ConditionEvent(val data: Boolean) : Event
 }
 
-class ConditionalTransitionTest : StringSpec({
+class ConditionalTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "conditional transition stay()" {
             val callbacks = mockkCallbacks()

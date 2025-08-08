@@ -9,7 +9,7 @@ package ru.nsk.kstatemachine.persistence
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
 
-class RestoreByRecordedEventsTest : StringSpec({
+class RestoreByRecordedEventsTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "negative check ${StateMachine::restoreByRecordedEvents.name} on destroyed machine throws" {
             val recordedEvents = RecordedEvents(0, emptyList())

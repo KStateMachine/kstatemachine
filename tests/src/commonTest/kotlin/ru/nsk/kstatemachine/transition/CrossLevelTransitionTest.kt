@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -16,7 +16,7 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class CrossLevelTransitionTest : StringSpec({
+class CrossLevelTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         // Transition from self to self is same as target-less transition
         "self to self" {

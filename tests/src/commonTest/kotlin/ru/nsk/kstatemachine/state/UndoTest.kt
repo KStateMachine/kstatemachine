@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -28,7 +28,7 @@ private object UndoTestData {
     class SwitchDataEvent(override val data: Int) : DataEvent<Int>
 }
 
-class UndoTest : StringSpec({
+class UndoTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "undo not enabled" {
             val machine = createTestStateMachine(coroutineStarterType) {

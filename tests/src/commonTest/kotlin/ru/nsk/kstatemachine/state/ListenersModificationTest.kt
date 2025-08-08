@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.state
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.onTriggered
 
-class ListenersModificationTest : StringSpec({
+class ListenersModificationTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "remove state listener from callback" {
             createTestStateMachine(coroutineStarterType) {

@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class HistoryStateTest : StringSpec({
+class HistoryStateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "history state cannot have listeners" {
             createTestStateMachine(coroutineStarterType) {

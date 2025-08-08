@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -20,7 +20,7 @@ import ru.nsk.kstatemachine.state.transitionConditionally
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.IGNORED
 import ru.nsk.kstatemachine.transition.noTransition
 
-class IgnoredEventHandlerTest : StringSpec({
+class IgnoredEventHandlerTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "throwing ignored event handler" {
             val machine = createTestStateMachine(coroutineStarterType) {

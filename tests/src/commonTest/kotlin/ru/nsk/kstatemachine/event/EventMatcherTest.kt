@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.event
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -27,7 +27,7 @@ private object EventMatcherTestData {
     open class HierarchyEventL2 : HierarchyEventL1()
 }
 
-class EventMatcherTest : StringSpec({
+class EventMatcherTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "isEqual()" {
             val callbacks = mockkCallbacks()

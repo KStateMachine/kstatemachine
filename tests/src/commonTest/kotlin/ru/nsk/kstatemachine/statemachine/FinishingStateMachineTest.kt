@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.confirmVerified
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.transition.onTriggered
 
-class FinishingStateMachineTest : StringSpec({
+class FinishingStateMachineTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "finishing state machine" {
             val callbacks = mockkCallbacks()

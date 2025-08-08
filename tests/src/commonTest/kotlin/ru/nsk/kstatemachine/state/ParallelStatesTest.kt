@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.containExactlyInAnyOrder
 import io.kotest.matchers.should
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.transition.onTriggered
 
-class ParallelStatesTest : StringSpec({
+class ParallelStatesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "initial state in parallel mode negative" {
             createTestStateMachine(coroutineStarterType) {

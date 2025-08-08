@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.serialization.persistence
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -75,7 +75,7 @@ private object StringPolymorphicSerializer : KSerializer<String> {
     }
 }
 
-class RecordedEventsSerializerTest : StringSpec({
+class RecordedEventsSerializerTest : FreeSpec({
     "Serialize and restore state machine with RecordedEvents" {
         suspend fun CoroutineScope.createMachine(): StateMachine {
             lateinit var state2: State

@@ -7,7 +7,7 @@
 
 package ru.nsk.kstatemachine.visitors
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.containExactly
 import io.kotest.matchers.should
 import ru.nsk.kstatemachine.CoroutineStarterType
@@ -16,7 +16,7 @@ import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
-class GetActiveStatesVisitorTest : StringSpec({
+class GetActiveStatesVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "activeStates()" {
             lateinit var state1: State

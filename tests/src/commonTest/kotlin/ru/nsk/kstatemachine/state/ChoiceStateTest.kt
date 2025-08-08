@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.state
 
 import io.kotest.assertions.throwables.shouldThrowWithMessage
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
@@ -31,7 +31,7 @@ private object ChoiceStateTestData {
     class IntEvent(override val data: Int) : DataEvent<Int>
 }
 
-class ChoiceStateTest : StringSpec({
+class ChoiceStateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "redirecting choice state" {
             val callbacks = mockkCallbacks()

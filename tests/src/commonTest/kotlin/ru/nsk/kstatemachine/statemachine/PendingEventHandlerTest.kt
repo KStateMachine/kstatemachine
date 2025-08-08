@@ -8,7 +8,7 @@
 package ru.nsk.kstatemachine.statemachine
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
@@ -20,7 +20,7 @@ import ru.nsk.kstatemachine.statemachine.ProcessingResult.PENDING
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
 import ru.nsk.kstatemachine.transition.onTriggered
 
-class PendingEventHandlerTest : StringSpec({
+class PendingEventHandlerTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "queue event in QueuePendingEventHandler" {
             val machine = createTestStateMachine(coroutineStarterType) {

@@ -7,14 +7,14 @@
 
 package ru.nsk.kstatemachine
 
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.addInitialState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 
-class IsSubStateOfTest : StringSpec({
+class IsSubStateOfTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "isSubStateOf()" {
             lateinit var state1: IState
