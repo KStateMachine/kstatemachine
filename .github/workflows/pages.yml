@@ -47,10 +47,10 @@ jobs:
         id: pages
         uses: actions/configure-pages@v3
       - name: Run Dokka
-        run: ./gradlew dokkaHtmlMultiModule
+        run: ./gradlew dokkaGenerate
         working-directory: '${{ github.workspace }}'
       - name: Copy kdoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -Rv build/dokka/htmlMultiModule/* docs/_site/kdoc
+        run: mkdir -p docs/_site/kdoc && cp -Rv build/dokka/html/* docs/_site/kdoc
         working-directory: '${{ github.workspace }}'
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default

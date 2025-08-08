@@ -26,7 +26,7 @@ val localProperties = Properties().apply {
 
 tasks.register<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
-    from(tasks.named("dokkaHtml"))
+    from(tasks.named("dokkaGenerate"))
 }
 
 publishing {

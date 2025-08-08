@@ -27,3 +27,9 @@ apiValidation {
      */
     nonPublicMarkers.add("ru.nsk.kstatemachine.VisibleForTesting")
 }
+
+dependencies {
+    dokka(project(":kstatemachine"))
+    dokka(project(":kstatemachine-coroutines"))
+    dokka(project(":kstatemachine-serialization:"))
+}
