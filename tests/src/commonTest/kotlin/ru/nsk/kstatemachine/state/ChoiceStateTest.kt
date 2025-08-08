@@ -33,197 +33,199 @@ private object ChoiceStateTestData {
 
 class ChoiceStateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "redirecting choice state" {
-            val callbacks = mockkCallbacks()
+        "$coroutineStarterType" - {
+            "redirecting choice state" {
+                val callbacks = mockkCallbacks()
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it()) }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    logger = StateMachine.Logger { println(it()) }
 
-                val choice = choiceState("choice") {
-                    log { "$event $argument" }
-                    State2
+                    val choice = choiceState("choice") {
+                        log { "$event $argument" }
+                        State2
+                    }
+
+                    addInitialState(State1) {
+                        transition<SwitchEvent> { targetState = choice }
+                    }
+                    addState(State2) { callbacks.listen(this) }
+                    onTransitionTriggered { log { it.toString() } }
                 }
 
-                addInitialState(State1) {
-                    transition<SwitchEvent> { targetState = choice }
-                }
-                addState(State2) { callbacks.listen(this) }
-                onTransitionTriggered { log { it.toString() } }
+                machine.processEventBlocking(SwitchEvent, false)
+
+                verifySequence { callbacks.onStateEntry(State2) }
             }
 
-            machine.processEventBlocking(SwitchEvent, false)
+            "redirecting choice states chain" {
+                val callbacks = mockkCallbacks()
 
-            verifySequence { callbacks.onStateEntry(State2) }
-        }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    logger = StateMachine.Logger { println(it()) }
 
-        "redirecting choice states chain" {
-            val callbacks = mockkCallbacks()
+                    val choice2 = choiceState("choice2") { State2 }
+                    val choice1 = choiceState("choice1") { choice2 }
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it()) }
-
-                val choice2 = choiceState("choice2") { State2 }
-                val choice1 = choiceState("choice1") { choice2 }
-
-                addInitialState(State1) {
-                    transition<SwitchEvent> { targetState = choice1 }
-                }
-                addState(State2) { callbacks.listen(this) }
-            }
-
-            machine.processEventBlocking(SwitchEvent)
-
-            verifySequence { callbacks.onStateEntry(State2) }
-        }
-
-        "initial choiceState" {
-            val callbacks = mockkCallbacks()
-
-            createTestStateMachine(coroutineStarterType) {
-                initialChoiceState("choice") { State2 }
-                addState(State2) { callbacks.listen(this) }
-            }
-            verifySequence { callbacks.onStateEntry(State2) }
-        }
-
-        "initial choiceDataState" {
-            val callbacks = mockkCallbacks()
-            lateinit var state2: DataState<Int>
-            createTestStateMachine(coroutineStarterType) {
-                initialChoiceDataState("choice") { state2 }
-                state2 = dataState(defaultData = 42) { callbacks.listen(this) }
-            }
-            verifySequence { callbacks.onStateEntry(state2) }
-            state2.data shouldBe 42
-        }
-
-        "initial choice state on entry parent" {
-            lateinit var state1: State
-            lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                state1 = initialState("state1") {
-                    initialChoiceState("choice") { state2 }
+                    addInitialState(State1) {
+                        transition<SwitchEvent> { targetState = choice1 }
+                    }
+                    addState(State2) { callbacks.listen(this) }
                 }
 
-                state2 = state("state2") {
-                    transition<SwitchEvent>(targetState = state1)
-                }
-            }
-            machine.processEvent(SwitchEvent)
-            machine.activeStates().shouldContainExactly(state2)
-        }
+                machine.processEventBlocking(SwitchEvent)
 
-        "initial choice state in a parallel state" {
-            lateinit var state2: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1", childMode = ChildMode.PARALLEL) {
-                    state("state11") {}
-                    state("state12") {
+                verifySequence { callbacks.onStateEntry(State2) }
+            }
+
+            "initial choiceState" {
+                val callbacks = mockkCallbacks()
+
+                createTestStateMachine(coroutineStarterType) {
+                    initialChoiceState("choice") { State2 }
+                    addState(State2) { callbacks.listen(this) }
+                }
+                verifySequence { callbacks.onStateEntry(State2) }
+            }
+
+            "initial choiceDataState" {
+                val callbacks = mockkCallbacks()
+                lateinit var state2: DataState<Int>
+                createTestStateMachine(coroutineStarterType) {
+                    initialChoiceDataState("choice") { state2 }
+                    state2 = dataState(defaultData = 42) { callbacks.listen(this) }
+                }
+                verifySequence { callbacks.onStateEntry(state2) }
+                state2.data shouldBe 42
+            }
+
+            "initial choice state on entry parent" {
+                lateinit var state1: State
+                lateinit var state2: State
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    state1 = initialState("state1") {
                         initialChoiceState("choice") { state2 }
                     }
+
+                    state2 = state("state2") {
+                        transition<SwitchEvent>(targetState = state1)
+                    }
                 }
-
-                state2 = state("state2")
-            }
-            machine.activeStates().shouldContainExactly(state2)
-        }
-
-        "redirecting choice data state" {
-            val callbacks = mockkCallbacks()
-
-            class IntEvent(override val data: Int) : DataEvent<Int>
-
-            lateinit var intState1: DataState<Int>
-            lateinit var intState2: DataState<Int>
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                logger = StateMachine.Logger { println(it()) }
-
-                addInitialState(State1)
-
-                val choice = choiceDataState("data choice") {
-                    log { "$event $argument" }
-                    val intEvent = event as? IntEvent // cast is necessary as we don't know event type here
-                    if (intEvent?.data == 42) intState1 else intState2
-                }
-
-                dataTransition<IntEvent, Int> { targetState = choice }
-
-                intState1 = dataState<Int>("intState1") { callbacks.listen(this) }
-                intState2 = dataState<Int>("intState2") { callbacks.listen(this) }
-                onTransitionTriggered { log { it.toString() } }
+                machine.processEvent(SwitchEvent)
+                machine.activeStates().shouldContainExactly(state2)
             }
 
-            machine.processEvent(IntEvent(42), true)
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(intState1) }
-            machine.processEvent(IntEvent(66), false)
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateExit(intState1)
-                callbacks.onStateEntry(intState2)
-            }
-        }
-
-        "Try reproduce https://github.com/KStateMachine/kstatemachine/issues/101" {
-            lateinit var state3: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                state3 = state("state3")
-                val state2 = dataState<Int>("dataState3") {
-                    initialChoiceState { state3 }
-                }
-                initialState("state1") {
-                    dataTransition<IntEvent, Int> { targetState = state2 }
-                }
-            }
-            machine.processEvent(IntEvent(42))
-            machine.activeStates().shouldContainExactly(state3)
-        }
-
-        "Implicit DataState activation by initialChoiceState with custom DataExtractor" {
-            lateinit var state21: State
-            lateinit var dataState2: DataState<Int>
-            val machine = createTestStateMachine(coroutineStarterType) {
-                dataState2 = dataState<Int>(
-                    "dataState2",
-                    dataExtractor = object : DataExtractor<Int> by defaultDataExtractor() {
-                        override suspend fun extract(
-                            transitionParams: TransitionParams<*>,
-                            isImplicitActivation: Boolean
-                        ): Int? {
-                            val dataEvent = transitionParams.event as? DataEvent<*>
-                            if (isImplicitActivation && dataEvent != null && dataEvent.data is Int) {
-                                return dataEvent.data as Int
-                            }
-                            return null
+            "initial choice state in a parallel state" {
+                lateinit var state2: State
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1", childMode = ChildMode.PARALLEL) {
+                        state("state11") {}
+                        state("state12") {
+                            initialChoiceState("choice") { state2 }
                         }
-                    }) {
-                    initialChoiceState { state21 }
-                    state21 = state("internalState21")
-                }
-                initialState("state1") {
-                    dataTransition<IntEvent, Int> { targetState = dataState2 }
-                }
-            }
-            machine.processEvent(IntEvent(42))
-            machine.activeStates().shouldContainExactly(dataState2, state21)
-            dataState2.data shouldBe 42
-        }
+                    }
 
-        "Negative implicit DataState activation by initialChoiceState" {
-            lateinit var state21: State
-            lateinit var dataState2: DataState<Int>
-            val machine = createTestStateMachine(coroutineStarterType) {
-                dataState2 = dataState<Int>("dataState2") {
-                    initialChoiceState { state21 }
-                    state21 = state("internalState21")
+                    state2 = state("state2")
                 }
-                initialState("state1") {
-                    dataTransition<IntEvent, Int> { targetState = dataState2 }
+                machine.activeStates().shouldContainExactly(state2)
+            }
+
+            "redirecting choice data state" {
+                val callbacks = mockkCallbacks()
+
+                class IntEvent(override val data: Int) : DataEvent<Int>
+
+                lateinit var intState1: DataState<Int>
+                lateinit var intState2: DataState<Int>
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    logger = StateMachine.Logger { println(it()) }
+
+                    addInitialState(State1)
+
+                    val choice = choiceDataState("data choice") {
+                        log { "$event $argument" }
+                        val intEvent = event as? IntEvent // cast is necessary as we don't know event type here
+                        if (intEvent?.data == 42) intState1 else intState2
+                    }
+
+                    dataTransition<IntEvent, Int> { targetState = choice }
+
+                    intState1 = dataState<Int>("intState1") { callbacks.listen(this) }
+                    intState2 = dataState<Int>("intState2") { callbacks.listen(this) }
+                    onTransitionTriggered { log { it.toString() } }
+                }
+
+                machine.processEvent(IntEvent(42), true)
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(intState1) }
+                machine.processEvent(IntEvent(66), false)
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onStateExit(intState1)
+                    callbacks.onStateEntry(intState2)
                 }
             }
-            shouldThrowWithMessage<IllegalStateException>(
-                "Last data is not available yet in DefaultDataState(dataState2), and default data not provided"
-            ) {
+
+            "Try reproduce https://github.com/KStateMachine/kstatemachine/issues/101" {
+                lateinit var state3: State
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    state3 = state("state3")
+                    val state2 = dataState<Int>("dataState3") {
+                        initialChoiceState { state3 }
+                    }
+                    initialState("state1") {
+                        dataTransition<IntEvent, Int> { targetState = state2 }
+                    }
+                }
                 machine.processEvent(IntEvent(42))
+                machine.activeStates().shouldContainExactly(state3)
+            }
+
+            "Implicit DataState activation by initialChoiceState with custom DataExtractor" {
+                lateinit var state21: State
+                lateinit var dataState2: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    dataState2 = dataState<Int>(
+                        "dataState2",
+                        dataExtractor = object : DataExtractor<Int> by defaultDataExtractor() {
+                            override suspend fun extract(
+                                transitionParams: TransitionParams<*>,
+                                isImplicitActivation: Boolean
+                            ): Int? {
+                                val dataEvent = transitionParams.event as? DataEvent<*>
+                                if (isImplicitActivation && dataEvent != null && dataEvent.data is Int) {
+                                    return dataEvent.data as Int
+                                }
+                                return null
+                            }
+                        }) {
+                        initialChoiceState { state21 }
+                        state21 = state("internalState21")
+                    }
+                    initialState("state1") {
+                        dataTransition<IntEvent, Int> { targetState = dataState2 }
+                    }
+                }
+                machine.processEvent(IntEvent(42))
+                machine.activeStates().shouldContainExactly(dataState2, state21)
+                dataState2.data shouldBe 42
+            }
+
+            "negative implicit DataState activation by initialChoiceState" {
+                lateinit var state21: State
+                lateinit var dataState2: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    dataState2 = dataState<Int>("dataState2") {
+                        initialChoiceState { state21 }
+                        state21 = state("internalState21")
+                    }
+                    initialState("state1") {
+                        dataTransition<IntEvent, Int> { targetState = dataState2 }
+                    }
+                }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "Last data is not available yet in DefaultDataState(dataState2), and default data not provided"
+                ) {
+                    machine.processEvent(IntEvent(42))
+                }
             }
         }
     }

@@ -25,112 +25,114 @@ import ru.nsk.kstatemachine.state.*
  */
 class CompositionStateMachinesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "composition, inner machine auto start on entry" { composition(coroutineStarterType, false) }
-        "composition, inner machine already started" { composition(coroutineStarterType, true) }
+        "$coroutineStarterType" - {
+            "composition, inner machine auto start on entry" { composition(coroutineStarterType, false) }
+            "composition, inner machine already started" { composition(coroutineStarterType, true) }
 
-        "nested machine as initial state" {
-            val callbacks = mockkCallbacks()
-            lateinit var state1: IState
-            val inner = createTestStateMachine(coroutineStarterType, start = false) {
-                state1 = initialState("state1") {
-                    callbacks.listen(this)
+            "nested machine as initial state" {
+                val callbacks = mockkCallbacks()
+                lateinit var state1: IState
+                val inner = createTestStateMachine(coroutineStarterType, start = false) {
+                    state1 = initialState("state1") {
+                        callbacks.listen(this)
+                    }
                 }
-            }
 
-            createTestStateMachine(coroutineStarterType) {
-                addInitialState(inner)
-            }
-
-            verifySequence {
-                callbacks.onStateEntry(state1)
-            }
-        }
-
-        "stop nested machines" {
-            val callbacks = mockkCallbacks()
-            val inner = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    callbacks.listen(this)
-                }
-            }
-
-            val outer = createTestStateMachine(coroutineStarterType) {
-                addInitialState(inner)
-            }
-
-            outer.isActive shouldBe true
-            inner.isActive shouldBe true
-            outer.stopBlocking()
-            outer.isActive shouldBe false
-            inner.isActive shouldBe true
-        }
-
-        "exit branch with nested machine" {
-            val callbacks = mockkCallbacks()
-
-            val inner = createTestStateMachine(coroutineStarterType) {
-                initialState { callbacks.listen(this) }
-            }
-
-            lateinit var state1: State
-            lateinit var state2: State
-            val outer = createTestStateMachine(coroutineStarterType) {
-                state1 = initialState {
+                createTestStateMachine(coroutineStarterType) {
                     addInitialState(inner)
-                    transitionOn<SwitchEvent> { targetState = { state2 } }
                 }
-                state2 = state("state2")
-            }
 
-            outer.activeStates().shouldContainExactly(state1, inner)
-
-            outer.processEventBlocking(SwitchEvent)
-            outer.isActive shouldBe true
-            inner.isActive shouldBe true
-            outer.activeStates().shouldContainExactly(state2)
-        }
-
-        "transition out from nested machine, negative" {
-            lateinit var state1: State
-            lateinit var state2: State
-            val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
-                logger = StateMachine.Logger { println(it()) }
-                state1 = initialState("inner-state1")
-                transitionOn<SwitchEvent> { targetState = { state2 } } // invalid
-            }
-
-            val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
-                logger = StateMachine.Logger { println(it()) }
-
-                addInitialState(inner)
-                state2 = state("outer-state2")
-            }
-
-            inner.activeStates().shouldContainExactly(state1)
-
-            outer.processEventBlocking(SwitchEvent) // ignored
-            inner.activeStates().shouldContainExactly(state1)
-            outer.activeStates().shouldContainExactly(inner)
-        }
-
-        "transition into nested machine sub-state, negative" {
-            lateinit var innerState2: State
-            val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
-                logger = StateMachine.Logger { println(it()) }
-                initialState("inner-state1")
-                innerState2 = state("inner-state2")
-            }
-
-            val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
-                logger = StateMachine.Logger { println(it()) }
-
-                initialState("state1") {
-                    transitionOn<SwitchEvent> { targetState = { innerState2 } } // invalid
+                verifySequence {
+                    callbacks.onStateEntry(state1)
                 }
-                addState(inner)
             }
 
-            shouldThrow<IllegalStateException> { outer.processEventBlocking(SwitchEvent) }
+            "stop nested machines" {
+                val callbacks = mockkCallbacks()
+                val inner = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1") {
+                        callbacks.listen(this)
+                    }
+                }
+
+                val outer = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(inner)
+                }
+
+                outer.isActive shouldBe true
+                inner.isActive shouldBe true
+                outer.stopBlocking()
+                outer.isActive shouldBe false
+                inner.isActive shouldBe true
+            }
+
+            "exit branch with nested machine" {
+                val callbacks = mockkCallbacks()
+
+                val inner = createTestStateMachine(coroutineStarterType) {
+                    initialState { callbacks.listen(this) }
+                }
+
+                lateinit var state1: State
+                lateinit var state2: State
+                val outer = createTestStateMachine(coroutineStarterType) {
+                    state1 = initialState {
+                        addInitialState(inner)
+                        transitionOn<SwitchEvent> { targetState = { state2 } }
+                    }
+                    state2 = state("state2")
+                }
+
+                outer.activeStates().shouldContainExactly(state1, inner)
+
+                outer.processEventBlocking(SwitchEvent)
+                outer.isActive shouldBe true
+                inner.isActive shouldBe true
+                outer.activeStates().shouldContainExactly(state2)
+            }
+
+            "transition out from nested machine, negative" {
+                lateinit var state1: State
+                lateinit var state2: State
+                val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
+                    logger = StateMachine.Logger { println(it()) }
+                    state1 = initialState("inner-state1")
+                    transitionOn<SwitchEvent> { targetState = { state2 } } // invalid
+                }
+
+                val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
+                    logger = StateMachine.Logger { println(it()) }
+
+                    addInitialState(inner)
+                    state2 = state("outer-state2")
+                }
+
+                inner.activeStates().shouldContainExactly(state1)
+
+                outer.processEventBlocking(SwitchEvent) // ignored
+                inner.activeStates().shouldContainExactly(state1)
+                outer.activeStates().shouldContainExactly(inner)
+            }
+
+            "transition into nested machine sub-state, negative" {
+                lateinit var innerState2: State
+                val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
+                    logger = StateMachine.Logger { println(it()) }
+                    initialState("inner-state1")
+                    innerState2 = state("inner-state2")
+                }
+
+                val outer = createTestStateMachine(coroutineStarterType, name = "outer") {
+                    logger = StateMachine.Logger { println(it()) }
+
+                    initialState("state1") {
+                        transitionOn<SwitchEvent> { targetState = { innerState2 } } // invalid
+                    }
+                    addState(inner)
+                }
+
+                shouldThrow<IllegalStateException> { outer.processEventBlocking(SwitchEvent) }
+            }
         }
     }
 })

@@ -16,62 +16,64 @@ import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
 class TransitionOverrideTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "override parent transition same event type" {
-            overrideParentTransitionWithEventType<SwitchEvent>(coroutineStarterType)
-        }
+        "$coroutineStarterType" - {
+            "override parent transition same event type" {
+                overrideParentTransitionWithEventType<SwitchEvent>(coroutineStarterType)
+            }
 
-        "override parent transition different event type" {
-            overrideParentTransitionWithEventType<Event>(coroutineStarterType)
-        }
+            "override parent transition different event type" {
+                overrideParentTransitionWithEventType<Event>(coroutineStarterType)
+            }
 
-        /*
+            /*
          * It is not possible to override with [noTransition]. Currently, I do not think it is necessary.
          * [stay] should fit such case, see "override with stay()".
          */
-        "override with noTransition() negative" {
-            val callbacks = mockkCallbacks()
+            "override with noTransition() negative" {
+                val callbacks = mockkCallbacks()
 
-            val machine = overrideWithDirection(coroutineStarterType, callbacks, noTransition())
+                val machine = overrideWithDirection(coroutineStarterType, callbacks, noTransition())
 
-            machine.processEventBlocking(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
 
-            verifySequence { callbacks.onTransitionTriggered(SwitchEvent, 2) }
-        }
-
-        "override with stay()" {
-            val callbacks = mockkCallbacks()
-
-            val machine = overrideWithDirection(coroutineStarterType, callbacks, stay())
-
-            machine.processEventBlocking(SwitchEvent)
-
-            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
-        }
-
-        "override all events" {
-            val callbacks = mockkCallbacks()
-
-            lateinit var state1: State
-            lateinit var state2: State
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                transitionOn<SwitchEvent> {
-                    targetState = { state2 }
-                    onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
-                }
-
-                state1 = initialState("state1") {
-                    // override all events
-                    transition<Event> { callbacks.listen(this) }
-                    callbacks.listen(this)
-                }
-                state2 = state("state2") { callbacks.listen(this) }
+                verifySequence { callbacks.onTransitionTriggered(SwitchEvent, 2) }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
+            "override with stay()" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+                val machine = overrideWithDirection(coroutineStarterType, callbacks, stay())
+
+                machine.processEventBlocking(SwitchEvent)
+
+                verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+            }
+
+            "override all events" {
+                val callbacks = mockkCallbacks()
+
+                lateinit var state1: State
+                lateinit var state2: State
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    transitionOn<SwitchEvent> {
+                        targetState = { state2 }
+                        onTriggered { callbacks.onTransitionTriggered(it.event, 2) }
+                    }
+
+                    state1 = initialState("state1") {
+                        // override all events
+                        transition<Event> { callbacks.listen(this) }
+                        callbacks.listen(this)
+                    }
+                    state2 = state("state2") { callbacks.listen(this) }
+                }
+
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
+
+                machine.processEventBlocking(SwitchEvent)
+                verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+            }
         }
     }
 })

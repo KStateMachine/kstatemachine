@@ -149,22 +149,24 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
 
 class ExportMetaInfoTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "ExportMetaInfo test" {
-            val machine = createTestMachine(coroutineStarterType)
-            machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe EXPORT_META_INFO_TEST
-        }
+        "$coroutineStarterType" - {
+            "ExportMetaInfo test" {
+                val machine = createTestMachine(coroutineStarterType)
+                machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe EXPORT_META_INFO_TEST
+            }
 
-        "ExportMetaInfo test with labels" {
-            val machine = createTestMachine(coroutineStarterType)
-            machine.exportToPlantUml(
-                showEventLabels = true,
-                unsafeCallConditionalLambdas = true
-            ) shouldBe EXPORT_META_INFO_WITH_LABELS_TEST
-        }
+            "ExportMetaInfo test with labels" {
+                val machine = createTestMachine(coroutineStarterType)
+                machine.exportToPlantUml(
+                    showEventLabels = true,
+                    unsafeCallConditionalLambdas = true
+                ) shouldBe EXPORT_META_INFO_WITH_LABELS_TEST
+            }
 
-        "ExportMetaInfo test without unsafeCallConditionalLambdas flag" {
-            val machine = createTestMachine(coroutineStarterType)
-            machine.exportToPlantUml() shouldBe EXPORT_META_INFO_WITHOUT_UNSAFE_CALL_CONDITIONAL_LAMBDAS_TEST
+            "ExportMetaInfo test without unsafeCallConditionalLambdas flag" {
+                val machine = createTestMachine(coroutineStarterType)
+                machine.exportToPlantUml() shouldBe EXPORT_META_INFO_WITHOUT_UNSAFE_CALL_CONDITIONAL_LAMBDAS_TEST
+            }
         }
     }
 })

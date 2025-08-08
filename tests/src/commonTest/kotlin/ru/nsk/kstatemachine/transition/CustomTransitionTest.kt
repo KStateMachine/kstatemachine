@@ -39,26 +39,28 @@ private object CustomTransitionTestData {
  */
 class CustomTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "custom transition" {
-            val callbacks = mockkCallbacks()
+        "$coroutineStarterType" - {
+            "custom transition" {
+                val callbacks = mockkCallbacks()
 
-            val event = CustomEvent(42)
+                val event = CustomEvent(42)
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                val state2 = state("state2")
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    val state2 = state("state2")
 
-                initialState("state1") {
-                    val transition = CustomTransition("customTransition", this, state2).apply {
-                        onTriggered { callbacks.onTransitionTriggered(it.event) }
+                    initialState("state1") {
+                        val transition = CustomTransition("customTransition", this, state2).apply {
+                            onTriggered { callbacks.onTransitionTriggered(it.event) }
+                        }
+                        addTransition(transition)
                     }
-                    addTransition(transition)
+
                 }
 
+                machine.processEventBlocking(event)
+
+                verifySequence { callbacks.onTransitionTriggered(event) }
             }
-
-            machine.processEventBlocking(event)
-
-            verifySequence { callbacks.onTransitionTriggered(event) }
         }
     }
 })

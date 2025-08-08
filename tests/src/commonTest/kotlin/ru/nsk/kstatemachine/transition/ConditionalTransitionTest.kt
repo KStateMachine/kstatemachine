@@ -28,169 +28,171 @@ private object ConditionalTransitionTestData {
 
 class ConditionalTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "conditional transition stay()" {
-            val callbacks = mockkCallbacks()
+        "$coroutineStarterType" - {
+            "conditional transition stay()" {
+                val callbacks = mockkCallbacks()
 
-            val first = object : DefaultState("first") {}
+                val first = object : DefaultState("first") {}
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<SwitchEvent> {
-                        direction = { stay() }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
                         callbacks.listen(this)
+
+                        transitionConditionally<SwitchEvent> {
+                            direction = { stay() }
+                            callbacks.listen(this)
+                        }
                     }
+                }
+
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+
+                machine.processEventBlocking(SwitchEvent)
+
+                verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+            }
+
+            "conditional transition noTransition()" {
+                val callbacks = mockkCallbacks()
+
+                val first = object : DefaultState("first") {}
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
+                        callbacks.listen(this)
+
+                        transitionConditionally<SwitchEvent> {
+                            direction = { noTransition() }
+                            callbacks.listen(this)
+                        }
+                    }
+                    onTransitionTriggered { callbacks.onTransitionTriggered(it.event) }
+                }
+
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onTransitionTriggered(ofType<StartEvent>())
+                    callbacks.onStateEntry(first)
+                }
+
+                machine.processEventBlocking(SwitchEvent)
+                verify { callbacks wasNot called }
+            }
+
+            "conditional transition targetState()" {
+                val callbacks = mockkCallbacks()
+
+                val first = object : DefaultState("first") {}
+                val second = object : DefaultState("second") {}
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
+                        callbacks.listen(this)
+
+                        transitionConditionally<SwitchEvent> {
+                            direction = { targetState(second) }
+                            callbacks.listen(this)
+                        }
+                    }
+                    addState(second) { callbacks.listen(this) }
+                }
+
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+
+                machine.processEventBlocking(SwitchEvent)
+                verifySequence {
+                    callbacks.onTransitionTriggered(SwitchEvent)
+                    callbacks.onStateExit(first)
+                    callbacks.onStateEntry(second)
                 }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+            "conditional transition" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(SwitchEvent)
+                val first = object : DefaultState("first") {}
+                val second = object : DefaultState("second") {}
 
-            verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
-        }
-
-        "conditional transition noTransition()" {
-            val callbacks = mockkCallbacks()
-
-            val first = object : DefaultState("first") {}
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<SwitchEvent> {
-                        direction = { noTransition() }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
                         callbacks.listen(this)
+
+                        transitionConditionally<SwitchEvent> {
+                            direction = { targetState(second) }
+                            callbacks.listen(this)
+                        }
                     }
+                    addState(second) { callbacks.listen(this) }
                 }
-                onTransitionTriggered { callbacks.onTransitionTriggered(it.event) }
+
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+
+                machine.processEventBlocking(SwitchEvent)
+                verifySequence {
+                    callbacks.onTransitionTriggered(SwitchEvent)
+                    callbacks.onStateExit(first)
+                    callbacks.onStateEntry(second)
+                }
             }
 
-            verifySequenceAndClear(callbacks) {
-                callbacks.onTransitionTriggered(ofType<StartEvent>())
-                callbacks.onStateEntry(first)
-            }
+            "conditional transition by event data" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(SwitchEvent)
-            verify { callbacks wasNot called }
-        }
+                val first = object : DefaultState("first") {}
+                val second = object : DefaultState("second") {}
+                val third = object : DefaultState("third") {}
 
-        "conditional transition targetState()" {
-            val callbacks = mockkCallbacks()
-
-            val first = object : DefaultState("first") {}
-            val second = object : DefaultState("second") {}
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<SwitchEvent> {
-                        direction = { targetState(second) }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
                         callbacks.listen(this)
+
+                        transitionConditionally<ConditionEvent> {
+                            direction = { if (event.data) targetState(second) else targetState(third) }
+                            callbacks.listen(this)
+                        }
                     }
+                    addState(second) { callbacks.listen(this) }
+                    addState(third) { callbacks.listen(this) }
                 }
-                addState(second) { callbacks.listen(this) }
+
+                val event = ConditionEvent(false)
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+
+                machine.processEventBlocking(event)
+                verifySequence {
+                    callbacks.onTransitionTriggered(event)
+                    callbacks.onStateExit(first)
+                    callbacks.onStateEntry(third)
+                }
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+            "conditional transition by argument" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequence {
-                callbacks.onTransitionTriggered(SwitchEvent)
-                callbacks.onStateExit(first)
-                callbacks.onStateEntry(second)
-            }
-        }
+                val first = object : DefaultState("first") {}
+                val second = object : DefaultState("second") {}
+                val third = object : DefaultState("third") {}
 
-        "conditional transition" {
-            val callbacks = mockkCallbacks()
-
-            val first = object : DefaultState("first") {}
-            val second = object : DefaultState("second") {}
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<SwitchEvent> {
-                        direction = { targetState(second) }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addInitialState(first) {
                         callbacks.listen(this)
+
+                        transitionConditionally<SwitchEvent> {
+                            direction = { if (argument as Boolean) targetState(second) else targetState(third) }
+                            callbacks.listen(this)
+                        }
                     }
+                    addState(second) { callbacks.listen(this) }
+                    addState(third) { callbacks.listen(this) }
                 }
-                addState(second) { callbacks.listen(this) }
-            }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
+                verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequence {
-                callbacks.onTransitionTriggered(SwitchEvent)
-                callbacks.onStateExit(first)
-                callbacks.onStateEntry(second)
-            }
-        }
-
-        "conditional transition by event data" {
-            val callbacks = mockkCallbacks()
-
-            val first = object : DefaultState("first") {}
-            val second = object : DefaultState("second") {}
-            val third = object : DefaultState("third") {}
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<ConditionEvent> {
-                        direction = { if (event.data) targetState(second) else targetState(third) }
-                        callbacks.listen(this)
-                    }
+                machine.processEventBlocking(SwitchEvent, false)
+                verifySequence {
+                    callbacks.onTransitionTriggered(SwitchEvent)
+                    callbacks.onStateExit(first)
+                    callbacks.onStateEntry(third)
                 }
-                addState(second) { callbacks.listen(this) }
-                addState(third) { callbacks.listen(this) }
-            }
-
-            val event = ConditionEvent(false)
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
-
-            machine.processEventBlocking(event)
-            verifySequence {
-                callbacks.onTransitionTriggered(event)
-                callbacks.onStateExit(first)
-                callbacks.onStateEntry(third)
-            }
-        }
-
-        "conditional transition by argument" {
-            val callbacks = mockkCallbacks()
-
-            val first = object : DefaultState("first") {}
-            val second = object : DefaultState("second") {}
-            val third = object : DefaultState("third") {}
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addInitialState(first) {
-                    callbacks.listen(this)
-
-                    transitionConditionally<SwitchEvent> {
-                        direction = { if (argument as Boolean) targetState(second) else targetState(third) }
-                        callbacks.listen(this)
-                    }
-                }
-                addState(second) { callbacks.listen(this) }
-                addState(third) { callbacks.listen(this) }
-            }
-
-            verifySequenceAndClear(callbacks) { callbacks.onStateEntry(first) }
-
-            machine.processEventBlocking(SwitchEvent, false)
-            verifySequence {
-                callbacks.onTransitionTriggered(SwitchEvent)
-                callbacks.onStateExit(first)
-                callbacks.onStateEntry(third)
             }
         }
     }

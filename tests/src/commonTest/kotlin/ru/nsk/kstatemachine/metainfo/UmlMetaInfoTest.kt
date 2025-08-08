@@ -7,7 +7,6 @@
 
 package ru.nsk.kstatemachine.metainfo
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
@@ -77,116 +76,118 @@ state "Nested states sm" as Meta_info_StateMachine {
 
 class UmlMetaInfoTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "metaInfo export test" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
-                // label for state machine
-                metaInfo = buildUmlMetaInfo { umlLabel = "Nested states sm" }
+        "$coroutineStarterType" - {
+            "metaInfo export test" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
+                    // label for state machine
+                    metaInfo = buildUmlMetaInfo { umlLabel = "Nested states sm" }
 
-                val state1 = initialState("State-1")
-                val state3 = finalState("State3") {
-                    // label for state
-                    metaInfo = buildUmlMetaInfo {
-                        umlLabel = "Long State 3"
-                        umlStateDescriptions = listOf("Description 1", "Description 2")
-                        umlNotes = listOf("Note 1", "Note 2")
-                    }
-                }
-
-                val state2 = state("State2") {
-                    // label for state
-                    metaInfo = buildUmlMetaInfo { umlLabel = "Long State 2" }
-                    transition<SwitchEvent> {
-                        // label for transition
-                        metaInfo = buildUmlMetaInfo { umlLabel = "That's all" }
-                        targetState = state3
-                    }
-                    transition<SwitchEvent>("back") {
-                        // label for transition
-                        metaInfo = buildUmlMetaInfo { umlLabel = "back to State 1" }
-                        targetState = state1
-                    }
-                    val finalSubState = finalState("FinalState") {
+                    val state1 = initialState("State-1")
+                    val state3 = finalState("State3") {
                         // label for state
-                        metaInfo = buildUmlMetaInfo { umlLabel = "Final sub state" }
+                        metaInfo = buildUmlMetaInfo {
+                            umlLabel = "Long State 3"
+                            umlStateDescriptions = listOf("Description 1", "Description 2")
+                            umlNotes = listOf("Note 1", "Note 2")
+                        }
                     }
-                    initialState("Initial subState") {
-                        transition<SwitchEvent> { targetState = finalSubState }
+
+                    val state2 = state("State2") {
+                        // label for state
+                        metaInfo = buildUmlMetaInfo { umlLabel = "Long State 2" }
+                        transition<SwitchEvent> {
+                            // label for transition
+                            metaInfo = buildUmlMetaInfo { umlLabel = "That's all" }
+                            targetState = state3
+                        }
+                        transition<SwitchEvent>("back") {
+                            // label for transition
+                            metaInfo = buildUmlMetaInfo { umlLabel = "back to State 1" }
+                            targetState = state1
+                        }
+                        val finalSubState = finalState("FinalState") {
+                            // label for state
+                            metaInfo = buildUmlMetaInfo { umlLabel = "Final sub state" }
+                        }
+                        initialState("Initial subState") {
+                            transition<SwitchEvent> { targetState = finalSubState }
+                        }
+                    }
+
+                    state1 {
+                        transition<SwitchEvent> {
+                            metaInfo = buildUmlMetaInfo { umlLabel = "go to ${state2.name}" }
+                            targetState = state2
+                        }
+                        transition<SwitchEvent>("self targeted") {
+                            targetState = this@state1
+                            metaInfo = buildUmlMetaInfo { umlNotes = listOf("Note 1", "Note 2") }
+                        }
+                        transition<SwitchEvent>()
+
+                        val state12 = state("State12")
+                        val choiceState = initialChoiceState("ChoiceState") { state12 }
+                        choiceState.metaInfo = buildUmlMetaInfo {
+                            umlLabel = "Choice label"
+                            // no plantUml nor Mermaid can draw this
+                            umlStateDescriptions = listOf("Description 1", "Description 2")
+                            umlNotes = listOf("Note 1", "Note 2")
+                        }
                     }
                 }
 
-                state1 {
-                    transition<SwitchEvent> {
-                        metaInfo = buildUmlMetaInfo { umlLabel = "go to ${state2.name}" }
-                        targetState = state2
-                    }
-                    transition<SwitchEvent>("self targeted") {
-                        targetState = this@state1
-                        metaInfo = buildUmlMetaInfo { umlNotes = listOf("Note 1", "Note 2") }
-                    }
-                    transition<SwitchEvent>()
-
-                    val state12 = state("State12")
-                    val choiceState = initialChoiceState("ChoiceState") { state12 }
-                    choiceState.metaInfo = buildUmlMetaInfo {
-                        umlLabel = "Choice label"
-                        // no plantUml nor Mermaid can draw this
-                        umlStateDescriptions = listOf("Description 1", "Description 2")
-                        umlNotes = listOf("Note 1", "Note 2")
-                    }
-                }
+                machine.exportToPlantUml(
+                    showEventLabels = true,
+                    unsafeCallConditionalLambdas = true
+                ) shouldBe PLANTUML_META_INFO
             }
 
-            machine.exportToPlantUml(
-                showEventLabels = true,
-                unsafeCallConditionalLambdas = true
-            ) shouldBe PLANTUML_META_INFO
-        }
-
-        "CompositeMetaInfo vararg export test" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
-                // label for state machine
-                metaInfo = buildCompositeMetaInfo(
-                    buildUmlMetaInfo { umlLabel = "Nested states sm" },
-                    object : MetaInfo {} // just a stub
-                )
-                initialState("State1")
-            }
-            machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
-        }
-
-        "CompositeMetaInfo export test" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
-                // label for state machine
-                metaInfo = buildCompositeMetaInfo {
-                    metaInfoSet = setOf(buildUmlMetaInfo { umlLabel = "Nested states sm" })
-                }
-                initialState("State1")
-            }
-            machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
-        }
-
-        "Negative CompositeMetaInfo nesting" {
-            shouldThrowWithMessage<IllegalStateException>("CompositeMetaInfo cannot nest each other") {
-                createTestStateMachine(coroutineStarterType) {
+            "CompositeMetaInfo vararg export test" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
+                    // label for state machine
                     metaInfo = buildCompositeMetaInfo(
-                        buildCompositeMetaInfo {},
-                        buildUmlMetaInfo {}
+                        buildUmlMetaInfo { umlLabel = "Nested states sm" },
+                        object : MetaInfo {} // just a stub
                     )
                     initialState("State1")
                 }
+                machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
             }
-        }
 
-        "Negative MetaInfo cannot be repeated more than once" {
-            shouldThrowWithMessage<IllegalStateException>("MetaInfo ${buildUmlMetaInfo {}::class} is repeated more than once") {
-                createTestStateMachine(coroutineStarterType) {
-                    transition<SwitchEvent> {
-                        metaInfo = buildCompositeMetaInfo(
-                            buildUmlMetaInfo { umlLabel = "text1" },
-                            buildUmlMetaInfo { umlLabel = "text2" }
-                        )
+            "CompositeMetaInfo export test" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Meta info") {
+                    // label for state machine
+                    metaInfo = buildCompositeMetaInfo {
+                        metaInfoSet = setOf(buildUmlMetaInfo { umlLabel = "Nested states sm" })
                     }
                     initialState("State1")
+                }
+                machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
+            }
+
+            "negative CompositeMetaInfo nesting" {
+                shouldThrowWithMessage<IllegalStateException>("CompositeMetaInfo cannot nest each other") {
+                    createTestStateMachine(coroutineStarterType) {
+                        metaInfo = buildCompositeMetaInfo(
+                            buildCompositeMetaInfo {},
+                            buildUmlMetaInfo {}
+                        )
+                        initialState("State1")
+                    }
+                }
+            }
+
+            "negative MetaInfo cannot be repeated more than once" {
+                shouldThrowWithMessage<IllegalStateException>("MetaInfo ${buildUmlMetaInfo {}::class} is repeated more than once") {
+                    createTestStateMachine(coroutineStarterType) {
+                        transition<SwitchEvent> {
+                            metaInfo = buildCompositeMetaInfo(
+                                buildUmlMetaInfo { umlLabel = "text1" },
+                                buildUmlMetaInfo { umlLabel = "text2" }
+                            )
+                        }
+                        initialState("State1")
+                    }
                 }
             }
         }

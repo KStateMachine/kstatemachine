@@ -8,7 +8,9 @@
 package ru.nsk.kstatemachine.event
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.called
 import io.mockk.verify
 import io.mockk.verifySequence
@@ -29,85 +31,88 @@ private object EventMatcherTestData {
 
 class EventMatcherTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "isEqual()" {
-            val callbacks = mockkCallbacks()
+        "$coroutineStarterType" - {
+            "isEqual()" {
+                val callbacks = mockkCallbacks()
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    transition<HierarchyEventL1> {
-                        eventMatcher = isEqual()
-                        callbacks.listen(this)
-                    }
-                    transition<HierarchyEventL2> {
-                        eventMatcher = isEqual()
-                        callbacks.listen(this)
-                    }
-                }
-            }
-
-            val event = HierarchyEventL2()
-
-            machine.processEventBlocking(event)
-
-            verifySequence { callbacks.onTransitionTriggered(event) }
-        }
-
-        "isEqual() negative" {
-            val callbacks = mockkCallbacks()
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    transition<HierarchyEventL1> {
-                        eventMatcher = isEqual()
-                        callbacks.listen(this)
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1") {
+                        transition<HierarchyEventL1> {
+                            eventMatcher = isEqual()
+                            callbacks.listen(this)
+                        }
+                        transition<HierarchyEventL2> {
+                            eventMatcher = isEqual()
+                            callbacks.listen(this)
+                        }
                     }
                 }
+
+                val event = HierarchyEventL2()
+
+                machine.processEventBlocking(event)
+
+                verifySequence { callbacks.onTransitionTriggered(event) }
             }
 
-            val event = HierarchyEventL2()
+            "isEqual() negative" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(event)
-
-            verify { callbacks wasNot called }
-        }
-
-        "isInstanceOf()" {
-            val callbacks = mockkCallbacks()
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    transition<HierarchyEventL1> {
-                        eventMatcher = isInstanceOf()
-                        callbacks.listen(this)
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1") {
+                        transition<HierarchyEventL1> {
+                            eventMatcher = isEqual()
+                            callbacks.listen(this)
+                        }
                     }
                 }
+
+                val event = HierarchyEventL2()
+
+                machine.processEventBlocking(event)
+
+                verify { callbacks wasNot called }
             }
 
-            val event = HierarchyEventL2()
+            "isInstanceOf()" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(event)
-
-            verifySequence { callbacks.onTransitionTriggered(event) }
-        }
-
-        "isInstanceOf() negative" {
-            val callbacks = mockkCallbacks()
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("state1") {
-                    transition<HierarchyEventL1> {
-                        eventMatcher = isInstanceOf()
-                        callbacks.listen(this)
-                    }
-                    transition<HierarchyEventL2> {
-                        eventMatcher = isInstanceOf()
-                        callbacks.listen(this)
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1") {
+                        transition<HierarchyEventL1> {
+                            eventMatcher = isInstanceOf()
+                            callbacks.listen(this)
+                        }
                     }
                 }
+
+                val event = HierarchyEventL2()
+
+                machine.processEventBlocking(event)
+
+                verifySequence { callbacks.onTransitionTriggered(event) }
             }
 
-            shouldThrow<IllegalStateException> {
-                machine.processEventBlocking(HierarchyEventL2())
+            "isInstanceOf() negative" {
+                val callbacks = mockkCallbacks()
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1") {
+                        transition<HierarchyEventL1> {
+                            eventMatcher = isInstanceOf()
+                            callbacks.listen(this)
+                        }
+                        transition<HierarchyEventL2> {
+                            eventMatcher = isInstanceOf()
+                            callbacks.listen(this)
+                        }
+                    }
+                }
+
+                val exception = shouldThrow<IllegalStateException> {
+                    machine.processEventBlocking(HierarchyEventL2())
+                }
+                exception.message shouldStartWith "Multiple transitions match"
             }
         }
     }

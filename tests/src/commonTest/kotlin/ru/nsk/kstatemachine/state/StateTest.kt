@@ -27,75 +27,76 @@ private object StateTestData {
 
 class StateTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "state subclass" {
-            val machine = createTestStateMachine(coroutineStarterType) {
-                // simple but little explicit, easy to forget addState() call
-                val subclassState = addState(SubclassState()) {
-                    onEntry { println("Enter state with data: ${this@addState.dataField}") }
-                }
+        "$coroutineStarterType" - {
+            "state subclass" {
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    // simple but little explicit, easy to forget addState() call
+                    val subclassState = addState(SubclassState()) {
+                        onEntry { println("Enter state with data: ${this@addState.dataField}") }
+                    }
 
-                val simpleState = initialState {
-                    transition<SwitchEvent> { targetState = subclassState }
-                }
+                    val simpleState = initialState {
+                        transition<SwitchEvent> { targetState = subclassState }
+                    }
 
-                subclassState {
-                    transition<SwitchEvent> {
-                        targetState = simpleState
-                        onTriggered { println("Data ${this@subclassState.dataField}") }
+                    subclassState {
+                        transition<SwitchEvent> {
+                            targetState = simpleState
+                            onTriggered { println("Data ${this@subclassState.dataField}") }
+                        }
                     }
                 }
+
+                machine.processEventBlocking(SwitchEvent)
+                machine.processEventBlocking(SwitchEvent)
             }
 
-            machine.processEventBlocking(SwitchEvent)
-            machine.processEventBlocking(SwitchEvent)
-        }
-
-        "final state transition with explicit state" {
-            val machine = createTestStateMachine(coroutineStarterType) {
-                val final = addFinalState(DefaultFinalState("final")) {
-                    transition<SwitchEvent>() // does nothing in this case
+            "final state transition with explicit state" {
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    val final = addFinalState(DefaultFinalState("final")) {
+                        transition<SwitchEvent>() // does nothing in this case
+                    }
+                    setInitialState(final)
                 }
-                setInitialState(final)
+                machine.isFinished shouldBe true
             }
-            machine.isFinished shouldBe true
-        }
 
-        "explicit final state marker usage" {
-            class MyState : DefaultState(), FinalState
+            "explicit final state marker usage" {
+                class MyState : DefaultState(), FinalState
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                val final = addFinalState(MyState())
-                setInitialState(final)
-            }
-            machine.isFinished shouldBe true
-        }
-
-        "metaInfo cannot be changed on running machine" {
-            lateinit var state: State
-            createTestStateMachine(coroutineStarterType) {
-                state = initialState {
-                    metaInfo = buildUmlMetaInfo { umlLabel = "label" }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    val final = addFinalState(MyState())
+                    setInitialState(final)
                 }
+                machine.isFinished shouldBe true
             }
-            shouldThrowUnitWithMessage<IllegalStateException>("Can not change metaInfo after state machine started") {
-                state.metaInfo = buildUmlMetaInfo { umlLabel = "fail label" }
-            }
-        }
 
-        "set state payload" {
-            lateinit var state: State
-            val machine = createTestStateMachine(coroutineStarterType) {
-                state = initialState {
-                    payload = "arbitrary data"
+            "metaInfo cannot be changed on running machine" {
+                lateinit var state: State
+                createTestStateMachine(coroutineStarterType) {
+                    state = initialState {
+                        metaInfo = buildUmlMetaInfo { umlLabel = "label" }
+                    }
+                }
+                shouldThrowUnitWithMessage<IllegalStateException>("Can not change metaInfo after state machine started") {
+                    state.metaInfo = buildUmlMetaInfo { umlLabel = "fail label" }
                 }
             }
-            state.payload shouldBe "arbitrary data"
-            machine.destroy()
-            state.payload shouldBe null
-        }
 
-        /** This code should not compile */
-        "dsl marker" {
+            "set state payload" {
+                lateinit var state: State
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    state = initialState {
+                        payload = "arbitrary data"
+                    }
+                }
+                state.payload shouldBe "arbitrary data"
+                machine.destroy()
+                state.payload shouldBe null
+            }
+
+            /** This code should not compile */
+            "dsl marker" {
 //            createTestStateMachine(coroutineStarterType) {
 //                val subclassState = addState(SubclassState())
 //                onStarted {}
@@ -122,6 +123,7 @@ class StateTest : FreeSpec({
 //                onTransitionTriggered {}
 //                setInitialState(subclassState)
 //            }
+            }
         }
     }
 })

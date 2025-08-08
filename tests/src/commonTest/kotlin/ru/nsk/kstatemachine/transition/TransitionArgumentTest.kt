@@ -19,42 +19,44 @@ private const val ARGUMENT = 1
 
 class TransitionArgumentTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "transition argument" {
-            val callbacks = mockkCallbacks()
+        "$coroutineStarterType" - {
+            "transition argument" {
+                val callbacks = mockkCallbacks()
 
-            val second = object : DefaultState("second") {}
+                val second = object : DefaultState("second") {}
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                addState(second) {
-                    callbacks.listen(this)
-                    onEntry { it.transition.argument shouldBe ARGUMENT }
-                }
-                initialState("first") {
-                    transition<SwitchEvent> {
-                        targetState = second
-                        onTriggered { it.transition.argument = ARGUMENT }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    addState(second) {
+                        callbacks.listen(this)
+                        onEntry { it.transition.argument shouldBe ARGUMENT }
+                    }
+                    initialState("first") {
+                        transition<SwitchEvent> {
+                            targetState = second
+                            onTriggered { it.transition.argument = ARGUMENT }
+                        }
                     }
                 }
+
+                machine.processEventBlocking(SwitchEvent)
+                verifySequence { callbacks.onStateEntry(second) }
             }
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onStateEntry(second) }
-        }
+            "transition argument on start" {
+                val callbacks = mockkCallbacks()
+                lateinit var state1: State
 
-        "transition argument on start" {
-            val callbacks = mockkCallbacks()
-            lateinit var state1: State
-
-            val machine = createTestStateMachine(coroutineStarterType, start = false) {
-                state1 = initialState("first") {
-                    callbacks.listen(this)
-                    onEntry { it.argument shouldBe ARGUMENT }
+                val machine = createTestStateMachine(coroutineStarterType, start = false) {
+                    state1 = initialState("first") {
+                        callbacks.listen(this)
+                        onEntry { it.argument shouldBe ARGUMENT }
+                    }
                 }
-            }
-            machine.startBlocking(ARGUMENT)
+                machine.startBlocking(ARGUMENT)
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequence { callbacks.onStateEntry(state1) }
+                machine.processEventBlocking(SwitchEvent)
+                verifySequence { callbacks.onStateEntry(state1) }
+            }
         }
     }
 })

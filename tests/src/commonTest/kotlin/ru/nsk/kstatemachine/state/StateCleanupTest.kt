@@ -22,26 +22,28 @@ private object StateCleanupTestData {
 
 class StateCleanupTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "cleanup is not called" {
-            val state = spyk<State1>()
-            useInMachine(coroutineStarterType, state)
-            coVerify(inverse = true) { state.onCleanup() }
-        }
+        "$coroutineStarterType" - {
+            "cleanup is not called" {
+                val state = spyk<State1>()
+                useInMachine(coroutineStarterType, state)
+                coVerify(inverse = true) { state.onCleanup() }
+            }
 
-        "cleanup is called on machine manual destruction" {
-            val state = spyk<State1>()
-            useInMachine(coroutineStarterType, state).destroyBlocking()
-            coVerify(exactly = 1) { state.onCleanup() }
-        }
+            "cleanup is called on machine manual destruction" {
+                val state = spyk<State1>()
+                useInMachine(coroutineStarterType, state).destroyBlocking()
+                coVerify(exactly = 1) { state.onCleanup() }
+            }
 
-        "cleanup is called on machine auto destruction" {
-            val state = spyk<State1>()
-            val machine1 = useInMachine(coroutineStarterType, state)
-            val machine2 = useInMachine(coroutineStarterType, state)
+            "cleanup is called on machine auto destruction" {
+                val state = spyk<State1>()
+                val machine1 = useInMachine(coroutineStarterType, state)
+                val machine2 = useInMachine(coroutineStarterType, state)
 
-            coVerify(exactly = 1) { state.onCleanup() }
-            machine1.isDestroyed shouldBe true
-            machine2.isDestroyed shouldBe false
+                coVerify(exactly = 1) { state.onCleanup() }
+                machine1.isDestroyed shouldBe true
+                machine2.isDestroyed shouldBe false
+            }
         }
     }
 })

@@ -16,115 +16,79 @@ import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
 
 class ExternalTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "external transition on machine level" {
-            val callbacks = mockkCallbacks()
-            lateinit var state1: State
-            lateinit var state2: State
+        "$coroutineStarterType" - {
+            "external transition on machine level" {
+                val callbacks = mockkCallbacks()
+                lateinit var state1: State
+                lateinit var state2: State
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                callbacks.listen(this)
-                state1 = initialState("state1") {
+                val machine = createTestStateMachine(coroutineStarterType) {
                     callbacks.listen(this)
-                    transitionOn<SwitchEvent> {
-                        targetState = { state2 }
-                        type = EXTERNAL
-                    }
-                }
-                state2 = state("state2") {
-                    callbacks.listen(this)
-                }
-            }
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateEntry(machine)
-                callbacks.onStateEntry(state1)
-            }
-
-            machine.processEventBlocking(SwitchEvent)
-
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateExit(state1)
-                callbacks.onStateEntry(state2)
-            }
-        }
-
-        "external transition" {
-            val callbacks = mockkCallbacks()
-            lateinit var state1: State
-            lateinit var state11: State
-            lateinit var state12: State
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                callbacks.listen(this)
-
-                state1 = initialState("state1") {
-                    callbacks.listen(this)
-
-                    state11 = initialState("state11") {
+                    state1 = initialState("state1") {
                         callbacks.listen(this)
                         transitionOn<SwitchEvent> {
-                            targetState = { state12 }
+                            targetState = { state2 }
                             type = EXTERNAL
                         }
                     }
-                    state12 = state("state12") {
+                    state2 = state("state2") {
                         callbacks.listen(this)
                     }
                 }
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onStateEntry(machine)
+                    callbacks.onStateEntry(state1)
+                }
+
+                machine.processEventBlocking(SwitchEvent)
+
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onStateExit(state1)
+                    callbacks.onStateEntry(state2)
+                }
             }
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateEntry(machine)
-                callbacks.onStateEntry(state1)
-                callbacks.onStateEntry(state11)
-            }
 
-            machine.processEventBlocking(SwitchEvent)
+            "external transition" {
+                val callbacks = mockkCallbacks()
+                lateinit var state1: State
+                lateinit var state11: State
+                lateinit var state12: State
 
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateExit(state11)
-                callbacks.onStateExit(state1)
-                callbacks.onStateEntry(state1)
-                callbacks.onStateEntry(state12)
-            }
-        }
-
-        "external transition self targeted" {
-            val callbacks = mockkCallbacks()
-            lateinit var state1: State
-            lateinit var state11: State
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                callbacks.listen(this)
-
-                state1 = initialState("state1") {
+                val machine = createTestStateMachine(coroutineStarterType) {
                     callbacks.listen(this)
 
-                    state11 = initialState("state11") {
+                    state1 = initialState("state1") {
                         callbacks.listen(this)
-                        transitionOn<SwitchEvent> {
-                            targetState = { state11 }
-                            type = EXTERNAL
+
+                        state11 = initialState("state11") {
+                            callbacks.listen(this)
+                            transitionOn<SwitchEvent> {
+                                targetState = { state12 }
+                                type = EXTERNAL
+                            }
+                        }
+                        state12 = state("state12") {
+                            callbacks.listen(this)
                         }
                     }
-                    state("state12") {
-                        callbacks.listen(this)
-                    }
+                }
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onStateEntry(machine)
+                    callbacks.onStateEntry(state1)
+                    callbacks.onStateEntry(state11)
+                }
+
+                machine.processEventBlocking(SwitchEvent)
+
+                verifySequenceAndClear(callbacks) {
+                    callbacks.onStateExit(state11)
+                    callbacks.onStateExit(state1)
+                    callbacks.onStateEntry(state1)
+                    callbacks.onStateEntry(state12)
                 }
             }
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateEntry(machine)
-                callbacks.onStateEntry(state1)
-                callbacks.onStateEntry(state11)
-            }
 
-            machine.processEventBlocking(SwitchEvent)
-            verifySequenceAndClear(callbacks) {
-                callbacks.onStateExit(state11)
-                callbacks.onStateEntry(state11)
-            }
-        }
-
-        listOf(EXTERNAL, LOCAL).forEach { transitionType ->
-            "external target-less transition same as local" {
+            "external transition self targeted" {
                 val callbacks = mockkCallbacks()
                 lateinit var state1: State
                 lateinit var state11: State
@@ -137,9 +101,9 @@ class ExternalTransitionTest : FreeSpec({
 
                         state11 = initialState("state11") {
                             callbacks.listen(this)
-                            transition<SwitchEvent> {
-                                type = transitionType
-                                callbacks.listen(this)
+                            transitionOn<SwitchEvent> {
+                                targetState = { state11 }
+                                type = EXTERNAL
                             }
                         }
                         state("state12") {
@@ -155,7 +119,45 @@ class ExternalTransitionTest : FreeSpec({
 
                 machine.processEventBlocking(SwitchEvent)
                 verifySequenceAndClear(callbacks) {
-                    callbacks.onTransitionTriggered(SwitchEvent)
+                    callbacks.onStateExit(state11)
+                    callbacks.onStateEntry(state11)
+                }
+            }
+
+            listOf(EXTERNAL, LOCAL).forEach { transitionType ->
+                "external target-less transition same as local" {
+                    val callbacks = mockkCallbacks()
+                    lateinit var state1: State
+                    lateinit var state11: State
+
+                    val machine = createTestStateMachine(coroutineStarterType) {
+                        callbacks.listen(this)
+
+                        state1 = initialState("state1") {
+                            callbacks.listen(this)
+
+                            state11 = initialState("state11") {
+                                callbacks.listen(this)
+                                transition<SwitchEvent> {
+                                    type = transitionType
+                                    callbacks.listen(this)
+                                }
+                            }
+                            state("state12") {
+                                callbacks.listen(this)
+                            }
+                        }
+                    }
+                    verifySequenceAndClear(callbacks) {
+                        callbacks.onStateEntry(machine)
+                        callbacks.onStateEntry(state1)
+                        callbacks.onStateEntry(state11)
+                    }
+
+                    machine.processEventBlocking(SwitchEvent)
+                    verifySequenceAndClear(callbacks) {
+                        callbacks.onTransitionTriggered(SwitchEvent)
+                    }
                 }
             }
         }

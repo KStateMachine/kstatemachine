@@ -22,80 +22,82 @@ import ru.nsk.kstatemachine.transition.noTransition
 
 class IgnoredEventHandlerTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        "throwing ignored event handler" {
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("first")
+        "$coroutineStarterType" - {
+            "throwing ignored event handler" {
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("first")
 
-                ignoredEventHandler = throwingIgnoredEventHandler()
-            }
+                    ignoredEventHandler = throwingIgnoredEventHandler()
+                }
 
-            shouldThrow<IllegalStateException> {
-                machine.processEvent(SwitchEvent)
-            }
-        }
-
-        "ignored event handler" {
-            val callbacks = mockkCallbacks()
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("first")
-
-                ignoredEventHandler = StateMachine.IgnoredEventHandler {
-                    callbacks.onIgnoredEvent(SwitchEvent)
+                shouldThrow<IllegalStateException> {
+                    machine.processEvent(SwitchEvent)
                 }
             }
 
-            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
-            verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
-        }
+            "ignored event handler" {
+                val callbacks = mockkCallbacks()
 
-        "exceptional ignored event handler" {
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState("first")
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("first")
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler {
-                    testError("unexpected ${it.event}")
+                    ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                        callbacks.onIgnoredEvent(SwitchEvent)
+                    }
                 }
+
+                machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
+                verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
             }
 
-            shouldThrow<TestException> { machine.processEventBlocking(SwitchEvent) }
-            machine.isDestroyed shouldBe false
-        }
+            "exceptional ignored event handler" {
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("first")
 
-        "process event on finished state machine" {
-            val callbacks = mockkCallbacks()
-
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialFinalState("final")
-
-                onFinished { callbacks.onStateFinished(this) }
-
-                ignoredEventHandler = StateMachine.IgnoredEventHandler {
-                    callbacks.onIgnoredEvent(it.event)
+                    ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                        testError("unexpected ${it.event}")
+                    }
                 }
+
+                shouldThrow<TestException> { machine.processEventBlocking(SwitchEvent) }
+                machine.isDestroyed shouldBe false
             }
 
-            verifySequenceAndClear(callbacks) { callbacks.onStateFinished(machine) }
+            "process event on finished state machine" {
+                val callbacks = mockkCallbacks()
 
-            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
-            verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
-        }
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialFinalState("final")
 
-        "ignored event on conditional noTransition()" {
-            val callbacks = mockkCallbacks()
+                    onFinished { callbacks.onStateFinished(this) }
 
-            val machine = createTestStateMachine(coroutineStarterType) {
-                initialState {
-                    transitionConditionally<SwitchEvent> { direction = { noTransition() } }
+                    ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                        callbacks.onIgnoredEvent(it.event)
+                    }
                 }
 
-                ignoredEventHandler = StateMachine.IgnoredEventHandler {
-                    callbacks.onIgnoredEvent(it.event)
-                }
+                verifySequenceAndClear(callbacks) { callbacks.onStateFinished(machine) }
+
+                machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
+                verifySequence { callbacks.onIgnoredEvent(SwitchEvent) }
             }
 
-            machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
-            verify { callbacks.onIgnoredEvent(SwitchEvent) }
+            "ignored event on conditional noTransition()" {
+                val callbacks = mockkCallbacks()
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState {
+                        transitionConditionally<SwitchEvent> { direction = { noTransition() } }
+                    }
+
+                    ignoredEventHandler = StateMachine.IgnoredEventHandler {
+                        callbacks.onIgnoredEvent(it.event)
+                    }
+                }
+
+                machine.processEventBlocking(SwitchEvent) shouldBe IGNORED
+                verify { callbacks.onIgnoredEvent(SwitchEvent) }
+            }
         }
     }
 })

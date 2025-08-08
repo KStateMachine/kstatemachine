@@ -319,159 +319,163 @@ private suspend fun makeChoiceMachine(coroutineStarterType: CoroutineStarterType
 
 class ExportPlantUmlVisitorTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
-        table(
-            headers("showEventLabels", "result"),
-            row(false, PLANTUML_NESTED_STATES_RESULT),
-            row(true, PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT),
-        ).forAll { showEventLabels, result ->
-            "plantUml export nested states" {
-                val machine = makeNestedMachine(coroutineStarterType)
-                machine.exportToPlantUml(showEventLabels) shouldBe result
+        "$coroutineStarterType" - {
+            table(
+                headers("showEventLabels", "result"),
+                row(false, PLANTUML_NESTED_STATES_RESULT),
+                row(true, PLANTUML_NESTED_STATES_SHOW_EVENT_LABELS_RESULT),
+            ).forAll { showEventLabels, result ->
+                "plantUml export nested states" {
+                    val machine = makeNestedMachine(coroutineStarterType)
+                    machine.exportToPlantUml(showEventLabels) shouldBe result
+                }
             }
-        }
 
-        "Mermaid export nested states" {
-            val machine = makeNestedMachine(coroutineStarterType)
-            machine.exportToMermaid() shouldBe MERMAID_NESTED_STATES_RESULT
-        }
+            "Mermaid export nested states" {
+                val machine = makeNestedMachine(coroutineStarterType)
+                machine.exportToMermaid() shouldBe MERMAID_NESTED_STATES_RESULT
+            }
 
-        "plantUml export parallel states" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
-                initialState("parallel states", ChildMode.PARALLEL) {
-                    state("State1") {
-                        metaInfo = buildUmlMetaInfo { umlLabel = "State 1" }
-                        val state11 = initialState("State-11")
-                        val state12 = state("State12")
+            "plantUml export parallel states" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
+                    initialState("parallel states", ChildMode.PARALLEL) {
+                        state("State1") {
+                            metaInfo = buildUmlMetaInfo { umlLabel = "State 1" }
+                            val state11 = initialState("State-11")
+                            val state12 = state("State12")
 
-                        state11 {
-                            transition<SwitchEvent> {
-                                metaInfo = buildUmlMetaInfo { umlLabel = "to State 12" }
-                                targetState = state12
+                            state11 {
+                                transition<SwitchEvent> {
+                                    metaInfo = buildUmlMetaInfo { umlLabel = "to State 12" }
+                                    targetState = state12
+                                }
+                            }
+                            state12 {
+                                transition<SwitchEvent> { targetState = state11 }
                             }
                         }
-                        state12 {
-                            transition<SwitchEvent> { targetState = state11 }
-                        }
-                    }
-                    state("State2") {
-                        val state21 = initialState("State21")
-                        val state22 = state("State22")
+                        state("State2") {
+                            val state21 = initialState("State21")
+                            val state22 = state("State22")
 
-                        state21 {
-                            transition<SwitchEvent> { targetState = state22 }
-                        }
-                        state22 {
-                            transition<SwitchEvent> { targetState = state21 }
+                            state21 {
+                                transition<SwitchEvent> { targetState = state22 }
+                            }
+                            state22 {
+                                transition<SwitchEvent> { targetState = state21 }
+                            }
                         }
                     }
                 }
+
+                machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
             }
 
-            machine.exportToPlantUml() shouldBe PLANTUML_PARALLEL_STATES_RESULT
-        }
-
-        "plantUml export machine with parallel mode" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {
-                state("State2") {
-                    val state22 = state("State22")
-                    initialState("State21") {
-                        transition<SwitchEvent>(targetState = state22)
+            "plantUml export machine with parallel mode" {
+                val machine =
+                    createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {
+                        state("State2") {
+                            val state22 = state("State22")
+                            initialState("State21") {
+                                transition<SwitchEvent>(targetState = state22)
+                            }
+                        }
+                        state("State1")
                     }
+
+                machine.exportToPlantUml() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT
+            }
+
+            "plantUml export empty machine with parallel mode" {
+                val machine =
+                    createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {}
+                machine.exportToPlantUml() shouldBe PLANTUML_EMPTY_MACHINE_PARALLEL_MODE_RESULT
+            }
+
+            "plantUml export with pseudo states" {
+                val machine = makeChoiceMachine(coroutineStarterType)
+                machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
+            }
+
+            "plantUml unsafe export with pseudo states" {
+                val machine = makeChoiceMachine(coroutineStarterType)
+                machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_UNSAFE_PSEUDO_STATES_RESULT
+            }
+
+            "plantUml export composed machines" {
+                val inner = createTestStateMachine(coroutineStarterType, name = "inner machine") {
+                    initialState("inner state1")
+                    state("inner state2")
+                    transition<SecondEvent>() // should be ignored
                 }
-                state("State1")
+                val outer = createTestStateMachine(coroutineStarterType, name = "outer machine") {
+                    initialState("outer state1")
+                    addState(inner)
+                    transition<FirstEvent>()
+                }
+
+                outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
             }
 
-            machine.exportToPlantUml() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT
-        }
+            "plantUml export multiple target states" {
+                lateinit var state212: State
+                lateinit var state222: State
 
-        "plantUml export empty machine with parallel mode" {
-            val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states", ChildMode.PARALLEL) {}
-            machine.exportToPlantUml() shouldBe PLANTUML_EMPTY_MACHINE_PARALLEL_MODE_RESULT
-        }
-
-        "plantUml export with pseudo states" {
-            val machine = makeChoiceMachine(coroutineStarterType)
-            machine.exportToPlantUml() shouldBe PLANTUML_PSEUDO_STATES_RESULT
-        }
-
-        "plantUml unsafe export with pseudo states" {
-            val machine = makeChoiceMachine(coroutineStarterType)
-            machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_UNSAFE_PSEUDO_STATES_RESULT
-        }
-
-        "plantUml export composed machines" {
-            val inner = createTestStateMachine(coroutineStarterType, name = "inner machine") {
-                initialState("inner state1")
-                state("inner state2")
-                transition<SecondEvent>() // should be ignored
-            }
-            val outer = createTestStateMachine(coroutineStarterType, name = "outer machine") {
-                initialState("outer state1")
-                addState(inner)
-                transition<FirstEvent>()
-            }
-
-            outer.exportToPlantUml() shouldBe PLANTUML_COMPOSED_MACHINES_RESULT
-        }
-
-        "plantUml export multiple target states" {
-            lateinit var state212: State
-            lateinit var state222: State
-
-            val machine = createTestStateMachine(coroutineStarterType, "state machine") {
-                initialState("state1") {
-                    transitionConditionally<SwitchEvent> {
-                        direction = {
-                            event.shouldNotBeInstanceOf<SwitchEvent>() // ExportPlantUmlEvent is provided as a fake
-                            targetParallelStates(state212, state222)
+                val machine = createTestStateMachine(coroutineStarterType, "state machine") {
+                    initialState("state1") {
+                        transitionConditionally<SwitchEvent> {
+                            direction = {
+                                event.shouldNotBeInstanceOf<SwitchEvent>() // ExportPlantUmlEvent is provided as a fake
+                                targetParallelStates(state212, state222)
+                            }
+                        }
+                    }
+                    state("state2", childMode = ChildMode.PARALLEL) {
+                        state("state21") {
+                            initialState("state211")
+                            state212 = state("state212")
+                        }
+                        state("state22") {
+                            initialState("state221")
+                            state222 = state("state222")
                         }
                     }
                 }
-                state("state2", childMode = ChildMode.PARALLEL) {
-                    state("state21") {
-                        initialState("state211")
-                        state212 = state("state212")
-                    }
-                    state("state22") {
-                        initialState("state221")
-                        state222 = state("state222")
-                    }
-                }
+
+                machine.exportToPlantUml(
+                    showEventLabels = true,
+                    unsafeCallConditionalLambdas = true
+                ) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_RESULT
             }
 
-            machine.exportToPlantUml(
-                showEventLabels = true,
-                unsafeCallConditionalLambdas = true
-            ) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_RESULT
-        }
+            "plantUml export multiple target states, disable by metadata" {
+                lateinit var state212: State
+                lateinit var state222: State
 
-        "plantUml export multiple target states, disable by metadata" {
-            lateinit var state212: State
-            lateinit var state222: State
-
-            val machine = createTestStateMachine(coroutineStarterType, "state machine") {
-                initialState("state1") {
-                    transitionConditionally<SwitchEvent> {
-                        metaInfo = IgnoreUnsafeCallConditionalLambdasMetaInfo
-                        direction = {
-                            event.shouldNotBeInstanceOf<SwitchEvent>() // ExportPlantUmlEvent is provided as a fake
-                            targetParallelStates(state212, state222)
+                val machine = createTestStateMachine(coroutineStarterType, "state machine") {
+                    initialState("state1") {
+                        transitionConditionally<SwitchEvent> {
+                            metaInfo = IgnoreUnsafeCallConditionalLambdasMetaInfo
+                            direction = {
+                                event.shouldNotBeInstanceOf<SwitchEvent>() // ExportPlantUmlEvent is provided as a fake
+                                targetParallelStates(state212, state222)
+                            }
+                        }
+                    }
+                    state("state2", childMode = ChildMode.PARALLEL) {
+                        state("state21") {
+                            initialState("state211")
+                            state212 = state("state212")
+                        }
+                        state("state22") {
+                            initialState("state221")
+                            state222 = state("state222")
                         }
                     }
                 }
-                state("state2", childMode = ChildMode.PARALLEL) {
-                    state("state21") {
-                        initialState("state211")
-                        state212 = state("state212")
-                    }
-                    state("state22") {
-                        initialState("state221")
-                        state222 = state("state222")
-                    }
-                }
-            }
 
-            machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_IGNORED_RESULT
+                machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_IGNORED_RESULT
+            }
         }
     }
 })
