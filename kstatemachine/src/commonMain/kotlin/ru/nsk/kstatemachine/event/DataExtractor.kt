@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 interface DataExtractor<D : Any> {
     val dataClass: KClass<D>
     suspend fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent): D?
-    suspend fun extract(transitionParams: TransitionParams<*>): D?
+    suspend fun extract(transitionParams: TransitionParams<*>, isImplicitActivation: Boolean): D?
 }
 
 inline fun <reified D : Any> defaultDataExtractor() = object : DataExtractor<D> {
@@ -29,5 +29,9 @@ inline fun <reified D : Any> defaultDataExtractor() = object : DataExtractor<D> 
     override suspend fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) =
         event.data as? D
 
-    override suspend fun extract(transitionParams: TransitionParams<*>) = null
+    /**
+     * [isImplicitActivation] is true if if the state is activated by transition activating the state non-directly
+     * (targeting [DataState]'s substate)
+     */
+    override suspend fun extract(transitionParams: TransitionParams<*>, isImplicitActivation: Boolean) = null
 }

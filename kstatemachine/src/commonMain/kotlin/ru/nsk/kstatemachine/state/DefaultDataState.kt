@@ -51,10 +51,10 @@ open class DefaultDataState<D : Any>(
                 is DataEvent<*> -> assignData(event)
                 is WrappedEvent -> assignData(event.event)
                 is FinishedEvent -> assign(dataExtractor.extractFinishedEvent(transitionParams, event))
-                else -> assign(dataExtractor.extract(transitionParams))
+                else -> assign(dataExtractor.extract(transitionParams, isImplicitActivation = false))
             }
         } else { // implicit activation
-            _data = lastData
+            assign(dataExtractor.extract(transitionParams, isImplicitActivation = true))
         }
     }
 

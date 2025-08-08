@@ -7,18 +7,22 @@
 
 package ru.nsk.kstatemachine.state
 
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.DataEvent
+import ru.nsk.kstatemachine.event.DataExtractor
+import ru.nsk.kstatemachine.event.defaultDataExtractor
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.IntEvent
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State2
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.onTransitionTriggered
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.transition.TransitionParams
 
 private object ChoiceStateTestData {
     object State1 : DefaultState()
@@ -159,7 +163,6 @@ class ChoiceStateTest : StringSpec({
             }
         }
 
-
         "Try reproduce https://github.com/KStateMachine/kstatemachine/issues/101" {
             lateinit var state3: State
             val machine = createTestStateMachine(coroutineStarterType) {
@@ -173,6 +176,55 @@ class ChoiceStateTest : StringSpec({
             }
             machine.processEvent(IntEvent(42))
             machine.activeStates().shouldContainExactly(state3)
+        }
+
+        "Implicit DataState activation by initialChoiceState with custom DataExtractor" {
+            lateinit var state21: State
+            lateinit var dataState2: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType) {
+                dataState2 = dataState<Int>(
+                    "dataState2",
+                    dataExtractor = object : DataExtractor<Int> by defaultDataExtractor() {
+                        override suspend fun extract(
+                            transitionParams: TransitionParams<*>,
+                            isImplicitActivation: Boolean
+                        ): Int? {
+                            val dataEvent = transitionParams.event as? DataEvent<*>
+                            if (isImplicitActivation && dataEvent != null && dataEvent.data is Int) {
+                                return dataEvent.data as Int
+                            }
+                            return null
+                        }
+                    }) {
+                    initialChoiceState { state21 }
+                    state21 = state("internalState21")
+                }
+                initialState("state1") {
+                    dataTransition<IntEvent, Int> { targetState = dataState2 }
+                }
+            }
+            machine.processEvent(IntEvent(42))
+            machine.activeStates().shouldContainExactly(dataState2, state21)
+            dataState2.data shouldBe 42
+        }
+
+        "Negative implicit DataState activation by initialChoiceState" {
+            lateinit var state21: State
+            lateinit var dataState2: DataState<Int>
+            val machine = createTestStateMachine(coroutineStarterType) {
+                dataState2 = dataState<Int>("dataState2") {
+                    initialChoiceState { state21 }
+                    state21 = state("internalState21")
+                }
+                initialState("state1") {
+                    dataTransition<IntEvent, Int> { targetState = dataState2 }
+                }
+            }
+            shouldThrowWithMessage<IllegalStateException>(
+                "Last data is not available yet in DefaultDataState(dataState2), and default data not provided"
+            ) {
+                machine.processEvent(IntEvent(42))
+            }
         }
     }
 })

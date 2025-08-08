@@ -351,10 +351,15 @@ class TypesafeTransitionTest : StringSpec({
                     dataExtractor = object : DataExtractor<Int> {
                         override val dataClass = Int::class
 
-                        override suspend fun extractFinishedEvent(transitionParams: TransitionParams<*>, event: FinishedEvent) =
-                            event.data as? Int
+                        override suspend fun extractFinishedEvent(
+                            transitionParams: TransitionParams<*>,
+                            event: FinishedEvent
+                        ) = event.data as? Int
 
-                        override suspend fun extract(transitionParams: TransitionParams<*>): Int? {
+                        override suspend fun extract(
+                            transitionParams: TransitionParams<*>,
+                            isImplicitActivation: Boolean
+                        ): Int? {
                             return (transitionParams.event as? CustomDataEvent)?.value
                         }
                     }
