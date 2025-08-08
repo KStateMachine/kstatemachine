@@ -33,7 +33,7 @@ createStateMachine(scope) {
 }
 ```
 
-`DataState`'s `data` field is set and might be accessed only while the state is active. At the moment when `DataState`
+`DataState`'s `data` field is set and might be accessed _only_ while the state is active. At the moment when `DataState`
 is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
 after state exit, it falls back to `defaultData` if provided or throws.
 
@@ -48,13 +48,16 @@ This is related to the way how `DataState` is implemented, `data` field is chang
 1. Implicit activation. `DataState` might be activated by `Event` (not `DataEvent`) that is targeting its child state.
    In this case `data` field of `DataState` is assigned with `lastData` field value.
    If state is activating the first time `lastData` falls back to `defaultData` if provided, otherwise exception is
-   thrown.
+   thrown. Starting from library version `v0.34.0` you can additionally customize implicit `DataState` activation
+   with `DataExtractor::extract` method, which receives `isImplicitActivation` argument set to `true` in this case.
+   You can find a sample of such behaviour in [TypesafeTransitionTest](https://github.com/KStateMachine/kstatemachine/blob/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine/transition/TypesafeTransitionTest.kt)
+   While it might be useful that is not typesafe and should be used with caution.
 2. Activation by `undo()` of `UndoEvent`. This works same way as undone transition.
 3. Activation by `FinishedEvent`. `FinishedEvent` may contain non-null data field. `DataState` receives this data
    if its type matches. `DataExtractor` class is responsible for matching. Such transition might be created only by
    `transitionConditionally()` function.
 4. Activation by non data event. This should not be necessary, but it might be done manually, same way as in case 3.
-   Using custom `DataExtractor` you can pass any data from any event type to `DataState`.
+   Using custom `DataExtractor` you can pass any data from any event type to `DataState`, even by implicit activation.
 
 ### Known issues
 
