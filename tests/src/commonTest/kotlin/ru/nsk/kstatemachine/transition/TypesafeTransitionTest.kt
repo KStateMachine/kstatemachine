@@ -18,15 +18,16 @@ import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.DataExtractor
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.FinishedEvent
+import ru.nsk.kstatemachine.event.defaultDataExtractor
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
-import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.CustomDataEvent
+import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.CustomIntEvent
 import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.IdEvent
 import ru.nsk.kstatemachine.transition.TypesafeTransitionTestData.NameEvent
 
 private object TypesafeTransitionTestData {
-    class CustomDataEvent(val value: Int) : Event
+    class CustomIntEvent(val value: Int) : Event
     class NameEvent(override val data: String) : DataEvent<String>
     class IdEvent(override val data: Int) : DataEvent<Int>
 }
@@ -216,6 +217,35 @@ class TypesafeTransitionTest : FreeSpec({
                 dataState.data shouldBe 1
             }
 
+            "implicit data state activation by cross-level transition with custom DataExtractor" {
+                lateinit var dataState: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    lateinit var state21: State
+
+                    initialState {
+                        transitionOn<CustomIntEvent> { targetState = { state21 } }
+                    }
+                    dataState = dataState(
+                        dataExtractor = object : DataExtractor<Int> by defaultDataExtractor() {
+                            override suspend fun extract(transitionParams: TransitionParams<*>, isImplicitActivation: Boolean): Int? {
+                                if (isImplicitActivation) {
+                                    val event = transitionParams.event as? CustomIntEvent
+                                    return event?.value
+                                }
+                                return null
+                            }
+                        }
+                    ) {
+                        onEntry { println(data) }
+
+                        state21 = initialState()
+                    }
+                }
+
+                machine.processEventBlocking(CustomIntEvent(42))
+                dataState.data shouldBe 42
+            }
+
             "transition with event super type" {
                 lateinit var state2: DataState<Number>
 
@@ -361,7 +391,7 @@ class TypesafeTransitionTest : FreeSpec({
                 lateinit var dataState: DataState<Int>
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState {
-                        transitionConditionally<CustomDataEvent> {
+                        transitionConditionally<CustomIntEvent> {
                             direction = { targetState(dataState) }
                         }
                     }
@@ -379,12 +409,12 @@ class TypesafeTransitionTest : FreeSpec({
                                 transitionParams: TransitionParams<*>,
                                 isImplicitActivation: Boolean
                             ): Int? {
-                                return (transitionParams.event as? CustomDataEvent)?.value
+                                return (transitionParams.event as? CustomIntEvent)?.value
                             }
                         }
                     )
                 }
-                machine.processEventBlocking(CustomDataEvent(42))
+                machine.processEventBlocking(CustomIntEvent(42))
                 dataState.data shouldBe 42
                 dataState.lastData shouldBe 42
             }
