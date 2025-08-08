@@ -196,7 +196,7 @@ class CoroutinesTest : FreeSpec({
     }
 
     "machine notification flow with replay" {
-        lateinit var state1: State
+        val state1: State
         lateinit var state2: State
         val machine = createStateMachine(this, start = false) {
             state1 = initialState("state1") {
@@ -242,7 +242,7 @@ class CoroutinesTest : FreeSpec({
     }
 
     "machine notification flow" {
-        lateinit var state1: State
+        val state1: State
         lateinit var state2: State
         val machine = createStateMachine(this, start = false) {
             state1 = initialState("state1") {
@@ -293,7 +293,7 @@ class CoroutinesTest : FreeSpec({
     }
 
     "activeStatesFlow()" {
-        lateinit var state1: State
+        val state1: State
         lateinit var state2: State
         val machine = createStateMachine(this) {
             state1 = initialState("state1") {

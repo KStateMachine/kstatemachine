@@ -29,7 +29,7 @@ private object TypesafeTransitionSample {
  * Only [DataEvent] holding special data can lead to [DataState] expecting the same data.
  */
 fun main() = runBlocking {
-    lateinit var accountFormState: DataState<LoginData>
+    val accountFormState: DataState<LoginData>
 
     val machine = createStateMachine(this, "Data states") {
         logger = StateMachine.Logger { println(it()) }

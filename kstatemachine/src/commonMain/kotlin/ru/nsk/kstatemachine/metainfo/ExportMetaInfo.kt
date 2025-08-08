@@ -11,6 +11,9 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.transition.EventAndArgument
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Hint to be used with [ExportMetaInfo]
@@ -123,5 +126,10 @@ private data class ExportMetaInfoBuilderImpl(
     }
 }
 
-fun buildExportMetaInfo(builder: ExportMetaInfoBuilder.() -> Unit): ExportMetaInfo =
-    ExportMetaInfoBuilderImpl().apply(builder).copy()
+@OptIn(ExperimentalContracts::class)
+fun buildExportMetaInfo(builder: ExportMetaInfoBuilder.() -> Unit): ExportMetaInfo {
+    contract {
+        callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+    }
+    return ExportMetaInfoBuilderImpl().apply(builder).copy()
+}

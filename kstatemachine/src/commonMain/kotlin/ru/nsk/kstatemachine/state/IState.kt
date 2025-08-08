@@ -5,17 +5,13 @@
  * All rights reserved.
  */
 
+@file:OptIn(ExperimentalContracts::class)
+
 package ru.nsk.kstatemachine.state
 
-import ru.nsk.kstatemachine.event.DataExtractor
-import ru.nsk.kstatemachine.event.defaultDataExtractor
 import ru.nsk.kstatemachine.metainfo.MetaInfo
-import ru.nsk.kstatemachine.state.pseudo.DefaultChoiceDataState
-import ru.nsk.kstatemachine.state.pseudo.DefaultChoiceState
-import ru.nsk.kstatemachine.state.pseudo.DefaultHistoryState
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.StateMachineDslMarker
-import ru.nsk.kstatemachine.transition.EventAndArgument
 import ru.nsk.kstatemachine.transition.TransitionDirection
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy
 import ru.nsk.kstatemachine.transition.TransitionParams
@@ -23,6 +19,9 @@ import ru.nsk.kstatemachine.visitors.CoVisitor
 import ru.nsk.kstatemachine.visitors.GetActiveStatesVisitor
 import ru.nsk.kstatemachine.visitors.Visitor
 import ru.nsk.kstatemachine.visitors.VisitorAcceptor
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.reflect.KClass
 
 /**
@@ -41,6 +40,7 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     val isFinished: Boolean
     val listeners: Collection<Listener>
     val childMode: ChildMode
+
     /**
      * Might be changed only during machine setup.
      */
@@ -91,9 +91,12 @@ interface IState : TransitionStateApi, VisitorAcceptor {
     }
 }
 
-suspend fun <S : IState> IState.addState(state: S, init: StateBlock<S>? = null): S {
+suspend inline fun <S : IState> IState.addState(state: S, init: StateBlock<S>): S {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
     addState(state)
-    if (init != null) state.init()
+    state.init()
     return state
 }
 
@@ -238,104 +241,4 @@ inline fun <reified S : IState> IState.requireState(recursive: Boolean = true) =
 
 suspend operator fun <S : IState> S.invoke(block: StateBlock<S>) = block()
 
-fun IState.machineOrNull(): StateMachine? = if (this is StateMachine) this else parent?.machineOrNull()
-
-/**
- * @param name is optional and is useful for getting state instance after state machine setup
- * with [IState.findState] and for debugging.
- */
-suspend fun IState.state(
-    name: String? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    init: StateBlock<State>? = null
-) = addState(DefaultState(name, childMode), init)
-
-suspend inline fun <reified D : Any> IState.dataState(
-    name: String? = null,
-    defaultData: D? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    noinline init: StateBlock<DataState<D>>? = null
-) = addState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
-
-/**
- * A shortcut for [state] and [IState.setInitialState] calls
- */
-suspend fun IState.initialState(
-    name: String? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    init: StateBlock<State>? = null
-) = addInitialState(DefaultState(name, childMode), init)
-
-/**
- * @param defaultData is necessary for initial [DataState]
- */
-suspend inline fun <reified D : Any> IState.initialDataState(
-    name: String? = null,
-    defaultData: D,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    noinline init: StateBlock<DataState<D>>? = null
-) = addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
-
-/**
- * A shortcut for [IState.addState] and [IState.setInitialState] calls
- */
-suspend fun <S : IState> IState.addInitialState(state: S, init: StateBlock<S>? = null): S {
-    addState(state, init)
-    setInitialState(state)
-    return state
-}
-
-/**
- * Helper dsl method for adding final states. This is exactly the same as simply call [IState.addState] but makes
- * code more self expressive.
- */
-suspend fun <S : IFinalState> IState.addFinalState(state: S, init: StateBlock<S>? = null) =
-    addState(state, init)
-
-suspend fun IState.finalState(name: String? = null, init: StateBlock<FinalState>? = null) =
-    addFinalState(DefaultFinalState(name), init)
-
-suspend fun IState.initialFinalState(name: String? = null, init: StateBlock<FinalState>? = null) =
-    addInitialState(DefaultFinalState(name), init)
-
-suspend inline fun <reified D : Any> IState.finalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    noinline init: StateBlock<FinalDataState<D>>? = null
-) = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
-
-suspend inline fun <reified D : Any> IState.initialFinalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    noinline init: StateBlock<FinalDataState<D>>? = null
-) = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor), init)
-
-fun IState.choiceState(
-    name: String? = null,
-    choiceAction: suspend EventAndArgument<*>.() -> State
-) = addState(DefaultChoiceState(name, choiceAction = choiceAction))
-
-suspend fun IState.initialChoiceState(
-    name: String? = null,
-    choiceAction: suspend EventAndArgument<*>.() -> State
-) = addInitialState(DefaultChoiceState(name, choiceAction = choiceAction))
-
-inline fun <reified D : Any> IState.choiceDataState(
-    name: String? = null,
-    noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))
-
-suspend inline fun <reified D : Any> IState.initialChoiceDataState(
-    name: String? = null,
-    noinline choiceAction: suspend EventAndArgument<*>.() -> DataState<D>
-) = addInitialState(DefaultChoiceDataState(name, D::class, choiceAction = choiceAction))
-
-fun IState.historyState(
-    name: String? = null,
-    defaultState: IState? = null,
-    historyType: HistoryType = HistoryType.SHALLOW,
-) = addState(DefaultHistoryState(name, defaultState, historyType))
+fun IState.machineOrNull(): StateMachine? = this as? StateMachine ?: parent?.machineOrNull()

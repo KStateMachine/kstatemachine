@@ -7,6 +7,10 @@
 
 package ru.nsk.kstatemachine.statemachine
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 interface CreationArguments {
     /**
      * Allows the library to automatically call destroy() on current state owning machine instance if user tries
@@ -62,8 +66,13 @@ private data class CreationArgumentsBuilderImpl(
     override var eventRecordingArguments: EventRecordingArguments? = null
 ) : CreationArgumentsBuilder
 
-fun buildCreationArguments(builder: CreationArgumentsBuilder.() -> Unit): CreationArguments =
-    CreationArgumentsBuilderImpl().apply(builder).copy()
+@OptIn(ExperimentalContracts::class)
+fun buildCreationArguments(builder: CreationArgumentsBuilder.() -> Unit): CreationArguments {
+    contract {
+        callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+    }
+    return CreationArgumentsBuilderImpl().apply(builder).copy()
+}
 
 interface EventRecordingArguments {
     /**
@@ -89,7 +98,12 @@ private data class EventRecordingArgumentsBuilderImpl(
     override var skipIgnoredEvents: Boolean = true,
 ) : EventRecordingArgumentsBuilder
 
-fun buildEventRecordingArguments(builder: EventRecordingArgumentsBuilder.() -> Unit): EventRecordingArguments =
-    EventRecordingArgumentsBuilderImpl().apply(builder).copy()
+@OptIn(ExperimentalContracts::class)
+fun buildEventRecordingArguments(builder: EventRecordingArgumentsBuilder.() -> Unit): EventRecordingArguments {
+    contract {
+        callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+    }
+    return EventRecordingArgumentsBuilderImpl().apply(builder).copy()
+}
 
 

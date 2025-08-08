@@ -26,7 +26,7 @@ private object UndoTransitionSample {
  * Undo transitions with [StateMachine.undo] method or [UndoEvent]
  */
 fun main() = runBlocking {
-    lateinit var state1: State
+    val state1: State
     lateinit var state2: State
     lateinit var state3: State
 

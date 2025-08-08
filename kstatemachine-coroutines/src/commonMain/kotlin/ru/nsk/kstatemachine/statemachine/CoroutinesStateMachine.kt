@@ -12,6 +12,9 @@ import ru.nsk.kstatemachine.coroutines.CoroutinesLibCoroutineAbstraction
 import ru.nsk.kstatemachine.coroutines.createStateMachine
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.ChildMode
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -27,6 +30,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  *
  * Note that all calls to created machine instance should be done only from that thread.
  */
+@OptIn(ExperimentalContracts::class)
 suspend fun createStateMachine(
     scope: CoroutineScope,
     name: String? = null,
@@ -34,8 +38,13 @@ suspend fun createStateMachine(
     start: Boolean = true,
     creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
-) = CoroutinesLibCoroutineAbstraction(scope)
-    .createStateMachine(name, childMode, start, creationArguments, init)
+): StateMachine {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
+    return CoroutinesLibCoroutineAbstraction(scope)
+        .createStateMachine(name, childMode, start, creationArguments, init)
+}
 
 /**
  * Processes event in async fashion (using launch() to start new coroutine).

@@ -5,6 +5,8 @@
  * All rights reserved.
  */
 
+@file:OptIn(ExperimentalContracts::class)
+
 package ru.nsk.kstatemachine.state
 
 import ru.nsk.kstatemachine.event.*
@@ -12,6 +14,9 @@ import ru.nsk.kstatemachine.event.EventMatcher.Companion.isInstanceOf
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.transition.*
 import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Helper interface for [IState] to keep transitions logic separately.
@@ -81,6 +86,9 @@ inline fun <reified E : Event> TransitionStateApi.transition(
     name: String? = null,
     block: UnitGuardedTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = UnitGuardedTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
@@ -100,6 +108,9 @@ inline fun <reified E : Event> TransitionStateApi.transitionOn(
     name: String? = null,
     block: UnitGuardedTransitionOnBuilder<E>.() -> Unit,
 ): Transition<E> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = UnitGuardedTransitionOnBuilder<E>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
@@ -115,6 +126,9 @@ inline fun <reified E : Event> TransitionStateApi.transitionConditionally(
     name: String? = null,
     block: ConditionalTransitionBuilder<E>.() -> Unit,
 ): Transition<E> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = ConditionalTransitionBuilder<E>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
@@ -154,6 +168,9 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     name: String? = null,
     block: DataGuardedTransitionBuilder<E, D>.() -> Unit,
 ): Transition<E> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = DataGuardedTransitionBuilder<E, D>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()
@@ -168,6 +185,9 @@ inline fun <reified E : DataEvent<D>, D : Any> TransitionStateApi.dataTransition
     name: String? = null,
     block: DataGuardedTransitionOnBuilder<E, D>.() -> Unit,
 ): Transition<E> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
     val builder = DataGuardedTransitionOnBuilder<E, D>(name, asState()).apply {
         eventMatcher = matcherForEvent(asState())
         block()

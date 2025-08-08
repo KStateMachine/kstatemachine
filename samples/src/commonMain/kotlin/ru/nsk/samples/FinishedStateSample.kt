@@ -22,10 +22,10 @@ private object FinishedStateSample {
  * States with child mode [ChildMode.PARALLEL] are finished when all their direct children are finished
  */
 fun main() = runBlocking {
-    lateinit var state1: IState
-    lateinit var state11: IState
-    lateinit var state12: IState
-    lateinit var state2: IState
+    val state1: IState
+    val state11: IState
+    val state12: IState
+    val state2: IState
 
     val machine = createStateMachine(this, childMode = ChildMode.PARALLEL) {
         state1 = state("State1", childMode = ChildMode.PARALLEL) {

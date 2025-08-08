@@ -9,6 +9,9 @@ package ru.nsk.kstatemachine.metainfo
 
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.transition.Transition
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Standard [MetaInfo], to control export PlantUML and Mermaid feature visualization.
@@ -53,5 +56,10 @@ private data class UmlMetaInfoBuilderImpl(
     override var umlNotes: List<String> = emptyList(),
 ) : UmlMetaInfoBuilder
 
-fun buildUmlMetaInfo(builder: UmlMetaInfoBuilder.() -> Unit): UmlMetaInfo =
-    UmlMetaInfoBuilderImpl().apply(builder).copy()
+@OptIn(ExperimentalContracts::class)
+fun buildUmlMetaInfo(builder: UmlMetaInfoBuilder.() -> Unit): UmlMetaInfo {
+    contract {
+        callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+    }
+    return UmlMetaInfoBuilderImpl().apply(builder).copy()
+}

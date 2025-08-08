@@ -10,6 +10,9 @@ package ru.nsk.kstatemachine.metainfo
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.transition.Transition
 import kotlin.collections.single
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
@@ -57,8 +60,13 @@ private data class CompositeMetaInfoBuilderImpl(
     override var metaInfoSet: Set<MetaInfo> = emptySet()
 ) : CompositeMetaInfoBuilder
 
-fun buildCompositeMetaInfo(builder: CompositeMetaInfoBuilder.() -> Unit): CompositeMetaInfo =
-    CompositeMetaInfoBuilderImpl().apply(builder).copy()
+@OptIn(ExperimentalContracts::class)
+fun buildCompositeMetaInfo(builder: CompositeMetaInfoBuilder.() -> Unit): CompositeMetaInfo {
+    contract {
+        callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+    }
+    return CompositeMetaInfoBuilderImpl().apply(builder).copy()
+}
 
 fun buildCompositeMetaInfo(metaInfo1: MetaInfo, metaInfo2: MetaInfo, vararg infos: MetaInfo): CompositeMetaInfo =
     CompositeMetaInfoBuilderImpl(infos.toMutableSet().apply {

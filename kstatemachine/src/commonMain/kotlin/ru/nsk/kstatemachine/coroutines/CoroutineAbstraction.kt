@@ -10,6 +10,9 @@ package ru.nsk.kstatemachine.coroutines
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachineImpl
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
@@ -52,18 +55,24 @@ internal class StdLibCoroutineAbstraction : CoroutineAbstraction {
     override suspend fun <R : Any> withContext(block: suspend () -> R): R = block()
 }
 
+@OptIn(ExperimentalContracts::class)
 suspend fun CoroutineAbstraction.createStateMachine(
     name: String?,
     childMode: ChildMode,
     start: Boolean,
     creationArguments: CreationArguments = buildCreationArguments {},
     init: suspend BuildingStateMachine.() -> Unit
-): StateMachine = StateMachineImpl(
-    name,
-    childMode,
-    creationArguments,
-    this,
-).apply {
-    init()
-    if (start) start()
+): StateMachine {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
+    return StateMachineImpl(
+        name,
+        childMode,
+        creationArguments,
+        this,
+    ).apply {
+        init()
+        if (start) start()
+    }
 }
