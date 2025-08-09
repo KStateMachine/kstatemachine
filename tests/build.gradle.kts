@@ -41,5 +41,5 @@ dependencies {
 }
 
 kover.reports.verify.rule {
-    minBound(87)
+    minBound(88)
 }
