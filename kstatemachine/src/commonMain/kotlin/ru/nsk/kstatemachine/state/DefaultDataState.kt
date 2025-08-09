@@ -26,10 +26,10 @@ open class DefaultDataState<D : Any>(
     childMode: ChildMode = EXCLUSIVE,
     private val dataExtractor: DataExtractor<D>,
 ) : BaseStateImpl(name, childMode), DataState<D> {
-    private var _data: D? = null
+    protected var _data: D? = null
     override val data: D get() = checkNotNull(_data) { "Data is not set. Is $this state active?" }
 
-    private var _lastData: D? = null
+    protected var _lastData: D? = null
     override val lastData: D
         get() = checkNotNull(_lastData ?: defaultData) {
             "Last data is not available yet in $this, and default data not provided"
@@ -60,10 +60,14 @@ open class DefaultDataState<D : Any>(
 
     private fun assignData(event: Event) {
         @Suppress("UNCHECKED_CAST")
-        event as DataEvent<D>
-        with(event.data) {
-            _data = this
-            _lastData = this
+        val dataEvent = event as? DataEvent<D>
+        if (dataEvent != null && dataClass.isInstance(event.data)) {
+            with(event.data) {
+                _data = this
+                _lastData = this
+            }
+        } else {
+            _data = lastData
         }
     }
 
@@ -85,7 +89,7 @@ inline fun <reified D : Any> defaultFinalDataState(
     name: String? = null,
     defaultData: D? = null,
     dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): DefaultFinalDataState<D> = DefaultFinalDataState(name, defaultData, dataExtractor)
+) = DefaultFinalDataState(name, defaultData, dataExtractor)
 
 open class DefaultFinalDataState<D : Any>(
     name: String? = null,

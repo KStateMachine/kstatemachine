@@ -37,6 +37,13 @@ createStateMachine(scope) {
 is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
 after state exit, it falls back to `defaultData` if provided or throws.
 
+### MutableDataState
+
+In some cases it might be necessary to change `DataState`'s data manually. To archive it the library introduces 
+additional `MutableDataState` type, which allows `data` field mutation with `setData` method. 
+This is more flexible but less strict approach than using simple `DataState` which allows `data` field update
+only by a transition.
+
 ### Target-less data transitions
 
 You can define target-less transitions for `DataState`. Please, note that if you want such transition to change state's

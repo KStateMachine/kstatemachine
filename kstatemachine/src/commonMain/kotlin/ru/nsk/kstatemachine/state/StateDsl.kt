@@ -9,8 +9,6 @@
 
 package ru.nsk.kstatemachine.state
 
-import ru.nsk.kstatemachine.event.DataExtractor
-import ru.nsk.kstatemachine.event.defaultDataExtractor
 import ru.nsk.kstatemachine.state.pseudo.DefaultChoiceDataState
 import ru.nsk.kstatemachine.state.pseudo.DefaultChoiceState
 import ru.nsk.kstatemachine.state.pseudo.DefaultHistoryState
@@ -43,26 +41,6 @@ suspend inline fun IState.state(
     return addState(DefaultState(name, childMode), init)
 }
 
-inline fun <reified D : Any> IState.dataState(
-    name: String? = null,
-    defaultData: D? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): DataState<D> = addState(defaultDataState(name, defaultData, childMode, dataExtractor))
-
-suspend inline fun <reified D : Any> IState.dataState(
-    name: String? = null,
-    defaultData: D? = null,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    init: StateBlock<DataState<D>>
-): DataState<D> {
-    contract {
-        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
-    }
-    return addState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
-}
-
 /**
  * A shortcut for [state] and [IState.setInitialState] calls
  */
@@ -83,32 +61,6 @@ suspend inline fun IState.initialState(
         callsInPlace(init, InvocationKind.EXACTLY_ONCE)
     }
     return addInitialState(DefaultState(name, childMode), init)
-}
-
-/**
- * @param defaultData is necessary for initial [DataState]
- */
-inline fun <reified D : Any> IState.initialDataState(
-    name: String? = null,
-    defaultData: D,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): DataState<D> = addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor))
-
-/**
- * @param defaultData is necessary for initial [DataState]
- */
-suspend inline fun <reified D : Any> IState.initialDataState(
-    name: String? = null,
-    defaultData: D,
-    childMode: ChildMode = ChildMode.EXCLUSIVE,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    init: StateBlock<DataState<D>>
-): DataState<D> {
-    contract {
-        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
-    }
-    return addInitialState(defaultDataState(name, defaultData, childMode, dataExtractor), init)
 }
 
 /**
@@ -165,42 +117,6 @@ suspend inline fun IState.initialFinalState(name: String? = null, init: StateBlo
         callsInPlace(init, InvocationKind.EXACTLY_ONCE)
     }
     return addInitialState(DefaultFinalState(name), init)
-}
-
-inline fun <reified D : Any> IState.finalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): FinalDataState<D> = addFinalState(defaultFinalDataState(name, defaultData, dataExtractor))
-
-suspend inline fun <reified D : Any> IState.finalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    init: StateBlock<FinalDataState<D>>
-): FinalDataState<D> {
-    contract {
-        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
-    }
-    return addFinalState(defaultFinalDataState(name, defaultData, dataExtractor), init)
-}
-
-inline fun <reified D : Any> IState.initialFinalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-): FinalDataState<D> = addInitialState(defaultFinalDataState(name, defaultData, dataExtractor))
-
-suspend inline fun <reified D : Any> IState.initialFinalDataState(
-    name: String? = null,
-    defaultData: D? = null,
-    dataExtractor: DataExtractor<D> = defaultDataExtractor(),
-    init: StateBlock<FinalDataState<D>>
-): FinalDataState<D> {
-    contract {
-        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
-    }
-    return addInitialState(defaultFinalDataState(name, defaultData, dataExtractor), init)
 }
 
 fun IState.choiceState(

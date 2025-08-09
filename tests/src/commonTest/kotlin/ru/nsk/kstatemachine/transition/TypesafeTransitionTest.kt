@@ -14,11 +14,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.event.DataEvent
-import ru.nsk.kstatemachine.event.DataExtractor
-import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.event.FinishedEvent
-import ru.nsk.kstatemachine.event.defaultDataExtractor
+import ru.nsk.kstatemachine.event.*
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
@@ -227,7 +223,10 @@ class TypesafeTransitionTest : FreeSpec({
                     }
                     dataState = dataState(
                         dataExtractor = object : DataExtractor<Int> by defaultDataExtractor() {
-                            override suspend fun extract(transitionParams: TransitionParams<*>, isImplicitActivation: Boolean): Int? {
+                            override suspend fun extract(
+                                transitionParams: TransitionParams<*>,
+                                isImplicitActivation: Boolean
+                            ): Int? {
                                 if (isImplicitActivation) {
                                     val event = transitionParams.event as? CustomIntEvent
                                     return event?.value
@@ -417,6 +416,21 @@ class TypesafeTransitionTest : FreeSpec({
                 machine.processEventBlocking(CustomIntEvent(42))
                 dataState.data shouldBe 42
                 dataState.lastData shouldBe 42
+            }
+
+            "targeting DataState by conditionalTransition() with wrong DataEvent type" {
+                lateinit var dataState: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState {
+                        transitionConditionally<NameEvent> {
+                            direction = { targetState(dataState) }
+                        }
+                    }
+                    dataState = dataState("data state", defaultData = 42)
+                }
+                machine.processEventBlocking(NameEvent("name"))
+                dataState.isActive shouldBe true
+                dataState.data shouldBe 42
             }
         }
     }

@@ -334,6 +334,7 @@ class ExportPlantUmlVisitorTest : FreeSpec({
             "Mermaid export nested states" {
                 val machine = makeNestedMachine(coroutineStarterType)
                 machine.exportToMermaid() shouldBe MERMAID_NESTED_STATES_RESULT
+                machine.exportToMermaidBlocking() shouldBe MERMAID_NESTED_STATES_RESULT // for coverage
             }
 
             "plantUml export parallel states" {
@@ -384,6 +385,7 @@ class ExportPlantUmlVisitorTest : FreeSpec({
                     }
 
                 machine.exportToPlantUml() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT
+                machine.exportToPlantUmlBlocking() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT // for coverage
             }
 
             "plantUml export empty machine with parallel mode" {
