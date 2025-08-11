@@ -46,18 +46,5 @@ kotlin {
             }
         }
 
-        // contains blocking APIs which are not supported on JS
-        val blockingMain by creating { dependsOn(commonMain.get()) }
-        val jsCommonMain by creating { dependsOn(commonMain.get()) }
-
-        jvmMain.get().dependsOn(blockingMain)
-        iosMain.get().dependsOn(blockingMain)
-        macosMain.get().dependsOn(blockingMain)
-        linuxMain.get().dependsOn(blockingMain)
-        mingwMain.get().dependsOn(blockingMain)
-
-        val wasmJsMain by getting
-        wasmJsMain.dependsOn(jsCommonMain)
-        jsMain.get().dependsOn(jsCommonMain)
     }
 }
