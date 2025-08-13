@@ -54,12 +54,12 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Run Dokka
-        run: ./gradlew dokkaGenerate
-        working-directory: '${{ github.workspace }}'
-      - name: Copy kdoc to _site
-        run: mkdir -p docs/_site/kdoc && cp -LRv build/dokka/html/* docs/_site/kdoc
-        working-directory: '${{ github.workspace }}'
+#      - name: Run Dokka
+#        run: ./gradlew dokkaGenerate
+#        working-directory: '${{ github.workspace }}'
+#      - name: Copy kdoc to _site
+#        run: mkdir -p docs/_site/kdoc && cp -LRv build/dokka/html/* docs/_site/kdoc
+#        working-directory: '${{ github.workspace }}'
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
