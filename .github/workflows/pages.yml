@@ -3,7 +3,12 @@ name: Deploy Jekyll site to Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
+    paths:
+      - "docs/**"
+
+  pull_request:
+    branches: [ "main" ]
     paths:
       - "docs/**"
 
