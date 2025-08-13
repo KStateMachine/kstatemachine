@@ -31,10 +31,11 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Publish with Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: publish
+        run: ./gradlew publish
 
       - name: Confirm publishing
         run: curl -X POST -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.nsk90"
