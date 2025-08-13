@@ -14,7 +14,8 @@ plugins {
  * local.properties file structure sample:
  *
  * signing.gnupg.executable=gpg2
- * signing.gnupg.keyName=AABBCCDD # last 8 digits of key ID (gpg2 --list-keys)
+ * # last 8 digits of key ID (gpg2 --list-keys)
+ * signing.gnupg.keyName=AABBCCDD
  * signing.gnupg.passphrase=secret1
  * mavenUsername=accountName
  * mavenPassword=secret2
@@ -93,7 +94,7 @@ publishing {
     }
 }
 
-val executable = localProperties.getProperty("signing.gnupg.executable")
+val executable: String? = localProperties.getProperty("signing.gnupg.executable")
 if (executable != null) {
     ext.set("signing.gnupg.executable", executable)
 
@@ -121,7 +122,7 @@ if (executable != null) {
     }
 }
 
-// workaround for gradle warning about task order. should be removed with gradle 8
+// workaround for gradle error about task order.
 val signingTasks = tasks.withType<Sign>()
 tasks.withType<AbstractPublishToMaven>().configureEach {
     dependsOn(signingTasks)
