@@ -57,6 +57,8 @@ jobs:
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
+      - name: Check for symlinks # GitHub doesn't allow symlinks
+        run: ls -lR docs/_site
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
