@@ -38,4 +38,4 @@ jobs:
         run: ./gradlew publish
 
       - name: Confirm publishing
-        run: curl -X POST -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.nsk90"
+        run: curl --fail --verbose -X POST -u "${{ secrets.MAVEN_USERNAME }}:${{ secrets.MAVEN_PASSWORD }}" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.nsk90"
