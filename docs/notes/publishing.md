@@ -25,3 +25,10 @@ drops the repository
 ```bash
 curl -X DELETE -u "{MAVEN_USER}:{MAVEN_PASSWORD}" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/{MAVEN_USER}/{IP}/io.github.nsk90--default-repository"
 ```
+
+So when the library is published from GitHub action
+* I have to go to https://central.sonatype.com/publishing/deployments
+* publish (some count of artifacts) the whole amount seems to be 60 currently.
+* Then check if there are open repos
+* manually trigger processing for it
+* then go to UI again and publish the rest of artefacts.
