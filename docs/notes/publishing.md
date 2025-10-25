@@ -28,7 +28,8 @@ curl -X DELETE -u "{MAVEN_USER}:{MAVEN_PASSWORD}" "https://ossrh-staging-api.cen
 
 So when the library is published from GitHub action
 * I have to go to https://central.sonatype.com/publishing/deployments
-* publish (some count of artifacts) the whole amount seems to be 60 currently.
+* publish (some count of artifacts) the whole amount seems to be 66 currently.
 * Then check if there are open repos
 * manually trigger processing for it
 * then go to UI again and publish the rest of artefacts.
+* (Checking and triggering open repos is also possible before publishing visible artifacts)
