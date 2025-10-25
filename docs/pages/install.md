@@ -53,12 +53,16 @@ dependencies {
     // or linux
     implementation("io.github.nsk90:kstatemachine-linuxx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-linuxx64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-serialization-linuxx64:<Tag>")  
+    implementation("io.github.nsk90:kstatemachine-serialization-linuxx64:<Tag>") 
+    // starting from 0.35.0
+    implementation("io.github.nsk90:kstatemachine-linuxarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-coroutines-linuxarm64:<Tag>")
+    implementation("io.github.nsk90:kstatemachine-serialization-linuxarm64:<Tag>")  
     // or mingw
     implementation("io.github.nsk90:kstatemachine-mingwx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-mingwx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-serialization-mingwx64:<Tag>") 
-    // or macos 
+    // or macOS 
     implementation("io.github.nsk90:kstatemachine-macosx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-macosx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-serialization-macosx64:<Tag>")

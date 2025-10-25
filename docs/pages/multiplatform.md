@@ -30,3 +30,4 @@ _If you need missing platform support, please create a GitHub issue._
 * **v0.30.0** adds `js` and `wasm` targets. `js` and `wasm` targets do not support blocking library APIs as those platforms do not have `runBlocking` support which
 is used internally. 
 * **v0.34.00** Adds native platforms support `linuxX64`, `mingwX64`, `macosX64` and `macosArm64`
+* **v0.35.00** Adds native platforms support `linuxArm64`
