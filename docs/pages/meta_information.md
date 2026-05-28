@@ -24,14 +24,14 @@ This mechanism is extendable and users may add their own `MetaInfo` sub interfac
 ## `MetaInfo` composition 
 
 If you need to specify more than one `MetaInfo` instance for `IState` or `Transition` you have two options:
-1) Use `CompositeMetaInfo` which is constructed by `buildCompositeMetaInfo` builder function. 
+1. Use `CompositeMetaInfo` which is constructed by `buildCompositeMetaInfo` builder function.
 This composite type allows to specify a set of `MetaInfo` objects.
 
    Limitations:
    * `CompositeMetaInfo` cannot nest into each other. Only one layer is supported.
    * Don't try to specify `MetaInfo` of same type multiple times. This is wrong by design. 
      Certain `MetaInfo` subtype should be applied only once. Exception will be thrown otherwise.
-2) Manually implement all required `MetaInfo` interfaces in a single object.
+2. Manually implement all required `MetaInfo` interfaces in a single object.
 
 Both options are supported, choose any one you like more.
 

@@ -18,21 +18,20 @@ title: Persistence (Serialization)
 
 There are several kinds or levels of `StateMachine` persistence (serialization). Let's look at sample use cases:
 
-1) **Structure + configuration** - Create `StateMachine` on some process/host and send its structure and
-   active configuration by network to another process/host.
-   The receiver can dynamically create the same `StateMachine` instance in the same state as original one.
-2) **Configuration only** - Both original and restored `StateMachine` instances are crated by identical static code
+1. **Structure + configuration** - Create `StateMachine` on some process/host and send its structure and
+active configuration by network to another process/host.
+The receiver can dynamically create the same `StateMachine` instance in the same state as original one.
+This case currently lacks built-in support by the library _(you can open an issue if you need something like that)_.
+2. **Configuration only** - Both original and restored `StateMachine` instances are crated by identical static code
    (in a single or multiple different processes/hosts). Only active configuration can be saved and restored.
+   This case in turn may be reached in two different ways:
 
-Case 1 currently lacks built-in support by the library (you can open an issue if you need something like that).
-Case 2 in turn may be reached in two different ways:
-
-1) **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine` and
-   applying them to restored one.
-2) **Event recording** - serializing all incoming events, and applying them later on new `StateMachine` instance,
-   which should lead it into the same state as original. This also allows to execute library callbacks (listeners)
-   if necessary, which is not possible with state persistence approach.
-   _Currently only this approach has built-in support._
+    1. **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine` and
+       applying them to restored one.
+    2. **Event recording** - serializing all incoming events, and applying them later on new `StateMachine` instance,
+       which should lead it into the same state as original. This also allows to execute library callbacks (listeners)
+       if necessary, which is not possible with state persistence approach.
+      _Currently only this approach has built-in support._
 
 ## Event recording
 
