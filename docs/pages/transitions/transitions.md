@@ -124,6 +124,15 @@ machine.processEvent(SwitchEvent)
 machine.processEvent(SwitchEvent)
 ```
 
+You can also access the `StartEvent` directly to read which state the machine entered:
+
+```kotlin
+onEntry {
+    val startEvent = it.event as? StartEvent
+    println("Initial state: ${startEvent?.startState}")
+}
+```
+
 ## Listen to all transitions in one place
 
 There might be many transitions from one state to another. It is possible to listen to all of them in state machine

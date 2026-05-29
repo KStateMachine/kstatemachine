@@ -36,6 +36,14 @@ It is done with `processEvent()` functions family.
   Returns`kotlinx.coroutines.Deferred` with `ProcessingResult`.
   Cannot be used with StdLib StateMachine instance (throws in this case).
 
+All `processEvent` variants return or resolve to `ProcessingResult`:
+
+| Value | Meaning |
+|---|---|
+| `PROCESSED` | A matching transition was found and triggered |
+| `IGNORED` | No matching transition found; event was passed to `IgnoredEventHandler` |
+| `PENDING` | Another event is currently being processed; this event was queued or dropped depending on `PendingEventHandler` |
+
 ## Ignored events
 
 By default, state machine simply ignores events that does not match any defined transition. You can see those events if

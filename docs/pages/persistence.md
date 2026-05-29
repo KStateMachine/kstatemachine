@@ -47,6 +47,13 @@ val machine = createStateMachine(
 }
 ```
 
+`buildEventRecordingArguments {}` accepts two optional properties:
+
+* `clearRecordsOnMachineRestart: Boolean` (default `true`) — clears recorded events when the machine is stopped and
+  started again. Disable if you want to preserve the full history across restarts.
+* `skipIgnoredEvents: Boolean` (default `true`) — ignored events are not recorded, since they do not affect machine
+  state and replaying them is unnecessary.
+
 When the machine had processed your business logic events, and you want to save its state configuration, first you have
 to get the recorded events:
 

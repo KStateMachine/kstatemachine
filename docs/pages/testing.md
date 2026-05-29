@@ -17,7 +17,9 @@ machine's behaviour.
 
 ## Logging
 
-You can enable internal state machine logging on your platform.
+You can enable internal state machine logging on your platform. `StateMachine.Logger` is a `fun interface` whose
+single method receives a **lazy** `() -> String` — the message is only evaluated if the logger actually uses it,
+avoiding string construction overhead when logging is disabled.
 
 On JVM:
 
@@ -41,6 +43,14 @@ createStateMachine(scope) {
 }
 ```
 
+From inside a state callback you can write to the machine's logger via the `IState.log {}` extension:
+
+```kotlin
+state("myState") {
+    onEntry { log { "Entered myState with event ${it.event}" } }
+}
+```
+
 ## Starting from particular state
 
 For testing, it might be useful to check how state machine reacts on events from particular state. There
@@ -57,4 +67,25 @@ val machine = createStateMachine(scope, start = false) {
 }
 
 machine.startFrom(state2)
+```
+
+`startFromBlocking()` is the non-suspending equivalent for use in regular (non-coroutine) test code:
+
+```kotlin
+machine.startFromBlocking(state2)
+```
+
+To start in a `DataState` and inject initial data at the same time use the data overload:
+
+```kotlin
+lateinit var dataState: DataState<String>
+
+val machine = createStateMachine(scope, start = false) {
+    dataState = dataState<String>("loaded")
+    // ...
+}
+
+machine.startFrom(dataState, data = "hello")
+// or blocking:
+machine.startFromBlocking(dataState, data = "hello")
 ```

@@ -33,9 +33,12 @@ createStateMachine(scope) {
 }
 ```
 
-`DataState`'s `data` field is set and might be accessed _only_ while the state is active. At the moment when `DataState`
-is activated it requires data value from a `DataEvent`. You can use `lastData` field to access last data value even
-after state exit, it falls back to `defaultData` if provided or throws.
+`DataState` exposes three properties:
+
+* `data: D` — the current data value; accessible **only while the state is active** (throws otherwise)
+* `lastData: D` — the last known value; **does not clear on state exit**; falls back to `defaultData` if the state
+  was never entered, or throws if `defaultData` is not set
+* `defaultData: D?` — optional fallback provided at construction time, e.g. `dataState<Int>(defaultData = 0)`
 
 ### MutableDataState
 
@@ -43,6 +46,23 @@ In some cases it might be necessary to change `DataState`'s data manually. To ar
 additional `MutableDataState` type, which allows `data` field mutation with `setData` method. 
 This is more flexible but less strict approach than using simple `DataState` which allows `data` field update
 only by a transition.
+
+Use `mutableDataState<D>()` (or `initialMutableDataState<D>()`) in the setup block:
+
+```kotlin
+lateinit var counter: MutableDataState<Int>
+
+createStateMachine(scope) {
+    counter = initialMutableDataState(defaultData = 0)
+    // ...
+}
+
+// Update from outside a transition (e.g. from a timer or background job):
+counter.setData(counter.lastData + 1)
+```
+
+{: .note }
+`setData()` can only update `data` while the state is active. If called while inactive, only `lastData` is updated.
 
 ### Target-less data transitions
 

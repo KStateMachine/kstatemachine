@@ -60,3 +60,51 @@ val machine = createStateMachine(
 }
 ```
 
+## Lifecycle
+
+A state machine can be stopped and restarted, or permanently destroyed.
+
+```kotlin
+machine.stop()          // suspendable; pauses the machine, transitions are not processed
+machine.stopBlocking()  // blocking analog — do NOT call from a listener callback (deadlock risk)
+
+machine.restart()       // stop() + start() in one call; optional argument passed to start()
+machine.restartBlocking()
+
+machine.destroy()       // terminal: clears all listeners, states and transitions
+machine.destroyBlocking()
+```
+
+Relevant state properties:
+
+| Property | Meaning |
+|---|---|
+| `isRunning` | `true` while the machine is started and not stopped |
+| `isDestroyed` | `true` after `destroy()` — machine is unusable at this point |
+| `hasProcessedEvents` | `true` if any event beyond `StartEvent` has been processed |
+
+{: .note }
+`stopBlocking()` must not be called from inside a listener callback when using a single-threaded
+`CoroutineScope` — it will deadlock. Use `stop()` (suspendable) instead.
+
+## Listeners
+
+Convenience extension functions (`onTransitionTriggered {}`, `onStateEntry {}`, etc.) are available as shortcuts.
+For cases where a single object should handle all machine notifications, implement `StateMachine.Listener` directly:
+
+```kotlin
+machine.addListener(object : StateMachine.Listener {
+    override suspend fun onStarted(transitionParams: TransitionParams<*>) {}
+    override suspend fun onTransitionTriggered(transitionParams: TransitionParams<*>) {}
+    override suspend fun onTransitionComplete(activeStates: Set<IState>, transitionParams: TransitionParams<*>) {}
+    override suspend fun onStateEntry(state: IState, transitionParams: TransitionParams<*>) {}
+    override suspend fun onStateExit(state: IState, transitionParams: TransitionParams<*>) {}
+    override suspend fun onStateFinished(state: IState, transitionParams: TransitionParams<*>) {}
+    override suspend fun onStopped() {}
+    override suspend fun onDestroyed() {}
+})
+```
+
+All methods have default empty implementations — override only the ones you need.
+`machine.removeListener(listener)` removes a previously added listener.
+

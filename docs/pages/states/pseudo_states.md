@@ -61,26 +61,41 @@ createStateMachine(/*...*/) {
 }
 ```
 
-You can use `choiceState` even on initial state branch.
+You can use `choiceState` even on initial state branch. Use `initialChoiceState {}` / `initialChoiceDataState {}`
+as a shorthand when the choice state should also be the initial state of its parent:
+
+```kotlin
+createStateMachine(scope) {
+    val state1 = state("state1")
+    val state2 = state("state2")
+    initialChoiceState {
+        if (someCondition) state1 else state2
+    }
+}
+```
+
 Note that `choiceState` can not be active, so if the library performs a transition and finds that `choiceState` is
 going to be activated, it executes its lambda argument and navigates to the resulting state.
 If the resulting state is also a `PseudoState` instance, further redirections might be applied.
 
 ### History state
 
-There are two types of history states, shallow and deep. Shallow history state is used to represent the most recently
-active child (its neighbour) of a parent state. It does not recurse into this child's active configuration (sub states),
-initial states will be used. Deep history state in contrast reflects the most recent active configuration of the parent
-state (including all sub states).
-You can specify default state which will be used if history was not recorded yet (parent was not active).
-When default state is not specified, parent initial state will be entered on transition to history state.
+There are two types of history states, controlled by the `historyType` parameter:
+
+* `HistoryType.SHALLOW` (default) — remembers only the most recently active immediate child; sub-states of that
+  child are not restored (their initial states are used instead).
+* `HistoryType.DEEP` — remembers the full nested active configuration of the parent, including all sub-states.
+
+You can specify a `defaultState` which is entered when the history has not been recorded yet (parent was never active).
+When `defaultState` is not specified, the parent's initial state is used.
 
 ```kotlin
 val machine = createStateMachine(scope) {
     state {
         val state11 = initialState()
         val state12 = state()
-        historyState(defaultState = state12)
+        // SHALLOW is the default; use HistoryType.DEEP to restore full nested configuration
+        historyState(historyType = HistoryType.SHALLOW, defaultState = state12)
     }
     state {
         // ...
