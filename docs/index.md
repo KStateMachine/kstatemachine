@@ -8,10 +8,11 @@ nav_order: 0
 
 KStateMachine is a Kotlin DSL library for creating state machines and statecharts.
 
-The library follows concepts from this two great and well known works:
+The library follows concepts from the fallowing great and well known works and specs:
 
 * [Statecharts: A visual formalism for complex systems](https://www.wisdom.weizmann.ac.il/~dharel/SCANNED.PAPERS/Statecharts.pdf)
 * [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
+* [Unified Modeling Language](https://www.omg.org/spec/UML/2.5.1/PDF)
 
 ## Workflow
 
