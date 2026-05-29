@@ -37,3 +37,26 @@ Use `buildCreationArguments()` function to provide it.
 
 Subsequent samples will use `createStateMachine()` function, but you can choose that one which fits your needs.
 
+### Creation arguments
+
+| Argument | Default | Description |
+|---|---|---|
+| `autoDestroyOnStatesReuse` | `true` | When a state owned by one machine is reused in another, automatically calls `destroy()` on the previous machine instead of throwing. |
+| `isUndoEnabled` | `false` | Enables the undo transition. See [Undo transition](https://kstatemachine.github.io/kstatemachine/pages/transitions/undo_transition.html). |
+| `doNotThrowOnMultipleTransitionsMatch` | `false` | When multiple transitions match an event, selects the first one instead of throwing. |
+| `requireNonBlankNames` | `false` | Throws on machine start if any state or transition has a null or blank name. |
+| `eventRecordingArguments` | `null` | Enables event recording for later persistence/restoration. See [Persistence](https://kstatemachine.github.io/kstatemachine/pages/persistence.html). |
+| `skipCoroutineScopeValidityCheck` | `false` | Skips the check that warns when a multithreaded dispatcher (e.g. `Dispatchers.Default`) is used. See [Multithreading](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html). |
+
+```kotlin
+val machine = createStateMachine(
+    scope,
+    creationArguments = buildCreationArguments {
+        isUndoEnabled = true
+        requireNonBlankNames = true
+    }
+) {
+    // ...
+}
+```
+

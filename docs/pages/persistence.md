@@ -102,4 +102,25 @@ You can configure restoration process by `restoreByRecordedEvents()` arguments.
 The machine should not process any events before its restoration (in such case exception will be thrown) as
 it can possibly lead to incorrect restoration result.
 
+### Configuring restoration
+
+`restoreByRecordedEvents()` accepts the following parameters:
+
+* `muteListeners` (default: `true`) — when `true`, listener callbacks are suppressed during replay, since the
+  application reactions were already executed when the original events were processed.
+* `disableStructureHashCodeCheck` (default: `false`) — skip the machine structure integrity check. Useful when you
+  intentionally restore on a structurally different machine, though results may differ.
+* `validator` (default: `StrictValidator`) — called after replay to validate the `RestorationResult`. The library
+  provides two built-in implementations:
+  * `StrictValidator` — throws `RestorationResultValidationException` if any warnings or failed processing results
+    are found. This is the default and recommended choice.
+  * `EmptyValidator` — skips validation entirely, useful when you expect and accept warnings.
+  * Custom `RestorationResultValidator` — implement the `fun interface` to apply your own logic.
+
+Example using `EmptyValidator` to allow warnings:
+
+```kotlin
+machine2.restoreByRecordedEvents(restoredRecordedEvents, validator = EmptyValidator)
+```
+
 See [Event recording sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SerializationEventRecordingSample.kt)

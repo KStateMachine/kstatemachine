@@ -112,7 +112,7 @@ val machine = createStateMachine(scope) {
         onEntry {
             // true - if entering by StateMachine initialization (StartEvent)
             // false - if entering any other way, by SwitchEvent in this case.
-            prinln(it.isStartTransition)
+            println(it.isStartTransition)
         }
         transitionOn<SwitchEvent> { targetState = { state2 } }
     }
@@ -136,8 +136,28 @@ createStateMachine(scope) {
         // Listen to all triggered transitions here
         println(it.event)
     }
+    onTransitionComplete { activeStates, transitionParams ->
+        // Called after target state entry callbacks have run
+        println("Active states: $activeStates")
+    }
 }
 ```
+
+Per-transition listeners also support both callbacks via `onTriggered {}` and `onComplete {}` extension functions:
+
+```kotlin
+transition<SwitchEvent> {
+    targetState = state2
+    onTriggered { println("Triggered by ${it.event}") }
+    onComplete { activeStates, transitionParams ->
+        // Called after state2's onEntry callbacks have run
+        println("Now in: $activeStates")
+    }
+}
+```
+
+`onTriggered` fires before target state entry callbacks; `onComplete` fires after all entry callbacks of the target
+state (and its children) have completed.
 
 ## Guarded transitions
 
@@ -174,7 +194,7 @@ State machine becomes more powerful tool when you can choose target state depend
 external data). Conditional transitions give you maximum flexibility on choosing target state and conditions when
 transition is triggered.
 
-There are fallowing options to choose transition direction:
+There are following options to choose transition direction:
 
 * `stay()` - transition is triggered but state is not changed;
 * `targetState(nextState)` - transition is triggered and state machine goes to the specified state;

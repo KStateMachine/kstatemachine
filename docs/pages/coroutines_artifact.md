@@ -26,7 +26,7 @@ You can find common information about multithreading library usage and coroutine
 and `kstatemachine-coroutines` artifact all library callbacks are `suspendable` functions. 
 So the functionality of this module should not be treated as "wrappers" or "extensions". 
 This is just a core functionality which is separated from original `kstatemachine` artifact
-to fallow language architecture regarding coroutines support.
+to follow language architecture regarding coroutines support.
 
 Contains additional functions to work with KStateMachine depending on Kotlin Coroutines library
 

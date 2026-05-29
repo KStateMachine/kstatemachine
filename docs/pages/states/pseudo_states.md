@@ -80,7 +80,7 @@ val machine = createStateMachine(scope) {
     state {
         val state11 = initialState()
         val state12 = state()
-        historyState(defultState = state12)
+        historyState(defaultState = state12)
     }
     state {
         // ...

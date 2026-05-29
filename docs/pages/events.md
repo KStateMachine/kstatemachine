@@ -29,11 +29,11 @@ It is done with `processEvent()` functions family.
   internally if you use StateMachine with coroutines support. Or just runs code in-place for StdLib StateMachine
   instance.
 * `processEventByLaunch()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses
-  StateMachine's `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
+  StateMachine's `CoroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
   Cannot be used with StdLib StateMachine instance (throws in this case).
 * `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses 
-  StateMachine's `CouroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
-  Returns`kotlinx.coroutines.Deffered` with `ProcessingResult`.
+  StateMachine's `CoroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
+  Returns`kotlinx.coroutines.Deferred` with `ProcessingResult`.
   Cannot be used with StdLib StateMachine instance (throws in this case).
 
 ## Ignored events
@@ -95,7 +95,7 @@ machine.processEvent(TurnOn, 42)
 ```
 
 {: .note }
-Type of arguments is `Any?`, so it is not type safe ot use them.
+Type of arguments is `Any?`, so it is not type safe to use them.
 
 ## Do not
 
@@ -105,7 +105,7 @@ to make decisions itself.
 
 Wrong - managing target state from outside:
 
-```kotin
+```kotlin
 if (somethingHappend)
     machine.processEvent(GoToState1Event)
 else 
@@ -114,7 +114,7 @@ else
 
 Correct - let the state machine to make decisions on an event:
 
-```kotin
+```kotlin
 machine.processEvent(SomethingHappenedEvent)
 ```
 

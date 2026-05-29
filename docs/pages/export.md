@@ -41,7 +41,7 @@ See [PlantUML nested states export sample](https://github.com/KStateMachine/ksta
 
 `Mermaid` uses almost the same text format as `PlantUML` for compatibility reasons.
 
-Use `exportToMermaid()`/`exportToToMermaidBlocking()` extension function to export state machine
+Use `exportToMermaid()`/`exportToMermaidBlocking()` extension function to export state machine
 to [Mermaid state diagram](https://mermaid.js.org/syntax/stateDiagram.html).
 `showEventLabels` flag allows to include `Event` types into the output.
 
