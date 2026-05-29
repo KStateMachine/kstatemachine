@@ -19,6 +19,16 @@ If your app code throws exceptions in a listener callbacks library catches them,
 passes the first occurred exception to `listenerExceptionHandler`. It simply rethrows exception by default, but you may
 want to mute them with custom handler for example.
 
+```kotlin
+createStateMachine(scope) {
+    listenerExceptionHandler = StateMachine.ListenerExceptionHandler { exception ->
+        // log and suppress instead of rethrowing
+        println("Listener error: $exception")
+    }
+    // ...
+}
+```
+
 ## Other exceptions
 
 Exceptions coming from other client code callbacks, that are considered to be no-throwing (like guard functions of
