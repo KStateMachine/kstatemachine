@@ -1,8 +1,8 @@
 plugins {
-    kotlin("multiplatform")
+    alias(libs.plugins.kotlin.multiplatform)
     ru.nsk.`maven-publish`
     id("org.jetbrains.dokka")
-    kotlin("plugin.serialization") version Versions.kotlin
+    alias(libs.plugins.kotlin.serialization)
     id("org.jetbrains.kotlinx.kover")
 }
 
@@ -10,11 +10,11 @@ group = rootProject.group
 version = rootProject.version
 
 kotlin {
-    jvmToolchain(Versions.jdkVersion)
+    jvmToolchain(libs.versions.jdk.get().toInt())
     sourceSets.all {
         languageSettings.apply {
-            languageVersion = Versions.languageVersion
-            apiVersion = Versions.apiVersion
+            languageVersion = libs.versions.kotlin.language.get()
+            apiVersion = libs.versions.kotlin.language.get()
         }
     }
 
@@ -42,8 +42,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":kstatemachine"))
-
-                api("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}")
+                api(libs.kotlinx.serialization.json)
             }
         }
 

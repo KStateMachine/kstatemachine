@@ -1,12 +1,13 @@
 plugins {
-    kotlin("jvm") version Versions.kotlin apply false
-    id("org.jetbrains.dokka") version Versions.kotlinDokka
-    id("org.jetbrains.kotlinx.binary-compatibility-validator") version Versions.kotlinBinaryCompatibilityValidatorPlugin
-    id("org.jetbrains.kotlinx.kover") version Versions.kotlinKoverPlugin
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.kover)
 }
 
-group = Versions.libraryMavenCentralGroup
-version = Versions.libraryVersion
+group = "io.github.nsk90"
+version = libs.versions.library.get()
 
 allprojects {
     repositories {

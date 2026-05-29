@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization") version Versions.kotlin
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
     id("org.jetbrains.kotlinx.kover")
 }
 
@@ -8,7 +8,7 @@ group = rootProject.group
 version = rootProject.version
 
 kotlin {
-    jvmToolchain(Versions.jdkVersion)
+    jvmToolchain(libs.versions.jdk.get().toInt())
     jvm {
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -21,13 +21,13 @@ kotlin {
                 implementation(project(":kstatemachine-coroutines"))
                 implementation(project(":kstatemachine-serialization"))
 
-                implementation("io.kotest:kotest-assertions-core:${Versions.kotest}")
+                implementation(libs.kotest.assertions.core)
             }
         }
         jvmTest {
             dependencies {
-                implementation("io.kotest:kotest-runner-junit5:${Versions.kotest}")
-                implementation("io.mockk:mockk:${Versions.mockk}")
+                implementation(libs.kotest.runner.junit5)
+                implementation(libs.mockk)
             }
         }
     }

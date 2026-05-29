@@ -2,15 +2,15 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization") version Versions.kotlin
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 group = rootProject.group
 version = rootProject.version
 
 kotlin {
-    jvmToolchain(Versions.jdkVersion)
+    jvmToolchain(libs.versions.jdk.get().toInt())
     jvm {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         binaries {
@@ -74,7 +74,7 @@ kotlin {
                 implementation(project(":kstatemachine-coroutines"))
                 implementation(project(":kstatemachine-serialization"))
 
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}")
+                implementation(libs.kotlinx.serialization.json)
             }
         }
     }

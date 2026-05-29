@@ -1,6 +1,5 @@
 package ru.nsk
 
-import Versions
 import org.gradle.kotlin.dsl.register
 import java.util.*
 
@@ -31,7 +30,7 @@ tasks.register<Jar>("javadocJar") {
 }
 
 publishing {
-    val resolvedGroupId = if (project.group == Versions.libraryJitPackGroup)
+    val resolvedGroupId = if (project.group == "com.github.nsk90")
         project.group.toString() // JitPack passes this as arguments
     else
         rootProject.group.toString()
@@ -79,7 +78,7 @@ publishing {
         }
     }
 
-    if (resolvedGroupId == Versions.libraryMavenCentralGroup) {
+    if (resolvedGroupId == "io.github.nsk90") {
         repositories {
             maven {
                 credentials {
