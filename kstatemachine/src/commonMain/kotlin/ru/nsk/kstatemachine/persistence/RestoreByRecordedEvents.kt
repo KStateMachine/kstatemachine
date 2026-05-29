@@ -8,8 +8,17 @@
 package ru.nsk.kstatemachine.persistence
 
 import ru.nsk.kstatemachine.event.SerializableGeneratedEvent
-import ru.nsk.kstatemachine.statemachine.*
+import ru.nsk.kstatemachine.statemachine.InternalStateMachine
+import ru.nsk.kstatemachine.statemachine.ListenersMutationSection
+import ru.nsk.kstatemachine.statemachine.ProcessingResult
+import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.statemachine.checkNotDestroyed
+import ru.nsk.kstatemachine.statemachine.destroy
+import ru.nsk.kstatemachine.statemachine.stop
+import ru.nsk.kstatemachine.statemachine.throwingIgnoredEventHandler
+import ru.nsk.kstatemachine.statemachine.use
 import ru.nsk.kstatemachine.visitors.structureHashCode
+import kotlin.coroutines.cancellation.CancellationException
 
 class RestorationResult internal constructor(
     val results: List<RestoredEventResult>,
@@ -117,7 +126,13 @@ suspend fun StateMachine.restoreByRecordedEvents(
                 }
                 results += RestoredEventResult(record, Result.success(ProcessingResult.PROCESSED), warnings)
             } else {
-                val processingResult = runCatching { processEvent(event, argument) }
+                val processingResult = try {
+                    Result.success(processEvent(event, argument))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    Result.failure(e)
+                }
                 val actualResult = processingResult.getOrNull()
                 if (actualResult != null && actualResult != record.processingResult) {
                     warnings += RestorationWarningException(
