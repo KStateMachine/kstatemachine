@@ -1,19 +1,19 @@
 [versions]
 library = "0.36.0"
 
-kotlin = "2.3.0"
-dokka = "2.1.0"
+kotlin = "2.3.21"
+dokka = "2.2.0"
 binary-compatibility-validator = "0.18.1"
-kover = "0.9.4"
+kover = "0.9.8"
 
 jdk = "17"
 kotlin-language = "2.0"
 
-coroutines = "1.10.2"
-serialization = "1.10.0"
+coroutines = "1.11.0"
+serialization = "1.11.0"
 
-mockk = "1.14.7"
-kotest = "6.1.0"
+mockk = "1.14.11"
+kotest = "6.1.11"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
