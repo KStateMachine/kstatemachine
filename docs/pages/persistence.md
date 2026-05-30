@@ -4,13 +4,15 @@ title: Persistence (Serialization)
 ---
 
 # Persistence (Serialization)
+
 {: .no_toc }
 
 ## Table of contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 * **Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
   JSON text, and possibly saving it into some persistent storage like a file or sending by a network.
@@ -19,19 +21,20 @@ title: Persistence (Serialization)
 There are several kinds or levels of `StateMachine` persistence (serialization). Let's look at sample use cases:
 
 1. **Structure + configuration** - Create `StateMachine` on some process/host and send its structure and
-active configuration by network to another process/host.
-The receiver can dynamically create the same `StateMachine` instance in the same state as original one.
-This case currently lacks built-in support by the library _(you can open an issue if you need something like that)_.
+   active configuration by network to another process/host.
+   The receiver can dynamically create the same `StateMachine` instance in the same state as original one.
+   This case currently lacks built-in support by the library _(you can open an issue if you need something like that)_.
 2. **Configuration only** - Both original and restored `StateMachine` instances are crated by identical static code
    (in a single or multiple different processes/hosts). Only active configuration can be saved and restored.
    This case in turn may be reached in two different ways:
 
-    1. **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine` and
+    1. **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine`
+       and
        applying them to restored one.
     2. **Event recording** - serializing all incoming events, and applying them later on new `StateMachine` instance,
        which should lead it into the same state as original. This also allows to execute library callbacks (listeners)
        if necessary, which is not possible with state persistence approach.
-      _Currently only this approach has built-in support._
+       _Currently only this approach has built-in support._
 
 ## Event recording
 
@@ -119,10 +122,10 @@ it can possibly lead to incorrect restoration result.
   intentionally restore on a structurally different machine, though results may differ.
 * `validator` (default: `StrictValidator`) — called after replay to validate the `RestorationResult`. The library
   provides two built-in implementations:
-  * `StrictValidator` — throws `RestorationResultValidationException` if any warnings or failed processing results
-    are found. This is the default and recommended choice.
-  * `EmptyValidator` — skips validation entirely, useful when you expect and accept warnings.
-  * Custom `RestorationResultValidator` — implement the `fun interface` to apply your own logic.
+    * `StrictValidator` — throws `RestorationResultValidationException` if any warnings or failed processing results
+      are found. This is the default and recommended choice.
+    * `EmptyValidator` — skips validation entirely, useful when you expect and accept warnings.
+    * Custom `RestorationResultValidator` — implement the `fun interface` to apply your own logic.
 
 Example using `EmptyValidator` to allow warnings:
 

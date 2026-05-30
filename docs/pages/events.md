@@ -5,13 +5,15 @@ nav_order: 4
 ---
 
 # Events
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 All events that can be processed by the library are subclassed from `Event` class.
 User defined events often contain properties that serve like data inputs for your StateMachine.
@@ -31,27 +33,27 @@ It is done with `processEvent()` functions family.
 * `processEventByLaunch()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses
   StateMachine's `CoroutineScope` to process event in a new coroutine by `kotlinx.coroutines.launch` function.
   Cannot be used with StdLib StateMachine instance (throws in this case).
-* `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses 
+* `processEventByAsync()` - (available in `kstatemachine-coroutines` artifact) Not suspendable, asynchronous, uses
   StateMachine's `CoroutineScope` to process event in a new coroutine by `kotlinx.coroutines.async` function.
   Returns`kotlinx.coroutines.Deferred` with `ProcessingResult`.
   Cannot be used with StdLib StateMachine instance (throws in this case).
 
 All `processEvent` variants return or resolve to `ProcessingResult`:
 
-| Value | Meaning |
-|---|---|
-| `PROCESSED` | A matching transition was found and triggered |
-| `IGNORED` | No matching transition found; event was passed to `IgnoredEventHandler` |
-| `PENDING` | Another event is currently being processed; this event was queued or dropped depending on `PendingEventHandler` |
+| Value       | Meaning                                                                                                         |
+|-------------|-----------------------------------------------------------------------------------------------------------------|
+| `PROCESSED` | A matching transition was found and triggered                                                                   |
+| `IGNORED`   | No matching transition found; event was passed to `IgnoredEventHandler`                                         |
+| `PENDING`   | Another event is currently being processed; this event was queued or dropped depending on `PendingEventHandler` |
 
 ### Choosing a processEvent variant
 
-| Variant | Suspends | Returns | When to use |
-|---|---|---|---|
-| `processEvent()` | yes | `ProcessingResult` | Default choice from coroutine code |
-| `processEventBlocking()` | no | `ProcessingResult` | Non-coroutine context; **never call from a listener callback** (deadlock risk) |
-| `processEventByLaunch()` | no | `Unit` | Fire-and-forget; you do not need the result |
-| `processEventByAsync()` | no | `Deferred<ProcessingResult>` | Non-suspending dispatch when you need to check the result later |
+| Variant                  | Suspends | Returns                      | When to use                                                                    |
+|--------------------------|----------|------------------------------|--------------------------------------------------------------------------------|
+| `processEvent()`         | yes      | `ProcessingResult`           | Default choice from coroutine code                                             |
+| `processEventBlocking()` | no       | `ProcessingResult`           | Non-coroutine context; **never call from a listener callback** (deadlock risk) |
+| `processEventByLaunch()` | no       | `Unit`                       | Fire-and-forget; you do not need the result                                    |
+| `processEventByAsync()`  | no       | `Deferred<ProcessingResult>` | Non-suspending dispatch when you need to check the result later                |
 
 `processEventByLaunch` and `processEventByAsync` are only available in the `kstatemachine-coroutines` artifact
 and cannot be used with a `StdLib` machine instance.
@@ -129,7 +131,7 @@ Wrong - managing target state from outside:
 ```kotlin
 if (somethingHappend)
     machine.processEvent(GoToState1Event)
-else 
+else
     machine.processEvent(GoToState2Event)
 ```
 

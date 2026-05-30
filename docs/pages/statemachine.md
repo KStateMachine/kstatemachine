@@ -5,13 +5,15 @@ nav_order: 1
 ---
 
 # State machine
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## Create state machine
 
@@ -32,21 +34,21 @@ val machine = createStateMachine(
 ```
 
 By default, factory functions start state machine. You can control it using `start` argument.
-All overloads accept optional argument `CreationArguments` which allows to change some options. 
+All overloads accept optional argument `CreationArguments` which allows to change some options.
 Use `buildCreationArguments()` function to provide it.
 
 Subsequent samples will use `createStateMachine()` function, but you can choose that one which fits your needs.
 
 ### Creation arguments
 
-| Argument | Default | Description |
-|---|---|---|
-| `autoDestroyOnStatesReuse` | `true` | When a state owned by one machine is reused in another, automatically calls `destroy()` on the previous machine instead of throwing. |
-| `isUndoEnabled` | `false` | Enables the undo transition. See [Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions). |
-| `doNotThrowOnMultipleTransitionsMatch` | `false` | When multiple transitions match an event, selects the first one instead of throwing. |
-| `requireNonBlankNames` | `false` | Throws on machine start if any state or transition has a null or blank name. |
-| `eventRecordingArguments` | `null` | Enables event recording for later persistence/restoration. See [Persistence](https://kstatemachine.github.io/kstatemachine/pages/persistence.html). |
-| `skipCoroutineScopeValidityCheck` | `false` | Skips the check that warns when a multithreaded dispatcher (e.g. `Dispatchers.Default`) is used. See [Multithreading](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html). |
+| Argument                               | Default | Description                                                                                                                                                                                     |
+|----------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `autoDestroyOnStatesReuse`             | `true`  | When a state owned by one machine is reused in another, automatically calls `destroy()` on the previous machine instead of throwing.                                                            |
+| `isUndoEnabled`                        | `false` | Enables the undo transition. See [Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions).                                         |
+| `doNotThrowOnMultipleTransitionsMatch` | `false` | When multiple transitions match an event, selects the first one instead of throwing.                                                                                                            |
+| `requireNonBlankNames`                 | `false` | Throws on machine start if any state or transition has a null or blank name.                                                                                                                    |
+| `eventRecordingArguments`              | `null`  | Enables event recording for later persistence/restoration. See [Persistence](https://kstatemachine.github.io/kstatemachine/pages/persistence.html).                                             |
+| `skipCoroutineScopeValidityCheck`      | `false` | Skips the check that warns when a multithreaded dispatcher (e.g. `Dispatchers.Default`) is used. See [Multithreading](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html). |
 
 ```kotlin
 val machine = createStateMachine(
@@ -77,11 +79,11 @@ machine.destroyBlocking()
 
 Relevant state properties:
 
-| Property | Meaning |
-|---|---|
-| `isRunning` | `true` while the machine is started and not stopped |
-| `isDestroyed` | `true` after `destroy()` — machine is unusable at this point |
-| `hasProcessedEvents` | `true` if any event beyond `StartEvent` has been processed |
+| Property             | Meaning                                                      |
+|----------------------|--------------------------------------------------------------|
+| `isRunning`          | `true` while the machine is started and not stopped          |
+| `isDestroyed`        | `true` after `destroy()` — machine is unusable at this point |
+| `hasProcessedEvents` | `true` if any event beyond `StartEvent` has been processed   |
 
 {: .note }
 `stopBlocking()` must not be called from inside a listener callback when using a single-threaded

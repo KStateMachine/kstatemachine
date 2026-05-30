@@ -4,18 +4,21 @@ title: Exception handling
 ---
 
 # Exception handling
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## Exceptions from listeners
 
 Even though `KStateMachine` assumes that listener callbacks should not throw exceptions, it may happen in practice.
-If your app code throws exceptions in listener callbacks, the library catches them, completes the transition successfully, and
+If your app code throws exceptions in listener callbacks, the library catches them, completes the transition
+successfully, and
 passes the first occurred exception to `listenerExceptionHandler`. It simply rethrows exception by default, but you may
 want to mute them with custom handler for example.
 

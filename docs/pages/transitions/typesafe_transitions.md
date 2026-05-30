@@ -5,13 +5,15 @@ parent: Transitions
 ---
 
 # Typesafe transitions
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 It is a common case when a state expects to receive some data from an event. Library provides typesafe API for such
 case. It is implemented with `DataEvent` and `DataState`. Both interfaces are parameterized with data type. To create
@@ -42,8 +44,8 @@ createStateMachine(scope) {
 
 ### MutableDataState
 
-In some cases it might be necessary to change `DataState`'s data manually. To archive it the library introduces 
-additional `MutableDataState` type, which allows `data` field mutation with `setData` method. 
+In some cases it might be necessary to change `DataState`'s data manually. To archive it the library introduces
+additional `MutableDataState` type, which allows `data` field mutation with `setData` method.
 This is more flexible but less strict approach than using simple `DataState` which allows `data` field update
 only by a transition.
 
@@ -77,7 +79,8 @@ This is related to the way how `DataState` is implemented, `data` field is chang
    If state is activating the first time `lastData` falls back to `defaultData` if provided, otherwise exception is
    thrown. Starting from library version `v0.34.0` you can additionally customize implicit `DataState` activation
    with `DataExtractor::extract` method, which receives `isImplicitActivation` argument set to `true` in this case.
-   You can find a sample of such behaviour in [TypesafeTransitionTest](https://github.com/KStateMachine/kstatemachine/blob/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine/transition/TypesafeTransitionTest.kt)
+   You can find a sample of such behaviour
+   in [TypesafeTransitionTest](https://github.com/KStateMachine/kstatemachine/blob/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine/transition/TypesafeTransitionTest.kt)
    While it might be useful that is not typesafe and should be used with caution.
 2. Activation by `undo()` of `UndoEvent`. This works same way as undone transition.
 3. Activation by `FinishedEvent`. `FinishedEvent` may contain non-null data field. `DataState` receives this data

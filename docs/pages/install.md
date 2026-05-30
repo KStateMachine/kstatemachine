@@ -4,13 +4,15 @@ title: Install
 ---
 
 # Install
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 
@@ -18,10 +20,11 @@ The library consists of the following components (artifacts):
 
 * `kstatemachine` - (mandatory) state machine implementation (depends only on **Kotlin Standard library**)
 * `kstatemachine-coroutines` - (optional) add-ons for working with coroutines (depends on **Kotlin Coroutines library**)
-* `kstatemachine-serialization` - (optional) add-ons for serialization (depends on **Kotlin Serialization library**). 
+* `kstatemachine-serialization` - (optional) add-ons for serialization (depends on **Kotlin Serialization library**).
   Released in `v0.32.0`
 
-Please note that starting from `v0.22.0` the library switched to **Kotlin Multiplatform** and artifact naming has changed.
+Please note that starting from `v0.22.0` the library switched to **Kotlin Multiplatform** and artifact naming has
+changed.
 
 ## Maven Central
 
@@ -53,15 +56,15 @@ dependencies {
     // or linux
     implementation("io.github.nsk90:kstatemachine-linuxx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-linuxx64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-serialization-linuxx64:<Tag>") 
+    implementation("io.github.nsk90:kstatemachine-serialization-linuxx64:<Tag>")
     // starting from 0.35.0
     implementation("io.github.nsk90:kstatemachine-linuxarm64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-linuxarm64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-serialization-linuxarm64:<Tag>")  
+    implementation("io.github.nsk90:kstatemachine-serialization-linuxarm64:<Tag>")
     // or mingw
     implementation("io.github.nsk90:kstatemachine-mingwx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-mingwx64:<Tag>")
-    implementation("io.github.nsk90:kstatemachine-serialization-mingwx64:<Tag>") 
+    implementation("io.github.nsk90:kstatemachine-serialization-mingwx64:<Tag>")
     // or macOS 
     implementation("io.github.nsk90:kstatemachine-macosx64:<Tag>")
     implementation("io.github.nsk90:kstatemachine-coroutines-macosx64:<Tag>")
@@ -97,7 +100,8 @@ Where `<Tag>` is a library version.
 You can see official docs
 about [dependencies on multiplatform libraries](https://kotlinlang.org/docs/multiplatform-add-dependencies.html#library-used-in-specific-source-sets)
 
-## JitPack 
+## JitPack
+
 Deprecated
 {: .label .label-red }
 

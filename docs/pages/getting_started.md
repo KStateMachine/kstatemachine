@@ -5,16 +5,19 @@ nav_order: 0
 ---
 
 # Getting started
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 KStateMachine is a Kotlin Multiplatform library for building hierarchical finite state machines.
-You define states, events, and transitions in a DSL; the library manages active state, callback dispatch, and coroutine integration.
+You define states, events, and transitions in a DSL; the library manages active state, callback dispatch, and coroutine
+integration.
 
 ## Add the dependency
 
@@ -25,7 +28,8 @@ dependencies {
 }
 ```
 
-Where `<Tag>` is the library version. See the [Install](install.html) page for the full platform list and Groovy coordinates.
+Where `<Tag>` is the library version. See the [Install](install.html) page for the full platform list and Groovy
+coordinates.
 
 ## Your first state machine
 
@@ -43,16 +47,16 @@ import ru.nsk.kstatemachine.transition.onTriggered
 object SwitchEvent : Event
 
 sealed class TrafficLightState : DefaultState() {
-    object Green  : TrafficLightState()
+    object Green : TrafficLightState()
     object Yellow : TrafficLightState()
-    object Red    : TrafficLightState()
+    object Red : TrafficLightState()
 }
 
 fun main() = runBlocking {
     val machine = createStateMachine(this, "Traffic lights") {
         addInitialState(TrafficLightState.Green) {
             onEntry { println("Green — go") }
-            onExit  { println("Leaving green") }
+            onExit { println("Leaving green") }
 
             transition<SwitchEvent> {
                 targetState = TrafficLightState.Yellow
@@ -88,12 +92,12 @@ Green — go
 
 ## Key concepts
 
-| Concept | Role |
-|---|---|
-| `Event` | Input that drives transitions; define one subclass per logical input |
-| `IState` | A node in the machine; holds `onEntry` / `onExit` callbacks |
-| `Transition` | Declares which event moves the machine from one state to another |
-| `StateMachine` | Root container; processes events and dispatches callbacks |
+| Concept        | Role                                                                 |
+|----------------|----------------------------------------------------------------------|
+| `Event`        | Input that drives transitions; define one subclass per logical input |
+| `IState`       | A node in the machine; holds `onEntry` / `onExit` callbacks          |
+| `Transition`   | Declares which event moves the machine from one state to another     |
+| `StateMachine` | Root container; processes events and dispatches callbacks            |
 
 The machine processes events one at a time in the thread of its `CoroutineScope`.
 If an event arrives while another is being processed it is queued automatically by the default

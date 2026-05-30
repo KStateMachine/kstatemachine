@@ -4,17 +4,20 @@ title: Multithreading and concurrency
 ---
 
 # Multithreading and concurrency
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 KStateMachine is designed to work in single thread.
 Concurrent modification of library classes will lead to race conditions.
-See [kotlin coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines) section for more info regarding coroutines environment, and how
+See [kotlin coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html#kotlin-coroutines)
+section for more info regarding coroutines environment, and how
 the library helps you to support this requirement.
 
 ## Kotlin Coroutines
@@ -52,7 +55,8 @@ conditions, it is not correct.
 Even `Dispatchers.Default.limitedParallelism(1)` that seems to be ok at glance,
 does not provide guarantee that each coroutine will be executed on the same single thread, it only limits the amount of
 used threads. So race condition still takes place, as nothing forces threads, running on different processor cores,
-to update variable values in their processor core caches, so outdated values could be used from core cache. In other words,
+to update variable values in their processor core caches, so outdated values could be used from core cache. In other
+words,
 one thread may not be aware of variable changes made by another. This is known as the __visibility guarantee__
 that the `volatile` keyword provides on the `jvm`.
 

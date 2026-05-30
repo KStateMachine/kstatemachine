@@ -4,13 +4,15 @@ title: Multiplatform
 ---
 
 # Multiplatform
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## Supported platforms
 
@@ -27,7 +29,8 @@ _If you need missing platform support, please create a GitHub issue._
 
 * Starting from **v0.22.0** KStateMachine has moved to Kotlin Multiplatform only with `JVM` platform support.
 * In **v0.22.1** `iOS` support has been added
-* **v0.30.0** adds `js` and `wasm` targets. `js` and `wasm` targets do not support blocking library APIs as those platforms do not have `runBlocking` support which
-is used internally. 
+* **v0.30.0** adds `js` and `wasm` targets. `js` and `wasm` targets do not support blocking library APIs as those
+  platforms do not have `runBlocking` support which
+  is used internally.
 * **v0.34.0** Adds native platform support: `linuxX64`, `mingwX64`, `macosX64`, and `macosArm64`
 * **v0.35.0** Adds native platform support: `linuxArm64`

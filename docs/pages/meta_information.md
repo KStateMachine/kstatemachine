@@ -4,13 +4,15 @@ title: Meta information
 ---
 
 # Meta information
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## `metaInfo` property
 
@@ -66,21 +68,22 @@ If you need to attach more than one `MetaInfo` to a state or transition you have
    ```
 
    Limitations:
-   * `CompositeMetaInfo` cannot be nested. Only one layer is supported.
-   * Each `MetaInfo` subtype may appear at most once — an exception is thrown otherwise.
+    * `CompositeMetaInfo` cannot be nested. Only one layer is supported.
+    * Each `MetaInfo` subtype may appear at most once — an exception is thrown otherwise.
 
 2. Manually implement all required `MetaInfo` interfaces in a single object. Useful when you control all
    the interfaces involved and want to avoid the composite wrapper.
 
 ## Built-in `MetaInfo` subclasses
 
-| Type | Purpose |
-|---|---|
-| `UmlMetaInfo` | Adds labels, descriptions, and notes to export diagrams. Built with `buildUmlMetaInfo {}`. |
-| `ExportMetaInfo` | Provides resolution hints for conditional transitions during export. Built with `buildExportMetaInfo {}`. |
-| `IgnoreUnsafeCallConditionalLambdasMetaInfo` | Suppresses `unsafeCallConditionalLambdas` execution for a specific state or transition during export. |
+| Type                                         | Purpose                                                                                                   |
+|----------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `UmlMetaInfo`                                | Adds labels, descriptions, and notes to export diagrams. Built with `buildUmlMetaInfo {}`.                |
+| `ExportMetaInfo`                             | Provides resolution hints for conditional transitions during export. Built with `buildExportMetaInfo {}`. |
+| `IgnoreUnsafeCallConditionalLambdasMetaInfo` | Suppresses `unsafeCallConditionalLambdas` execution for a specific state or transition during export.     |
 
-See [controlling export output](https://kstatemachine.github.io/kstatemachine/pages/export.html#controlling-export-output) for usage details.
+See [controlling export output](https://kstatemachine.github.io/kstatemachine/pages/export.html#controlling-export-output)
+for usage details.
 
 For the full `MetaInfo` type hierarchy see the
 [KDoc API reference](https://kstatemachine.github.io/kstatemachine/kdoc/index.html).

@@ -6,13 +6,15 @@ has_children: true
 ---
 
 # Transitions
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
 created with `transition()` function:
@@ -78,7 +80,8 @@ Such transitions are also called internal or self-targeted.
 ## Transition type
 
 There are two types of transitions `TransitionType.LOCAL` (default) and `TransitionType.EXTERNAL`.
-Most transitions are functionally equivalent regardless of type, except when transitioning between a superstate and a sub-state.
+Most transitions are functionally equivalent regardless of type, except when transitioning between a superstate and a
+sub-state.
 A local transition does not cause an exit and re-entry of the source state when the target is a sub-state of the source,
 and does not cause an exit and re-entry of the target state when the target is a superstate of the source.
 
@@ -93,11 +96,11 @@ transition<SwitchEvent> {
 
 ## Check if the transition is triggered by StartEvent
 
-When you start a StateMachine it enters it's initial state path. This is done with special 
-library defined event called `StartEvent`. 
+When you start a StateMachine it enters it's initial state path. This is done with special
+library defined event called `StartEvent`.
 
 Sample: There are use cases when you need to check if the state is activated by StateMachine initialization
-or due to some event processing in machine runtime (after initialization). 
+or due to some event processing in machine runtime (after initialization).
 
 It can be done by checking the event type in `TransitionParams`, if it is `StartEvent` or not.
 The library provides convenience `TransitionParams::isStartTransition` extension property for that purpose:
@@ -174,11 +177,11 @@ functions to create guarded transition:
 
 ```kotlin
 state1 {
-    transition<SwitchEvent> {
-        guard = { value > 10 }
-        targetState = state2
-        // ...
-    }
+  transition<SwitchEvent> {
+    guard = { value > 10 }
+    targetState = state2
+    // ...
+  }
 }
 ```
 
@@ -186,11 +189,11 @@ See [guarded transition sample](https://github.com/KStateMachine/kstatemachine/t
 
 ### Guarded vs conditional transitions
 
-| | `guard` on `transition()` / `transitionOn()` | `transitionConditionally()` |
-|---|---|---|
-| Target state | Fixed at definition time | Chosen dynamically in `direction` lambda |
-| Blocking the transition | Return `false` from `guard` | Return `noTransition()` from `direction` |
-| Syntax | Shorter | More flexible |
+|                         | `guard` on `transition()` / `transitionOn()` | `transitionConditionally()`              |
+|-------------------------|----------------------------------------------|------------------------------------------|
+| Target state            | Fixed at definition time                     | Chosen dynamically in `direction` lambda |
+| Blocking the transition | Return `false` from `guard`                  | Return `noTransition()` from `direction` |
+| Syntax                  | Shorter                                      | More flexible                            |
 
 Use `guard` when the target state is known and you only need to decide whether to fire.
 Use `transitionConditionally` when the target state itself depends on runtime data
@@ -276,24 +279,24 @@ state("state2", childMode = ChildMode.PARALLEL) {
 
 ## Transition interruption
 
-Typically, to calculate whether transition processing should be performed or not, you can use a guard function, 
+Typically, to calculate whether transition processing should be performed or not, you can use a guard function,
 described in [Guarded transitions](#guarded-transitions). In such APIs guard function is separated from `targetState`
-calculation function, sometimes it might be not convenient. So if your logic requires to mix the selection of a 
+calculation function, sometimes it might be not convenient. So if your logic requires to mix the selection of a
 `targetState` with the fact of triggering of the transition, it is more convenient to use `transitionConditionally()`
 as it accepts single callback method called `direction`.
 
 ```kotlin
 transitionConditionally<SwitchEvent> {
     direction = {
-        if (should) 
-            targetState(nextState) 
-        else 
+        if (should)
+            targetState(nextState)
+        else
             noTransition() // transition will not be triggered at all
     }
 }
 ```
 
-Both `guard` and `direction` callbacks are marked with `suspend` keyword, so you can easily call coroutines in 
+Both `guard` and `direction` callbacks are marked with `suspend` keyword, so you can easily call coroutines in
 synchronous style inside them.
 
 There is no way to interrupt a transition from `onTriggered()` notifications.

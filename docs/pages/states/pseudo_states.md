@@ -5,13 +5,15 @@ parent: States
 ---
 
 # Pseudo states
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 Pseudo states are special kind of states that machine cannot enter, but they are useful to describe additional
 logic in machine behaviour.

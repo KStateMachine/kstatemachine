@@ -4,13 +4,15 @@ title: Export
 ---
 
 # Export
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 The library supports export into PlantUML and Mermaid diagram drawing systems. They both use PlantUML text format.
 Mermaid supports fewer features then PlantUML itself.
@@ -126,7 +128,7 @@ transitionConditionally<ValueEvent> {
         // the library does not need to call "direction" lambda, this hint provides the result (state1) directly
         addStateResolutionHint("when 1", state1)
         // same, but uses lazy initialization for state (if the reference is not initializied yet)
-        addLazyStateResolutionHint("when 1", lazy { state1 } )
+        addLazyStateResolutionHint("when 1", lazy { state1 })
         // calls "direction" lambda during export with specified Event and optional argument (lambda will return state2)
         addEventAndArgumentResolutionHint("when 2", ValueEvent(2))
         // you can specify set of states that represents parallel target states

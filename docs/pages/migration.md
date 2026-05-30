@@ -4,13 +4,15 @@ title: Migration guide
 ---
 
 # Migration guide
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## Migrating from versions older than v0.20.0
 
@@ -23,7 +25,8 @@ for non-coroutine contexts.
 * Add both `kstatemachine` and `kstatemachine-coroutines` to your build.
 * Replace machine creation with `createStateMachine` or `createStateMachineBlocking` from `kstatemachine-coroutines`,
   passing a `CoroutineScope` as the first argument.
-* Prefer suspendable function variants (`start`, `stop`, `processEvent`, `undo`, etc.) whenever you are inside a coroutine.
+* Prefer suspendable function variants (`start`, `stop`, `processEvent`, `undo`, etc.) whenever you are inside a
+  coroutine.
 * Avoid the `Blocking` suffix variants, **especially recursively** (e.g. from inside a listener callback) —
   they use `runBlocking` internally and will deadlock in that context.
 

@@ -4,13 +4,15 @@ title: Coroutines artifact
 ---
 
 # Coroutines artifact
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 This page contains information about `kstatemachine-coroutines` artifact functionality,
 which provides library APIs for working in the `Kotlin Coroutines` environment.
@@ -23,15 +25,15 @@ You can find common information about multithreading library usage and coroutine
 ## Artifact separation
 
 `KStateMachine` has first class support of coroutines. Even if you don't use `Kotlin Coroutines`
-and `kstatemachine-coroutines` artifact all library callbacks are `suspendable` functions. 
-So the functionality of this module should not be treated as "wrappers" or "extensions". 
+and `kstatemachine-coroutines` artifact all library callbacks are `suspendable` functions.
+So the functionality of this module should not be treated as "wrappers" or "extensions".
 This is just a core functionality which is separated from original `kstatemachine` artifact
 to follow language architecture regarding coroutines support.
 
 ## State machine creation
 
-The artifact contains `createStateMachine()` / `createStateMachineBlocking()` methods, which were described in 
-[Create state machine](https://kstatemachine.github.io/kstatemachine/pages/statemachine.html#create-state-machine) 
+The artifact contains `createStateMachine()` / `createStateMachineBlocking()` methods, which were described in
+[Create state machine](https://kstatemachine.github.io/kstatemachine/pages/statemachine.html#create-state-machine)
 block
 
 ## Flow notifications
@@ -67,9 +69,9 @@ machine.stateMachineNotificationFlow(extraBufferCapacity = 10)
     .onEach { notification ->
         when (notification) {
             is TransitionTriggered -> println("Triggered by: ${notification.transitionParams.event}")
-            is StateEntry          -> println("Entered: ${notification.state.name}")
-            is StateExit           -> println("Exited: ${notification.state.name}")
-            else                   -> Unit
+            is StateEntry -> println("Entered: ${notification.state.name}")
+            is StateExit -> println("Exited: ${notification.state.name}")
+            else -> Unit
         }
     }
     .launchIn(this)
