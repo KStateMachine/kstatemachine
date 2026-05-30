@@ -36,28 +36,31 @@
 
 ## What is KStateMachine?
 
-**KStateMachine** lets you model complex application logic as a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine) or [statechart](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) using an expressive Kotlin DSL. It runs on every Kotlin Multiplatform target, integrates seamlessly with Kotlin Coroutines, and has **zero mandatory dependencies**.
+**KStateMachine** lets you model complex application logic as
+a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine)
+or [statechart](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) using an expressive Kotlin DSL.
+It runs on every Kotlin Multiplatform target, integrates seamlessly with Kotlin Coroutines, and has **zero mandatory
+dependencies**.
 
 ---
 
 ## ✨ Why KStateMachine?
 
-## 📄 Documentation
-| Feature | KStateMachine |
-|---|:---:|
-| Kotlin DSL syntax | ✅ |
-| Kotlin Multiplatform (JVM, Android, iOS, JS, Wasm, Native) | ✅ |
-| Kotlin Coroutines support (optional) | ✅ |
-| Zero mandatory dependencies | ✅ |
-| Nested states & statecharts | ✅ |
-| Parallel states | ✅ |
-| Typesafe event→state data passing | ✅ |
-| Undo transitions | ✅ |
-| Export to PlantUML & Mermaid | ✅ |
-| Persist & restore state | ✅ |
-| Built-in `kotlinx.serialization` support | ✅ |
-| Testing utilities (`startFrom`) | ✅ |
-| Reactive listeners (states, groups, transitions) | ✅ |
+| Feature                                                    | KStateMachine |
+|------------------------------------------------------------|:-------------:|
+| Kotlin DSL syntax                                          |       ✅       |
+| Kotlin Multiplatform (JVM, Android, iOS, JS, Wasm, Native) |       ✅       |
+| Kotlin Coroutines support (optional)                       |       ✅       |
+| Zero mandatory dependencies                                |       ✅       |
+| Nested states & statecharts                                |       ✅       |
+| Parallel states                                            |       ✅       |
+| Typesafe event→state data passing                          |       ✅       |
+| Undo transitions                                           |       ✅       |
+| Export to PlantUML & Mermaid                               |       ✅       |
+| Persist & restore state                                    |       ✅       |
+| Built-in `kotlinx.serialization` support                   |       ✅       |
+| Testing utilities (`startFrom`)                            |       ✅       |
+| Reactive listeners (states, groups, transitions)           |       ✅       |
 
 ---
 
@@ -65,11 +68,9 @@
 
 ### Animated traffic light
 
-
 <div align="center">
 <img src="./docs/traffic-light.svg" alt="Animated UML statechart — traffic light state machine" width="635"/>
 </div>
-
 
 ```kotlin
 // Events
@@ -77,16 +78,16 @@ object SwitchEvent : Event
 
 // States
 sealed class States : DefaultState() {
-    object RedState    : States()
+    object RedState : States()
     object YellowState : States()
-    object GreenState  : States(), FinalState  // machine stops here
+    object GreenState : States(), FinalState  // machine stops here
 }
 
 fun main() = runBlocking {
     val machine = createStateMachine(scope = this) {
         addInitialState(RedState) {
             onEntry { println("🔴 Red — stop!") }
-            onExit  { println("   leaving red") }
+            onExit { println("   leaving red") }
 
             transition<SwitchEvent> {
                 targetState = YellowState
@@ -128,36 +129,57 @@ fun main() = runBlocking {
 
 **Integration**
 
-- **[Kotlin DSL](https://kotlinlang.org/docs/type-safe-builders.html)** — declarative, readable state machine structure; plain API also available
-- **[Kotlin Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html)** — call suspending functions in listeners and guards; fully optional
-- **[Kotlin Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html)** — JVM, Android, iOS, JS, Wasm, Native
+- **[Kotlin DSL](https://kotlinlang.org/docs/type-safe-builders.html)** — declarative, readable state machine structure;
+  plain API also available
+- **[Kotlin Coroutines](https://kstatemachine.github.io/kstatemachine/pages/multithreading.html)** — call suspending
+  functions in listeners and guards; fully optional
+- **[Kotlin Multiplatform](https://kstatemachine.github.io/kstatemachine/pages/multiplatform.html)** — JVM, Android,
+  iOS, JS, Wasm, Native
 - **Zero dependencies** — core artifact depends only on the Kotlin stdlib
 
 **State management**
 
-- **[Event-based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** — transitions fire in response to events
-- **[Reactive listeners](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** — observe machines, states, state groups, and transitions
-- **[Guarded & conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#guarded-transitions)** — dynamic target state computed at runtime
-- **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** — full statechart hierarchy with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#cross-level-transitions)
-- **[Composed state machines](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#composed-nested-state-machines)** — embed one machine as a child state of another
-- **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** — history, redirect, and other behavioural helpers
-- **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)** — carry typed data from event to target state
-- **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** — run orthogonal regions simultaneously
-- **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** — navigate back like a stack-based FSM
+- **[Event-based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** — transitions fire in response to
+  events
+- **[Reactive listeners](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** —
+  observe machines, states, state groups, and transitions
+- *
+  *[Guarded & conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#guarded-transitions)
+  ** — dynamic target state computed at runtime
+- **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** — full
+  statechart hierarchy
+  with [cross-level transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#cross-level-transitions)
+- *
+  *[Composed state machines](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#composed-nested-state-machines)
+  ** — embed one machine as a child state of another
+- **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** — history,
+  redirect, and other behavioural helpers
+- **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)
+  ** — carry typed data from event to target state
+- **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** — run
+  orthogonal regions simultaneously
+- *
+  *[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)
+  ** — navigate back like a stack-based FSM
 
 **Tooling**
 
-- **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** — generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition
-- **[Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)** — record processed events and replay them to restore state; `kotlinx.serialization` built in
-- **[Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** — `startFrom(state)` bypasses normal init, enabling focused unit tests
+- **[Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)** —
+  generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition
+- **[Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html)** — record processed
+  events and replay them to restore state; `kotlinx.serialization` built in
+- **[Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** — `startFrom(state)` bypasses
+  normal init, enabling focused unit tests
 
 ---
 
 ## 📄 Documentation
 
 > [!IMPORTANT]
-> Full documentation lives at **[kstatemachine.github.io/kstatemachine](https://kstatemachine.github.io/kstatemachine)**  
-> KDoc for every class: **[kstatemachine.github.io/kstatemachine/kdoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html)**
+> Full documentation lives at 
+  **[kstatemachine.github.io/kstatemachine](https://kstatemachine.github.io/kstatemachine)**  
+> KDoc for every class: 
+  **[kstatemachine.github.io/kstatemachine/kdoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html)**
 
 ---
 
@@ -173,11 +195,11 @@ If KStateMachine saves you time, please consider supporting the project:
 
 ## 🧪 Samples
 
-Full app samples and 20+ focused code samples are listed on the **[Samples page](https://kstatemachine.github.io/kstatemachine/pages/samples.html)** in the documentation.
+Full app samples and 20+ focused code samples are listed on the 
+**[Samples page](https://kstatemachine.github.io/kstatemachine/pages/samples.html)** in the documentation.
 
 <p align="center">
-  <img src="https://github.com/kstatemachine/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
-       alt="Android sample app" width="40%"/>
+  <img src="https://github.com/kstatemachine/compose-kstatemachine-sample/blob/main/images/app-sample.gif" alt="Android sample app"/>
 </p>
 
 ---
@@ -206,7 +228,8 @@ dependencies {
 ```
 
 Replace `<Tag>` with the current version shown in the Maven Central badge above.  
-See the [full install guide](https://kstatemachine.github.io/kstatemachine/pages/install.html) for Gradle Kotlin DSL, Groovy DSL, and JitPack variants.
+See the [full install guide](https://kstatemachine.github.io/kstatemachine/pages/install.html) for Gradle Kotlin DSL,
+Groovy DSL, and JitPack variants.
 
 ---
 
@@ -230,11 +253,11 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting.
 
 ## 🙋 Support
 
-| Channel | Best for |
-|---|---|
-| [Slack `#kstatemachine`](https://kotlinlang.slack.com/archives/C07DVAEKLM8) | Questions & discussions |
+| Channel                                                                          | Best for                       |
+|----------------------------------------------------------------------------------|--------------------------------|
+| [Slack `#kstatemachine`](https://kotlinlang.slack.com/archives/C07DVAEKLM8)      | Questions & discussions        |
 | [GitHub Discussions](https://github.com/kstatemachine/kstatemachine/discussions) | Questions & longer discussions |
-| [GitHub Issues](https://github.com/KStateMachine/kstatemachine/issues) | Bug reports & feature requests |
+| [GitHub Issues](https://github.com/KStateMachine/kstatemachine/issues)           | Bug reports & feature requests |
 
 When asking on other platforms, include a link to this repo or use the `#kstatemachine` tag.
 
