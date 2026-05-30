@@ -14,7 +14,7 @@ has_children: true
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Default states
 

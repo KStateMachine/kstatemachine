@@ -12,7 +12,7 @@ title: Multithreading and concurrency
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 KStateMachine is designed to work in single thread.
 Concurrent modification of library classes will lead to race conditions.

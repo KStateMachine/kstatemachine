@@ -13,7 +13,7 @@ nav_order: 4
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 All events that can be processed by the library are subclassed from `Event` class.
 User defined events often contain properties that serve like data inputs for your StateMachine.

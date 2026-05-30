@@ -12,7 +12,7 @@ title: Samples
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Full app samples
 

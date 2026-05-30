@@ -13,7 +13,7 @@ nav_order: 0
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 KStateMachine is a Kotlin Multiplatform library for building hierarchical finite state machines.
 You define states, events, and transitions in a DSL; the library manages active state, callback dispatch, and coroutine

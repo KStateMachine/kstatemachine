@@ -12,7 +12,7 @@ title: Migration guide
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Migrating from versions older than v0.20.0
 

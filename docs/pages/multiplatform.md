@@ -12,7 +12,7 @@ title: Multiplatform
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Supported platforms
 

@@ -12,7 +12,7 @@ title: Install
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 KStateMachine is available on `Maven Central` and `JitPack` repositories.
 

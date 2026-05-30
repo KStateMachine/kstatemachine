@@ -13,7 +13,7 @@ parent: Transitions
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 It is a common case when a state expects to receive some data from an event. Library provides typesafe API for such
 case. It is implemented with `DataEvent` and `DataState`. Both interfaces are parameterized with data type. To create

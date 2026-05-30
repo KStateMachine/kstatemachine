@@ -14,7 +14,7 @@ has_children: true
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
 created with `transition()` function:

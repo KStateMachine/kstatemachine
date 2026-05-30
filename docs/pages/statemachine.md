@@ -13,7 +13,7 @@ nav_order: 1
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Create state machine
 

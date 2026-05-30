@@ -12,7 +12,7 @@ title: Export
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 The library supports export into PlantUML and Mermaid diagram drawing systems. They both use PlantUML text format.
 Mermaid supports fewer features then PlantUML itself.

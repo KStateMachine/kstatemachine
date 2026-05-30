@@ -12,7 +12,7 @@ title: Meta information
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## `metaInfo` property
 

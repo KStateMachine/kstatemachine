@@ -12,7 +12,7 @@ title: Testing
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 It is recommended to specify names for `States` and `Transitions`. This should help when someone tries to debug state
 machine's behaviour.

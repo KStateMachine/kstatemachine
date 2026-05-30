@@ -12,7 +12,7 @@ title: Exception handling
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Exceptions from listeners
 
