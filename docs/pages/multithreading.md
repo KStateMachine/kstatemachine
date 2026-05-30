@@ -110,25 +110,6 @@ runBlocking { // defines non-empty coroutine context for state machine
 }
 ```
 
-## Migration guide from versions older than v0.20.0
+## Migration guide
 
-### If you already have or ready to add Kotlin Coroutines dependency
-
-* Add both `kstatemachine` and `kstatemachine-coroutines` artifacts to your build system
-* Use `createStateMachine` or `createStateMachineBlocking` from `kstatemachine-coroutines` artifact to create state
-  machines providing `CoroutineScope` as argument
-* Use suspendable versions of functions (`start`/`stop`/`processEvent`/`undo` etc.) when possible
-* Avoid using function analogs with `Blocking` suffix **(especially recursively)** as this may easily lead to deadlocks
-  or race conditions depending on your use case and machine configuration
-
-### If you can not have dependency on Kotlin Coroutines or just do not want to use it
-
-* Use only `kstatemachine` artifact in your build system
-* Use `createStdLibStateMachine` to create state machines
-* Use suspendable versions of functions (`start`/`stop`/`processEvent`/`undo` etc.) when possible
-  (from KStateMachine callbacks for example)
-* In other cases use their analogs with `Blocking` suffix, it is ok
-* If you try to use Kotlin Coroutines library from machine created by `createStdLibStateMachine` you will probably get
-  an exception.
-* Using suspendable code without calls to Kotlin Coroutines library is ok, as `suspend` keyword is a compiler feature,
-  not library one.
+See the dedicated [Migration guide](migration.html) page for instructions on upgrading from versions older than v0.20.0.

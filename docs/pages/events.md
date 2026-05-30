@@ -44,6 +44,19 @@ All `processEvent` variants return or resolve to `ProcessingResult`:
 | `IGNORED` | No matching transition found; event was passed to `IgnoredEventHandler` |
 | `PENDING` | Another event is currently being processed; this event was queued or dropped depending on `PendingEventHandler` |
 
+### Choosing a processEvent variant
+
+| Variant | Suspends | Returns | When to use |
+|---|---|---|---|
+| `processEvent()` | yes | `ProcessingResult` | Default choice from coroutine code |
+| `processEventBlocking()` | no | `ProcessingResult` | Non-coroutine context; **never call from a listener callback** (deadlock risk) |
+| `processEventByLaunch()` | no | `Unit` | Fire-and-forget; you do not need the result |
+| `processEventByAsync()` | no | `Deferred<ProcessingResult>` | Non-suspending dispatch when you need to check the result later |
+
+`processEventByLaunch` and `processEventByAsync` are only available in the `kstatemachine-coroutines` artifact
+and cannot be used with a `StdLib` machine instance.
+See [Coroutines artifact](coroutines_artifact.html) for code examples.
+
 ## Ignored events
 
 By default, state machine simply ignores events that does not match any defined transition. You can see those events if

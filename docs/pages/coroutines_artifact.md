@@ -36,36 +36,76 @@ block
 
 ## Flow notifications
 
-Coroutines users often use `Flow` to get some changes from a source.
-The library provides `StateMachine` extension methods which represents notification APIs (listeners) in a form of `Flow`:
+Coroutines users often use `Flow` to react to changes from a source.
+The library provides two `StateMachine` extensions that expose its notifications as flows:
 
-* `stateMachineNotificationFlow()` returns a `SharedFlow` of all machine notifications:
+* `activeStatesFlow()` returns a `StateFlow<Set<IState>>` that emits the current active-state set every time it changes.
+  This is the primary API for driving UI updates reactively:
 
 ```kotlin
- machine.stateMachineNotificationFlow().collect {
-    when (it) {
-        is Started -> println("Started ${it.machine}")
-        is TransitionTriggered -> println("TransitionTriggered ${it.transitionParams.event}")
-        is TransitionComplete -> println("TransitionComplete ${it.transitionParams.event}")
-        is StateEntry -> println("StateEntry ${it.state}")
-        is StateExit -> println("StateExit ${it.state}")
-        is StateFinished -> println("StateFinished ${it.state}")
-        is Stopped -> println("Stopped ${it.machine}")
-        is Destroyed -> println("Destroyed ${it.machine}")
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import ru.nsk.kstatemachine.statemachine.activeStatesFlow
+
+machine.activeStatesFlow()
+    .onEach { activeStates ->
+        // runs on the machine's coroutine context — safe to read machine state here
+        updateUi(activeStates)
     }
-}
+    .launchIn(uiScope)
 ```
 
-* `activeStatesFlow()` returns a `StateFlow` of active machine states:
+* `stateMachineNotificationFlow()` returns a `SharedFlow` that emits every machine lifecycle event:
+  started, stopped, destroyed, state entries/exits, and transition triggers/completions.
+  Use it when you need finer-grained observation than `activeStatesFlow()` provides:
 
 ```kotlin
-machine.activeStatesFlow().collect { activeStates ->
-    println("The set of active states: $activeStates")
-}
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
+import ru.nsk.kstatemachine.statemachine.stateMachineNotificationFlow
+
+machine.stateMachineNotificationFlow(extraBufferCapacity = 10)
+    .onEach { notification ->
+        when (notification) {
+            is TransitionTriggered -> println("Triggered by: ${notification.transitionParams.event}")
+            is StateEntry          -> println("Entered: ${notification.state.name}")
+            is StateExit           -> println("Exited: ${notification.state.name}")
+            else                   -> Unit
+        }
+    }
+    .launchIn(this)
 ```
+
+{: .note }
+`stateMachineNotificationFlow` accepts an `extraBufferCapacity` parameter. Set it high enough so that
+fast producers do not drop notifications while downstream collectors are suspended.
+
+See [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)
+for a complete runnable example.
 
 ## Event processing
 
-`processEventByLaunch()` and `processEventByAsync()` functions are described in 
-[event processing](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-processing) block.
-You can use them to process events in asynchronous way.
+The `kstatemachine-coroutines` artifact adds two non-suspending event dispatch functions on top of
+the base `processEvent()` / `processEventBlocking()`:
+
+* `processEventByLaunch()` — fire-and-forget. Dispatches the event in a new coroutine on the machine's scope
+  and returns immediately with no result:
+
+```kotlin
+machine.processEventByLaunch(SomeEvent) // returns Unit; event is queued and processed asynchronously
+```
+
+* `processEventByAsync()` — non-suspending dispatch that returns a `Deferred<ProcessingResult>`.
+  Useful when you need to verify how the event was handled without suspending at the call site:
+
+```kotlin
+val deferred = machine.processEventByAsync(SomeEvent)
+// ... do other work ...
+val result = deferred.await() // suspend here when you actually need the result
+```
+
+For a comparison of all four variants and when to choose each, see
+[Choosing a processEvent variant](https://kstatemachine.github.io/kstatemachine/pages/events.html#choosing-a-processevent-variant)
+on the Events page.
+
+See [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt)
+for a side-by-side runnable comparison of `processEventByLaunch` and `processEventByAsync`.

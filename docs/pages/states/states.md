@@ -239,6 +239,18 @@ each time.
 For use cases when you need to pass data from `Event` to `IState`, the library provides `DataState` and `DataEvent`
 concept, see [typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) section.
 
+## Choosing how to store state data
+
+| Approach | Type-safe | When to use |
+|---|---|---|
+| State subclass with properties | yes | Domain data that belongs to a state; the recommended pattern for most cases |
+| `DataState<D>` | yes | Data that flows from a transition event to the state and must be accessible while the state is active |
+| `payload: Any?` | no | Quick prototyping or passing ad-hoc data through a few states without creating subclasses |
+
+Prefer state subclasses for production code — they are explicit and refactor-friendly.
+Use `DataState` when the data originates from an `Event` and needs to be read back from the active state.
+See [Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) for the `DataState` + `DataEvent` API.
+
 ## Finishing states and state machine
 
 Some of state machines and states are infinite, but other ones may finish.

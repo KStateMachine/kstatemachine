@@ -190,7 +190,7 @@ fun main() = runBlocking {
   The library itself does not depend on Android.
 
   <p align="center">
-      <img src="https://github.com/kstatemachine/android-kstatemachine-sample/blob/main/images/android-app-sample.gif"
+      <img src="https://github.com/kstatemachine/kstatemachine-compose-sample/blob/main/images/app-sample.gif"
           alt="Android sample app" width="30%" height="30%"/>
   </p>
 * [Compose 2D shooter game sample](https://github.com/KStateMachine/compose-kstatemachine-sample)

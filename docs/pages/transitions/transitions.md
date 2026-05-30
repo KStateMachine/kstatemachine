@@ -184,6 +184,18 @@ state1 {
 
 See [guarded transition sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
 
+### Guarded vs conditional transitions
+
+| | `guard` on `transition()` / `transitionOn()` | `transitionConditionally()` |
+|---|---|---|
+| Target state | Fixed at definition time | Chosen dynamically in `direction` lambda |
+| Blocking the transition | Return `false` from `guard` | Return `noTransition()` from `direction` |
+| Syntax | Shorter | More flexible |
+
+Use `guard` when the target state is known and you only need to decide whether to fire.
+Use `transitionConditionally` when the target state itself depends on runtime data
+(e.g. routing to one of several states based on a value).
+
 ```mermaid
 ---
 title: Guarded transition diagram
