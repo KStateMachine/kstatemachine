@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 635 115" width="635" height="115">
+  <defs>
+    <style>
+      /* === state box fill+glow === */
+      @keyframes red-box {
+        0%, 33.2%   { fill: #2d1010; stroke: #f85149; filter: drop-shadow(0 0 6px #f8514966); }
+        33.5%, 100% { fill: #161b22; stroke: #30363d; filter: none; }
+      }
+      @keyframes ylw-box {
+        0%,   30.5% { fill: #161b22; stroke: #30363d; filter: none; }
+        33.5%, 66.2% { fill: #21190a; stroke: #d29922; filter: drop-shadow(0 0 6px #d2992266); }
+        66.5%, 100% { fill: #161b22; stroke: #30363d; filter: none; }
+      }
+      @keyframes grn-box {
+        0%,   63.5% { fill: #161b22; stroke: #30363d; filter: none; }
+        66.5%, 100% { fill: #0c1f12; stroke: #3fb950; filter: drop-shadow(0 0 6px #3fb95066); }
+      }
+
+      /* === state label color === */
+      @keyframes red-lbl {
+        0%, 33.2%   { fill: #f85149; }
+        33.5%, 100% { fill: #8b949e; }
+      }
+      @keyframes ylw-lbl {
+        0%,   30.5% { fill: #8b949e; }
+        33.5%, 66.2% { fill: #e3b341; }
+        66.5%, 100% { fill: #8b949e; }
+      }
+      @keyframes grn-lbl {
+        0%,   63.5% { fill: #8b949e; }
+        66.5%, 100% { fill: #3fb950; }
+      }
+
+      /* === arrow color (via CSS color → currentColor) === */
+      @keyframes arr1-c {
+        0%,   26%   { color: #30363d; }
+        27%, 33.5%  { color: #e3b341; }
+        33.6%, 100% { color: #30363d; }
+      }
+      @keyframes arr2-c {
+        0%,   59%   { color: #30363d; }
+        60%, 66.5%  { color: #3fb950; }
+        66.6%, 100% { color: #30363d; }
+      }
+      @keyframes arr3-c {
+        0%,   93%  { color: #30363d; }
+        94%, 100%  { color: #8b949e; }
+      }
+
+      /* === traveling dots === */
+      @keyframes dot1-m {
+        0%,   26.9% { opacity: 0; transform: translateX(0px); }
+        27%         { opacity: 1; transform: translateX(0px); }
+        33.2%       { opacity: 0; transform: translateX(70px); }
+        33.3%, 100% { opacity: 0; transform: translateX(70px); }
+      }
+      @keyframes dot2-m {
+        0%,   59.9% { opacity: 0; transform: translateX(0px); }
+        60%         { opacity: 1; transform: translateX(0px); }
+        66.2%       { opacity: 0; transform: translateX(70px); }
+        66.3%, 100% { opacity: 0; transform: translateX(70px); }
+      }
+      @keyframes dot3-m {
+        0%,   93.9% { opacity: 0; transform: translateX(0px); }
+        94%         { opacity: 1; transform: translateX(0px); }
+        99%         { opacity: 0; transform: translateX(34px); }
+        99.1%, 100% { opacity: 0; transform: translateX(34px); }
+      }
+
+      /* === apply === */
+      .rb { animation: red-box 9s infinite; }
+      .yb { animation: ylw-box 9s infinite; }
+      .gb { animation: grn-box 9s infinite; }
+      .rl { animation: red-lbl 9s infinite; }
+      .yl { animation: ylw-lbl 9s infinite; }
+      .gl { animation: grn-lbl 9s infinite; }
+      .a1 { animation: arr1-c 9s infinite; color: #30363d; }
+      .a2 { animation: arr2-c 9s infinite; color: #30363d; }
+      .a3 { animation: arr3-c 9s infinite; color: #30363d; }
+      .d1 { animation: dot1-m 9s infinite; transform-box: fill-box; transform-origin: center; fill: #e3b341; opacity: 0; }
+      .d2 { animation: dot2-m 9s infinite; transform-box: fill-box; transform-origin: center; fill: #3fb950;  opacity: 0; }
+      .d3 { animation: dot3-m 9s infinite; transform-box: fill-box; transform-origin: center; fill: #8b949e;  opacity: 0; }
+    </style>
+  </defs>
+
+  <!-- Background + frame -->
+  <rect width="635" height="115" rx="8" fill="#0d1117"/>
+  <rect x="0.75" y="0.75" width="633.5" height="113.5" rx="7.5" fill="none" stroke="#21262d" stroke-width="1.5"/>
+
+  <!-- UML frame label -->
+  <text x="12" y="15" font-family="monospace" font-size="9" fill="#484f58">&#171;statechart&#187; TrafficLightMachine</text>
+  <line x1="12" y1="20" x2="197" y2="20" stroke="#21262d" stroke-width="0.75"/>
+
+  <!-- ─── Initial pseudostate ─── -->
+  <circle cx="20" cy="62" r="7" fill="#c9d1d9"/>
+
+  <!-- init → Red -->
+  <line x1="27" y1="62" x2="50" y2="62" stroke="#c9d1d9" stroke-width="1.5"/>
+  <polygon points="50,57 62,62 50,67" fill="#c9d1d9"/>
+
+  <!-- ─── RedState ─── -->
+  <rect class="rb" x="62" y="39" width="108" height="46" rx="5" stroke-width="1.75" fill="#161b22" stroke="#30363d"/>
+  <line x1="62" y1="59" x2="170" y2="59" stroke="#30363d" stroke-width="0.6" opacity="0.6"/>
+  <text class="rl" x="116" y="51" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#8b949e">RedState</text>
+
+  <!-- ─── Arrow 1: Red → Yellow ─── -->
+  <g class="a1">
+    <line x1="172" y1="62" x2="229" y2="62" stroke="currentColor" stroke-width="1.5"/>
+    <polygon points="229,57 241,62 229,67" fill="currentColor"/>
+  </g>
+  <!-- dot traveling Red→Yellow -->
+  <circle class="d1" cx="172" cy="62" r="4.5"/>
+  <!-- label -->
+  <text x="206" y="29" font-family="monospace" font-size="9.5" font-style="italic" text-anchor="middle" fill="#6e7681">SwitchEvent</text>
+  <line x1="172" y1="33" x2="241" y2="33" stroke="#21262d" stroke-width="0.5" stroke-dasharray="2,3"/>
+
+  <!-- ─── YellowState ─── -->
+  <rect class="yb" x="242" y="39" width="124" height="46" rx="5" stroke-width="1.75" fill="#161b22" stroke="#30363d"/>
+  <line x1="242" y1="59" x2="366" y2="59" stroke="#30363d" stroke-width="0.6" opacity="0.6"/>
+  <text class="yl" x="304" y="51" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#8b949e">YellowState</text>
+
+  <!-- ─── Arrow 2: Yellow → Green ─── -->
+  <g class="a2">
+    <line x1="366" y1="62" x2="423" y2="62" stroke="currentColor" stroke-width="1.5"/>
+    <polygon points="423,57 435,62 423,67" fill="currentColor"/>
+  </g>
+  <!-- dot traveling Yellow→Green -->
+  <circle class="d2" cx="366" cy="62" r="4.5"/>
+  <!-- label -->
+  <text x="400" y="29" font-family="monospace" font-size="9.5" font-style="italic" text-anchor="middle" fill="#6e7681">SwitchEvent</text>
+  <line x1="366" y1="33" x2="435" y2="33" stroke="#21262d" stroke-width="0.5" stroke-dasharray="2,3"/>
+
+  <!-- ─── GreenState ─── -->
+  <rect class="gb" x="436" y="39" width="120" height="46" rx="5" stroke-width="1.75" fill="#161b22" stroke="#30363d"/>
+  <line x1="436" y1="59" x2="556" y2="59" stroke="#30363d" stroke-width="0.6" opacity="0.6"/>
+  <text class="gl" x="496" y="51" font-family="monospace" font-size="11.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#8b949e">GreenState</text>
+
+  <!-- ─── Arrow 3: Green → Final ─── -->
+  <g class="a3">
+    <line x1="556" y1="62" x2="579" y2="62" stroke="currentColor" stroke-width="1.5"/>
+    <polygon points="579,57 591,62 579,67" fill="currentColor"/>
+  </g>
+  <!-- dot traveling Green→Final -->
+  <circle class="d3" cx="556" cy="62" r="4.5"/>
+
+  <!-- ─── Final pseudostate (double circle) ─── -->
+  <circle cx="605" cy="62" r="14" fill="none" stroke="#c9d1d9" stroke-width="1.5"/>
+  <circle cx="605" cy="62" r="9"  fill="#c9d1d9"/>
+
+  <!-- ─── Action compartment hints (static) ─── -->
+  <text x="116" y="74" font-family="monospace" font-size="8" text-anchor="middle" dominant-baseline="middle" fill="#484f58">entry / onEntry { }</text>
+  <text x="304" y="74" font-family="monospace" font-size="8" text-anchor="middle" dominant-baseline="middle" fill="#484f58">entry / onEntry { }</text>
+  <text x="496" y="74" font-family="monospace" font-size="8" text-anchor="middle" dominant-baseline="middle" fill="#484f58">entry / onEntry { }</text>
+</svg>
