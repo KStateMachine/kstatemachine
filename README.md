@@ -29,7 +29,7 @@
 
 **KStateMachine** is a powerful **Kotlin Multiplatform** library with clean DSL syntax for creating
 complex [state machines](https://en.wikipedia.org/wiki/Finite-state_machine)
-and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) driven by 
+and [statecharts](https://www.sciencedirect.com/science/article/pii/0167642387900359/pdf) driven by
 **Kotlin Coroutines**.
 
 ## 🌏 Overview
@@ -48,7 +48,8 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 
 ### ⚙️ State management features
 
-* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
+* **[Event based](https://kstatemachine.github.io/kstatemachine/pages/events.html)
+  ** - [transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) are performed by
   processing
   incoming events
 * **[Reactive](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-states)** - listen for
@@ -56,7 +57,8 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
   [state groups](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#listen-group-of-states) and
   transitions
 * **[Guarded](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#guarded-transitions)
-  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)** - dynamic
+  and [Conditional transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#conditional-transitions)
+  ** - dynamic
   target
   state which is calculated in a moment of event processing depending on application business logic
 * **[Nested states](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#nested-states)** - build
@@ -70,15 +72,18 @@ and [statecharts](https://www.sciencedirect.com/science/article/pii/016764238790
 * **[Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)** for additional
   logic in machine
   behaviour
-* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)** - pass data in
+* **[Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)
+  ** - pass data in
   typesafe way
   from event to state
 * **[Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)** - avoid a
   combinatorial
   explosion of
   states
-* **[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)** - navigate back to previous
-state (like stack based FSMs do)
+* *
+  *[Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)
+  ** - navigate back to previous
+  state (like stack based FSMs do)
 
 * **[Optional argument](https://kstatemachine.github.io/kstatemachine/pages/events.html#event-argument)** passing for
   events and
@@ -90,8 +95,10 @@ state (like stack based FSMs do)
   configuration and restore it later. Built-in `kotlinx.serialization` support.
 * **[Testable](https://kstatemachine.github.io/kstatemachine/pages/testing.html)** - run state machine from specified
   state and enable internal logging
-* **[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)** - all features are covered
-by tests
+* *
+  *[Well tested](https://github.com/kstatemachine/kstatemachine/tree/master/tests/src/commonTest/kotlin/ru/nsk/kstatemachine)
+  ** - all features are covered
+  by tests
 
 ## 📄 Documentation
 
@@ -185,15 +192,12 @@ fun main() = runBlocking {
 
 ## 🧪 Samples
 
-* [Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
+<p align="center">
+    <img src="https://github.com/kstatemachine/compose-kstatemachine-sample/blob/main/images/app-sample.gif" alt="sample app"/>
+</p>
 
-  The library itself does not depend on Android.
-
-  <p align="center">
-      <img src="https://github.com/kstatemachine/kstatemachine-compose-sample/blob/main/images/app-sample.gif"
-          alt="Android sample app" width="30%" height="30%"/>
-  </p>
-* [Compose 2D shooter game sample](https://github.com/KStateMachine/compose-kstatemachine-sample)
+* [Compose 2D shooter game sample](https://github.com/KStateMachine/compose-kstatemachine-sample) 
+* [Deprecated - Android 2D shooter game sample](https://github.com/kstatemachine/android-kstatemachine-sample)
 * [Finished state sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedStateSample.kt)
 * [Transition on FinishedEvent sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventSample.kt)
 * [FinishedEvent using with DataState sample](./samples/src/commonMain/kotlin/ru/nsk/samples/FinishedEventDataStateSample.kt)
