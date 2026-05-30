@@ -78,11 +78,9 @@ Such transitions are also called internal or self-targeted.
 ## Transition type
 
 There are two types of transitions `TransitionType.LOCAL` (default) and `TransitionType.EXTERNAL`.
-Most of the cases both transitions are functionally equivalent except in cases where transition
-is happening between super and sub states. Local transition doesn't cause exit and entry to source state if
-target state is a sub-state of a source state.
-Local transition doesn't cause exit and entry to target state if target is a superstate of a source
-state.
+Most transitions are functionally equivalent regardless of type, except when transitioning between a superstate and a sub-state.
+A local transition does not cause an exit and re-entry of the source state when the target is a sub-state of the source,
+and does not cause an exit and re-entry of the target state when the target is a superstate of the source.
 
 Use `type` argument or property of transition builder functions to set transition type:
 
@@ -101,7 +99,7 @@ library defined event called `StartEvent`.
 Sample: There are use cases when you need to check if the state is activated by StateMachine initialization
 or due to some event processing in machine runtime (after initialization). 
 
-It can be done by checking the event type in `TransitionParams`, if it is `StartEvent` of not.
+It can be done by checking the event type in `TransitionParams`, if it is `StartEvent` or not.
 The library provides convenience `TransitionParams::isStartTransition` extension property for that purpose:
 
 ```kotlin

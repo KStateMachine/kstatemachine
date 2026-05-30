@@ -24,7 +24,7 @@ A state machine can be created with one of those factory functions:
 
 ```kotlin
 val machine = createStateMachine(
-    scope, // 
+    scope,
     "Traffic lights" // Optional name is convenient for logging debugging and export
 ) {
     // Set up state machine ...

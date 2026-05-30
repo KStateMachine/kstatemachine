@@ -89,8 +89,8 @@ itself).
 
 ## Restoring StateMachine
 
-When a user wants to restore the StateMachine, he deserializes `RecordedEvents` object and
-creates StateMachine instance having exactly the same structure as original one.
+When a user wants to restore the StateMachine, they deserialize the `RecordedEvents` object and
+create a StateMachine instance having exactly the same structure as the original one.
 Typically, both instances are created by the same code.
 
 ```kotlin

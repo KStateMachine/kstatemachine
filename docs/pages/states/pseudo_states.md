@@ -26,11 +26,8 @@ class SomeEvent(val value: Int) : Event
 
 choiceState {
     when (event) {
-        is SomeEvent -> { // cast is necessary as we don't know event type here
-            if (someEvent.value > 3) State1 else State2
-        }
-        else -> { /*...*/
-        }
+        is SomeEvent -> if (event.value > 3) State1 else State2 // smart-cast to SomeEvent applies in this branch
+        else -> { /*...*/ }
     }
 }
 ```

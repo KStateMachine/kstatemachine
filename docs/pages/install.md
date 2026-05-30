@@ -131,7 +131,7 @@ Add dependencies:
 // kotlin
 dependencies {
     implementation("com.github.nsk90:kstatemachine:<Tag>")
-    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
+    // note that group is different in second artifact, long group name also works for first artifact but not vice versa
     // it is some strange JitPack behaviour
     implementation("com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>") // optional
     implementation("com.github.nsk90.kstatemachine:kstatemachine-serialization:<Tag>") // optional
@@ -142,7 +142,7 @@ dependencies {
 // groovy
 dependencies {
     implementation 'com.github.nsk90:kstatemachine:<Tag>'
-    // note that group is different in second artifact, long group name also works for first artifact but not vise versa
+    // note that group is different in second artifact, long group name also works for first artifact but not vice versa
     // it is some strange JitPack behaviour
     implementation 'com.github.nsk90.kstatemachine:kstatemachine-coroutines:<Tag>' // optional
     implementation 'com.github.nsk90.kstatemachine:kstatemachine-serialization:<Tag>' // optional

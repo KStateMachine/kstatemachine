@@ -52,9 +52,9 @@ conditions, it is not correct.
 Even `Dispatchers.Default.limitedParallelism(1)` that seems to be ok at glance,
 does not provide guarantee that each coroutine will be executed on the same single thread, it only limits the amount of
 used threads. So race condition still takes place, as nothing forces threads, running on different processor cores,
-to update variable values in their processor core caches, so outdated values could be used from core cache. Other words,
-one thread does not to know about variable changes made by other one. This known as __visibility guarantee__,
-that `volatile` keyword provides on `jvm`.
+to update variable values in their processor core caches, so outdated values could be used from core cache. In other words,
+one thread may not be aware of variable changes made by another. This is known as the __visibility guarantee__
+that the `volatile` keyword provides on the `jvm`.
 
 ### `CoroutineContext` preservation guarantee
 

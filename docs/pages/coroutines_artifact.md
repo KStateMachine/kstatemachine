@@ -12,8 +12,8 @@ title: Coroutines artifact
 - TOC
 {:toc}
 
-This page contains information about `kstatemachine-coroutines` artifact functionality.
-Which contains the library APIs for working in `Kotlin Coroutines` environment.
+This page contains information about `kstatemachine-coroutines` artifact functionality,
+which provides library APIs for working in the `Kotlin Coroutines` environment.
 
 > This artifact depends on Kotlin Coroutines library
 
@@ -28,9 +28,7 @@ So the functionality of this module should not be treated as "wrappers" or "exte
 This is just a core functionality which is separated from original `kstatemachine` artifact
 to follow language architecture regarding coroutines support.
 
-Contains additional functions to work with KStateMachine depending on Kotlin Coroutines library
-
-##  State machine creation
+## State machine creation
 
 The artifact contains `createStateMachine()` / `createStateMachineBlocking()` methods, which were described in 
 [Create state machine](https://kstatemachine.github.io/kstatemachine/pages/statemachine.html#create-state-machine) 

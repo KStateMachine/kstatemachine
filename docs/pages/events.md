@@ -16,7 +16,7 @@ nav_order: 4
 All events that can be processed by the library are subclassed from `Event` class.
 User defined events often contain properties that serve like data inputs for your StateMachine.
 
-Conceptually events notify a StateMachine about out world changes.
+Conceptually events notify a StateMachine about outside world changes.
 Generally it is not recommended to confuse them with commands, see [do not section](#do-not) for details.
 
 ## Event processing

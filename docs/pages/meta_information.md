@@ -19,7 +19,7 @@ The library declares `metaInfo` property for `IState` and `Transition` types.
 This mechanism is extendable and users may add their own `MetaInfo` sub interfaces/classes if necessary.
 
 {: .note }
-`MetaInfo` considered to be immutable data by design
+`MetaInfo` is considered to be immutable data by design
 
 ## `MetaInfo` composition 
 

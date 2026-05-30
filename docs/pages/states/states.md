@@ -18,7 +18,7 @@ has_children: true
 
 `IState` is just an interface, `DefaultState` & co. are implementations.
 
-Use default states if you do not need to distinguish states (by type) outside from state machine. Otherwise, consider
+Use default states if you do not need to distinguish states (by type) outside the state machine. Otherwise, consider
 using [state subclasses](#state-subclasses).
 
 In state machine setup block define states with `initialState()`, `state()`, `finalState()`, etc. factory functions:
@@ -49,8 +49,7 @@ createStateMachine(scope) {
 ## State subclasses
 
 You can use your own `IState` subclasses with `addInitialState()`, `addState()` and `addFinalState()` functions.
-Subclass `DefaultState`, `DefaultFinalState` or their [data](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) analogs `DefaultDataState`
-, `DefaultFinalDataState`, then you can easily distinguish your states by type when observing state changes:
+Subclass `DefaultState`, `DefaultFinalState`, or their [data](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html) analogs `DefaultDataState`, `DefaultFinalDataState`. Then you can easily distinguish your states by type when observing state changes:
 
 ```kotlin
 class SomeState : DefaultState()
