@@ -77,6 +77,9 @@ kotlin {
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "PlantUmlUnsafeExportWithExportMetaInfoSample") {
                 mainClass.set("ru.nsk.samples.PlantUmlUnsafeExportWithExportMetaInfoSampleKt")
             }
+            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "SavedStateConfigSample") {
+                mainClass.set("ru.nsk.samples.SavedStateConfigSampleKt")
+            }
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "SerializationEventRecordingSample") {
                 mainClass.set("ru.nsk.samples.SerializationEventRecordingSampleKt")
             }

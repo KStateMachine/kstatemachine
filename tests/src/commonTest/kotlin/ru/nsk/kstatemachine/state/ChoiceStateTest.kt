@@ -168,7 +168,7 @@ class ChoiceStateTest : FreeSpec({
                 lateinit var state3: State
                 val machine = createTestStateMachine(coroutineStarterType) {
                     state3 = state("state3")
-                    val state2 = dataState<Int>("dataState3") {
+                    val state2 = dataState<Int>("dataState2") {
                         initialChoiceState { state3 }
                     }
                     initialState("state1") {

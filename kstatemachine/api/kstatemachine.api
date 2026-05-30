@@ -211,6 +211,20 @@ public final class ru/nsk/kstatemachine/persistence/RestoredEventResult {
 	public final fun getWarnings ()Ljava/util/List;
 }
 
+public final class ru/nsk/kstatemachine/persistence/SavedStateConfig {
+	public final fun getActiveLeafStateNames ()Ljava/util/List;
+	public final fun getDataStateValues ()Ljava/util/Map;
+	public final fun getStructureHashCode ()I
+}
+
+public final class ru/nsk/kstatemachine/persistence/SavedStateConfigKt {
+	public static final fun captureSavedStateConfig (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/persistence/SavedStateConfig;
+	public static final fun restoreBySavedStateConfig (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun restoreBySavedStateConfig$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun restoreBySavedStateConfigBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;Z)V
+	public static synthetic fun restoreBySavedStateConfigBlocking$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;ZILjava/lang/Object;)V
+}
+
 public final class ru/nsk/kstatemachine/persistence/StrictValidator : ru/nsk/kstatemachine/persistence/RestorationResultValidator {
 	public static final field INSTANCE Lru/nsk/kstatemachine/persistence/StrictValidator;
 	public fun validate (Lru/nsk/kstatemachine/persistence/RestorationResult;Lru/nsk/kstatemachine/persistence/RecordedEvents;Lru/nsk/kstatemachine/statemachine/StateMachine;)V

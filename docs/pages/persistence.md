@@ -24,15 +24,16 @@ There are several kinds or levels of `StateMachine` persistence (serialization).
    This case currently lacks built-in support by the library _(you can open an issue if you need something like that)_.
 2. **Configuration only** - Both original and restored `StateMachine` instances are crated by identical static code
    (in a single or multiple different processes/hosts). Only active configuration can be saved and restored.
-   This case in turn may be reached in two different ways:
+   This case in turn may be reached in three different ways:
 
-    1. **Persisting state** - serializing all internal data, active states, variables etc. from original `StateMachine`
-       and
-       applying them to restored one.
-    2. **Event recording** - serializing all incoming events, and applying them later on new `StateMachine` instance,
-       which should lead it into the same state as original. This also allows to execute library callbacks (listeners)
-       if necessary, which is not possible with state persistence approach.
-       _Currently only this approach has built-in support._
+    1. **Persisting state** - deeply serializing all internal data, active states, history stack, state variables etc.
+       from original `StateMachine` and applying them to restored one.
+    2. **Active state configuration** - lightweight snapshot of currently active states and `DataState` data values.
+       Constant size regardless of machine lifetime. Listeners fire normally during restore.
+       See [Active state configuration persistence](#active-state-configuration-persistence).
+    3. **Event recording** - serializing all incoming events and replaying them on a new machine instance,
+       which leads it into the same state as the original. Listeners are suppressed during replay by default.
+       See [Event recording](#event-recording).
 
 ## Event recording
 
@@ -132,3 +133,84 @@ machine2.restoreByRecordedEvents(restoredRecordedEvents, validator = EmptyValida
 ```
 
 See [Event recording sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SerializationEventRecordingSample.kt)
+
+## Active state configuration persistence
+
+An alternative to event recording is to take a **snapshot of the currently active states** (and their
+`DataState` data values). The snapshot has constant size regardless of how many events the machine has
+processed, making it ideal for long-running machines.
+
+Restoration via `restoreBySavedStateConfig()` genuinely enters states using the same mechanism as
+`Testing.startFrom()`, so **listener callbacks fire normally** during restore — unlike
+`restoreByRecordedEvents()` which suppresses them by default.
+
+### How it works
+
+**Step 1 — capture** (synchronous, no `suspend` needed):
+
+```kotlin
+val snapshot: SavedStateConfig = machine.captureSavedStateConfig()
+```
+
+**Step 2 — restore** on a freshly constructed machine with identical structure:
+
+```kotlin
+// suspending
+machine2.restoreBySavedStateConfig(snapshot)
+
+// or blocking
+machine2.restoreBySavedStateConfigBlocking(snapshot)
+```
+
+`restoreBySavedStateConfig()` starts the machine if it has not been started yet.
+
+### Prerequisites
+
+The following conditions are verified at capture time (an `IllegalStateException` is thrown if any fail):
+
+* The machine must be running.
+* `isUndoEnabled` must be `false` — the undo stack cannot be snapshotted and would be empty after restore.
+* All currently active states must have non-blank names. Use `requireNonBlankNames = true` in
+  `buildCreationArguments {}` to enforce this at machine start, or assign names to every state manually.
+
+### Serialization
+
+`SavedStateConfig` can be serialized using `kotlinx.serialization`. The library provides
+`SavedStateConfigSerializer` via `KStateMachineSerializersModule` (from `kstatemachine-serialization`
+artifact).
+
+If your machine has `DataState` instances, you must register serializers for their value types under
+`Any::class` in the `SerializersModule`:
+
+```kotlin
+val jsonFormat = Json {
+    serializersModule = KStateMachineSerializersModule + SerializersModule {
+        polymorphic(Any::class) {
+            subclass(MyData::class)   // your DataState value type(s)
+        }
+    }
+}
+
+val snapshotJson = jsonFormat.encodeToString(snapshot)
+// later:
+val restoredSnapshot = jsonFormat.decodeFromString<SavedStateConfig>(snapshotJson)
+machine2.restoreBySavedStateConfig(restoredSnapshot)
+```
+
+### Configuring restoration
+
+`restoreBySavedStateConfig()` accepts one optional parameter:
+
+* `disableStructureHashCodeCheck` (default: `false`) — skip the machine structure integrity check.
+  Useful when intentionally restoring on a structurally different machine, though results may differ.
+
+### Limitations
+
+| Limitation | Details |
+|---|---|
+| **History states not restored** | `HistoryState` recorded history is not part of the snapshot; after restore it defaults to `defaultState` or the parent's initial state |
+| **All active states must have names** | Identification relies on state names; capture throws if any active state has a null or blank name |
+| **`isUndoEnabled` must be false** | The undo stack cannot be captured; capture throws if undo is enabled |
+| **Listeners fire during restore** | Unlike `restoreByRecordedEvents`, there is no `muteListeners` option — state entry is genuine |
+
+See [Saved state config sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SavedStateConfigSample.kt)

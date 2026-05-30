@@ -28,6 +28,7 @@ import ru.nsk.kstatemachine.transition.EventAndArgument
 
 val KStateMachineSerializersModule = SerializersModule {
     contextual(RecordedEventsSerializer)
+    contextual(SavedStateConfigSerializer)
     polymorphic(Event::class) {
         subclass(SerializableGeneratedEvent::class, SerializableGeneratedEventSerializer)
     }
