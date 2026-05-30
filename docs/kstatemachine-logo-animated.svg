@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 150" width="560" height="150">
+  <defs>
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <style>
+    .t {
+      font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+      font-size: 42px;
+      font-weight: 700;
+    }
+
+    /*
+     * Hard-cut swap strategy: the word is always fully visible.
+     * Only the segments that change have paired layers; each pair
+     * swaps within a 0.1% window (~7.5ms = one frame at 60fps).
+     * No whole-word fade, no overlap, no blink.
+     *
+     * Forward transitions:          Loop-reset (reverse cascade):
+     *   15%  — k  → K (white→purple)   90%   — M  → m
+     *   30%  — state → State (→grey)   91.3% — State → state
+     *   50%  — m  → M                  92.7% — K  → k
+     */
+    #k-lo  { animation: ak-lo  7.5s linear infinite; }
+    #k-hi  { animation: ak-hi  7.5s linear infinite; }
+    #st-lo { animation: ast-lo 7.5s linear infinite; }
+    #st-hi { animation: ast-hi 7.5s linear infinite; }
+    #m-lo  { animation: am-lo  7.5s linear infinite; }
+    #m-hi  { animation: am-hi  7.5s linear infinite; }
+    #arr   { stroke-dasharray: 542; animation: fa 7.5s linear infinite, da 7.5s linear infinite; }
+    #tip   { animation: ft 7.5s linear infinite; }
+
+    @keyframes ak-lo {
+      0%    { opacity: 1; }
+      14.9% { opacity: 1; }
+      15%   { opacity: 0; }
+      92.6% { opacity: 0; }
+      92.7% { opacity: 1; }
+      100%  { opacity: 1; }
+    }
+    @keyframes ak-hi {
+      0%    { opacity: 0; }
+      14.9% { opacity: 0; }
+      15%   { opacity: 1; }
+      92.6% { opacity: 1; }
+      92.7% { opacity: 0; }
+      100%  { opacity: 0; }
+    }
+    @keyframes ast-lo {
+      0%    { opacity: 1; }
+      29.9% { opacity: 1; }
+      30%   { opacity: 0; }
+      91.2% { opacity: 0; }
+      91.3% { opacity: 1; }
+      100%  { opacity: 1; }
+    }
+    @keyframes ast-hi {
+      0%    { opacity: 0; }
+      29.9% { opacity: 0; }
+      30%   { opacity: 1; }
+      91.2% { opacity: 1; }
+      91.3% { opacity: 0; }
+      100%  { opacity: 0; }
+    }
+    @keyframes am-lo {
+      0%    { opacity: 1; }
+      49.9% { opacity: 1; }
+      50%   { opacity: 0; }
+      89.9% { opacity: 0; }
+      90%   { opacity: 1; }
+      100%  { opacity: 1; }
+    }
+    @keyframes am-hi {
+      0%    { opacity: 0; }
+      49.9% { opacity: 0; }
+      50%   { opacity: 1; }
+      89.9% { opacity: 1; }
+      90%   { opacity: 0; }
+      100%  { opacity: 0; }
+    }
+    @keyframes fa {
+      0%, 54% { opacity: 0; }
+      56%     { opacity: 1; }
+      83%     { opacity: 1; }
+      87%     { opacity: 0; }
+      100%    { opacity: 0; }
+    }
+    @keyframes da {
+      0%, 54% { stroke-dashoffset: 542; }
+      71%     { stroke-dashoffset: 0; }
+      100%    { stroke-dashoffset: 0; }
+    }
+    @keyframes ft {
+      0%, 69% { opacity: 0; }
+      72%     { opacity: 1; }
+      83%     { opacity: 1; }
+      87%     { opacity: 0; }
+      100%    { opacity: 0; }
+    }
+  </style>
+
+  <rect width="560" height="150" rx="12" fill="#0D1117"/>
+
+  <!-- k / K  (x=105, width=27) -->
+  <text id="k-lo" class="t" fill="#E6EDF3"><tspan x="105" y="88" textLength="27">k</tspan></text>
+  <text id="k-hi" class="t" fill="#7F52FF" opacity="0"><tspan x="105" y="88" textLength="27">K</tspan></text>
+
+  <!-- state / State  (x=132, width=134) -->
+  <text id="st-lo" class="t" fill="#E6EDF3"><tspan x="132" y="88" textLength="134">state</tspan></text>
+  <text id="st-hi" class="t" fill="#9DA3B4" opacity="0"><tspan x="132" y="88" textLength="134">State</tspan></text>
+
+  <!-- m / M  (x=266, width=27) -->
+  <text id="m-lo" class="t" fill="#E6EDF3"><tspan x="266" y="88" textLength="27">m</tspan></text>
+  <text id="m-hi" class="t" fill="#E6EDF3" opacity="0"><tspan x="266" y="88" textLength="27">M</tspan></text>
+
+  <!-- achine — static, never changes  (x=293, width=162) -->
+  <text class="t" fill="#E6EDF3"><tspan x="293" y="88" textLength="162">achine</tspan></text>
+
+  <!-- transition arrow: exits right end of word, loops underneath, tip re-enters at K -->
+  <!-- path length: 22+49+400+49+22 = 542 -->
+  <path id="arr"
+    d="M 458,73 L 480,73 L 480,122 L 80,122 L 80,73 L 102,73"
+    fill="none" stroke="#7F52FF" stroke-width="2.5"
+    stroke-linejoin="round" stroke-linecap="round"
+    filter="url(#glow)" opacity="0"/>
+
+  <polygon id="tip" points="102,73 87,66 87,80" fill="#7F52FF" filter="url(#glow)" opacity="0"/>
+</svg>

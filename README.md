@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/kstatemachine-logo.png" alt="KStateMachine" width="500"/>
+<img src="./docs/kstatemachine-logo-animated.svg" alt="KStateMachine" width="500"/>
 
 **A powerful Kotlin Multiplatform state machine library with clean DSL syntax**  
 **and first-class Kotlin Coroutines support**
