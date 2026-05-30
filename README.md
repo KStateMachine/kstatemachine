@@ -213,7 +213,7 @@ Or open in IntelliJ IDEA and run from there.
 
 ## 🤝 Contribution
 
-The library is actively developed — feature proposals and pull requests are welcome!  
+The library is in **stable** phase — but feature proposals and pull requests are welcome!  
 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting.
 
 ---
