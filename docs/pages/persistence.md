@@ -6,7 +6,7 @@ title: Persistence (Serialization)
 # Persistence (Serialization)
 {: .no_toc }
 
-## Table of contents
+## Page contents
 {: .no_toc .text-delta }
 
 - TOC
