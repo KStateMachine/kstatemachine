@@ -5,11 +5,9 @@ nav_order: 0
 ---
 
 # Getting started
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

@@ -5,11 +5,9 @@ nav_order: 4
 ---
 
 # Events
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

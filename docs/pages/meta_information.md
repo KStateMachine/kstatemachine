@@ -4,11 +4,9 @@ title: Meta information
 ---
 
 # Meta information
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

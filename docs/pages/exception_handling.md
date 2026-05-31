@@ -4,11 +4,9 @@ title: Exception handling
 ---
 
 # Exception handling
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

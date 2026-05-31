@@ -4,11 +4,9 @@ title: Coroutines artifact
 ---
 
 # Coroutines artifact
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

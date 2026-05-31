@@ -5,11 +5,9 @@ nav_order: 1
 ---
 
 # State machine
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

@@ -4,11 +4,9 @@ title: Migration guide
 ---
 
 # Migration guide
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

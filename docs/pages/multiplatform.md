@@ -4,11 +4,9 @@ title: Multiplatform
 ---
 
 # Multiplatform
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

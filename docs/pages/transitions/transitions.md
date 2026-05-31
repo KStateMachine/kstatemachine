@@ -6,11 +6,9 @@ has_children: true
 ---
 
 # Transitions
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

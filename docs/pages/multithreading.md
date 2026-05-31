@@ -4,11 +4,9 @@ title: Multithreading and concurrency
 ---
 
 # Multithreading and concurrency
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC

@@ -4,11 +4,9 @@ title: Testing
 ---
 
 # Testing
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC
