@@ -138,6 +138,23 @@ state Parallel_states_StateMachine {
 @enduml
 """
 
+private const val PLANTUML_PARALLEL_LEAF_TRANSITIONS_RESULT = """@startuml
+hide empty description
+state Parallel_states_StateMachine {
+    state parallel_states {
+        state State1
+        State1 --> State1 : FirstEvent
+        --
+        state State2
+        State2 --> State2 : SecondEvent
+        
+    }
+    
+    [*] --> parallel_states
+}
+@enduml
+"""
+
 private const val PLANTUML_EMPTY_MACHINE_PARALLEL_MODE_RESULT = """@startuml
 hide empty description
 state Parallel_states_StateMachine {
@@ -383,6 +400,21 @@ class ExportPlantUmlVisitorTest : FreeSpec({
 
                 machine.exportToPlantUml() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT
                 machine.exportToPlantUmlBlocking() shouldBe PLANTUML_MACHINE_PARALLEL_MODE_RESULT // for coverage
+            }
+
+            "plantUml export parallel leaf states with transitions" {
+                val machine = createTestStateMachine(coroutineStarterType, name = "Parallel states") {
+                    initialState("parallel states", ChildMode.PARALLEL) {
+                        state("State1") {
+                            transition<FirstEvent> { targetState = this@state }
+                        }
+                        state("State2") {
+                            transition<SecondEvent> { targetState = this@state }
+                        }
+                    }
+                }
+
+                machine.exportToPlantUml(showEventLabels = true) shouldBe PLANTUML_PARALLEL_LEAF_TRANSITIONS_RESULT
             }
 
             "plantUml export empty machine with parallel mode" {

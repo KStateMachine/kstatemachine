@@ -249,11 +249,24 @@ internal class ExportPlantUmlVisitor(
         state.printStateNotes()
 
         val states = state.states.toList()
-        // visit child states
-        for (s in states.indices) {
-            visit(states[s])
-            if (s != states.lastIndex && state.childMode == ChildMode.PARALLEL)
-                line(PARALLEL)
+
+        if (state.childMode == ChildMode.PARALLEL) {
+            // For parallel states, each region's transitions must appear within that region before
+            // the "--" separator, otherwise the PlantUML parser rejects the diagram.
+            for (s in states.indices) {
+                val child = states[s]
+                visit(child)
+                if (child !is StateMachine)
+                    child.transitions.forEach { visit(it) }
+                if (child is IFinalState)
+                    line("${child.graphName()} --> $STAR")
+                if (s != states.lastIndex)
+                    line(PARALLEL)
+            }
+        } else {
+            // visit child states
+            for (s in states.indices)
+                visit(states[s])
         }
 
         // add initial transition
@@ -262,14 +275,16 @@ internal class ExportPlantUmlVisitor(
         if (initialState != null)
             line("$STAR --> ${initialState.graphName()}")
 
-        // visit transitions, skipping internal StateMachines
-        states.flatMap {
-            if (it !is StateMachine) it.transitions else emptySet()
-        }.forEach { visit(it) }
+        if (state.childMode != ChildMode.PARALLEL) {
+            // visit transitions, skipping internal StateMachines
+            states.flatMap {
+                if (it !is StateMachine) it.transitions else emptySet()
+            }.forEach { visit(it) }
 
-        // add finish transitions
-        states.filterIsInstance<IFinalState>()
-            .forEach { line("${it.graphName()} --> $STAR") }
+            // add finish transitions
+            states.filterIsInstance<IFinalState>()
+                .forEach { line("${it.graphName()} --> $STAR") }
+        }
     }
 
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
