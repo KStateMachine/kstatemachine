@@ -67,6 +67,29 @@ internal data class TargetState(
  */
 suspend fun EventAndArgument<*>.targetState(targetState: IState): TransitionDirection = resolveTargetState(targetState)
 
+/**
+ * Transitions the machine to multiple [targetStates] simultaneously, activating one state per region of a
+ * [ChildMode.PARALLEL] parent. This is the programmatic equivalent of a **UML fork pseudo-state**: a single
+ * transition splits control into several concurrent orthogonal regions.
+ *
+ * Each element of [targetStates] is resolved before use: [PseudoState] targets (e.g. choice or history states)
+ * are followed to their effective destination, so you may pass a [PseudoState] as a target and it will be
+ * transparently resolved at runtime.
+ *
+ * Constraints:
+ * - At least two target states must be provided.
+ * - After resolution, every effective target must reside inside a [ChildMode.PARALLEL] parent (i.e. they must all
+ *   be in distinct orthogonal regions of the same parallel state).
+ *
+ * Typical usage inside [transitionConditionally]:
+ * ```kotlin
+ * redState {
+ *     transitionConditionally<SwitchEvent> {
+ *         direction = { targetParallelStates(region1State, region2State) }
+ *     }
+ * }
+ * ```
+ */
 suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>): TransitionDirection {
     require(targetStates.size >= 2) {
         "There should be at least two targetStates, current amount ${targetStates.size}," +
@@ -90,6 +113,7 @@ private fun InternalState.findParallelAncestor(): InternalState? {
     return if (childMode == ChildMode.PARALLEL) this else internalParent?.findParallelAncestor()
 }
 
+/** Convenience overload of [targetParallelStates] that accepts individual state arguments instead of a [Set]. */
 suspend fun EventAndArgument<*>.targetParallelStates(
     targetState1: IState,
     targetState2: IState,

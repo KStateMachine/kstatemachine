@@ -249,13 +249,14 @@ redState {
 }
 ```
 
-## Transition targeting multiple states
+## Transition targeting multiple states (fork)
 
-When you work with parallel states, you may want to specify multiple states as a transition target, specifying
-a target state for each parallel state region.
+`targetParallelStates()` is the programmatic equivalent of a **UML fork pseudo-state**: a single transition
+splits control into several concurrent orthogonal regions, activating one target state per region simultaneously.
 
-This may be done with `targetParallelStates()` method inside `transitionConditionally()` transition builder function.
-Each specified state must be a child (not necessary direct) of a parallel state.
+Use it inside `transitionConditionally()` when you want to enter a parallel state and place each of its orthogonal
+regions into a specific sub-state rather than letting them start from their default initial states.
+Each specified target must be a descendant (not necessarily a direct child) of a [parallel state](../states/states.md#parallel-states).
 
 ```kotlin
 initialState("state1") {
@@ -274,6 +275,33 @@ state("state2", childMode = ChildMode.PARALLEL) {
     }
 }
 ```
+
+```mermaid
+---
+title: Fork transition diagram
+---
+stateDiagram-v2
+state fork_state <<fork>>
+state state2 {
+  state state21 {
+    state211
+    state212
+  }
+  --
+  state state22 {
+    state221
+    state222
+  }
+}
+[*] --> state1
+state1 --> fork_state : SwitchEvent
+fork_state --> state212
+fork_state --> state222
+```
+
+[PseudoState](../states/states.md#pseudo-states) targets (choice, history, etc.) are accepted and resolved
+transparently at runtime, so you can pass a choice state as one of the fork targets and it will be followed to
+its effective destination before activation.
 
 ## Transition interruption
 
