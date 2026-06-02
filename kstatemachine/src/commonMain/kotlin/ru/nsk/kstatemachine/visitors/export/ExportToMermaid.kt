@@ -21,7 +21,7 @@ import ru.nsk.kstatemachine.visitors.export.CompatibilityFormat.MERMAID
  * See [ExportMetaInfo] for more info.
  */
 suspend fun StateMachine.exportToMermaid(
-    showEventLabels: Boolean = false,
+    showEventLabels: Boolean = true,
     unsafeCallConditionalLambdas: Boolean = false,
 ) = with(ExportPlantUmlVisitor(MERMAID, showEventLabels, unsafeCallConditionalLambdas)) {
     accept(this)
@@ -30,7 +30,7 @@ suspend fun StateMachine.exportToMermaid(
 
 /** Blocking analog for [exportToMermaid] */
 fun StateMachine.exportToMermaidBlocking(
-    showEventLabels: Boolean = false,
+    showEventLabels: Boolean = true,
     unsafeCallConditionalLambdas: Boolean = false,
 ) = coroutineAbstraction.runBlocking {
     with(ExportPlantUmlVisitor(MERMAID, showEventLabels, unsafeCallConditionalLambdas)) {

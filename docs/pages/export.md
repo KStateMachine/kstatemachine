@@ -26,7 +26,7 @@ handle such constructions.
 
 Use `exportToPlantUml()`/`exportToPlantUmlBlocking()` extension function to export state machine
 to [PlantUML state diagram](https://plantuml.com/en/state-diagram).
-`showEventLabels` flag allows to include `Event` types into the output.
+`showEventLabels` flag allows to include `Event` types into the output (enabled by default).
 
 ```kotlin
 val machine = createStateMachine(scope) { /* ... */ }
@@ -43,7 +43,7 @@ See [PlantUML nested states export sample](https://github.com/KStateMachine/ksta
 
 Use `exportToMermaid()`/`exportToMermaidBlocking()` extension function to export state machine
 to [Mermaid state diagram](https://mermaid.js.org/syntax/stateDiagram.html).
-`showEventLabels` flag allows to include `Event` types into the output.
+`showEventLabels` flag allows to include `Event` types into the output (enabled by default).
 
 ```kotlin
 val machine = createStateMachine(scope) { /* ... */ }

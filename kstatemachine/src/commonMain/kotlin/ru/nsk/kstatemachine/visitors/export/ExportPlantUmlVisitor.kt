@@ -354,7 +354,7 @@ private fun <E : Event> makeUnsafeCollectTargetStatesPolicy(
  *  * See [ExportMetaInfo] for more info.
  */
 suspend fun StateMachine.exportToPlantUml(
-    showEventLabels: Boolean = false,
+    showEventLabels: Boolean = true,
     unsafeCallConditionalLambdas: Boolean = false,
 ) = with(ExportPlantUmlVisitor(PLANT_UML, showEventLabels, unsafeCallConditionalLambdas)) {
     accept(this)
@@ -363,7 +363,7 @@ suspend fun StateMachine.exportToPlantUml(
 
 /** Blocking analog for [exportToPlantUml] */
 fun StateMachine.exportToPlantUmlBlocking(
-    showEventLabels: Boolean = false,
+    showEventLabels: Boolean = true,
     unsafeCallConditionalLambdas: Boolean = false,
 ) = coroutineAbstraction.runBlocking {
     with(ExportPlantUmlVisitor(PLANT_UML, showEventLabels, unsafeCallConditionalLambdas)) {
