@@ -1,7 +1,7 @@
 /*
  * Author: Mikhail Fedotov
  * Github: https://github.com/KStateMachine
- * Copyright (c) 2024.
+ * Copyright (c) 2026.
  * All rights reserved.
  */
 
@@ -12,7 +12,6 @@ package ru.nsk.samples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
@@ -25,8 +24,7 @@ import ru.nsk.kstatemachine.persistence.captureSavedStateConfig
 import ru.nsk.kstatemachine.persistence.restoreBySavedStateConfig
 import ru.nsk.kstatemachine.serialization.persistence.KStateMachineSerializersModule
 import ru.nsk.kstatemachine.state.*
-import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement
-import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES_AND_TRANSITIONS
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.createStateMachine
@@ -41,13 +39,14 @@ private object SavedStateConfigSample {
     data class LoadedData(val id: Int, val payload: String)
 }
 
-private suspend fun CoroutineScope.createMachine(): StateMachine {
+private suspend fun CoroutineScope.createMachine(start: Boolean = true): StateMachine {
     lateinit var idleState: State
     lateinit var loadedState: DataState<SavedStateConfigSample.LoadedData>
     return createStateMachine(
         this,
         "SavedStateConfig sample",
-        creationArguments = buildCreationArguments { requireNonBlankNames = STATES_AND_TRANSITIONS },
+        start = start,
+        creationArguments = buildCreationArguments { requireNonBlankNames = STATES },
     ) {
         logger = StateMachine.Logger { println(it()) }
         idleState = initialState("Idle") {
@@ -75,7 +74,7 @@ private suspend fun CoroutineScope.restoreStep(
 ): StateMachine {
     val snapshot = jsonFormat.decodeFromString<SavedStateConfig>(snapshotJson)
 
-    val machine = createMachine()
+    val machine = createMachine(start = false)
     machine.restoreBySavedStateConfig(snapshot)
     return machine
 }
