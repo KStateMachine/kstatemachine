@@ -52,6 +52,7 @@ in the repository.
 | [UndoTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)                       | Navigate backwards (undo)                   |
 | [TargetlessTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TargetlessTransitionSample.kt)           | Internal transitions without a state change |
 | [LocalVsExternalTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/LocalVsExternalTransitionSample.kt) | LOCAL vs EXTERNAL transition semantics      |
+| [JoinTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/JoinTransitionSample.kt)                       | Synchronise parallel regions with a join pseudo-state |
 
 ### States
 

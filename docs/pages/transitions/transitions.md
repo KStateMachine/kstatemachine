@@ -303,6 +303,66 @@ fork_state --> state222
 transparently at runtime, so you can pass a choice state as one of the fork targets and it will be followed to
 its effective destination before activation.
 
+## Synchronising parallel regions (join)
+
+`joinTransition()` is the programmatic equivalent of a **UML join pseudo-state**: multiple orthogonal regions each
+transition to a dedicated join-point state inside that region, and when **all** join-point states are simultaneously
+active the single outgoing transition fires automatically.
+
+Call `joinTransition()` on the **parallel state** inside its DSL block, passing one join-point state per region and
+the target state to enter after joining.
+
+```kotlin
+state("parallelWork", childMode = ChildMode.PARALLEL) {
+
+    state("download") {
+        val downloadJoin = state("downloadJoin")  // no outgoing transitions → soft-blocks
+        initialState("downloading") {
+            transition<DownloadCompleteEvent> { targetState = downloadJoin }
+        }
+    }
+
+    state("validate") {
+        val validationJoin = state("validationJoin")
+        initialState("validating") {
+            transition<ValidationCompleteEvent> { targetState = validationJoin }
+        }
+    }
+
+    joinTransition(downloadJoin, validationJoin, targetState = processing)
+}
+```
+
+```mermaid
+---
+title: Join transition diagram
+---
+stateDiagram-v2
+state join_state <<join>>
+state parallelWork {
+  state download {
+    downloading --> downloadJoin : DownloadCompleteEvent
+  }
+  --
+  state validate {
+    validating --> validationJoin : ValidationCompleteEvent
+  }
+}
+downloadJoin --> join_state
+validationJoin --> join_state
+join_state --> processing
+[*] --> parallelWork
+```
+
+**Soft blocking**: once a region enters its join-point state, the parallel state's event-routing algorithm finds no
+matching transition there and falls back to the parallel parent's own transitions — which only contain the internal
+`JoinCompleteEvent`. All other events find no match and are silently ignored for that region. This is
+convention-based: join-point states **must not** have outgoing user transitions.
+
+**`FinalState` alternative**: if every region should also mark itself *finished*, use `finalState()` instead of a
+plain join-point state. The parallel parent then fires `FinishedEvent` when all regions finish, giving two
+notification paths for the same condition.
+
 ## Transition interruption
 
 Typically, to calculate whether transition processing should be performed or not, you can use a guard function,

@@ -18,6 +18,7 @@ import ru.nsk.kstatemachine.metainfo.ResolutionHint
 import ru.nsk.kstatemachine.metainfo.StateResolutionHint
 import ru.nsk.kstatemachine.metainfo.findMetaInfo
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.START_TRANSITION_NAME
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -42,6 +43,7 @@ private const val PARALLEL = "--"
 private const val SHALLOW_HISTORY = "[H]"
 private const val DEEP_HISTORY = "[H*]"
 private const val CHOICE = "<<choice>>"
+private const val JOIN = "<<join>>"
 
 /**
  * This object will be unsafely cast to any kind of [Event],
@@ -155,6 +157,26 @@ internal class ExportPlantUmlVisitor(
      */
     override suspend fun <E : Event> visit(transition: Transition<E>) {
         transition as InternalTransition<E>
+
+        val joinMeta = transition.metaInfo.findMetaInfo<JoinTransitionMetaInfo>()
+        if (joinMeta != null) {
+            crossLevelTransitions += "state ${joinMeta.joinName} $JOIN"
+            for (jp in joinMeta.joinPoints) {
+                crossLevelTransitions += "${(jp as InternalState).graphName()} --> ${joinMeta.joinName}"
+            }
+            val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
+                transition.produceTargetStateDirection(policy)
+            }
+            for (info in targetStateInfoList) {
+                if (info.transitionDirection is TargetState) {
+                    @Suppress("UNCHECKED_CAST")
+                    for (target in info.transitionDirection.targetStates as Set<InternalState>) {
+                        crossLevelTransitions += "${joinMeta.joinName} --> ${target.graphName()}"
+                    }
+                }
+            }
+            return
+        }
 
         val sourceStateGraphName = transition.sourceState.graphName()
         val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->

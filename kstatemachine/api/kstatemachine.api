@@ -472,6 +472,11 @@ public abstract class ru/nsk/kstatemachine/state/InternalState : ru/nsk/kstatema
 	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class ru/nsk/kstatemachine/state/JoinTransitionKt {
+	public static final fun joinTransition (Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;)V
+	public static synthetic fun joinTransition$default (Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;ILjava/lang/Object;)V
+}
+
 public abstract interface class ru/nsk/kstatemachine/state/MutableDataState : ru/nsk/kstatemachine/state/DataState {
 	public abstract fun setData (Ljava/lang/Object;)V
 }

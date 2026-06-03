@@ -78,16 +78,16 @@ state Nested_states_StateMachine {
         state Initial_subState
         
         [*] --> Initial_subState
-        Initial_subState --> Final_subState
+        Initial_subState --> Final_subState : SwitchEvent
         Final_subState --> [*]
     }
     
     [*] --> State1
-    State1 --> State2 : to State2
-    State1 --> State1
-    State1 --> State1
-    State2 --> State3
-    State2 --> State1 : back
+    State1 --> State2 : to State2, SwitchEvent
+    State1 --> State1 : SwitchEvent
+    State1 --> State1 : SwitchEvent
+    State2 --> State3 : SwitchEvent
+    State2 --> State1 : back, SwitchEvent
     State3 --> [*]
 }
 """
@@ -101,8 +101,8 @@ state Parallel_states_StateMachine {
             state State12
             
             [*] --> State_11
-            State_11 --> State12 : to State 12
-            State12 --> State_11
+            State_11 --> State12 : to State 12, SwitchEvent
+            State12 --> State_11 : SwitchEvent
         }
         --
         state State2 {
@@ -110,8 +110,8 @@ state Parallel_states_StateMachine {
             state State22
             
             [*] --> State21
-            State21 --> State22
-            State22 --> State21
+            State21 --> State22 : SwitchEvent
+            State22 --> State21 : SwitchEvent
         }
         
     }
@@ -129,7 +129,7 @@ state Parallel_states_StateMachine {
         state State21
         
         [*] --> State21
-        State21 --> State22
+        State21 --> State22 : SwitchEvent
     }
     --
     state State1
@@ -184,8 +184,8 @@ state Pseudo_states_StateMachine {
     [*] --> state1
     final --> [*]
 }
-state3 --> state2[H]
-state3 --> state2[H*]
+state3 --> state2[H] : FirstEvent
+state3 --> state2[H*] : SecondEvent
 @enduml
 """
 
@@ -211,8 +211,8 @@ state Pseudo_states_StateMachine {
     final --> [*]
 }
 choice --> state1
-state3 --> state2[H]
-state3 --> state2[H*]
+state3 --> state2[H] : FirstEvent
+state3 --> state2[H*] : SecondEvent
 @enduml
 """
 
@@ -223,7 +223,7 @@ state outer_machine_StateMachine {
     state inner_machine_StateMachine
     
     [*] --> outer_state1
-    outer_machine_StateMachine --> outer_machine_StateMachine
+    outer_machine_StateMachine --> outer_machine_StateMachine : FirstEvent
 }
 @enduml
 """
@@ -279,6 +279,38 @@ state state_machine_StateMachine {
     
     [*] --> state1
 }
+@enduml
+"""
+
+private const val PLANTUML_JOIN_TRANSITION_RESULT = """@startuml
+hide empty description
+state Join_machine_StateMachine {
+    state processing
+    state parallelWork {
+        state download {
+            state downloadJoin
+            state downloading
+            
+            [*] --> downloading
+            downloading --> downloadJoin : SwitchEvent
+        }
+        --
+        state validate {
+            state validationJoin
+            state validating
+            
+            [*] --> validating
+            validating --> validationJoin : SwitchEventL1
+        }
+        
+    }
+    
+    [*] --> parallelWork
+}
+state join <<join>>
+downloadJoin --> join
+validationJoin --> join
+join --> processing
 @enduml
 """
 
@@ -506,6 +538,33 @@ class ExportPlantUmlVisitorTest : FreeSpec({
                 }
 
                 machine.exportToPlantUml(unsafeCallConditionalLambdas = true) shouldBe PLANTUML_MULTIPLE_TARGET_STATES_IGNORED_RESULT
+            }
+
+            "plantUml export join transition" {
+                lateinit var processing: State
+                lateinit var downloadJoin: IState
+                lateinit var validationJoin: IState
+
+                val machine = createTestStateMachine(coroutineStarterType, name = "Join machine") {
+                    processing = state("processing")
+                    initialState("parallelWork", ChildMode.PARALLEL) {
+                        state("download") {
+                            downloadJoin = state("downloadJoin")
+                            initialState("downloading") {
+                                transition<SwitchEvent> { targetState = downloadJoin }
+                            }
+                        }
+                        state("validate") {
+                            validationJoin = state("validationJoin")
+                            initialState("validating") {
+                                transition<SwitchEventL1> { targetState = validationJoin }
+                            }
+                        }
+                        joinTransition(downloadJoin, validationJoin, name = "join", targetState = processing)
+                    }
+                }
+
+                machine.exportToPlantUml(showEventLabels = true) shouldBe PLANTUML_JOIN_TRANSITION_RESULT
             }
         }
     }
