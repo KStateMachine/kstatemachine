@@ -170,7 +170,8 @@ The following conditions are verified at capture time (an `IllegalStateException
 
 * The machine must be running.
 * `isUndoEnabled` must be `false` — the undo stack cannot be snapshotted and would be empty after restore.
-* All currently active states must have non-blank names. Use `requireNonBlankNames = true` in
+* All currently active states must have non-blank names. 
+  Use `requireNonBlankNames` with `STATE` or `STATES_AND_TRANSIOTIONS` value in
   `buildCreationArguments {}` to enforce this at machine start, or assign names to every state manually.
 
 ### Serialization

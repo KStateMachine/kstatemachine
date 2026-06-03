@@ -10,12 +10,12 @@ package ru.nsk.kstatemachine.persistence
 import ru.nsk.kstatemachine.VisibleForTesting
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.DefaultDataState
-import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.activeStates
 import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.InternalStateMachine
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.checkNotDestroyed
+import ru.nsk.kstatemachine.testing.Testing.startFrom
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
 /**
@@ -40,7 +40,8 @@ class SavedStateConfig @VisibleForTesting constructor(
  * Prerequisites (throws [IllegalStateException] if violated):
  * - Machine must be running and not destroyed.
  * - [StateMachine.creationArguments].isUndoEnabled must be false — the undo stack cannot be persisted.
- * - All active states must have non-blank names. Use `requireNonBlankNames = true` in creation arguments
+ * - All active states must have non-blank names.
+ *   Use `requireNonBlankNames` with `STATES` value or `STATES_AND_TRANSITIONS` in creation arguments
  *   to enforce this at machine start, or assign names to all states manually.
  */
 fun StateMachine.captureSavedStateConfig(): SavedStateConfig {
@@ -57,7 +58,7 @@ fun StateMachine.captureSavedStateConfig(): SavedStateConfig {
     leafStates.forEach { state ->
         check(!state.name.isNullOrBlank()) {
             "Active state $state has no name — assign names to all active states " +
-                    "or use requireNonBlankNames = true in buildCreationArguments {}"
+                    "or use requireNonBlankNames with STATES of STATES_AND_TRANSITIONS in buildCreationArguments {}"
         }
     }
 
@@ -65,7 +66,7 @@ fun StateMachine.captureSavedStateConfig(): SavedStateConfig {
     active.filterIsInstance<DataState<*>>().forEach { state ->
         check(!state.name.isNullOrBlank()) {
             "Active DataState $state has no name — assign names to all active states " +
-                    "or use requireNonBlankNames = true in buildCreationArguments {}"
+                    "or use requireNonBlankNames with STATES of STATES_AND_TRANSITIONS in buildCreationArguments {}"
         }
         dataStateValues[state.name!!] = state.data
     }

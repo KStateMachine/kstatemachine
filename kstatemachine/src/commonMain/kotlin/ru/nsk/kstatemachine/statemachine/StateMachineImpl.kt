@@ -160,8 +160,7 @@ internal class StateMachineImpl(
     private fun checkBeforeRunMachine() {
         accept(CheckUniqueNamesVisitor())
         accept(CheckMetaInfoStructureVisitor())
-        if (creationArguments.requireNonBlankNames)
-            checkNonBlankNames()
+        checkNonBlankNames(creationArguments.requireNonBlankNames)
         checkNotDestroyed()
         check(!isRunning) { "$this is already started" }
         check(!isProcessingEvent) { "$this is already processing event, this is internal error, please report a bug" }

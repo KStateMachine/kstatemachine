@@ -25,6 +25,8 @@ import ru.nsk.kstatemachine.persistence.captureSavedStateConfig
 import ru.nsk.kstatemachine.persistence.restoreBySavedStateConfig
 import ru.nsk.kstatemachine.serialization.persistence.KStateMachineSerializersModule
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES_AND_TRANSITIONS
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.createStateMachine
@@ -45,7 +47,7 @@ private suspend fun CoroutineScope.createMachine(): StateMachine {
     return createStateMachine(
         this,
         "SavedStateConfig sample",
-        creationArguments = buildCreationArguments { requireNonBlankNames = true },
+        creationArguments = buildCreationArguments { requireNonBlankNames = STATES_AND_TRANSITIONS },
     ) {
         logger = StateMachine.Logger { println(it()) }
         idleState = initialState("Idle") {

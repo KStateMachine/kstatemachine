@@ -9,13 +9,17 @@ package ru.nsk.kstatemachine.visitors
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES_AND_TRANSITIONS
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.TRANSITIONS
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.Transition
 
 /**
  * Checks that machine contains states and transitions with filled and non-blank names.
  */
-internal class RequireNonBlankNamesVisitor : RecursiveVisitor {
+internal class RequireNonBlankNamesVisitor(private val requirement: NonBlankNamesRequirement) : RecursiveVisitor {
     private val invalidStates = mutableSetOf<IState>()
     private val invalidTransitions = mutableSetOf<Transition<*>>()
 
@@ -26,7 +30,7 @@ internal class RequireNonBlankNamesVisitor : RecursiveVisitor {
     }
 
     override fun visit(state: IState) {
-        if (state.name.isNullOrBlank())
+        if (requirement in listOf(STATES, STATES_AND_TRANSITIONS) && state.name.isNullOrBlank())
             invalidStates += state
 
         if (state !is StateMachine) // do not check nested machines
@@ -34,7 +38,7 @@ internal class RequireNonBlankNamesVisitor : RecursiveVisitor {
     }
 
     override fun <E : Event> visit(transition: Transition<E>) {
-        if (transition.name.isNullOrBlank())
+        if (requirement in listOf(TRANSITIONS, STATES_AND_TRANSITIONS) && transition.name.isNullOrBlank())
             invalidTransitions += transition
     }
 
@@ -49,14 +53,14 @@ internal class RequireNonBlankNamesVisitor : RecursiveVisitor {
     }
 }
 
-fun StateMachine.hasBlankNames(): Boolean {
-    val visitor = RequireNonBlankNamesVisitor()
+fun StateMachine.hasBlankNames(requirement: NonBlankNamesRequirement = STATES_AND_TRANSITIONS): Boolean {
+    val visitor = RequireNonBlankNamesVisitor(requirement)
     accept(visitor)
     return visitor.hasBlankNames()
 }
 
-fun StateMachine.checkNonBlankNames() {
-    val visitor = RequireNonBlankNamesVisitor()
+fun StateMachine.checkNonBlankNames(requirement: NonBlankNamesRequirement = STATES_AND_TRANSITIONS) {
+    val visitor = RequireNonBlankNamesVisitor(requirement)
     accept(visitor)
     visitor.checkNonBlankNames()
 }

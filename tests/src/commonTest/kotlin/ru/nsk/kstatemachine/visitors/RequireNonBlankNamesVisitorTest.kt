@@ -16,6 +16,9 @@ import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.transition
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.DISABLED
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES_AND_TRANSITIONS
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 
 class RequireNonBlankNamesVisitorTest : FreeSpec({
@@ -87,7 +90,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
             "check machine started with blank names and disabled check" {
                 createTestStateMachine(
                     coroutineStarterType,
-                    creationArguments = buildCreationArguments { requireNonBlankNames = false }
+                    creationArguments = buildCreationArguments { requireNonBlankNames = DISABLED }
                 ) {
                     initialState()
                 }
@@ -97,7 +100,7 @@ class RequireNonBlankNamesVisitorTest : FreeSpec({
                 val machine = createTestStateMachine(
                     coroutineStarterType,
                     start = false,
-                    creationArguments = buildCreationArguments { requireNonBlankNames = true }
+                    creationArguments = buildCreationArguments { requireNonBlankNames = STATES_AND_TRANSITIONS }
                 ) {
                     initialState()
                 }

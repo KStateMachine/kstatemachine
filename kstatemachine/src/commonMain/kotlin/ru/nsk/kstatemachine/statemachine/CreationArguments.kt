@@ -11,6 +11,13 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+enum class NonBlankNamesRequirement {
+    DISABLED,
+    STATES,
+    TRANSITIONS,
+    STATES_AND_TRANSITIONS,
+}
+
 interface CreationArguments {
     /**
      * Allows the library to automatically call destroy() on current state owning machine instance if user tries
@@ -37,9 +44,9 @@ interface CreationArguments {
     /**
      * If enabled, throws exception on the machine start,
      * if it contains states or transitions with null or blank names
-     * Default: false
+     * Default: DISABLED
      */
-    val requireNonBlankNames: Boolean
+    val requireNonBlankNames: NonBlankNamesRequirement
 
     /**
      * If set, enables incoming events recording in order to restore [StateMachine] later.
@@ -63,7 +70,7 @@ interface CreationArgumentsBuilder : CreationArguments {
     override var autoDestroyOnStatesReuse: Boolean
     override var isUndoEnabled: Boolean
     override var doNotThrowOnMultipleTransitionsMatch: Boolean
-    override var requireNonBlankNames: Boolean
+    override var requireNonBlankNames: NonBlankNamesRequirement
     override var eventRecordingArguments: EventRecordingArguments?
     override var skipCoroutineScopeValidityCheck: Boolean
 }
@@ -72,7 +79,7 @@ private data class CreationArgumentsBuilderImpl(
     override var autoDestroyOnStatesReuse: Boolean = true,
     override var isUndoEnabled: Boolean = false,
     override var doNotThrowOnMultipleTransitionsMatch: Boolean = false,
-    override var requireNonBlankNames: Boolean = false,
+    override var requireNonBlankNames: NonBlankNamesRequirement = NonBlankNamesRequirement.DISABLED,
     override var eventRecordingArguments: EventRecordingArguments? = null,
     override var skipCoroutineScopeValidityCheck: Boolean = false,
 ) : CreationArgumentsBuilder
