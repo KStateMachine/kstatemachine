@@ -66,11 +66,38 @@ class SavedStateConfigTest : FreeSpec({
                 loaded.data shouldBe 99
 
                 val snapshot = machine1.captureSavedStateConfig()
-                snapshot.dataStateValues["loaded"] shouldBe 99
+                snapshot.dataStateLastValues["loaded"] shouldBe 99
 
                 val machine2 = buildMachine()
                 machine2.restoreBySavedStateConfig(snapshot)
                 (machine2.requireState("loaded") as DataState<*>).data shouldBe 99
+            }
+
+            "lastData of inactive DataState is captured and restored" {
+                lateinit var loaded: DataState<Int>
+                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, start = false) {
+                    val idle = initialState("idle") {
+                        dataTransitionOn<SavedStateConfigTestData.IntEvent, Int> { targetState = { loaded } }
+                    }
+                    loaded = dataState("loaded") {
+                        transitionOn<SwitchEvent> { targetState = { idle } }
+                    }
+                }
+
+                val machine1 = buildMachine()
+                machine1.start()
+                machine1.processEvent(SavedStateConfigTestData.IntEvent(42))
+                loaded.data shouldBe 42
+                machine1.processEvent(SwitchEvent) // back to idle, loaded is now inactive
+                loaded.lastData shouldBe 42
+
+                val snapshot = machine1.captureSavedStateConfig()
+                snapshot.activeLeafStateNames shouldBe listOf("idle")
+                snapshot.dataStateLastValues["loaded"] shouldBe 42
+
+                val machine2 = buildMachine()
+                machine2.restoreBySavedStateConfig(snapshot)
+                (machine2.requireState("loaded") as DataState<*>).lastData shouldBe 42
             }
 
             "capture and restore MutableDataState preserves data" {
@@ -84,7 +111,7 @@ class SavedStateConfigTest : FreeSpec({
                 counter.setData(42)
 
                 val snapshot = machine1.captureSavedStateConfig()
-                snapshot.dataStateValues["counter"] shouldBe 42
+                snapshot.dataStateLastValues["counter"] shouldBe 42
 
                 val machine2 = buildMachine()
                 machine2.restoreBySavedStateConfig(snapshot)
@@ -114,7 +141,7 @@ class SavedStateConfigTest : FreeSpec({
                 val snapshot = SavedStateConfig(
                     structureHashCode = Int.MAX_VALUE,
                     activeLeafStateNames = listOf("state1"),
-                    dataStateValues = emptyMap(),
+                    dataStateLastValues = emptyMap(),
                 )
                 val machine = createTestStateMachine(coroutineStarterType, start = false) {
                     initialState("state1")

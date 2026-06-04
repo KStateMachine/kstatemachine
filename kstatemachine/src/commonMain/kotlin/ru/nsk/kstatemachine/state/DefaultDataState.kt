@@ -34,6 +34,7 @@ open class DefaultDataState<D : Any>(
         get() = checkNotNull(_lastData ?: defaultData) {
             "Last data is not available yet in $this, and default data not provided"
         }
+    internal val lastDataOrNull: D? get() = _lastData
     override val dataClass: KClass<D> get() = dataExtractor.dataClass
 
     override suspend fun onDoEnter(transitionParams: TransitionParams<*>) {
@@ -83,8 +84,9 @@ open class DefaultDataState<D : Any>(
     override suspend fun onStopped() = cleanData()
     override suspend fun onCleanup() = cleanData()
 
-    internal open fun restoreData(data: D) {
-        _lastData = data
+    internal open fun restoreData(lastData: Any?) {
+        @Suppress("UNCHECKED_CAST")
+        if (lastData != null) _lastData = lastData as D
     }
 }
 

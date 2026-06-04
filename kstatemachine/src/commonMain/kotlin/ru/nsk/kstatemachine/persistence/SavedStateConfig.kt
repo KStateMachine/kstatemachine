@@ -10,6 +10,7 @@ package ru.nsk.kstatemachine.persistence
 import ru.nsk.kstatemachine.VisibleForTesting
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.DefaultDataState
+import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.activeStates
 import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.InternalStateMachine
@@ -30,8 +31,13 @@ class SavedStateConfig @VisibleForTesting constructor(
     val structureHashCode: Int,
     /** Names of the leaf active states at capture time. Passed to startFrom() on restoration. */
     val activeLeafStateNames: List<String>,
-    /** Names and data values of all active DataStates at capture time. Pre-set before startFrom(). */
-    val dataStateValues: Map<String, Any?>,
+    /**
+     * Last remembered data value per DataState, keyed by state name.
+     * Includes any DataState that had a value at capture time, whether active or not.
+     * On restoration the value is fed into the state's internal last-data slot; for active states
+     * the entry path then derives [DataState.data] from it via the usual fall-back.
+     */
+    val dataStateLastValues: Map<String, Any?>,
 )
 
 /**
@@ -62,19 +68,21 @@ fun StateMachine.captureSavedStateConfig(): SavedStateConfig {
         }
     }
 
-    val dataStateValues = mutableMapOf<String, Any?>()
-    active.filterIsInstance<DataState<*>>().forEach { state ->
+    val lastValues = mutableMapOf<String, Any?>()
+
+    collectAllDefaultDataStates().forEach { state ->
+        val last = state.lastDataOrNull ?: return@forEach
         check(!state.name.isNullOrBlank()) {
-            "Active DataState $state has no name — assign names to all active states " +
-                    "or use requireNonBlankNames with STATES of STATES_AND_TRANSITIONS in buildCreationArguments {}"
+            "DataState $state has lastData set but no name — assign names to all DataStates " +
+                    "or use requireNonBlankNames with STATES or STATES_AND_TRANSITIONS in buildCreationArguments {}"
         }
-        dataStateValues[state.name!!] = state.data
+        lastValues[state.name!!] = last
     }
 
     return SavedStateConfig(
         structureHashCode = structureHashCode,
         activeLeafStateNames = leafStates.map { it.name!! },
-        dataStateValues = dataStateValues,
+        dataStateLastValues = lastValues,
     )
 }
 
@@ -109,10 +117,9 @@ suspend fun StateMachine.restoreBySavedStateConfig(
                     "disableStructureHashCodeCheck = true if you are sure the machines are compatible"
         }
 
-    savedStateConfig.dataStateValues.forEach { (name, data) ->
-        @Suppress("UNCHECKED_CAST")
-        val state = requireState(name) as DefaultDataState<Any>
-        if (data != null) state.restoreData(data)
+    savedStateConfig.dataStateLastValues.forEach { (name, lastData) ->
+        val state = requireState(name) as DefaultDataState<*>
+        state.restoreData(lastData)
     }
 
     val leafStates = savedStateConfig.activeLeafStateNames.map { requireState(it) }.toSet()
@@ -127,4 +134,11 @@ fun StateMachine.restoreBySavedStateConfigBlocking(
     disableStructureHashCodeCheck: Boolean = false,
 ) = coroutineAbstraction.runBlocking {
     restoreBySavedStateConfig(savedStateConfig, disableStructureHashCodeCheck)
+}
+
+private fun IState.collectAllDefaultDataStates(): List<DefaultDataState<*>> = buildList {
+    for (state in states) {
+        if (state is DefaultDataState<*>) add(state)
+        if (state !is StateMachine) addAll(state.collectAllDefaultDataStates())
+    }
 }

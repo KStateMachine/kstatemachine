@@ -213,7 +213,7 @@ public final class ru/nsk/kstatemachine/persistence/RestoredEventResult {
 
 public final class ru/nsk/kstatemachine/persistence/SavedStateConfig {
 	public final fun getActiveLeafStateNames ()Ljava/util/List;
-	public final fun getDataStateValues ()Ljava/util/Map;
+	public final fun getDataStateLastValues ()Ljava/util/Map;
 	public final fun getStructureHashCode ()I
 }
 
@@ -637,7 +637,7 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/CreationArgume
 	public abstract fun getAutoDestroyOnStatesReuse ()Z
 	public abstract fun getDoNotThrowOnMultipleTransitionsMatch ()Z
 	public abstract fun getEventRecordingArguments ()Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;
-	public abstract fun getRequireNonBlankNames ()Z
+	public abstract fun getRequireNonBlankNames ()Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
 	public abstract fun getSkipCoroutineScopeValidityCheck ()Z
 	public abstract fun isUndoEnabled ()Z
 }
@@ -646,13 +646,13 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/CreationArgume
 	public abstract fun getAutoDestroyOnStatesReuse ()Z
 	public abstract fun getDoNotThrowOnMultipleTransitionsMatch ()Z
 	public abstract fun getEventRecordingArguments ()Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;
-	public abstract fun getRequireNonBlankNames ()Z
+	public abstract fun getRequireNonBlankNames ()Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
 	public abstract fun getSkipCoroutineScopeValidityCheck ()Z
 	public abstract fun isUndoEnabled ()Z
 	public abstract fun setAutoDestroyOnStatesReuse (Z)V
 	public abstract fun setDoNotThrowOnMultipleTransitionsMatch (Z)V
 	public abstract fun setEventRecordingArguments (Lru/nsk/kstatemachine/statemachine/EventRecordingArguments;)V
-	public abstract fun setRequireNonBlankNames (Z)V
+	public abstract fun setRequireNonBlankNames (Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;)V
 	public abstract fun setSkipCoroutineScopeValidityCheck (Z)V
 	public abstract fun setUndoEnabled (Z)V
 }
@@ -676,6 +676,16 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/EventRecording
 
 public final class ru/nsk/kstatemachine/statemachine/IgnoredEventHandlerKt {
 	public static final fun throwingIgnoredEventHandler (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/statemachine/StateMachine$IgnoredEventHandler;
+}
+
+public final class ru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement : java/lang/Enum {
+	public static final field DISABLED Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
+	public static final field STATES Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
+	public static final field STATES_AND_TRANSITIONS Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
+	public static final field TRANSITIONS Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
+	public static fun values ()[Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;
 }
 
 public final class ru/nsk/kstatemachine/statemachine/PendingEventHandlerKt {
@@ -1027,8 +1037,10 @@ public final class ru/nsk/kstatemachine/visitors/GetStructureHashCodeVisitorKt {
 }
 
 public final class ru/nsk/kstatemachine/visitors/RequireNonBlankNamesVisitorKt {
-	public static final fun checkNonBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;)V
-	public static final fun hasBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;)Z
+	public static final fun checkNonBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;)V
+	public static synthetic fun checkNonBlankNames$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;ILjava/lang/Object;)V
+	public static final fun hasBlankNames (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;)Z
+	public static synthetic fun hasBlankNames$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/statemachine/NonBlankNamesRequirement;ILjava/lang/Object;)Z
 }
 
 public abstract interface class ru/nsk/kstatemachine/visitors/Visitor {

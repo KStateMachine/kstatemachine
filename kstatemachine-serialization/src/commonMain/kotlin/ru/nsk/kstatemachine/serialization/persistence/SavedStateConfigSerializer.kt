@@ -27,21 +27,21 @@ import ru.nsk.kstatemachine.persistence.SavedStateConfig
 
 internal object SavedStateConfigSerializer : KSerializer<SavedStateConfig> {
     private val anySerializer = PolymorphicSerializer(Any::class)
-    private val dataValuesSerializer = MapSerializer(String.serializer(), anySerializer.nullable)
+    private val lastValuesSerializer = MapSerializer(String.serializer(), anySerializer.nullable)
 
     override val descriptor = buildClassSerialDescriptor(
         "ru.nsk.kstatemachine.persistence.SavedStateConfig"
     ) {
         element<Int>("structureHashCode")
         element("activeLeafStateNames", ListSerializer(String.serializer()).descriptor)
-        element("dataStateValues", dataValuesSerializer.descriptor)
+        element("dataStateLastValues", lastValuesSerializer.descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: SavedStateConfig) {
         encoder.encodeStructure(descriptor) {
             encodeIntElement(descriptor, 0, value.structureHashCode)
             encodeSerializableElement(descriptor, 1, ListSerializer(String.serializer()), value.activeLeafStateNames)
-            encodeSerializableElement(descriptor, 2, dataValuesSerializer, value.dataStateValues)
+            encodeSerializableElement(descriptor, 2, lastValuesSerializer, value.dataStateLastValues)
         }
     }
 
@@ -51,22 +51,22 @@ internal object SavedStateConfigSerializer : KSerializer<SavedStateConfig> {
                 SavedStateConfig(
                     structureHashCode = decodeIntElement(descriptor, 0),
                     activeLeafStateNames = decodeSerializableElement(descriptor, 1, ListSerializer(String.serializer())),
-                    dataStateValues = decodeSerializableElement(descriptor, 2, dataValuesSerializer),
+                    dataStateLastValues = decodeSerializableElement(descriptor, 2, lastValuesSerializer),
                 )
             } else {
                 var structureHashCode = makeNullPointerFailure<Int>("required structureHashCode property is absent")
                 var activeLeafStateNames =
                     makeNullPointerFailure<List<String>>("required activeLeafStateNames property is absent")
-                var dataStateValues =
-                    makeNullPointerFailure<Map<String, Any?>>("required dataStateValues property is absent")
+                var dataStateLastValues =
+                    makeNullPointerFailure<Map<String, Any?>>("required dataStateLastValues property is absent")
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
                         0 -> structureHashCode = Result.success(decodeIntElement(descriptor, 0))
                         1 -> activeLeafStateNames = Result.success(
                             decodeSerializableElement(descriptor, 1, ListSerializer(String.serializer()))
                         )
-                        2 -> dataStateValues = Result.success(
-                            decodeSerializableElement(descriptor, 2, dataValuesSerializer)
+                        2 -> dataStateLastValues = Result.success(
+                            decodeSerializableElement(descriptor, 2, lastValuesSerializer)
                         )
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
@@ -75,7 +75,7 @@ internal object SavedStateConfigSerializer : KSerializer<SavedStateConfig> {
                 SavedStateConfig(
                     structureHashCode.getOrThrow(),
                     activeLeafStateNames.getOrThrow(),
-                    dataStateValues.getOrThrow(),
+                    dataStateLastValues.getOrThrow(),
                 )
             }
         }
