@@ -24,7 +24,7 @@ internal class RequireNonBlankNamesVisitor(private val requirement: NonBlankName
     private val invalidTransitions = mutableSetOf<Transition<*>>()
 
     override fun visit(machine: StateMachine) {
-        if (machine.name.isNullOrBlank())
+        if (requirement in listOf(STATES, STATES_AND_TRANSITIONS) && machine.name.isNullOrBlank())
             invalidStates += machine
         machine.visitChildren()
     }
