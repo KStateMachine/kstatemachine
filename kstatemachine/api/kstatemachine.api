@@ -218,7 +218,8 @@ public final class ru/nsk/kstatemachine/persistence/SavedStateConfig {
 }
 
 public final class ru/nsk/kstatemachine/persistence/SavedStateConfigKt {
-	public static final fun captureSavedStateConfig (Lru/nsk/kstatemachine/statemachine/StateMachine;)Lru/nsk/kstatemachine/persistence/SavedStateConfig;
+	public static final fun captureSavedStateConfig (Lru/nsk/kstatemachine/statemachine/StateMachine;Z)Lru/nsk/kstatemachine/persistence/SavedStateConfig;
+	public static synthetic fun captureSavedStateConfig$default (Lru/nsk/kstatemachine/statemachine/StateMachine;ZILjava/lang/Object;)Lru/nsk/kstatemachine/persistence/SavedStateConfig;
 	public static final fun restoreBySavedStateConfig (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun restoreBySavedStateConfig$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun restoreBySavedStateConfigBlocking (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/persistence/SavedStateConfig;Z)V

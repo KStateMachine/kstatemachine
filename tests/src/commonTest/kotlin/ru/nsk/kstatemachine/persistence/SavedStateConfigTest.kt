@@ -200,6 +200,33 @@ class SavedStateConfigTest : FreeSpec({
                 }
             }
 
+            "capture with isUndoEnabled succeeds when disableUndoEnabledCheck is true" {
+                lateinit var state2: State
+                suspend fun buildMachine() = createTestStateMachine(
+                    coroutineStarterType,
+                    start = false,
+                    creationArguments = buildCreationArguments { isUndoEnabled = true },
+                ) {
+                    initialState("state1") {
+                        transitionOn<SwitchEvent> { targetState = { state2 } }
+                    }
+                    state2 = state("state2")
+                }
+
+                val machine1 = buildMachine()
+                machine1.start()
+                machine1.processEvent(SwitchEvent)
+
+                val snapshot = shouldNotThrowAny {
+                    machine1.captureSavedStateConfig(disableUndoEnabledCheck = true)
+                }
+                snapshot.activeLeafStateNames shouldBe listOf("state2")
+
+                val machine2 = buildMachine()
+                machine2.restoreBySavedStateConfig(snapshot)
+                machine2.activeStates().single().name shouldBe "state2"
+            }
+
             "capture with unnamed active state throws" {
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState() // no name

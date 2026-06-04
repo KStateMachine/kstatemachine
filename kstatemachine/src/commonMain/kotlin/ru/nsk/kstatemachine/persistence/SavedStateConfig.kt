@@ -46,17 +46,24 @@ class SavedStateConfig @VisibleForTesting constructor(
  * Prerequisites (throws [IllegalStateException] if violated):
  * - Machine must be running and not destroyed.
  * - [StateMachine.creationArguments].isUndoEnabled must be false — the undo stack cannot be persisted.
+ *   Pass [disableUndoEnabledCheck] = true to bypass this check; the restored machine will start with
+ *   an empty undo stack but can still record and undo events processed after restoration.
  * - All active states must have non-blank names.
  *   Use `requireNonBlankNames` with `STATES` value or `STATES_AND_TRANSITIONS` in creation arguments
  *   to enforce this at machine start, or assign names to all states manually.
  */
-fun StateMachine.captureSavedStateConfig(): SavedStateConfig {
+fun StateMachine.captureSavedStateConfig(
+    disableUndoEnabledCheck: Boolean = false,
+): SavedStateConfig {
     checkNotDestroyed()
     check(isRunning) { "$this is not running" }
-    check(!creationArguments.isUndoEnabled) {
-        "captureSavedStateConfig() is not compatible with isUndoEnabled = true: " +
-                "the undo stack cannot be persisted and would be empty after restoration"
-    }
+    if (!disableUndoEnabledCheck)
+        check(!creationArguments.isUndoEnabled) {
+            "captureSavedStateConfig() is not compatible with isUndoEnabled = true: " +
+                    "the undo stack cannot be persisted and would be empty after restoration. " +
+                    "Pass disableUndoEnabledCheck = true to opt in: the restored machine will start " +
+                    "with an empty undo stack but accept undo for events processed after restoration."
+        }
 
     val active = activeStates()
 
