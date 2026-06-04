@@ -256,6 +256,34 @@ class SavedStateConfigTest : FreeSpec({
                 }
             }
 
+            "restoration mutes listeners by default and fires them when muteListeners is false" {
+                lateinit var state2: State
+                suspend fun buildMachine(onEntry: () -> Unit) =
+                    createTestStateMachine(coroutineStarterType, start = false) {
+                        initialState("state1") {
+                            transitionOn<SwitchEvent> { targetState = { state2 } }
+                        }
+                        state2 = state("state2") {
+                            onEntry { onEntry() }
+                        }
+                    }
+
+                val machine1 = buildMachine(onEntry = {})
+                machine1.start()
+                machine1.processEvent(SwitchEvent)
+                val snapshot = machine1.captureSavedStateConfig()
+
+                var mutedCount = 0
+                val mutedMachine = buildMachine(onEntry = { mutedCount++ })
+                mutedMachine.restoreBySavedStateConfig(snapshot) // muteListeners defaults to true
+                mutedCount shouldBe 0
+
+                var audibleCount = 0
+                val audibleMachine = buildMachine(onEntry = { audibleCount++ })
+                audibleMachine.restoreBySavedStateConfig(snapshot, muteListeners = false)
+                audibleCount shouldBe 1
+            }
+
             "restoreBySavedStateConfigBlocking works" {
                 lateinit var state2: State
                 val machine1 = createTestStateMachine(coroutineStarterType) {

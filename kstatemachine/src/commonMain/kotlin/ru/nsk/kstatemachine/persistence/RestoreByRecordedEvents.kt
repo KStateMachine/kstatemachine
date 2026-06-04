@@ -168,6 +168,6 @@ fun StateMachine.restoreByRecordedEventsBlocking(
     }
 }
 
-private object EmptyListenersMutationSection : ListenersMutationSection {
+internal object EmptyListenersMutationSection : ListenersMutationSection {
     override fun close() = Unit
 }

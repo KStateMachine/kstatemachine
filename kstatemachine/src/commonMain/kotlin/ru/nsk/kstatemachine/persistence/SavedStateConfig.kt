@@ -16,6 +16,7 @@ import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.InternalStateMachine
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.checkNotDestroyed
+import ru.nsk.kstatemachine.statemachine.use
 import ru.nsk.kstatemachine.testing.Testing.startFrom
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
@@ -100,14 +101,15 @@ fun StateMachine.captureSavedStateConfig(
  * The machine must not have processed any events before restoration (the same restriction as
  * [restoreByRecordedEvents]).
  *
- * Unlike [restoreByRecordedEvents], listener callbacks fire normally during restoration because
- * states are genuinely entered via [ru.nsk.kstatemachine.testing.Testing.startFrom].
- *
+ * @param muteListeners by default listener callbacks are suppressed during restoration, since the
+ *   original machine already triggered them at the original moment. Pass `false` to receive the
+ *   entry/exit/transition callbacks on the restored machine too.
  * @param disableStructureHashCodeCheck skip the structural integrity check — useful when intentionally
  *   restoring on a machine with a different structure (results may differ).
  */
 suspend fun StateMachine.restoreBySavedStateConfig(
     savedStateConfig: SavedStateConfig,
+    muteListeners: Boolean = true,
     disableStructureHashCodeCheck: Boolean = false,
 ): Unit = coroutineAbstraction.withContext {
     checkNotDestroyed()
@@ -130,7 +132,11 @@ suspend fun StateMachine.restoreBySavedStateConfig(
     }
 
     val leafStates = savedStateConfig.activeLeafStateNames.map { requireState(it) }.toSet()
-    (this as InternalStateMachine).startFrom(leafStates, argument = null)
+    this as InternalStateMachine
+    val mutationSection = if (muteListeners) openListenersMutationSection() else EmptyListenersMutationSection
+    mutationSection.use {
+        startFrom(leafStates, argument = null)
+    }
 }
 
 /**
@@ -138,9 +144,10 @@ suspend fun StateMachine.restoreBySavedStateConfig(
  */
 fun StateMachine.restoreBySavedStateConfigBlocking(
     savedStateConfig: SavedStateConfig,
+    muteListeners: Boolean = true,
     disableStructureHashCodeCheck: Boolean = false,
 ) = coroutineAbstraction.runBlocking {
-    restoreBySavedStateConfig(savedStateConfig, disableStructureHashCodeCheck)
+    restoreBySavedStateConfig(savedStateConfig, muteListeners, disableStructureHashCodeCheck)
 }
 
 private fun IState.collectAllDefaultDataStates(): List<DefaultDataState<*>> = buildList {
