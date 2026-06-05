@@ -34,13 +34,13 @@ private fun joinEventMatcher(joinId: Any): EventMatcher<JoinCompleteEvent> =
  * Adds a **UML join** transition to this [ChildMode.PARALLEL] state.
  *
  * Each element of [joinPoints] is a state inside one parallel region that acts as
- * that region's synchronisation point. When **all** join-point states become active
+ * that region's synchronization point. When **all** join-point states become active
  * simultaneously the outgoing transition fires automatically to [targetState].
  *
  * **Soft blocking**: join-point states should carry no outgoing user transitions.
  * The parallel state's event-routing algorithm finds no matching transition in a
  * join-point state and falls back to the parallel parent's own transitions, which
- * only contain the internal `JoinCompleteEvent` transition. All other events are
+ * only contain the internal [JoinCompleteEvent] transition. All other events are
  * silently ignored for that region — by convention, not enforcement.
  *
  * @param joinPoints at least 2 states, one per parallel region.

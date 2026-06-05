@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-package ru.nsk.kstatemachine.persistence
+package ru.nsk.kstatemachine.serialization.persistence
 
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -17,6 +17,10 @@ import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.event.DataEvent
+import ru.nsk.kstatemachine.persistence.SavedStateConfig
+import ru.nsk.kstatemachine.persistence.captureSavedStateConfig
+import ru.nsk.kstatemachine.persistence.restoreBySavedStateConfig
+import ru.nsk.kstatemachine.persistence.restoreBySavedStateConfigBlocking
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.*
 
@@ -29,7 +33,7 @@ class SavedStateConfigTest : FreeSpec({
         "$coroutineStarterType" - {
             "capture and restore plain state" {
                 lateinit var state2: State
-                val machine1 = createTestStateMachine(coroutineStarterType) {
+                val machine1 = createTestStateMachine(coroutineStarterType, "machine") {
                     initialState("state1") {
                         transitionOn<SwitchEvent> { targetState = { state2 } }
                     }
@@ -41,7 +45,7 @@ class SavedStateConfigTest : FreeSpec({
                 snapshot.activeLeafStateNames shouldBe listOf("state2")
 
                 lateinit var state2b: State
-                val machine2 = createTestStateMachine(coroutineStarterType, start = false) {
+                val machine2 = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("state1") {
                         transitionOn<SwitchEvent> { targetState = { state2b } }
                     }
@@ -53,7 +57,7 @@ class SavedStateConfigTest : FreeSpec({
 
             "capture and restore DataState preserves data" {
                 lateinit var loaded: DataState<Int>
-                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, start = false) {
+                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("idle") {
                         dataTransitionOn<SavedStateConfigTestData.IntEvent, Int> { targetState = { loaded } }
                     }
@@ -75,7 +79,7 @@ class SavedStateConfigTest : FreeSpec({
 
             "lastData of inactive DataState is captured and restored" {
                 lateinit var loaded: DataState<Int>
-                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, start = false) {
+                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     val idle = initialState("idle") {
                         dataTransitionOn<SavedStateConfigTestData.IntEvent, Int> { targetState = { loaded } }
                     }
@@ -102,7 +106,7 @@ class SavedStateConfigTest : FreeSpec({
 
             "capture and restore MutableDataState preserves data" {
                 lateinit var counter: MutableDataState<Int>
-                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, start = false) {
+                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     counter = initialMutableDataState("counter", defaultData = 0)
                 }
 
@@ -119,7 +123,7 @@ class SavedStateConfigTest : FreeSpec({
             }
 
             "capture and restore parallel regions" {
-                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, start = false) {
+                suspend fun buildMachine() = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("parallel", childMode = ChildMode.PARALLEL) {
                         state("p1")
                         state("p2")
@@ -152,7 +156,7 @@ class SavedStateConfigTest : FreeSpec({
             }
 
             "structure hash mismatch ignored when disabled" {
-                val machine1 = createTestStateMachine(coroutineStarterType) {
+                val machine1 = createTestStateMachine(coroutineStarterType, "machine") {
                     initialState("state1")
                 }
                 val snapshot = machine1.captureSavedStateConfig()
@@ -204,6 +208,7 @@ class SavedStateConfigTest : FreeSpec({
                 lateinit var state2: State
                 suspend fun buildMachine() = createTestStateMachine(
                     coroutineStarterType,
+                    "machine",
                     start = false,
                     creationArguments = buildCreationArguments { isUndoEnabled = true },
                 ) {
@@ -237,7 +242,7 @@ class SavedStateConfigTest : FreeSpec({
             }
 
             "restore on already-processed machine throws" {
-                val machine1 = createTestStateMachine(coroutineStarterType) {
+                val machine1 = createTestStateMachine(coroutineStarterType, "machine") {
                     initialState("state1")
                 }
                 val snapshot = machine1.captureSavedStateConfig()
@@ -259,7 +264,7 @@ class SavedStateConfigTest : FreeSpec({
             "restoration mutes listeners by default and fires them when muteListeners is false" {
                 lateinit var state2: State
                 suspend fun buildMachine(onEntry: () -> Unit) =
-                    createTestStateMachine(coroutineStarterType, start = false) {
+                    createTestStateMachine(coroutineStarterType, "machine", start = false) {
                         initialState("state1") {
                             transitionOn<SwitchEvent> { targetState = { state2 } }
                         }
@@ -286,7 +291,7 @@ class SavedStateConfigTest : FreeSpec({
 
             "restoreBySavedStateConfigBlocking works" {
                 lateinit var state2: State
-                val machine1 = createTestStateMachine(coroutineStarterType) {
+                val machine1 = createTestStateMachine(coroutineStarterType, "machine") {
                     initialState("state1") {
                         transitionOn<SwitchEvent> { targetState = { state2 } }
                     }
@@ -297,7 +302,7 @@ class SavedStateConfigTest : FreeSpec({
                 val snapshot = machine1.captureSavedStateConfig()
 
                 lateinit var state2b: State
-                val machine2 = createTestStateMachine(coroutineStarterType, start = false) {
+                val machine2 = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("state1") {
                         transitionOn<SwitchEvent> { targetState = { state2b } }
                     }

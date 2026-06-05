@@ -14,19 +14,20 @@ import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.activeStates
 import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.InternalStateMachine
+import ru.nsk.kstatemachine.statemachine.NonBlankNamesRequirement.STATES
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.checkNotDestroyed
 import ru.nsk.kstatemachine.statemachine.use
 import ru.nsk.kstatemachine.testing.Testing.startFrom
+import ru.nsk.kstatemachine.visitors.checkNonBlankNames
 import ru.nsk.kstatemachine.visitors.structureHashCode
 
 /**
  * A constant-size snapshot of an active state configuration.
  * Captured with [captureSavedStateConfig] and restored with [restoreBySavedStateConfig].
+ * This type is for data serialization.
  *
  * Unlike event recording, the snapshot size is independent of how many events the machine has processed.
- * Restoring via [restoreBySavedStateConfig] genuinely enters states (using the same mechanism as
- * [ru.nsk.kstatemachine.testing.Testing.startFrom]), so listener callbacks fire normally.
  */
 class SavedStateConfig @VisibleForTesting constructor(
     val structureHashCode: Int,
@@ -49,7 +50,7 @@ class SavedStateConfig @VisibleForTesting constructor(
  * - [StateMachine.creationArguments].isUndoEnabled must be false — the undo stack cannot be persisted.
  *   Pass [disableUndoEnabledCheck] = true to bypass this check; the restored machine will start with
  *   an empty undo stack but can still record and undo events processed after restoration.
- * - All active states must have non-blank names.
+ * - All states must have non-blank names.
  *   Use `requireNonBlankNames` with `STATES` value or `STATES_AND_TRANSITIONS` in creation arguments
  *   to enforce this at machine start, or assign names to all states manually.
  */
@@ -66,24 +67,16 @@ fun StateMachine.captureSavedStateConfig(
                     "with an empty undo stack but accept undo for events processed after restoration."
         }
 
+    checkNonBlankNames(STATES)
+
     val active = activeStates()
 
     val leafStates = active.filter { s -> s.states.none { child -> child in active } }
-    leafStates.forEach { state ->
-        check(!state.name.isNullOrBlank()) {
-            "Active state $state has no name — assign names to all active states " +
-                    "or use requireNonBlankNames with STATES of STATES_AND_TRANSITIONS in buildCreationArguments {}"
-        }
-    }
 
     val lastValues = mutableMapOf<String, Any?>()
 
     collectAllDefaultDataStates().forEach { state ->
         val last = state.lastDataOrNull ?: return@forEach
-        check(!state.name.isNullOrBlank()) {
-            "DataState $state has lastData set but no name — assign names to all DataStates " +
-                    "or use requireNonBlankNames with STATES or STATES_AND_TRANSITIONS in buildCreationArguments {}"
-        }
         lastValues[state.name!!] = last
     }
 
@@ -98,8 +91,10 @@ fun StateMachine.captureSavedStateConfig(
  * Restores this machine to the state configuration described by [savedStateConfig].
  * Starts the machine if it is not already started.
  *
- * The machine must not have processed any events before restoration (the same restriction as
- * [restoreByRecordedEvents]).
+ * Prerequisites (throws [IllegalStateException] if violated):
+ * - Machine must not be destroyed.
+ * - Machine must not have processed any events (the same restriction as [restoreByRecordedEvents]).
+ * - All states must have non-blank names (same requirement as [captureSavedStateConfig]).
  *
  * @param muteListeners by default listener callbacks are suppressed during restoration, since the
  *   original machine already triggered them at the original moment. Pass `false` to receive the
@@ -119,6 +114,8 @@ suspend fun StateMachine.restoreBySavedStateConfig(
                     "initially clear ${StateMachine::class.simpleName}"
         }
     }
+
+    checkNonBlankNames(STATES)
 
     if (!disableStructureHashCodeCheck)
         check(structureHashCode == savedStateConfig.structureHashCode) {
