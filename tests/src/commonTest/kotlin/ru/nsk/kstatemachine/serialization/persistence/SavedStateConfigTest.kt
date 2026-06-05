@@ -147,7 +147,7 @@ class SavedStateConfigTest : FreeSpec({
                     activeLeafStateNames = listOf("state1"),
                     dataStateLastValues = emptyMap(),
                 )
-                val machine = createTestStateMachine(coroutineStarterType, start = false) {
+                val machine = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("state1")
                 }
                 shouldThrow<IllegalStateException> {
@@ -161,7 +161,7 @@ class SavedStateConfigTest : FreeSpec({
                 }
                 val snapshot = machine1.captureSavedStateConfig()
 
-                val machine2 = createTestStateMachine(coroutineStarterType, start = false) {
+                val machine2 = createTestStateMachine(coroutineStarterType, "machine", start = false) {
                     initialState("state1")
                     state("state2")
                 }
