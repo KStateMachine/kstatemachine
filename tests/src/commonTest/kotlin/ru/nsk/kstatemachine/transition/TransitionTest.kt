@@ -129,7 +129,7 @@ class TransitionTest : FreeSpec({
                 finalState.isActive shouldBe true
             }
 
-            "transition to free state, negative" {
+            "[negative] transition to free state" {
                 val freeState = DefaultState("freeState")
                 val machine = createTestStateMachine(coroutineStarterType, name = "outer") {
                     initialState {
@@ -141,7 +141,7 @@ class TransitionTest : FreeSpec({
                 ) { machine.processEventBlocking(SwitchEvent) }
             }
 
-            "transition to non machine state, negative" {
+            "[negative] transition to non machine state" {
                 val otherMachine = createTestStateMachine(coroutineStarterType, "otherMachine") {
                     initialState()
                 }
@@ -156,7 +156,7 @@ class TransitionTest : FreeSpec({
                 ) { machine.processEventBlocking(SwitchEvent) }
             }
 
-            "multiple matching transitions negative" {
+            "[negative] multiple matching transitions" {
                 val machine = createTestStateMachine(coroutineStarterType) {
                     transition<SwitchEvent>()
                     transition<SwitchEvent>()
@@ -181,7 +181,7 @@ class TransitionTest : FreeSpec({
                 machine.processEventBlocking(SwitchEvent)
             }
 
-            "parallel multiple matching transitions negative" {
+            "[negative] parallel multiple matching transitions" {
                 val machine = createTestStateMachine(coroutineStarterType, childMode = ChildMode.PARALLEL) {
                     state { transition<SwitchEvent>() }
                     state { transition<SwitchEvent>() }

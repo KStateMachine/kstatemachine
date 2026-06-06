@@ -140,7 +140,7 @@ class ParallelTargetStatesTest : FreeSpec({
                 }
             }
 
-            "negative transition targets multiple states, invalid state amount" {
+            "[negative] transition targets multiple states, invalid state amount" {
                 lateinit var state1: State
 
                 val machine = createTestStateMachine(coroutineStarterType) {
@@ -155,7 +155,7 @@ class ParallelTargetStatesTest : FreeSpec({
                 ) { machine.processEvent(SwitchEvent) }
             }
 
-            "negative transition targets multiple states, invalid target states" {
+            "[negative] transition targets multiple states, invalid target states" {
                 lateinit var state1: State
                 lateinit var state2: State
 
@@ -366,7 +366,7 @@ class ParallelTargetStatesTest : FreeSpec({
                 }
             }
 
-            "negative, multiple targets for EXCLUSIVE state" {
+            "[negative] multiple targets for EXCLUSIVE state" {
                 lateinit var state221: State
                 lateinit var state222: State
                 lateinit var state232: State

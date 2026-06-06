@@ -23,7 +23,7 @@ import ru.nsk.kstatemachine.transition.onTriggered
 class ParallelStatesTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
-            "initial state in parallel mode negative" {
+            "[negative] initial state in parallel mode" {
                 createTestStateMachine(coroutineStarterType) {
                     initialState(childMode = ChildMode.PARALLEL) {
                         shouldThrowWithMessage<IllegalStateException>(
@@ -33,7 +33,7 @@ class ParallelStatesTest : FreeSpec({
                 }
             }
 
-            "final or pseudo state in parallel mode negative" {
+            "[negative] final or pseudo state in parallel mode" {
                 createTestStateMachine(coroutineStarterType, childMode = ChildMode.PARALLEL) {
                     shouldThrowWithMessage<IllegalArgumentException>(
                         "Can not add IFinalState in parallel child mode"
@@ -138,7 +138,7 @@ class ParallelStatesTest : FreeSpec({
                 }
             }
 
-            "process event by parallel states negative" {
+            "[negative] process event by parallel states" {
                 val callbacks = mockkCallbacks()
 
                 val machine = createTestStateMachine(coroutineStarterType) {

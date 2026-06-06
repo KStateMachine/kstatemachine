@@ -490,7 +490,7 @@ class StateMachineTest : FreeSpec({
                 machine.processEventByLaunch(SwitchEvent)
             }
 
-            "negative processEventByAsync() throws" {
+            "[negative] processEventByAsync() throws" {
                 val machine = createStdLibStateMachine {
                     initialState()
                     transition<SwitchEvent>()
@@ -500,7 +500,7 @@ class StateMachineTest : FreeSpec({
                 ) { machine.processEventByAsync(SwitchEvent) }
             }
 
-            "negative processEventByLaunch() throws" {
+            "[negative] processEventByLaunch() throws" {
                 val machine = createStdLibStateMachine {
                     initialState()
                     transition<SwitchEvent>()

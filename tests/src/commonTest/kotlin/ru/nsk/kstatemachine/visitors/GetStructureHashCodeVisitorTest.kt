@@ -61,7 +61,7 @@ class GetStructureHashCodeVisitorTest : FreeSpec({
                 machine.structureHashCode shouldNotBe machine2.structureHashCode
             }
 
-            "negative structure hash code should catch state reorder (not works for empty states)" {
+            "[negative] structure hash code should catch state reorder (not works for empty states)" {
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState()
                     state()

@@ -165,7 +165,7 @@ class UmlMetaInfoTest : FreeSpec({
                 machine.exportToPlantUml() shouldBe PLANTUML_COMPOSITE_META_INFO
             }
 
-            "negative CompositeMetaInfo nesting" {
+            "[negative] CompositeMetaInfo nesting" {
                 shouldThrowWithMessage<IllegalStateException>("CompositeMetaInfo cannot nest each other") {
                     createTestStateMachine(coroutineStarterType) {
                         metaInfo = buildCompositeMetaInfo(
@@ -177,7 +177,7 @@ class UmlMetaInfoTest : FreeSpec({
                 }
             }
 
-            "negative MetaInfo cannot be repeated more than once" {
+            "[negative] MetaInfo cannot be repeated more than once" {
                 shouldThrowWithMessage<IllegalStateException>("MetaInfo ${buildUmlMetaInfo {}::class} is repeated more than once") {
                     createTestStateMachine(coroutineStarterType) {
                         transition<SwitchEvent> {

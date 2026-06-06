@@ -54,7 +54,7 @@ class EventMatcherTest : FreeSpec({
                 verifySequence { callbacks.onTransitionTriggered(event) }
             }
 
-            "isEqual() negative" {
+            "[negative] isEqual()" {
                 val callbacks = mockkCallbacks()
 
                 val machine = createTestStateMachine(coroutineStarterType) {
@@ -92,7 +92,7 @@ class EventMatcherTest : FreeSpec({
                 verifySequence { callbacks.onTransitionTriggered(event) }
             }
 
-            "isInstanceOf() negative" {
+            "[negative] isInstanceOf()" {
                 val callbacks = mockkCallbacks()
 
                 val machine = createTestStateMachine(coroutineStarterType) {

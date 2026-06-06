@@ -31,7 +31,7 @@ private object TypesafeTransitionTestData {
 class TypesafeTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
-            "initial DataState negative" {
+            "[negative] initial DataState" {
                 shouldThrowWithMessage<Exception>(
                     "Last data is not available yet in DefaultDataState(state1), and default data not provided"
                 ) {
@@ -175,7 +175,7 @@ class TypesafeTransitionTest : FreeSpec({
                 state22.data shouldBe id
             }
 
-            "implicit data state activation by cross-level transition negative" {
+            "[negative] implicit data state activation by cross-level transition" {
                 val machine = createTestStateMachine(coroutineStarterType) {
                     lateinit var state21: State
 
@@ -262,7 +262,7 @@ class TypesafeTransitionTest : FreeSpec({
                 state2.data shouldBe id
             }
 
-            "target-less data transition inside nonDataState negative" {
+            "[negative] target-less data transition inside nonDataState" {
                 shouldThrowWithMessage<IllegalArgumentException>(
                     "targetState should be set in this transition builder"
                 ) {

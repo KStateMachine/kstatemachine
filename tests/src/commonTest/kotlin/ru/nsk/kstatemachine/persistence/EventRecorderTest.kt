@@ -30,7 +30,7 @@ import ru.nsk.kstatemachine.visitors.structureHashCode
 class EventRecorderTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
-            "negative event recording should be explicitly enabled" {
+            "[negative] event recording should be explicitly enabled" {
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState()
                 }
@@ -40,7 +40,7 @@ class EventRecorderTest : FreeSpec({
                 ) { machine.eventRecorder }
             }
 
-            "negative process SerializableGeneratedEvent" {
+            "[negative] process SerializableGeneratedEvent" {
                 val machine = createTestStateMachine(
                     coroutineStarterType,
                     creationArguments = buildCreationArguments {
@@ -54,7 +54,7 @@ class EventRecorderTest : FreeSpec({
                 }
             }
 
-            "negative process WrappedEvent" {
+            "[negative] process WrappedEvent" {
                 val machine = createTestStateMachine(
                     coroutineStarterType,
                     creationArguments = buildCreationArguments {

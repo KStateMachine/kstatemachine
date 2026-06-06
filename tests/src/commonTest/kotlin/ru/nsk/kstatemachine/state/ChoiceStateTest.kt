@@ -272,7 +272,7 @@ class ChoiceStateTest : FreeSpec({
                 dataState2.data shouldBe 42
             }
 
-            "negative implicit DataState activation by initialChoiceState" {
+            "[negative] implicit DataState activation by initialChoiceState" {
                 lateinit var state21: State
                 lateinit var dataState2: DataState<Int>
                 val machine = createTestStateMachine(coroutineStarterType) {

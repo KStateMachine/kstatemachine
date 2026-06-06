@@ -91,7 +91,7 @@ class CompositionStateMachinesTest : FreeSpec({
                 outer.activeStates().shouldContainExactly(state2)
             }
 
-            "transition out from nested machine, negative" {
+            "[negative] transition out from nested machine" {
                 lateinit var state1: State
                 lateinit var state2: State
                 val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
@@ -114,7 +114,7 @@ class CompositionStateMachinesTest : FreeSpec({
                 outer.activeStates().shouldContainExactly(inner)
             }
 
-            "transition into nested machine sub-state, negative" {
+            "[negative] transition into nested machine sub-state" {
                 lateinit var innerState2: State
                 val inner = createTestStateMachine(coroutineStarterType, name = "inner") {
                     logger = StateMachine.Logger { println(it()) }

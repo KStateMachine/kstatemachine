@@ -29,7 +29,7 @@ class TransitionOverrideTest : FreeSpec({
          * It is not possible to override with [noTransition]. Currently, I do not think it is necessary.
          * [stay] should fit such case, see "override with stay()".
          */
-            "override with noTransition() negative" {
+            "[negative] override with noTransition()" {
                 val callbacks = mockkCallbacks()
 
                 val machine = overrideWithDirection(coroutineStarterType, callbacks, noTransition())

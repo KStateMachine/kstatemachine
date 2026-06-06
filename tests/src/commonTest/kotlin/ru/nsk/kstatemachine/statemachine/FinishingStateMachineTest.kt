@@ -140,7 +140,7 @@ class FinishingStateMachineTest : FreeSpec({
                 state2.isFinished shouldBe true
             }
 
-            "finishing with parallel states negative" {
+            "[negative] finishing with parallel states" {
                 val callbacks = mockkCallbacks()
 
                 lateinit var state1: IState

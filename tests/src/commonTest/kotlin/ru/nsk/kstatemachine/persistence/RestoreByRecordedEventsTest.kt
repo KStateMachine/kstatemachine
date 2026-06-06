@@ -21,7 +21,7 @@ import ru.nsk.kstatemachine.statemachine.*
 class RestoreByRecordedEventsTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
-            "negative check ${StateMachine::restoreByRecordedEvents.name} on destroyed machine throws" {
+            "[negative] check ${StateMachine::restoreByRecordedEvents.name} on destroyed machine throws" {
                 val recordedEvents = RecordedEvents(0, emptyList())
 
                 val machine = createTestStateMachine(coroutineStarterType) {
@@ -34,7 +34,7 @@ class RestoreByRecordedEventsTest : FreeSpec({
                 }
             }
 
-            "negative check ${StateMachine::restoreByRecordedEvents.name} on machine that already processed events throws" {
+            "[negative] check ${StateMachine::restoreByRecordedEvents.name} on machine that already processed events throws" {
                 val recordedEvents = RecordedEvents(0, emptyList())
 
                 val machine = createTestStateMachine(coroutineStarterType) {
@@ -69,7 +69,7 @@ class RestoreByRecordedEventsTest : FreeSpec({
                 }
             }
 
-            "negative check event restoration on different machines throws" {
+            "[negative] check event restoration on different machines throws" {
                 val machine1 = createTestStateMachine(
                     coroutineStarterType,
                     creationArguments = buildCreationArguments {
@@ -209,7 +209,7 @@ class RestoreByRecordedEventsTest : FreeSpec({
                 machine2.activeStates().shouldContainExactly(firstState)
             }
 
-            "negative restore the machine started with argument" {
+            "[negative] restore the machine started with argument" {
                 val machine1 = createTestStateMachine(
                     coroutineStarterType,
                     start = false,
