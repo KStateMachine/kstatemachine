@@ -163,7 +163,7 @@ If KStateMachine saves you time, please consider supporting the project:
 
 ## 🧪 Samples
 
-Full app samples and 20+ focused code samples are listed on the
+Full app samples and 20+ runnable focused code samples are listed on the
 **[Samples page](https://kstatemachine.github.io/kstatemachine/pages/samples.html)** in the documentation.
 
 <p align="center">
