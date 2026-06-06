@@ -135,29 +135,32 @@ class ChoiceStateTest : FreeSpec({
                 machine.activeStates().shouldContainExactly(state2)
             }
 
-            "negative multiple initial choice states in parallel states (doNotThrowOnMultipleTransitionsMatch = false)" {
+            "[negative] multiple initial choice states in parallel states throws (doNotThrowOnMultipleTransitionsMatch = false)" {
                 lateinit var state2: State
                 lateinit var state3: State
-                val machine = createTestStateMachine(coroutineStarterType) {
-                    initialState("state1", childMode = ChildMode.PARALLEL) {
-                        state("state11") {
-                            initialChoiceState("choice111") { state2 }
+                shouldThrowWithMessage<IllegalStateException>(
+                    "multiple transitions match: multiple initial pseudo-states found in DefaultState(state1)"
+                ) {
+                    createTestStateMachine(coroutineStarterType) {
+                        initialState("state1", childMode = ChildMode.PARALLEL) {
+                            state("state11") {
+                                initialChoiceState("choice111") { state2 }
+                            }
+                            state("state12") {
+                                initialChoiceState("choice121") { state3 }
+                            }
                         }
-                        state("state12") {
-                            initialChoiceState("choice121") { state3 }
-                        }
-                    }
 
-                    state2 = state("state2")
-                    state3 = state("state3")
+                        state2 = state("state2")
+                        state3 = state("state3")
+                    }
                 }
-                machine.activeStates().shouldContainExactly(state2)
             }
 
             "multiple initial choice states in parallel states, multiple transitions (doNotThrowOnMultipleTransitionsMatch = true)" {
                 lateinit var state2: State
                 lateinit var state3: State
-                shouldThrowWithMessage<IllegalStateException>( "multiple transitions match") {
+                shouldThrowWithMessage<IllegalStateException>("multiple transitions match: multiple initial pseudo-states found in DefaultState(state1)") {
                     val machine = createTestStateMachine(
                         coroutineStarterType,
                         creationArguments = buildCreationArguments { doNotThrowOnMultipleTransitionsMatch = true }
@@ -190,6 +193,25 @@ class ChoiceStateTest : FreeSpec({
                     state("state2")
                 }
                 machine.activeStates().shouldContainExactly(state121)
+            }
+
+            "multiple initial choice states in a parallel state navigates to regions sub-states" {
+                lateinit var state112: State
+                lateinit var state122: State
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    initialState("state1", childMode = ChildMode.PARALLEL) {
+                        state("state11") {
+                            state112 = state("state112") {}
+                            initialChoiceState("choice111") { state112 }
+                        }
+                        state("state12") {
+                            state122 = state("state122") {}
+                            initialChoiceState("choice121") { state122 }
+                        }
+                    }
+                    state("state2")
+                }
+                machine.activeStates().shouldContainExactly(state112, state122)
             }
 
             "redirecting choice data state" {
