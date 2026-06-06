@@ -1,18 +1,23 @@
-/*
- * Author: Mikhail Fedotov
- * Github: https://github.com/KStateMachine
- * Copyright (c) 2024.
- * All rights reserved.
- */
-
-package ru.nsk.kstatemachine.state
+package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.core.spec.style.scopes.FreeSpecContainerScope.invoke
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.CoroutineStarterType
+import ru.nsk.kstatemachine.SwitchEvent
+import ru.nsk.kstatemachine.SwitchEventL1
+import ru.nsk.kstatemachine.SwitchEventL2
+import ru.nsk.kstatemachine.createTestStateMachine
+import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.activeStates
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.joinTransition
+import ru.nsk.kstatemachine.state.state
+import ru.nsk.kstatemachine.state.transition
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.statemachine.restartBlocking
 

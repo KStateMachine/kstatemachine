@@ -10,6 +10,7 @@ package ru.nsk.kstatemachine.state
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.CoroutineStarterType
@@ -24,6 +25,7 @@ import ru.nsk.kstatemachine.state.ChoiceStateTestData.IntEvent
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State2
 import ru.nsk.kstatemachine.statemachine.StateMachine
+import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.onTransitionTriggered
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
@@ -181,37 +183,45 @@ class ChoiceStateTest : FreeSpec({
             }
 
             "initial choice state in a parallel state navigates to sub-state" {
+                lateinit var state11: State
+                lateinit var state12: State
                 lateinit var state121: State
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState("state1", childMode = ChildMode.PARALLEL) {
-                        state("state11") {}
-                        state("state12") {
+                        state11 = state("state11") {}
+                        state12 = state("state12") {
                             state121 = state("state121") {}
                             initialChoiceState("choice") { state121 }
                         }
                     }
                     state("state2")
                 }
-                machine.activeStates().shouldContainExactly(state121)
+                machine.activeStates().shouldContainExactlyInAnyOrder(
+                    machine.requireState("state1"), state11, state12, state121
+                )
             }
 
             "multiple initial choice states in a parallel state navigates to regions sub-states" {
+                lateinit var state11: State
+                lateinit var state12: State
                 lateinit var state112: State
                 lateinit var state122: State
                 val machine = createTestStateMachine(coroutineStarterType) {
                     initialState("state1", childMode = ChildMode.PARALLEL) {
-                        state("state11") {
+                        state11 = state("state11") {
                             state112 = state("state112") {}
                             initialChoiceState("choice111") { state112 }
                         }
-                        state("state12") {
+                        state12 = state("state12") {
                             state122 = state("state122") {}
                             initialChoiceState("choice121") { state122 }
                         }
                     }
                     state("state2")
                 }
-                machine.activeStates().shouldContainExactly(state112, state122)
+                machine.activeStates().shouldContainExactlyInAnyOrder(
+                    machine.requireState("state1"), state11, state12, state112, state122
+                )
             }
 
             "redirecting choice data state" {

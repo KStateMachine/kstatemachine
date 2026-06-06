@@ -7,12 +7,15 @@
 
 package ru.nsk.kstatemachine.state
 
+import ru.nsk.kstatemachine.event.DataExtractor
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.event.EventMatcher
+import ru.nsk.kstatemachine.event.FinishedEvent
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.transition.DefaultTransition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.TransitionType
+import kotlin.reflect.KClass
 
 /** Internal event fired when all join-point states become simultaneously active. */
 internal data class JoinCompleteEvent(val joinId: Any) : Event

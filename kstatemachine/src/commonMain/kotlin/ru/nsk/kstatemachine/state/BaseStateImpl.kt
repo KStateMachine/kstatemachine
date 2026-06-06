@@ -226,7 +226,7 @@ open class BaseStateImpl(
                         if (it === state)
                             it.recursiveEnterStatePath(path, transitionParams)
                         else
-                            recursiveEnterInitialStates(transitionParams)
+                            it.recursiveEnterInitialStates(transitionParams)
                     }
                 }
             }

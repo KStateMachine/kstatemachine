@@ -96,7 +96,7 @@ suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>):
                 " check that you are not using the same state multiple times"
     }
     val resolvedStates = mutableSetOf<IState>()
-    targetStates.mapNotNullTo(resolvedStates) { recursiveResolveTargetState(it) }
+    targetStates.forEach { resolvedStates.addAll(recursiveResolveTargetStates(it) ?: return@forEach) }
     if (resolvedStates.isEmpty()) return NoTransition
 
     @Suppress("UNCHECKED_CAST")
@@ -121,18 +121,20 @@ suspend fun EventAndArgument<*>.targetParallelStates(
 ) = targetParallelStates(setOf(targetState1, targetState2, *targetStates))
 
 private suspend fun EventAndArgument<*>.resolveTargetState(targetState: IState): TransitionDirection {
-    val resolvedState = recursiveResolveTargetState(targetState)
-    return if (resolvedState != null) TargetState(setOf(resolvedState)) else NoTransition
+    val resolvedStates = recursiveResolveTargetStates(targetState)
+    return if (resolvedStates != null) TargetState(resolvedStates) else NoTransition
 }
 
 /**
- * @return state or null, which means no transition
+ * @return resolved target states or null, which means no transition.
+ * Usually returns a single-element set, but may return multiple states when parallel initial pseudo-states
+ * each redirect to their own sub-state within the same parallel structure.
  */
-private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState: IState): IState? {
+private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState: IState): Set<IState>? {
     val resolvedTarget = when (targetState) {
         // We can return here to optimize out double initialPseudoState resolution,
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
-        is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetState
+        is RedirectPseudoState -> return (targetState.resolveTargetState(DefaultPolicy(this)) as? TargetState)?.targetStates
         is HistoryState -> targetState.storedState
         is UndoState -> targetState.popTargetStates().firstOrNull() // fixme this is a bug, should use all set items, add test for undo multi-target transition
         else -> targetState
@@ -140,8 +142,27 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetState(targetState:
     // when target state calculated we need to check if its entry will trigger another redirection
     // by initial child choiceState (for instance)
     return if (resolvedTarget != null) {
-        val initialPseudoState = resolvedTarget.findInitialPseudoState()
-        if (initialPseudoState == null) resolvedTarget else recursiveResolveTargetState(initialPseudoState)
+        val initialPseudoStates = resolvedTarget.findAllInitialPseudoStates()
+        when (initialPseudoStates.size) {
+            0 -> setOf(resolvedTarget)
+            1 -> recursiveResolveTargetStates(initialPseudoStates.single())
+            else -> {
+                // Multiple pseudo-states in parallel regions: resolve each independently
+                val allTargets = initialPseudoStates.flatMapTo(mutableSetOf()) {
+                    recursiveResolveTargetStates(it) ?: emptySet()
+                }
+                if (allTargets.isEmpty()) return null
+                // If all resolved targets share a PARALLEL ancestor they are compatible (each in its own region)
+                @Suppress("UNCHECKED_CAST")
+                val lca = findLca(allTargets as Set<InternalNode>) as InternalState
+                check(lca.findParallelAncestor() != null) {
+                    val parallelState = (initialPseudoStates.first() as InternalState).findParallelAncestor()
+                        ?: resolvedTarget
+                    "multiple transitions match: multiple initial pseudo-states found in $parallelState"
+                }
+                allTargets
+            }
+        }
     } else {
         null
     }
@@ -190,31 +211,28 @@ sealed class TransitionDirectionProducerPolicy<E : Event> {
 }
 
 /**
- * Finds [PseudoState] if it is on initial path (would be activated if simply enter initial state path)
+ * Finds all [PseudoState]s on the initial path (states that would be activated if simply entering the initial state path).
+ * Returns one element for EXCLUSIVE children, potentially multiple for PARALLEL when each region has an initial pseudo-state.
  */
-private fun IState.findInitialPseudoState(): PseudoState? {
-    if (this is PseudoState) return this
-    if (states.isEmpty()) return null
+private fun IState.findAllInitialPseudoStates(): List<PseudoState> {
+    if (this is PseudoState) return listOf(this)
+    if (states.isEmpty()) return emptyList()
     when (childMode) {
         ChildMode.EXCLUSIVE -> {
             val initialState = requireInitialState()
             return if (initialState !is StateMachine)  // inner state machine manages its internal state by its own
-                initialState.findInitialPseudoState()
+                initialState.findAllInitialPseudoStates()
             else
-                null
+                emptyList()
         }
 
         ChildMode.PARALLEL -> {
-            val initialStates = states.mapNotNull {
+            return states.flatMap {
                 if (it !is StateMachine) // inner state machine manages its internal state by its own
-                    it.findInitialPseudoState()
+                    it.findAllInitialPseudoStates()
                 else
-                    null
+                    emptyList()
             }
-            return if (initialStates.isEmpty())
-                null
-            else
-                initialStates.first() // take first or other else?
         }
     }
 }
