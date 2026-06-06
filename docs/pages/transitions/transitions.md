@@ -363,6 +363,41 @@ convention-based: join-point states **must not** have outgoing user transitions.
 plain join-point state. The parallel parent then fires `FinishedEvent` when all regions finish, giving two
 notification paths for the same condition.
 
+### Joining into a DataState
+
+`joinTransition()` does not accept a [`DataState`](../states/states.md#data-states) as its target — there is no
+event carrying the data for it. Use `joinDataTransition()` instead, which takes an additional `dataProducer` lambda
+that is called once, at join time, to compute the value the target `DataState` receives on entry.
+
+```kotlin
+val result: DataState<String> = dataState("result")
+
+state("parallelWork", childMode = ChildMode.PARALLEL) {
+
+    state("download") {
+        val downloadJoin = state("downloadJoin")
+        initialState("downloading") {
+            transition<DownloadCompleteEvent> { targetState = downloadJoin }
+        }
+    }
+
+    state("validate") {
+        val validationJoin = state("validationJoin")
+        initialState("validating") {
+            transition<ValidationCompleteEvent> { targetState = validationJoin }
+        }
+    }
+
+    joinDataTransition(downloadJoin, validationJoin, targetState = result) {
+        "download + validation complete"   // dataProducer: suspend () -> String
+    }
+}
+```
+
+The lambda runs inside the same coroutine that processes the join, so it may suspend (e.g. perform an async read).
+Once the lambda returns, the library fires an internal `DataJoinCompleteEvent` carrying the produced value;
+`result.data` is set from it exactly as if the trigger had been a regular `DataEvent`.
+
 ## Transition interruption
 
 Typically, to calculate whether transition processing should be performed or not, you can use a guard function,
