@@ -41,3 +41,10 @@ fun finishedEventMatcher(state: IState) = object : EventMatcher<FinishedEvent> {
     override val eventClass = FinishedEvent::class
     override suspend fun match(value: Event) = value is FinishedEvent && value.state === state
 }
+
+internal fun joinEventMatcher(joinId: Any): EventMatcher<JoinCompleteEvent> =
+    object : EventMatcher<JoinCompleteEvent> {
+        override val eventClass = JoinCompleteEvent::class
+        override suspend fun match(value: Event) =
+            value is JoinCompleteEvent && value.joinId === joinId
+    }

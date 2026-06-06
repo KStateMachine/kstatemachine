@@ -8,39 +8,14 @@
 package ru.nsk.kstatemachine.state
 
 import ru.nsk.kstatemachine.event.DataEvent
-import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.event.EventMatcher
-import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.event.JoinCompleteDataEventImpl
+import ru.nsk.kstatemachine.event.JoinCompleteEvent
+import ru.nsk.kstatemachine.event.JoinCompleteEventImpl
+import ru.nsk.kstatemachine.event.joinEventMatcher
+import ru.nsk.kstatemachine.metainfo.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.transition.DefaultTransition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.TransitionType
-
-/** Internal event fired when all join-point states become simultaneously active. */
-internal data class JoinCompleteEvent(val joinId: Any) : Event
-
-/** Internal data-carrying variant of [JoinCompleteEvent], used by [joinDataTransition]. */
-internal data class DataJoinCompleteEvent<D : Any>(val joinId: Any, override val data: D) : DataEvent<D>
-
-/** Attached to the join transition so the exporter can render `<<join>>` notation. */
-internal data class JoinTransitionMetaInfo(
-    val joinPoints: Set<IState>,
-    val joinName: String,
-) : MetaInfo
-
-private fun joinEventMatcher(joinId: Any): EventMatcher<JoinCompleteEvent> =
-    object : EventMatcher<JoinCompleteEvent> {
-        override val eventClass = JoinCompleteEvent::class
-        override suspend fun match(value: Event) =
-            value is JoinCompleteEvent && value.joinId === joinId
-    }
-
-private fun dataJoinEventMatcher(joinId: Any): EventMatcher<DataJoinCompleteEvent<*>> =
-    object : EventMatcher<DataJoinCompleteEvent<*>> {
-        @Suppress("UNCHECKED_CAST")
-        override val eventClass = DataJoinCompleteEvent::class as kotlin.reflect.KClass<DataJoinCompleteEvent<*>>
-        override suspend fun match(value: Event) =
-            value is DataJoinCompleteEvent<*> && value.joinId === joinId
-    }
 
 /**
  * Adds a **UML join** transition to this [ChildMode.PARALLEL] state.
@@ -84,7 +59,7 @@ fun IState.joinTransition(
         joinPoint.addListener(object : IState.Listener {
             override suspend fun onEntry(transitionParams: TransitionParams<*>) {
                 if (joinPointSet.all { it.isActive }) {
-                    parallelState.machine.processEvent(JoinCompleteEvent(joinId))
+                    parallelState.machine.processEvent(JoinCompleteEventImpl(joinId))
                 }
             }
         })
@@ -138,7 +113,7 @@ fun <D : Any> IState.joinDataTransition(
         joinPoint.addListener(object : IState.Listener {
             override suspend fun onEntry(transitionParams: TransitionParams<*>) {
                 if (joinPointSet.all { it.isActive }) {
-                    parallelState.machine.processEvent(DataJoinCompleteEvent(joinId, dataProducer()))
+                    parallelState.machine.processEvent(JoinCompleteDataEventImpl(joinId, dataProducer()))
                 }
             }
         })
@@ -147,7 +122,7 @@ fun <D : Any> IState.joinDataTransition(
     addTransition(
         DefaultTransition(
             name = name,
-            eventMatcher = dataJoinEventMatcher(joinId),
+            eventMatcher = joinEventMatcher(joinId),
             type = TransitionType.LOCAL,
             metaInfo = JoinTransitionMetaInfo(joinPointSet, joinName),
             sourceState = this,

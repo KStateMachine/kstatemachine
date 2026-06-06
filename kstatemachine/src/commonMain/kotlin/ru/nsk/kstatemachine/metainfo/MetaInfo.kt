@@ -74,3 +74,8 @@ fun buildCompositeMetaInfo(metaInfo1: MetaInfo, metaInfo2: MetaInfo, vararg info
         add(metaInfo2)
     })
 
+/** Attached to the join transition so the exporter can render `<<join>>` notation. */
+internal data class JoinTransitionMetaInfo(
+    val joinPoints: Set<IState>,
+    val joinName: String,
+) : MetaInfo

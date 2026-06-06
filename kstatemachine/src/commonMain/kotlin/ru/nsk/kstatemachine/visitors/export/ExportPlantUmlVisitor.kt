@@ -12,13 +12,13 @@ import ru.nsk.kstatemachine.isNeighbor
 import ru.nsk.kstatemachine.metainfo.EventAndArgumentResolutionHint
 import ru.nsk.kstatemachine.metainfo.ExportMetaInfo
 import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
+import ru.nsk.kstatemachine.metainfo.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.metainfo.ResolutionHint
 import ru.nsk.kstatemachine.metainfo.StateResolutionHint
 import ru.nsk.kstatemachine.metainfo.findMetaInfo
 import ru.nsk.kstatemachine.state.*
-import ru.nsk.kstatemachine.state.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.state.pseudo.UndoState
 import ru.nsk.kstatemachine.statemachine.START_TRANSITION_NAME
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -164,7 +164,7 @@ internal class ExportPlantUmlVisitor(
             for (jp in joinMeta.joinPoints) {
                 crossLevelTransitions += "${(jp as InternalState).graphName()} --> ${joinMeta.joinName}"
             }
-            val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
+            val targetStateInfoList = executeDirectionProducerPolicy(transition.metaInfo) { policy ->
                 transition.produceTargetStateDirection(policy)
             }
             for (info in targetStateInfoList) {
@@ -179,7 +179,7 @@ internal class ExportPlantUmlVisitor(
         }
 
         val sourceStateGraphName = transition.sourceState.graphName()
-        val targetStateInfoList = executeDirectionProducerPolicy<E>(transition.metaInfo) { policy ->
+        val targetStateInfoList = executeDirectionProducerPolicy(transition.metaInfo) { policy ->
             transition.produceTargetStateDirection(policy)
         }
         for (targetStateInfo in targetStateInfoList) {
@@ -240,7 +240,7 @@ internal class ExportPlantUmlVisitor(
                         val eventAndArgument = it.eventAndArgument as EventAndArgument<E>
                         TargetStateInfo(
                             it.description,
-                            block(makeUnsafeCollectTargetStatesPolicy<E>(eventAndArgument))
+                            block(makeUnsafeCollectTargetStatesPolicy(eventAndArgument))
                         )
                     }
                     hintMap[StateResolutionHint::class]?.mapTo(stateInfoList) {
@@ -248,10 +248,10 @@ internal class ExportPlantUmlVisitor(
                         TargetStateInfo(it.description, TargetState(it.targetStates))
                     }
                 } else {
-                    stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy<E>()))
+                    stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy()))
                 }
             } else {
-                stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy<E>()))
+                stateInfoList += TargetStateInfo(null, block(makeUnsafeCollectTargetStatesPolicy()))
             }
         } else {
             stateInfoList += TargetStateInfo(null, block(CollectTargetStatesPolicy()))

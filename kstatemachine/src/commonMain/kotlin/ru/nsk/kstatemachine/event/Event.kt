@@ -10,6 +10,7 @@ package ru.nsk.kstatemachine.event
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.FinalDataState
 import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.joinDataTransition
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.undo
 
@@ -86,8 +87,21 @@ class WrappedEvent(val event: Event, val argument: Any?) : GeneratedEvent
  */
 data class SerializableGeneratedEvent(val eventType: EventType) : GeneratedEvent {
     sealed interface EventType {
-        object Start: EventType
-        object Stop: EventType
+        object Start : EventType
+        object Stop : EventType
         class Destroy(val stop: Boolean) : EventType
     }
 }
+
+/** Internal event fired when all join-point states become simultaneously active. */
+interface JoinCompleteEvent : GeneratedEvent {
+    val joinId: Any
+}
+
+internal data class JoinCompleteEventImpl(override val joinId: Any) : JoinCompleteEvent
+
+/** Internal data-carrying variant of [JoinCompleteEvent], used by [joinDataTransition]. */
+internal data class JoinCompleteDataEventImpl<D : Any>(
+    override val joinId: Any,
+    override val data: D,
+) : JoinCompleteEvent, DataEvent<D>
