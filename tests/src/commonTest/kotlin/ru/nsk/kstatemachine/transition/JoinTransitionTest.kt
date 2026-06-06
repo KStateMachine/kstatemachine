@@ -2,19 +2,22 @@ package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.core.spec.style.scopes.FreeSpecContainerScope.invoke
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.SwitchEventL1
 import ru.nsk.kstatemachine.SwitchEventL2
 import ru.nsk.kstatemachine.createTestStateMachine
 import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.state.activeStates
+import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.joinDataTransition
 import ru.nsk.kstatemachine.state.joinTransition
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transition
@@ -309,6 +312,38 @@ class JoinTransitionTest : FreeSpec({
                         }
                     }
                 }
+            }
+
+            "joinDataTransition feeds computed data to DataState target" {
+                lateinit var afterJoin: DataState<String>
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = dataState("afterJoin")
+                    initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinDataTransition(jp1, jp2, targetState = afterJoin) { "joined" }
+                    }
+                }
+
+                machine.processEventBlocking(SwitchEvent)
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEventBlocking(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                afterJoin.data shouldBe "joined"
             }
 
             "join with 3 regions" {
