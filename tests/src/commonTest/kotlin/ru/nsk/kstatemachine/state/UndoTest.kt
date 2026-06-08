@@ -461,6 +461,58 @@ class UndoTest : FreeSpec({
                 machine.activeStates() shouldContain region2Other
             }
 
+            // The multi-target UndoState branch calls recursiveResolveTargetStates() for each
+            // stored target, which includes the "initial pseudo-state" check. In practice the undo
+            // stack always stores post-resolution leaf states (transitionParams.direction.targetStates
+            // is produced by recursiveResolveTargetStates itself), so that check is always a no-op.
+            // This test covers the end-to-end path: a parallel entry resolved through two choice
+            // pseudo-states stores {leaf1, leaf2} in the stack, and undo restores exactly those leaves.
+            "undo multi-target parallel transition where entry was resolved via initial choice states" {
+                lateinit var parallelState: State
+                lateinit var leaf1a: State
+                lateinit var leaf2a: State
+                lateinit var state3: State
+
+                val machine = createTestStateMachine(
+                    coroutineStarterType,
+                    creationArguments = buildCreationArguments { isUndoEnabled = true }
+                ) {
+                    initialState("state1") {
+                        transitionConditionally<SwitchEvent> {
+                            // target the parallel composite — both choice states are resolved at entry time
+                            direction = { targetState(parallelState) }
+                        }
+                    }
+                    parallelState = state("parallelState", childMode = ChildMode.PARALLEL) {
+                        // each region's initial is a choice pseudo-state → resolved on entry
+                        state("region1") {
+                            choiceState { leaf1a }  // always goes to leaf1a
+                            leaf1a = state("leaf1a") {
+                                transitionOn<SecondEvent> { targetState = { state3 } }
+                            }
+                        }
+                        state("region2") {
+                            choiceState { leaf2a }  // always goes to leaf2a
+                            leaf2a = state("leaf2a")
+                        }
+                    }
+                    state3 = state("state3")
+                }
+
+                machine.processEvent(SwitchEvent)
+                // both choice states resolved → leaf1a and leaf2a active
+                machine.activeStates() shouldContain leaf1a
+                machine.activeStates() shouldContain leaf2a
+
+                machine.processEvent(SecondEvent)
+                machine.activeStates() shouldContain state3
+
+                machine.undo()
+                // multi-target undo restores both resolved leaves, not the composite parallelState
+                machine.activeStates() shouldContain leaf1a
+                machine.activeStates() shouldContain leaf2a
+            }
+
             "undo from onEntry(), this uses event queue" {
                 lateinit var state1: State
                 lateinit var state2: State

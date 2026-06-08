@@ -9,8 +9,16 @@ package ru.nsk.kstatemachine.transition
 
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.findLca
-import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.HistoryState
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.InternalNode
+import ru.nsk.kstatemachine.state.InternalState
+import ru.nsk.kstatemachine.state.PseudoState
+import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.state.requireInitialState
+import ru.nsk.kstatemachine.state.transitionConditionally
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.TransitionDirectionProducerPolicy.DefaultPolicy
 
@@ -154,30 +162,26 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
     }
     // when target state calculated we need to check if its entry will trigger another redirection
     // by initial child choiceState (for instance)
-    return if (resolvedTarget != null) {
-        val initialPseudoStates = resolvedTarget.findAllInitialPseudoStates()
-        when (initialPseudoStates.size) {
-            0 -> setOf(resolvedTarget)
-            1 -> recursiveResolveTargetStates(initialPseudoStates.single())
-            else -> {
-                // Multiple pseudo-states in parallel regions: resolve each independently
-                val allTargets = initialPseudoStates.flatMapTo(mutableSetOf()) {
-                    recursiveResolveTargetStates(it) ?: emptySet()
-                }
-                if (allTargets.isEmpty()) return null
-                // If all resolved targets share a PARALLEL ancestor they are compatible (each in its own region)
-                @Suppress("UNCHECKED_CAST")
-                val lca = findLca(allTargets as Set<InternalNode>) as InternalState
-                check(lca.findParallelAncestor() != null) {
-                    val parallelState = (initialPseudoStates.first() as InternalState).findParallelAncestor()
-                        ?: resolvedTarget
-                    "multiple transitions match: multiple initial pseudo-states found in $parallelState"
-                }
-                allTargets
+    val initialPseudoStates = resolvedTarget.findAllInitialPseudoStates()
+    return when (initialPseudoStates.size) {
+        0 -> setOf(resolvedTarget)
+        1 -> recursiveResolveTargetStates(initialPseudoStates.single())
+        else -> {
+            // Multiple pseudo-states in parallel regions: resolve each independently
+            val allTargets = initialPseudoStates.flatMapTo(mutableSetOf()) {
+                recursiveResolveTargetStates(it) ?: emptySet()
             }
+            if (allTargets.isEmpty()) return null
+            // If all resolved targets share a PARALLEL ancestor they are compatible (each in its own region)
+            @Suppress("UNCHECKED_CAST")
+            val lca = findLca(allTargets as Set<InternalNode>) as InternalState
+            check(lca.findParallelAncestor() != null) {
+                val parallelState = (initialPseudoStates.first() as InternalState).findParallelAncestor()
+                    ?: resolvedTarget
+                "multiple transitions match: multiple initial pseudo-states found in $parallelState"
+            }
+            allTargets
         }
-    } else {
-        null
     }
 }
 
