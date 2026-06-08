@@ -24,6 +24,7 @@ import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.IgnoredEventHandler
 import ru.nsk.kstatemachine.statemachine.StateMachine.Logger
 import ru.nsk.kstatemachine.transition.targetParallelStates
+import ru.nsk.kstatemachine.transition.targetState
 import ru.nsk.kstatemachine.transition.unwrappedArgument
 import ru.nsk.kstatemachine.transition.unwrappedEvent
 
@@ -486,13 +487,13 @@ class UndoTest : FreeSpec({
                     parallelState = state("parallelState", childMode = ChildMode.PARALLEL) {
                         // each region's initial is a choice pseudo-state → resolved on entry
                         state("region1") {
-                            choiceState { leaf1a }  // always goes to leaf1a
+                            initialChoiceState { leaf1a }  // always goes to leaf1a
                             leaf1a = state("leaf1a") {
                                 transitionOn<SecondEvent> { targetState = { state3 } }
                             }
                         }
                         state("region2") {
-                            choiceState { leaf2a }  // always goes to leaf2a
+                            initialChoiceState { leaf2a }  // always goes to leaf2a
                             leaf2a = state("leaf2a")
                         }
                     }
