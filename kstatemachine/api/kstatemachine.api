@@ -50,6 +50,10 @@ public final class ru/nsk/kstatemachine/event/FinishedEvent : ru/nsk/kstatemachi
 public abstract interface class ru/nsk/kstatemachine/event/GeneratedEvent : ru/nsk/kstatemachine/event/Event {
 }
 
+public abstract interface class ru/nsk/kstatemachine/event/JoinCompleteEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public abstract fun getJoinId ()Ljava/lang/Object;
+}
+
 public final class ru/nsk/kstatemachine/event/SerializableGeneratedEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
 	public fun <init> (Lru/nsk/kstatemachine/event/SerializableGeneratedEvent$EventType;)V
 	public final fun component1 ()Lru/nsk/kstatemachine/event/SerializableGeneratedEvent$EventType;
@@ -578,7 +582,9 @@ public abstract interface class ru/nsk/kstatemachine/state/TransitionStateApi {
 
 public final class ru/nsk/kstatemachine/state/TransitionStateApiKt {
 	public static final fun findTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun findTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Lru/nsk/kstatemachine/event/Event;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun requireTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun requireTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Lru/nsk/kstatemachine/event/Event;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public class ru/nsk/kstatemachine/state/pseudo/BasePseudoState : ru/nsk/kstatemachine/state/BaseStateImpl, ru/nsk/kstatemachine/state/PseudoState {

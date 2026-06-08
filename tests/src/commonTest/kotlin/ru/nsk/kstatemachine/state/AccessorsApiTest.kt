@@ -7,12 +7,18 @@
 
 package ru.nsk.kstatemachine.state
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.transition.Transition
+
+private open class BaseTestEvent : Event
+private class DerivedTestEvent : BaseTestEvent()
 
 class AccessorsApiTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
@@ -122,6 +128,71 @@ class AccessorsApiTest : FreeSpec({
                 shouldThrowWithMessage<IllegalArgumentException>(
                     "State nested not found"
                 ) { machine.requireState("nested") }
+            }
+
+            "findTransition() by event type strict (default)" {
+                val state = object : DefaultState() {}
+
+                lateinit var transitionFirst: Transition<*>
+                lateinit var transitionSecond: Transition<*>
+
+                createTestStateMachine(coroutineStarterType) {
+                    addInitialState(state) {
+                        transitionFirst = transition<FirstEvent>("first")
+                        transitionSecond = transition<SecondEvent>("second")
+                    }
+                }
+
+                state.findTransition<FirstEvent>() shouldBeSameInstanceAs transitionFirst
+                state.findTransition<SecondEvent>() shouldBeSameInstanceAs transitionSecond
+                state.findTransition<SwitchEvent>().shouldBeNull()
+            }
+
+            "findTransition(event) finds transition by eventMatcher.match()" {
+                val state = object : DefaultState() {}
+                lateinit var transitionSwitch: Transition<*>
+                lateinit var transitionFirst: Transition<*>
+
+                createTestStateMachine(coroutineStarterType) {
+                    addInitialState(state) {
+                        transitionSwitch = transition<SwitchEvent>("switch")
+                        transitionFirst = transition<FirstEvent>("first")
+                    }
+                }
+
+                state.findTransition(SwitchEvent) shouldBeSameInstanceAs transitionSwitch
+                state.findTransition(FirstEvent) shouldBeSameInstanceAs transitionFirst
+                // unrelated event → null
+                state.findTransition(SecondEvent).shouldBeNull()
+            }
+
+            "findTransition(event) uses isInstanceOf semantics — matches subtype events" {
+                // A transition registered for BaseTestEvent with the default isInstanceOf() matcher
+                // must match DerivedTestEvent instances because DerivedTestEvent IS-A BaseTestEvent.
+                val state = object : DefaultState() {}
+                lateinit var transitionBase: Transition<*>
+
+                createTestStateMachine(coroutineStarterType) {
+                    addInitialState(state) {
+                        transitionBase = transition<BaseTestEvent>("base")
+                    }
+                }
+
+                state.findTransition(DerivedTestEvent()) shouldBeSameInstanceAs transitionBase
+                state.findTransition(SwitchEvent).shouldBeNull()
+            }
+
+            "requireTransition(event) throws when no match" {
+                val state = object : DefaultState() {}
+                createTestStateMachine(coroutineStarterType) {
+                    addInitialState(state) {
+                        transition<SwitchEvent>()
+                    }
+                }
+
+                shouldThrow<IllegalArgumentException> {
+                    state.requireTransition(FirstEvent)
+                }
             }
         }
     }

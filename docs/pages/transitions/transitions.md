@@ -442,6 +442,34 @@ There are two predefined event matchers:
 
 You can define your own matchers by subclassing `EventMatcher` class.
 
+## Finding transitions
+
+Use `findTransition()` / `requireTransition()` to look up a transition on any state after the machine is built, for example to attach a listener dynamically.
+
+**By name:**
+
+```kotlin
+val t = state.requireTransition("myTransition")
+```
+
+**By event type (strict):**
+
+```kotlin
+// finds only the transition whose eventClass is exactly SwitchEvent
+val t = state.findTransition<SwitchEvent>()
+```
+
+**By event instance (suspend):**
+
+```kotlin
+// calls eventMatcher.match(event) — respects all custom matcher logic
+val t = state.findTransition(myEvent)
+```
+
+This overload is `suspend` because `EventMatcher.match` is itself suspending. It honours the full matcher
+contract, so a transition with a custom `finishedEventMatcher` or `isEqual()` will only be returned when
+its matcher actually accepts the provided event instance.
+
 ## Undo transitions
 
 Transitions may be undone with `StateMachine.undo()` function or alternatively by sending special `UndoEvent` to machine

@@ -17,7 +17,6 @@ import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
 /**
  * Helper interface for [IState] to keep transitions logic separately.
  */
@@ -47,6 +46,8 @@ fun TransitionStateApi.requireTransition(name: String) =
 
 /**
  * Find transition by Event type. This might be used to start listening to transition after state machine setup.
+ * The match is strict: only the transition whose [EventMatcher.eventClass] is exactly `E::class` is returned.
+ * To match by event instance (including subtype matching), use [findTransition] with an event instance.
  */
 inline fun <reified E : Event> TransitionStateApi.findTransition(): Transition<E>? {
     @Suppress("UNCHECKED_CAST")
@@ -58,6 +59,22 @@ inline fun <reified E : Event> TransitionStateApi.findTransition(): Transition<E
  */
 inline fun <reified E : Event> TransitionStateApi.requireTransition() =
     requireNotNull(findTransition<E>()) { "Transition for ${E::class.simpleName} not found" }
+
+/**
+ * Find the first transition whose [EventMatcher] accepts [event] (i.e. [EventMatcher.match] returns `true`).
+ *
+ * Unlike the type-based [findTransition] overloads this uses the full matcher logic, so custom matchers
+ * (e.g. [finishedEventMatcher]) are respected.
+ */
+suspend fun TransitionStateApi.findTransition(event: Event): Transition<*>? =
+    transitions.find { it.eventMatcher.match(event) }
+
+/**
+ * Require the first transition whose [EventMatcher] accepts [event].
+ * Throws [IllegalArgumentException] if no such transition exists.
+ */
+suspend fun TransitionStateApi.requireTransition(event: Event): Transition<*> =
+    requireNotNull(findTransition(event)) { "Transition for $event not found" }
 
 /**
  * Shortcut overload for transition with an optional target state
@@ -200,3 +217,4 @@ inline fun <reified E : Event> matcherForEvent(state: IState) = when {
     E::class == FinishedEvent::class -> finishedEventMatcher(state) as EventMatcher<E>
     else -> isInstanceOf()
 }
+

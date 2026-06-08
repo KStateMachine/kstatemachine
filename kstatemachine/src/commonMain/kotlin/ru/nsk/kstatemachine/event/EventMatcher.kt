@@ -16,6 +16,7 @@ import kotlin.reflect.KClass
  * Adds an ability to select who [Transition] matches [Event] subclass
  */
 interface EventMatcher<E : Event> {
+    /** Never match by accessing this field. Use [match] */
     val eventClass: KClass<E>
     suspend fun match(value: Event): Boolean
 
