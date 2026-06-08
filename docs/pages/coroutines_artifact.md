@@ -82,6 +82,13 @@ fast producers do not drop notifications while downstream collectors are suspend
 See [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)
 for a complete runnable example.
 
+## Async scoped action
+
+`asyncScopedAction` provides a concise way to run background work tied to a state's lifetime —
+the KStateMachine equivalent of a UML **do activity**.
+See [Async scoped action](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity)
+on the States page for full details and examples.
+
 ## Event processing
 
 The `kstatemachine-coroutines` artifact adds two non-suspending event dispatch functions on top of

@@ -12,19 +12,61 @@ import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.verifySequence
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import ru.nsk.kstatemachine.SecondEvent
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.event.StartEvent
 import ru.nsk.kstatemachine.mockkCallbacks
-import ru.nsk.kstatemachine.state.*
-import ru.nsk.kstatemachine.statemachine.*
-import ru.nsk.kstatemachine.statemachine.StateMachineNotification.*
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.asyncScopedAction
+import ru.nsk.kstatemachine.state.choiceState
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.onEntry
+import ru.nsk.kstatemachine.state.onExit
+import ru.nsk.kstatemachine.state.onFinished
+import ru.nsk.kstatemachine.state.state
+import ru.nsk.kstatemachine.state.transition
+import ru.nsk.kstatemachine.state.transitionConditionally
+import ru.nsk.kstatemachine.state.transitionOn
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.Destroyed
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.Started
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.StateEntry
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.StateExit
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.StateFinished
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.Stopped
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.TransitionComplete
+import ru.nsk.kstatemachine.statemachine.StateMachineNotification.TransitionTriggered
+import ru.nsk.kstatemachine.statemachine.activeStatesFlow
+import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.kstatemachine.statemachine.createStdLibStateMachine
+import ru.nsk.kstatemachine.statemachine.destroy
+import ru.nsk.kstatemachine.statemachine.onDestroyed
+import ru.nsk.kstatemachine.statemachine.onStarted
+import ru.nsk.kstatemachine.statemachine.onStateEntry
+import ru.nsk.kstatemachine.statemachine.onStateExit
+import ru.nsk.kstatemachine.statemachine.onStateFinished
+import ru.nsk.kstatemachine.statemachine.onStopped
+import ru.nsk.kstatemachine.statemachine.onTransitionComplete
+import ru.nsk.kstatemachine.statemachine.onTransitionTriggered
+import ru.nsk.kstatemachine.statemachine.processEventBlocking
+import ru.nsk.kstatemachine.statemachine.stateMachineNotificationFlow
 import ru.nsk.kstatemachine.transition.onTriggered
 import ru.nsk.kstatemachine.transition.stay
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 class CoroutinesTest : FreeSpec({
@@ -32,38 +74,38 @@ class CoroutinesTest : FreeSpec({
     "call suspend functions from major listeners and callbacks" {
         val machine = createStdLibStateMachine {
             onStarted {
-                delay(0)
+                delay(0.milliseconds)
             }
-            onTransitionTriggered { delay(0) }
-            onTransitionComplete { _, _ -> delay(0) }
-            onStateEntry { _, _ -> delay(0) }
-            onStateExit { _, _ -> delay(0) }
-            onStateFinished { _, _ -> delay(0) }
-            onStopped { delay(0) }
-            onDestroyed { delay(0) }
+            onTransitionTriggered { delay(0.milliseconds) }
+            onTransitionComplete { _, _ -> delay(0.milliseconds) }
+            onStateEntry { _, _ -> delay(0.milliseconds) }
+            onStateExit { _, _ -> delay(0.milliseconds) }
+            onStateFinished { _, _ -> delay(0.milliseconds) }
+            onStopped { delay(0.milliseconds) }
+            onDestroyed { delay(0.milliseconds) }
             val first = initialState("first") {
-                onEntry { delay(0) }
-                onExit { delay(0) }
-                onFinished { delay(0) }
+                onEntry { delay(0.milliseconds) }
+                onExit { delay(0.milliseconds) }
+                onFinished { delay(0.milliseconds) }
 
                 val transition = transition<SwitchEvent> {
                     guard = {
-                        delay(0)
+                        delay(0.milliseconds)
                         true
                     }
-                    onTriggered { delay(0) }
+                    onTriggered { delay(0.milliseconds) }
                 }
-                transition.onTriggered { delay(0) }
+                transition.onTriggered { delay(0.milliseconds) }
 
                 transitionConditionally<SecondEvent> {
                     direction = {
-                        delay(0)
+                        delay(0.milliseconds)
                         stay()
                     }
                 }
             }
             choiceState {
-                delay(0)
+                delay(0.milliseconds)
                 first
             }
         }
@@ -76,7 +118,7 @@ class CoroutinesTest : FreeSpec({
         ) {
             createStdLibStateMachine {
                 initialState()
-                onStarted { delay(100) }
+                onStarted { delay(100.milliseconds) }
             }
         }
     }
@@ -85,15 +127,15 @@ class CoroutinesTest : FreeSpec({
         val scope = CoroutineScope(EmptyCoroutineContext)
         try {
             createStateMachine(scope) {
-                onStarted { delay(1) }
+                onStarted { delay(1.milliseconds) }
                 initialState("first") {
                     onEntry {
                         coroutineScope {
-                            scope.launch { delay(1) }
-                            scope.launch { delay(1) }
+                            scope.launch { delay(1.milliseconds) }
+                            scope.launch { delay(1.milliseconds) }
                         }
                         withContext(Dispatchers.Default) {
-                            delay(1)
+                            delay(1.milliseconds)
                         }
                     }
                 }
@@ -309,18 +351,30 @@ class CoroutinesTest : FreeSpec({
     }
 
     "context switching" {
-        println(""+ Thread.currentThread() + Thread.currentThread().hashCode() )
+        println("" + Thread.currentThread() + Thread.currentThread().hashCode())
         val scope = CoroutineScope(EmptyCoroutineContext)
         val scope1 = CoroutineScope(Dispatchers.Default)
         val scope2 = CoroutineScope(Dispatchers.IO)
         scope.launch {
-            println("EmptyCoroutineContext ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+            println(
+                "EmptyCoroutineContext ${this.coroutineContext} "
+                        + Thread.currentThread()
+                        + Thread.currentThread().hashCode()
+            )
         }
         scope1.launch {
-            println("Default               ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+            println(
+                "Default               ${this.coroutineContext} "
+                        + Thread.currentThread()
+                        + Thread.currentThread().hashCode()
+            )
         }
         scope2.launch {
-            println("IO                    ${this.coroutineContext} " + Thread.currentThread() + Thread.currentThread().hashCode() )
+            println(
+                "IO                    ${this.coroutineContext} "
+                        + Thread.currentThread()
+                        + Thread.currentThread().hashCode()
+            )
         }
     }
 })

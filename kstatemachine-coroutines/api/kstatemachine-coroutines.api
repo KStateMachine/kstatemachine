@@ -1,3 +1,7 @@
+public final class ru/nsk/kstatemachine/state/StateCoroutinesKt {
+	public static final fun asyncScopedAction (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function2;)V
+}
+
 public final class ru/nsk/kstatemachine/statemachine/CoroutinesStateMachineBlockingKt {
 	public static final fun createStateMachineBlocking (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;)Lru/nsk/kstatemachine/statemachine/StateMachine;
 	public static synthetic fun createStateMachineBlocking$default (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lru/nsk/kstatemachine/statemachine/StateMachine;

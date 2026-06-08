@@ -102,6 +102,39 @@ state {
 It is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
 modifications.
 
+## Async scoped action (do activity)
+
+`asyncScopedAction` is the KStateMachine equivalent of the UML **do activity**: a background coroutine that runs
+concurrently while a state is active.
+
+* Starts when the state is **entered** (after entry actions complete).
+* Is automatically **cancelled** when the state is **exited** via a normal transition.
+* Is **cancelled** when the machine is **stopped** (`machine.stop()`) or **destroyed** (`machine.destroy()`),
+  even though those operations do not fire `onExit` listeners.
+* Is **re-launched** every time the state is re-entered (including after machine restart).
+
+```kotlin
+import ru.nsk.kstatemachine.state.asyncScopedAction
+
+state("polling") {
+    asyncScopedAction {
+        while (true) {
+            fetchLatestData()
+            delay(1_000)
+        }
+    }
+}
+```
+
+The lambda receiver is the state itself, so you can access its properties directly.
+Common use-cases include polling loops, progress animations, or any work that should run
+only while a particular state is active.
+
+{: .note }
+`asyncScopedAction` is provided by the `kstatemachine-coroutines` artifact and requires a machine
+created with `createStateMachine(scope)`. Calling it on a machine created with
+`createStdLibStateMachine` throws `IllegalArgumentException`.
+
 ## Listen group of states
 
 If you need to perform some actions depending on active statuses of two or more states use `onActiveAllOf()`
