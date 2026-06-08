@@ -25,7 +25,6 @@ import ru.nsk.kstatemachine.state.ChoiceStateTestData.IntEvent
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State1
 import ru.nsk.kstatemachine.state.ChoiceStateTestData.State2
 import ru.nsk.kstatemachine.statemachine.StateMachine
-import ru.nsk.kstatemachine.state.requireState
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.onTransitionTriggered
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
@@ -183,11 +182,12 @@ class ChoiceStateTest : FreeSpec({
             }
 
             "initial choice state in a parallel state navigates to sub-state" {
+                lateinit var state1: State
                 lateinit var state11: State
                 lateinit var state12: State
                 lateinit var state121: State
                 val machine = createTestStateMachine(coroutineStarterType) {
-                    initialState("state1", childMode = ChildMode.PARALLEL) {
+                    state1 = initialState("state1", childMode = ChildMode.PARALLEL) {
                         state11 = state("state11") {}
                         state12 = state("state12") {
                             state121 = state("state121") {}
@@ -197,17 +197,18 @@ class ChoiceStateTest : FreeSpec({
                     state("state2")
                 }
                 machine.activeStates().shouldContainExactlyInAnyOrder(
-                    machine.requireState("state1"), state11, state12, state121
+                    state1, state11, state12, state121
                 )
             }
 
             "multiple initial choice states in a parallel state navigates to regions sub-states" {
+                lateinit var state1: State
                 lateinit var state11: State
                 lateinit var state12: State
                 lateinit var state112: State
                 lateinit var state122: State
                 val machine = createTestStateMachine(coroutineStarterType) {
-                    initialState("state1", childMode = ChildMode.PARALLEL) {
+                    state1 = initialState("state1", childMode = ChildMode.PARALLEL) {
                         state11 = state("state11") {
                             state112 = state("state112") {}
                             initialChoiceState("choice111") { state112 }
@@ -220,7 +221,7 @@ class ChoiceStateTest : FreeSpec({
                     state("state2")
                 }
                 machine.activeStates().shouldContainExactlyInAnyOrder(
-                    machine.requireState("state1"), state11, state12, state112, state122
+                    state1, state11, state12, state112, state122
                 )
             }
 
