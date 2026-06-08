@@ -8,6 +8,7 @@
 package ru.nsk.kstatemachine
 
 import ru.nsk.kstatemachine.state.InternalNode
+import ru.nsk.kstatemachine.state.InternalState
 import ru.nsk.kstatemachine.state.requireParentNode
 
 /**
@@ -107,7 +108,9 @@ internal fun InternalNode.findTreePathFromTargetsToLca(
     return path
 }
 
-internal fun findLca(states: Set<InternalNode>): InternalNode {
+internal fun findLca(states: Set<InternalState>): InternalState = findNodeLca(states) as InternalState
+
+private fun findNodeLca(states: Set<InternalNode>): InternalNode {
     require(states.isNotEmpty()) { "States set is empty" }
 
     val stateDepths = mutableListOf<Pair<InternalNode, Int>>()

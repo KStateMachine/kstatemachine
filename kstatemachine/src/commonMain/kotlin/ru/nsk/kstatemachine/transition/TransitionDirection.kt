@@ -12,7 +12,6 @@ import ru.nsk.kstatemachine.findLca
 import ru.nsk.kstatemachine.state.ChildMode
 import ru.nsk.kstatemachine.state.HistoryState
 import ru.nsk.kstatemachine.state.IState
-import ru.nsk.kstatemachine.state.InternalNode
 import ru.nsk.kstatemachine.state.InternalState
 import ru.nsk.kstatemachine.state.PseudoState
 import ru.nsk.kstatemachine.state.RedirectPseudoState
@@ -108,7 +107,7 @@ suspend fun EventAndArgument<*>.targetParallelStates(targetStates: Set<IState>):
     if (resolvedStates.isEmpty()) return NoTransition
 
     @Suppress("UNCHECKED_CAST")
-    val lca = findLca(resolvedStates as Set<InternalNode>) as InternalState
+    val lca = findLca(resolvedStates as Set<InternalState>)
     check(lca.findParallelAncestor() != null) {
         "Resolved states does not have common ancestor with ${ChildMode.PARALLEL} child mode. " +
                 "Only children of a state with ${ChildMode.PARALLEL} child mode" +
@@ -144,20 +143,9 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
         is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetStates
         is HistoryState -> targetState.storedState
-        is UndoState -> {
-            val undoTargets = targetState.popTargetStates()
-            when {
-                undoTargets.isEmpty() -> return null
-                undoTargets.size == 1 -> undoTargets.single()
-                else -> {
-                    // Multiple targets (from a parallel targetParallelStates transition) — resolve each and combine
-                    val allResolved = undoTargets.flatMapTo(mutableSetOf()) {
-                        recursiveResolveTargetStates(it) ?: emptySet()
-                    }
-                    return allResolved.ifEmpty { null }
-                }
-            }
-        }
+        // Undo targets are always post-resolution leaf states (recorded from
+        // transitionParams.direction.targetStates which is itself the output of this function).
+        is UndoState -> return targetState.popTargetStates().ifEmpty { null }
         else -> targetState
     }
     // when target state calculated we need to check if its entry will trigger another redirection
@@ -174,10 +162,10 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
             if (allTargets.isEmpty()) return null
             // If all resolved targets share a PARALLEL ancestor they are compatible (each in its own region)
             @Suppress("UNCHECKED_CAST")
-            val lca = findLca(allTargets as Set<InternalNode>) as InternalState
+            val lca = findLca(allTargets as Set<InternalState>)
             check(lca.findParallelAncestor() != null) {
-                val parallelState = (initialPseudoStates.first() as InternalState).findParallelAncestor()
-                    ?: resolvedTarget
+                val parallelState = (initialPseudoStates.first() as InternalState)
+                    .findParallelAncestor() ?: resolvedTarget
                 "multiple transitions match: multiple initial pseudo-states found in $parallelState"
             }
             allTargets
