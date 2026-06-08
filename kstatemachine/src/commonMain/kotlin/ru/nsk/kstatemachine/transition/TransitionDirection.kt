@@ -134,19 +134,20 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
     val resolvedTarget = when (targetState) {
         // We can return here to optimize out double initialPseudoState resolution,
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
-        is RedirectPseudoState -> return (targetState.resolveTargetState(DefaultPolicy(this)) as? TargetState)?.targetStates
+        is RedirectPseudoState -> return targetState.resolveTargetState(DefaultPolicy(this)).targetStates
         is HistoryState -> targetState.storedState
         is UndoState -> {
             val undoTargets = targetState.popTargetStates()
-            if (undoTargets.isEmpty()) return null
-            if (undoTargets.size == 1) {
-                undoTargets.first()
-            } else {
-                // Multiple targets (from a parallel targetParallelStates transition) — resolve each and combine
-                val allResolved = undoTargets.flatMapTo(mutableSetOf()) {
-                    recursiveResolveTargetStates(it) ?: emptySet()
+            when {
+                undoTargets.isEmpty() -> return null
+                undoTargets.size == 1 -> undoTargets.single()
+                else -> {
+                    // Multiple targets (from a parallel targetParallelStates transition) — resolve each and combine
+                    val allResolved = undoTargets.flatMapTo(mutableSetOf()) {
+                        recursiveResolveTargetStates(it) ?: emptySet()
+                    }
+                    return allResolved.ifEmpty { null }
                 }
-                return if (allResolved.isEmpty()) null else allResolved
             }
         }
         else -> targetState
