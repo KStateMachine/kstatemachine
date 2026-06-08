@@ -23,6 +23,7 @@ import ru.nsk.kstatemachine.state.UndoTestData.SwitchDataEvent
 import ru.nsk.kstatemachine.statemachine.*
 import ru.nsk.kstatemachine.statemachine.StateMachine.IgnoredEventHandler
 import ru.nsk.kstatemachine.statemachine.StateMachine.Logger
+import ru.nsk.kstatemachine.transition.targetParallelStates
 import ru.nsk.kstatemachine.transition.unwrappedArgument
 import ru.nsk.kstatemachine.transition.unwrappedEvent
 
@@ -63,7 +64,7 @@ class UndoTest : FreeSpec({
                 }
 
                 machine.activeStates() shouldContain state1
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates() shouldContain state2
             }
 
@@ -81,7 +82,7 @@ class UndoTest : FreeSpec({
                         onEntry { machine.undo() }
                     }
                 }
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates().shouldContain(state1)
             }
 
@@ -99,9 +100,9 @@ class UndoTest : FreeSpec({
                 }
 
                 machine.activeStates() shouldContain state1
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates() shouldContain state2
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state1
             }
 
@@ -119,24 +120,24 @@ class UndoTest : FreeSpec({
                         transitionOn<SecondEvent> { targetState = { state1 } }
                     }
                 }
-                machine.undoBlocking() // does nothing, and should not break anything
+                machine.undo() // does nothing, and should not break anything
 
                 machine.activeStates() shouldContain state1
-                machine.processEventBlocking(FirstEvent)
-                machine.processEventBlocking(SecondEvent)
-                machine.processEventBlocking(FirstEvent)
+                machine.processEvent(FirstEvent)
+                machine.processEvent(SecondEvent)
+                machine.processEvent(FirstEvent)
                 machine.activeStates() shouldContain state2
 
                 state1.onEntry(once = true) { it.unwrappedEvent shouldBe SecondEvent }
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state1
 
                 state2.onEntry(once = true) { it.unwrappedEvent shouldBe FirstEvent }
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state2
 
                 state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state1
             }
 
@@ -156,25 +157,25 @@ class UndoTest : FreeSpec({
                 }
 
                 machine.activeStates() shouldContain state1
-                machine.processEventBlocking(FirstEvent)
+                machine.processEvent(FirstEvent)
                 machine.activeStates() shouldContain state2
 
                 state1.onEntry(once = true) { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state1
 
                 // again
-                machine.processEventBlocking(FirstEvent)
+                machine.processEvent(FirstEvent)
                 machine.activeStates() shouldContain state2
-                machine.processEventBlocking(SecondEvent)
+                machine.processEvent(SecondEvent)
                 machine.activeStates() shouldContain state1
 
                 state2.onEntry { it.unwrappedEvent shouldBe FirstEvent }
-                machine.undoBlocking() // SecondEvent
+                machine.undo() // SecondEvent
                 machine.activeStates() shouldContain state2
 
                 state1.onEntry { it.unwrappedEvent.shouldBeInstanceOf<StartEvent>() }
-                machine.undoBlocking() // FirstEvent
+                machine.undo() // FirstEvent
                 machine.activeStates() shouldContain state1
             }
 
@@ -196,13 +197,13 @@ class UndoTest : FreeSpec({
                 }
 
                 machine.activeStates() shouldContain state1
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates() shouldContain state2
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates() shouldContain state3
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state2
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates() shouldContain state1
             }
 
@@ -223,11 +224,11 @@ class UndoTest : FreeSpec({
                     }
                     state2 = state("state2")
                 }
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates().shouldContain(state12)
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates().shouldContain(state2)
-                machine.processEventBlocking(UndoEvent) // alternative syntax
+                machine.processEvent(UndoEvent) // alternative syntax
                 machine.activeStates().shouldContain(state12)
             }
 
@@ -249,14 +250,14 @@ class UndoTest : FreeSpec({
                     state2 = state("state2")
                 }
 
-                machine.processEventBlocking(SwitchDataEvent(42))
+                machine.processEvent(SwitchDataEvent(42))
                 state12.data shouldBe 42
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates().shouldContain(state2)
                 shouldThrowWithMessage<IllegalStateException>(
                     "Data is not set. Is DefaultDataState(state12) state active?"
                 ) { state12.data }
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates().shouldContain(state12)
                 state12.data shouldBe 42
             }
@@ -284,20 +285,20 @@ class UndoTest : FreeSpec({
 
                 val iterations = 3
                 for (iteration in 1..iterations) {
-                    machine.processEventBlocking(SwitchDataEvent(iteration))
-                    machine.processEventBlocking(FirstEvent)
+                    machine.processEvent(SwitchDataEvent(iteration))
+                    machine.processEvent(FirstEvent)
                 }
-                machine.processEventBlocking(SecondEvent)
+                machine.processEvent(SecondEvent)
 
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates().shouldContain(state11)
 
                 for (iteration in 3 downTo iterations) {
-                    machine.undoBlocking()
+                    machine.undo()
                     machine.activeStates().shouldContain(state12)
                     state12.data shouldBe iteration
 
-                    machine.undoBlocking()
+                    machine.undo()
                     machine.activeStates().shouldContain(state11)
                 }
             }
@@ -322,17 +323,17 @@ class UndoTest : FreeSpec({
                 }
 
                 state2.onEntry(once = true) { it.argument shouldBe 0 }
-                machine.processEventBlocking(SwitchEvent, 0)
+                machine.processEvent(SwitchEvent, 0)
                 machine.activeStates().shouldContain(state2)
 
-                machine.processEventBlocking(SwitchEvent)
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 machine.activeStates().shouldContain(state2)
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates().shouldContain(state2)
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates().shouldContain(state2)
-                machine.undoBlocking()
+                machine.undo()
                 machine.activeStates().shouldContain(state1)
             }
 
@@ -354,16 +355,16 @@ class UndoTest : FreeSpec({
                     it.argument shouldBe 0
                     it.event.shouldBeInstanceOf<StartEvent>()
                 }
-                machine.startBlocking(0)
+                machine.start(0)
 
-                machine.undoBlocking(1) // nothing
-                machine.processEventBlocking(SwitchEvent)
+                machine.undo(1) // nothing
+                machine.processEvent(SwitchEvent)
 
                 state1.onEntry(once = true) {
                     it.argument shouldBe 2
                     it.unwrappedEvent.shouldBeInstanceOf<StartEvent>()
                 }
-                machine.undoBlocking(2)
+                machine.undo(2)
             }
 
             "undo with argument, and unwrapped properties" {
@@ -385,9 +386,9 @@ class UndoTest : FreeSpec({
                     it.event.shouldBeInstanceOf<StartEvent>()
                     it.argument shouldBe 1
                 }
-                machine.startBlocking(1)
+                machine.start(1)
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
 
                 state1.onEntry(once = true) {
                     it.event.shouldBeInstanceOf<WrappedEvent>()
@@ -398,7 +399,7 @@ class UndoTest : FreeSpec({
                     wrappedEvent.argument shouldBe 1
                     it.unwrappedArgument shouldBe wrappedEvent.argument
                 }
-                machine.processEventBlocking(UndoEvent, 2)
+                machine.processEvent(UndoEvent, 2)
             }
 
             "undo ignored event" {
@@ -411,9 +412,53 @@ class UndoTest : FreeSpec({
                         transition<SwitchEvent>()
                     }
                 }
-                machine.processEventBlocking(SwitchEvent)
-                machine.undoBlocking()
-                shouldThrowWithMessage<TestException>("test") { machine.undoBlocking() }
+                machine.processEvent(SwitchEvent)
+                machine.undo()
+                shouldThrowWithMessage<TestException>("test") { machine.undo() }
+            }
+
+            "undo multi-target parallel transition restores all regions" {
+                lateinit var state1: State
+                lateinit var region1Initial: State
+                lateinit var region1Other: State
+                lateinit var region2Initial: State
+                lateinit var region2Other: State
+                lateinit var state3: State
+
+                val machine = createTestStateMachine(
+                    coroutineStarterType,
+                    creationArguments = buildCreationArguments { isUndoEnabled = true }
+                ) {
+                    state1 = initialState("state1") {
+                        transitionConditionally<SwitchEvent> {
+                            direction = { targetParallelStates(region1Other, region2Other) }
+                        }
+                    }
+                    state("parallelState", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            region1Initial = initialState("region1Initial")
+                            region1Other = state("region1Other") {
+                                transitionOn<SecondEvent> { targetState = { state3 } }
+                            }
+                        }
+                        state("region2") {
+                            region2Initial = initialState("region2Initial")
+                            region2Other = state("region2Other")
+                        }
+                    }
+                    state3 = state("state3")
+                }
+
+                machine.processEvent(SwitchEvent)
+                machine.activeStates() shouldContain region1Other
+                machine.activeStates() shouldContain region2Other
+
+                machine.processEvent(SecondEvent)
+                machine.activeStates() shouldContain state3
+
+                machine.undo()
+                machine.activeStates() shouldContain region1Other
+                machine.activeStates() shouldContain region2Other
             }
 
             "undo from onEntry(), this uses event queue" {
@@ -440,10 +485,10 @@ class UndoTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
+                machine.processEvent(SwitchEvent)
 
-                machine.undoBlocking() // same as machine.processEvent(UndoEvent)
+                machine.undo() // same as machine.processEvent(UndoEvent)
 
                 machine.activeStates() shouldContain state1
             }

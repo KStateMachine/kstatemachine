@@ -136,7 +136,19 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
         // as initialPseudoState resolution is already done inside RedirectPseudoState::resolveTargetState()
         is RedirectPseudoState -> return (targetState.resolveTargetState(DefaultPolicy(this)) as? TargetState)?.targetStates
         is HistoryState -> targetState.storedState
-        is UndoState -> targetState.popTargetStates().firstOrNull() // fixme this is a bug, should use all set items, add test for undo multi-target transition
+        is UndoState -> {
+            val undoTargets = targetState.popTargetStates()
+            if (undoTargets.isEmpty()) return null
+            if (undoTargets.size == 1) {
+                undoTargets.first()
+            } else {
+                // Multiple targets (from a parallel targetParallelStates transition) — resolve each and combine
+                val allResolved = undoTargets.flatMapTo(mutableSetOf()) {
+                    recursiveResolveTargetStates(it) ?: emptySet()
+                }
+                return if (allResolved.isEmpty()) null else allResolved
+            }
+        }
         else -> targetState
     }
     // when target state calculated we need to check if its entry will trigger another redirection
