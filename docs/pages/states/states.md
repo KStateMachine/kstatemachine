@@ -230,6 +230,7 @@ this:
 ---
 title: Parallel states diagram
 ---
+%%{init: {'theme': 'd~~~~ark'}}%%
 stateDiagram-v2
 state Laptop {
   [*] --> Charging

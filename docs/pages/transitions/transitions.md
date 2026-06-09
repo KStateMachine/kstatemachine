@@ -201,6 +201,7 @@ Use `transitionConditionally` when the target state itself depends on runtime da
 ---
 title: Guarded transition diagram
 ---
+%%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
 State1 
 [*] --> State1
@@ -280,6 +281,7 @@ state("state2", childMode = ChildMode.PARALLEL) {
 ---
 title: Fork transition diagram
 ---
+%%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
 state fork_state <<fork>>
 state state2 {
@@ -337,6 +339,7 @@ state("parallelWork", childMode = ChildMode.PARALLEL) {
 ---
 title: Join transition diagram
 ---
+%%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
 state join_state <<join>>
 state parallelWork {
@@ -541,6 +544,7 @@ groups its child states. Child states inherit there parent transitions.
 ---
 title: Inherit transitions diagram
 ---
+%%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
 state State1 {    
     [*] --> State1_1

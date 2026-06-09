@@ -126,7 +126,7 @@ private suspend fun createTestMachine(coroutineStarterType: CoroutineStarterType
                 when (event.value) {
                     1 -> targetState(state1)
                     2 -> targetState(state2)
-                    3 -> targetParallelStates(state1, state2)
+                    3 -> targetParallelStates(state1, state2) // fixme no parallel parent
                     4 -> stay()
                     else -> noTransition()
                 }
