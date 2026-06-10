@@ -427,23 +427,56 @@ There is no way to interrupt a transition from `onTriggered()` notifications.
 
 ## Transition event type matching
 
-By default, event type that triggers transition is matched as instance of specified event class. For
-example `transition<SwitchEvent>()` matches `SwitchEvent` class and its subclasses. If you have event hierarchy it might
-be necessary to control matching mechanism, it might be done with `eventMatcher` argument of transition builder
-functions:
+By default the event type is matched with `isInstanceOf()`: the transition fires for the specified class
+**and all its subclasses**.
 
 ```kotlin
-transition<SwitchEvent> {
-    eventMatcher = isEqual()
+// Fires for SwitchEvent and any class that extends SwitchEvent
+transition<SwitchEvent>()
+```
+
+### Catch-all (wildcard) transitions
+
+Because `Event` is the base class of every event in the library, `transition<Event>()` matches **any** event:
+
+```kotlin
+state("fallback") {
+    // triggered by every event that reaches this state
+    transition<Event> { targetState = errorState }
 }
 ```
 
-There are two predefined event matchers:
+This is the standard pattern for a wildcard or default transition — it is also commonly used to override a
+parent transition for all events (see [Transition override rules](#transition-override-rules)).
 
-* `isInstanceOf()` matches specified class and its subclasses (default)
-* `isEqual()` matches only specified class
+### Strict matching
 
-You can define your own matchers by subclassing `EventMatcher` class.
+Use `isEqual()` to match only the exact class, ignoring subclasses:
+
+```kotlin
+transition<SwitchEvent> {
+    eventMatcher = isEqual()   // only SwitchEvent, not subclasses
+}
+```
+
+### Custom matchers
+
+Implement `EventMatcher` to apply any predicate:
+
+```kotlin
+transition<SwitchEvent> {
+    eventMatcher = object : EventMatcher<SwitchEvent>(SwitchEvent::class) {
+        override suspend fun match(eventAndArgument: EventAndArgument<*>) =
+            eventAndArgument.event is SwitchEvent && someCondition()
+    }
+}
+```
+
+| Matcher         | Matches                                  |
+|-----------------|------------------------------------------|
+| `isInstanceOf()` | The type and every subtype (default)    |
+| `isEqual()`      | Only the exact type, no subtypes        |
+| Custom           | Any logic you need                      |
 
 ## Finding transitions
 
@@ -535,10 +568,9 @@ and fill it from multiple listeners.
 
 ## Inherit transitions by grouping states
 
-Suppose you have three states that all should have a transitions to another state. You can explicitly set this
-transition for each state but with this approach complexity grows and when you add fourth state you have to remember to
-add this specific transition. This problem can be solved with adding parent state which defines such transition and
-groups its child states. Child states inherit there parent transitions.
+Suppose you have three states that all should have a transition to another state. Defining it on each state
+individually is repetitive and error-prone when states are added later. The solution is to define the
+transition on a parent state — all child states **inherit** it automatically.
 
 ```mermaid
 ---
@@ -558,16 +590,108 @@ State1 --> FinalState : Exit
 FinalState --> [*]
 ```
 
-A child state can override an inherited transition. To override parent transition child state should define any
-transition that matches the event.
+```kotlin
+createStateMachine(scope) {
+    val finalState = finalState("final")
+
+    // All children of this state inherit the Exit transition
+    initialState("state1", childMode = ChildMode.EXCLUSIVE) {
+        transition<ExitEvent> { targetState = finalState }
+
+        initialState("state1_1") { /* inherits ExitEvent transition */ }
+        state("state1_2")        { /* inherits ExitEvent transition */ }
+        state("state1_3")        { /* inherits ExitEvent transition */ }
+    }
+}
+```
+
+### Transition lookup order
+
+When an event arrives, the machine searches for a matching transition starting at the **currently active
+(leaf) state** and walking up the parent chain until a match is found or the root is reached:
+
+1. Active leaf state — own transitions checked first
+2. Parent state — its transitions checked next
+3. Grandparent, … up to the root machine state
+
+The first matching transition wins. If no transition matches anywhere in the chain, the event is passed to
+`IgnoredEventHandler`.
+
+### Transition override rules
+
+A child state **overrides** an inherited transition by defining its own transition that matches the same
+event type. Because the default matcher is `isInstanceOf()`, a child transition registered for a supertype
+also overrides parent transitions for all subtypes of that supertype.
 
 ```kotlin
 createStateMachine(scope) {
     val state2 = state("state2")
-    // all nested states inherit this parent transition
-    transition<SwitchEvent> { targetState = state2 }
+    val state3 = state("state3")
 
-    // child state overrides transitions for all events
-    initialState("state1") { transition<Event>() }
+    initialState("parent") {
+        // Inherited by all children: SwitchEvent → state2
+        transition<SwitchEvent> { targetState = state2 }
+
+        // This child handles SwitchEvent itself → overrides the parent transition
+        initialState("child1") {
+            transition<SwitchEvent> { targetState = state3 }
+        }
+
+        // This child has no SwitchEvent transition → inherits parent's (→ state2)
+        state("child2")
+    }
 }
 ```
+
+### Wildcard override — block all inherited transitions
+
+Use `transition<Event>()` on a child state to intercept **every** event before it can reach the parent.
+This works because `Event` is the base class of all events and `isInstanceOf()` matches every subtype:
+
+```kotlin
+createStateMachine(scope) {
+    val state2 = state("state2")
+
+    initialState("parent") {
+        transition<SwitchEvent> { targetState = state2 }
+
+        // This child absorbs all events; the parent transition is never reached
+        initialState("child") {
+            transition<Event>()   // target-less: stay in child, consume the event
+        }
+    }
+}
+```
+
+### Transition priority within the same state
+
+By default the library **throws an exception** if more than one transition on the same state matches the
+incoming event. This is a safety net that catches ambiguous machine definitions early.
+
+```kotlin
+state {
+    // Both could match a SwitchEvent subtype — throws by default
+    transition<SwitchEvent>()
+    transition<Event>()
+}
+```
+
+To opt into first-match-wins semantics (declaration order) instead of throwing, set
+`doNotThrowOnMultipleTransitionsMatch = true` in the creation arguments:
+
+```kotlin
+val machine = createStateMachine(
+    scope,
+    creationArguments = buildCreationArguments {
+        doNotThrowOnMultipleTransitionsMatch = true
+    }
+) {
+    state {
+        transition<SpecificEvent> { targetState = state1 }   // wins for SpecificEvent
+        transition<Event>         { targetState = fallback }  // wins for everything else
+    }
+}
+```
+
+With `doNotThrowOnMultipleTransitionsMatch = true` the first matching transition in declaration order is
+selected, so define more specific transitions before more general catch-all ones.

@@ -75,28 +75,67 @@ The library provides implementation of such throwing handler by `throwingIgnored
 
 ## Pending events
 
-Pending events are such events that are posted for processing while another event is already processing, for example
-from listeners callbacks.
+A **pending event** is an event posted while the machine is already processing another event — the most common
+case is calling `processEvent()` from inside a listener callback.
 
-Default `PendingEventHandler` that is created with `queuePendingEventHandler()` stores such events in queue and machine
-processes them all after a current one. This allows to call `processEvent()` from listeners callbacks.
+### Default behaviour — queue (deferred delivery)
 
-If you are using another `PendingEventHandler` implementation, like logging or throwing one created by
-`throwingPendingEventHandler()` function, then behaviour of calling `processEvent()` while state machine is already
-processing event will depend on `PendingEventHandler` implementation. Pending event may be simply dropped or exception
-thrown. Alternatively with custom `PendingEventHandler` you can post such events to some queue to process them later
-passing to `processEvent()`. Using of throwing `PendingEventHandler` sample:
+`queuePendingEventHandler()` is the **default** handler. It stores incoming events in a FIFO queue and replays
+them in order immediately after the current event finishes processing. This means you can freely call
+`processEvent()` from any listener without worrying about re-entrancy:
 
 ```kotlin
 createStateMachine(scope) {
-    // ...
+    // queuePendingEventHandler() is already the default; shown here for clarity
+    pendingEventHandler = queuePendingEventHandler()
+
+    val state2 = state("state2")
+    initialState("state1") {
+        onEntry {
+            // Safe: SecondEvent is queued and delivered after SwitchEvent finishes
+            machine.processEvent(SecondEvent)
+        }
+        transitionOn<SwitchEvent> { targetState = { state2 } }
+        transitionOn<SecondEvent> { targetState = { /* ... */ state2 } }
+    }
+}
+machine.processEvent(SwitchEvent)
+// Both SwitchEvent and SecondEvent are fully processed by the time this returns
+```
+
+`processEvent()` returns `ProcessingResult.PENDING` for any event that is queued rather than processed
+immediately. The queued events are processed synchronously in the same call before `processEvent()` returns
+to the original caller.
+
+This is the recommended way to implement **deferred event delivery**: emit the follow-up event from an
+`onEntry`, `onExit`, or transition listener callback and it will be delivered in the correct order.
+
+### Throwing handler
+
+Use `throwingPendingEventHandler()` during development to catch unexpected re-entrant calls:
+
+```kotlin
+createStateMachine(scope) {
     pendingEventHandler = throwingPendingEventHandler()
 }
 ```
 
+### Custom handler
+
+You can provide any `PendingEventHandler` implementation to integrate with an external queue, logging
+system, or dispatcher:
+
+```kotlin
+createStateMachine(scope) {
+    pendingEventHandler = PendingEventHandler { eventAndArgument ->
+        myExternalQueue.post(eventAndArgument.event)
+    }
+}
+```
+
 {: .note }
-`PendingEventHandler` that does nothing will not let you process pending events (they will be dropped) as it
-leads to undefined machine state and mixed notifications.
+A `PendingEventHandler` that silently discards events leads to undefined machine state and missing
+notifications. Prefer `queuePendingEventHandler()` unless you have a specific reason to drop events.
 
 ## Event argument
 

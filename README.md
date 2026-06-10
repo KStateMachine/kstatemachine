@@ -135,12 +135,12 @@ fun main() = runBlocking {
 
 **Tooling**
 
-| Feature                                                                                   | Description                                                                                                            |
-|-------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| [IntelliJ Plugin](https://kstatemachine.github.io/kstatemachine/pages/plugin.html)        | Visualise, navigate, and export state machines directly from your IDE — no runtime needed                              |
-| [Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)                 | Generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition |
-| [Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html) | Record processed events and replay them to restore state; `kotlinx.serialization` built in                             |
-| [Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)       | `startFrom(state)` bypasses normal init, enabling focused unit tests                                                   |
+| Feature                                                                                   | Description                                                                                                                                         |
+|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| [IntelliJ Plugin](https://kstatemachine.github.io/kstatemachine/pages/plugin.html)        | Visualise, navigate, and export state machines directly from your IDE — no runtime needed                                                           |
+| [Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)                 | Generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition                              |
+| [Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html) | Two strategies: **event recording** (full replay) or **state snapshot** (`captureSavedStateConfig`) — both serialisable via `kotlinx.serialization` |
+| [Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)       | `startFrom(state)` bypasses normal init, enabling focused unit tests                                                                                |
 
 ---
 

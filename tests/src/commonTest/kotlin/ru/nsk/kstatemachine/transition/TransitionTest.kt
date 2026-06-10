@@ -17,6 +17,7 @@ import io.mockk.confirmVerified
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
+import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.ProcessingResult.PROCESSED
 import ru.nsk.kstatemachine.statemachine.buildCreationArguments
@@ -67,7 +68,7 @@ class TransitionTest : FreeSpec({
 
                 verifySequenceAndClear(callbacks) { callbacks.onStateEntry(state1) }
 
-                machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
+                machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
                 verifySequence {
                     callbacks.onTransitionTriggered(SwitchEvent)
@@ -91,7 +92,7 @@ class TransitionTest : FreeSpec({
                     state2 = state("state2") { callbacks.listen(this) }
                 }
 
-                machine.processEventBlocking(SwitchEvent) shouldBe PROCESSED
+                machine.processEvent(SwitchEvent) shouldBe PROCESSED
 
                 verifySequence {
                     callbacks.onTransitionTriggered(SwitchEvent)
@@ -111,7 +112,7 @@ class TransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 verify { callbacks.onTransitionTriggered(SwitchEvent) }
             }
 
@@ -125,7 +126,7 @@ class TransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 finalState.isActive shouldBe true
             }
 
@@ -138,7 +139,7 @@ class TransitionTest : FreeSpec({
                 }
                 shouldThrowWithMessage<IllegalStateException>(
                     "Transitioning to targetState DefaultState(freeState) from another state machine is not possible"
-                ) { machine.processEventBlocking(SwitchEvent) }
+                ) { machine.processEvent(SwitchEvent) }
             }
 
             "[negative] transition to non machine state" {
@@ -153,7 +154,7 @@ class TransitionTest : FreeSpec({
 
                 shouldThrowWithMessage<IllegalStateException>(
                     "Transitioning to targetState StateMachineImpl(otherMachine) from another state machine is not possible"
-                ) { machine.processEventBlocking(SwitchEvent) }
+                ) { machine.processEvent(SwitchEvent) }
             }
 
             "[negative] multiple matching transitions" {
@@ -164,7 +165,7 @@ class TransitionTest : FreeSpec({
                 }
 
                 shouldThrow<IllegalStateException> {
-                    machine.processEventBlocking(SwitchEvent)
+                    machine.processEvent(SwitchEvent)
                 }.message shouldStartWith "Multiple transitions match"
             }
 
@@ -188,7 +189,7 @@ class TransitionTest : FreeSpec({
                 }
 
                 shouldThrow<IllegalStateException> {
-                    machine.processEventBlocking(SwitchEvent)
+                    machine.processEvent(SwitchEvent)
                 }.message shouldStartWith "Multiple transitions match"
             }
 
@@ -202,7 +203,7 @@ class TransitionTest : FreeSpec({
                     state { transition<SwitchEvent>() }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
             }
 
             "self-targeted transition does not trigger reentering states" {

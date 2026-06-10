@@ -12,9 +12,18 @@ title: Persistence (Serialization)
 - TOC
 {:toc}
 
-* **Persist** `StateMachine` - means transform it into serializable representation, such as `Serializable` object or
-  JSON text, and possibly saving it into some persistent storage like a file or sending by a network.
-* **Restoration** - is a process of restoring the `StateMachine` from the serializable representation.
+The library provides **two built-in strategies** for persisting and restoring a state machine, both
+serializable to JSON via `kotlinx.serialization`:
+
+| Strategy            | API                                                         | Size                          | Listeners on restore  | Best for                                    |
+|---------------------|-------------------------------------------------------------|-------------------------------|-----------------------|---------------------------------------------|
+| **State snapshot**  | `captureSavedStateConfig()` / `restoreBySavedStateConfig()` | Constant (active states only) | Suppressed by default | Long-running machines, frequent checkpoints |
+| **Event recording** | `machine.eventRecorder` / `restoreByRecordedEvents()`       | Grows with event count        | Suppressed by default | Audit trails, full replay, debugging        |
+
+Both strategies require that the restored machine is built from **identical code** — only the active
+configuration is persisted, not the machine structure itself.
+
+---
 
 There are several kinds or levels of `StateMachine` persistence (serialization). Let's look at sample use cases:
 
@@ -211,11 +220,11 @@ machine2.restoreBySavedStateConfig(restoredSnapshot)
 
 ### Limitations
 
-| Limitation                            | Details                                                                                                                                |
-|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| **History states not restored**       | `HistoryState` recorded history is not part of the snapshot; after restore it defaults to `defaultState` or the parent's initial state |
-| **All states must have names**        | Identification relies on state names; capture throws if any state has a null or blank name                                             |
-| **`isUndoEnabled` must be false**     | The undo stack cannot be captured; capture throws if undo is enabled unless `disableUndoEnabledCheck = true` is passed                 |
-| **Listeners fire during restore**     | Unlike `restoreByRecordedEvents`, there is no `muteListeners` option — state entry is genuine                                          |
+| Limitation                        | Details                                                                                                                                |
+|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| **History states not restored**   | `HistoryState` recorded history is not part of the snapshot; after restore it defaults to `defaultState` or the parent's initial state |
+| **All states must have names**    | Identification relies on state names; capture throws if any state has a null or blank name                                             |
+| **`isUndoEnabled` must be false** | The undo stack cannot be captured; capture throws if undo is enabled unless `disableUndoEnabledCheck = true` is passed                 |
+| **Listeners fire during restore** | Unlike `restoreByRecordedEvents`, there is no `muteListeners` option — state entry is genuine                                          |
 
 See [Saved state config sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SavedStateConfigSample.kt)

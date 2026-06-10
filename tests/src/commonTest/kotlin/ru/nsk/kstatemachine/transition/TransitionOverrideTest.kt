@@ -12,6 +12,7 @@ import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.statemachine.buildCreationArguments
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 
 class TransitionOverrideTest : FreeSpec({
@@ -73,6 +74,48 @@ class TransitionOverrideTest : FreeSpec({
 
                 machine.processEventBlocking(SwitchEvent)
                 verifySequence { callbacks.onTransitionTriggered(SwitchEvent) }
+            }
+
+            "multiple matching transitions" {
+                val callbacks = mockkCallbacks()
+                val machine = createTestStateMachine(
+                    coroutineStarterType,
+                    creationArguments = buildCreationArguments { doNotThrowOnMultipleTransitionsMatch = true }
+                ) {
+                    transition<SwitchEvent> {
+                        onTriggered { callbacks.onTransitionTriggered(it.event, 0) }
+                    }
+                    transition<SwitchEvent> {
+                        onTriggered { callbacks.onTransitionTriggered(it.event, 1) }
+                    }
+                    initialState()
+                }
+
+                machine.processEvent(SwitchEvent)
+                verifySequence {
+                    callbacks.onTransitionTriggered(SwitchEvent, 0)
+                }
+            }
+
+            "multiple matching transitions of super and subtype" {
+                val callbacks = mockkCallbacks()
+                val machine = createTestStateMachine(
+                    coroutineStarterType,
+                    creationArguments = buildCreationArguments { doNotThrowOnMultipleTransitionsMatch = true }
+                ) {
+                    transition<Event> {
+                        onTriggered { callbacks.onTransitionTriggered(it.event, 0) }
+                    }
+                    transition<SwitchEvent> {
+                        onTriggered { callbacks.onTransitionTriggered(it.event, 1) }
+                    }
+                    initialState()
+                }
+
+                machine.processEvent(SwitchEvent)
+                verifySequence {
+                    callbacks.onTransitionTriggered(SwitchEvent, 0)
+                }
             }
         }
     }
