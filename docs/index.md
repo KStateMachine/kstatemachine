@@ -14,6 +14,16 @@ The library follows concepts from the following great and well known works and s
 * [State Chart XML (SCXML)](http://www.w3.org/TR/scxml/)
 * [Unified Modeling Language](https://www.omg.org/spec/UML/2.5.1/PDF)
 
+## IntelliJ IDEA Plugin
+
+[**KStateMachine Visual**](pages/plugin.html) is an IntelliJ IDEA plugin that visualizes and navigates
+your state machines directly from Kotlin source.
+
+Install from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/32202-kstatemachine-visual/)
+or read the [full plugin documentation](pages/plugin.html).
+
+---
+
 ## Workflow
 
 Building blocks (main interfaces) of the library:

@@ -12,6 +12,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.nsk90/kstatemachine?logo=sonatype)](https://central.sonatype.com/artifact/io.github.nsk90/kstatemachine)
 [![JitPack](https://img.shields.io/jitpack/version/io.github.nsk90/kstatemachine?style=flat&logo=jitpack&color=brgreen)](https://jitpack.io/#nsk90/kstatemachine)
 [![Multiplatform](https://img.shields.io/badge/multiplatform-jvm%20%7C%20android%20%7C%20ios%20%7C%20native%20%7C%20js%20%7C%20wasm-brightgreen)](https://kstatemachine.github.io/kstatemachine/#multiplatform)
+[![JetBrains Marketplace](https://img.shields.io/jetbrains/plugin/v/32202-kstatemachine-visual?label=IntelliJ%20Plugin&logo=jetbrains)](https://plugins.jetbrains.com/plugin/32202-kstatemachine-visual/)
 
 [![Open Collective](https://img.shields.io/badge/open%20collective-kstatemachine-lightblue?logo=opencollective)](https://opencollective.com/kstatemachine)
 [![Mentioned in Awesome Kotlin](https://awesome.re/mentioned-badge.svg)](https://github.com/KotlinBy/awesome-kotlin)
@@ -24,6 +25,7 @@
 
 [📖 Documentation](https://kstatemachine.github.io/kstatemachine) &nbsp;|&nbsp;
 [📚 KDoc](https://kstatemachine.github.io/kstatemachine/kdoc/index.html) &nbsp;|&nbsp;
+[🔌 IntelliJ Plugin](#-intellij-idea-plugin) &nbsp;|&nbsp;
 [🚀 Quick Start](#-quick-start) &nbsp;|&nbsp;
 [🧪 Samples](#-samples) &nbsp;|&nbsp;
 [💾 Install](#-install) &nbsp;|&nbsp;
@@ -128,16 +130,37 @@ fun main() = runBlocking {
 | [Pseudo states](https://kstatemachine.github.io/kstatemachine/pages/states/pseudo_states.html)                                            | History, redirect, and other behavioural helpers                                                                                                                   |
 | [Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html)                         | Carry typed data from event to target state                                                                                                                        |
 | [Parallel states](https://kstatemachine.github.io/kstatemachine/pages/states.html#parallel-states)                                        | Run orthogonal regions simultaneously                                                                                                                              |
-| [Fork & Join](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#synchronising-parallel-regions-join)        | Synchronise concurrent orthogonal regions (UML fork/join pseudo-states)                                                                                            |
+| [Fork & Join](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#synchronising-parallel-regions-join)       | Synchronise concurrent orthogonal regions (UML fork/join pseudo-states)                                                                                            |
 | [Undo transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html#undo-transitions)                     | Navigate back like a stack-based FSM                                                                                                                               |
 
 **Tooling**
 
 | Feature                                                                                   | Description                                                                                                            |
 |-------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| [IntelliJ Plugin](https://kstatemachine.github.io/kstatemachine/pages/plugin.html)        | Visualise, navigate, and export state machines directly from your IDE — no runtime needed                              |
 | [Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)                 | Generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition |
 | [Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html) | Record processed events and replay them to restore state; `kotlinx.serialization` built in                             |
 | [Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)       | `startFrom(state)` bypasses normal init, enabling focused unit tests                                                   |
+
+---
+
+## 🔌 IntelliJ IDEA Plugin
+
+**[KStateMachine Visual](https://plugins.jetbrains.com/plugin/32202-kstatemachine-visual/)** is an
+IntelliJ IDEA plugin that visualizes and navigates your state machines straight from Kotlin source —
+no runtime required.
+
+- **Tree view** with specialized icons for every state type (initial, final, choice, history, data, parallel)
+- **Bidirectional navigation** between the editor and the tree view
+- **Live PlantUML diagram** — rendered inline with debounced real-time updates as you type (no Graphviz needed)
+- **Export** as SVG or raw PlantUML source
+- **Static analysis** — resolves the full DSL tree including states inside conditional branches that runtime export
+  misses
+
+**Install:** `Settings → Plugins → Marketplace` → search **KStateMachine Visual**
+
+See the [plugin documentation page](https://kstatemachine.github.io/kstatemachine/pages/plugin.html)
+for the full feature reference and manual install instructions.
 
 ---
 
