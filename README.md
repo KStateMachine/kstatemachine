@@ -141,6 +141,7 @@ fun main() = runBlocking {
 | [Export](https://kstatemachine.github.io/kstatemachine/pages/export.html)                 | Generate [PlantUML](https://plantuml.com/) or [Mermaid](https://mermaid.js.org/) diagrams from your machine definition                              |
 | [Persist & restore](https://kstatemachine.github.io/kstatemachine/pages/persistence.html) | Two strategies: **event recording** (full replay) or **state snapshot** (`captureSavedStateConfig`) — both serialisable via `kotlinx.serialization` |
 | [Testing helpers](https://kstatemachine.github.io/kstatemachine/pages/testing.html)       | `startFrom(state)` bypasses normal init, enabling focused unit tests                                                                                |
+| [Library comparison](https://kstatemachine.github.io/kstatemachine/pages/comparison.html) | Side-by-side feature matrix vs FlowRedux, Tinder StateMachine, and Spring State Machine                                                            |
 
 ---
 
