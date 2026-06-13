@@ -49,3 +49,11 @@ internal fun joinEventMatcher(joinId: Any): EventMatcher<JoinCompleteEvent> =
         override suspend fun match(value: Event) =
             value is JoinCompleteEvent && value.joinId === joinId
     }
+
+internal fun autoEventMatcher(transitionId: Any): EventMatcher<AutoEvent> =
+    object : EventMatcher<AutoEvent> {
+        override val eventClass = AutoEvent::class
+        override suspend fun match(value: Event) =
+            value is AutoEvent && value.transitionId === transitionId
+    }
+

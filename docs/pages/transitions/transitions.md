@@ -401,6 +401,67 @@ The lambda runs inside the same coroutine that processes the join, so it may sus
 Once the lambda returns, the library fires an internal `DataJoinCompleteEvent` carrying the produced value;
 `result.data` is set from it exactly as if the trigger had been a regular `DataEvent`.
 
+## Eventless (automatic) transitions
+
+`automaticTransition()` is a **UML eventless ("always") transition** — it fires on state entry, without any external
+event. After it lands in its target state, that state's own eventless transitions (if any) are evaluated in turn,
+producing UML run-to-completion semantics. Guards are evaluated at fire time; if a guard rejects the state simply
+stays put and the transition is re-tried on the next entry.
+
+```kotlin
+val target = state("target")
+initialState("source") {
+    automaticTransition(targetState = target)            // fires on entry of "source"
+}
+```
+
+For guarded behaviour or for choosing the target dynamically use `automaticTransitionOn()`:
+
+```kotlin
+automaticTransitionOn {
+    guard = { isReady }
+    targetState = { computeNext() }
+}
+```
+
+For full conditional control (e.g. picking among several targets) use `automaticTransitionConditionally()`:
+
+```kotlin
+automaticTransitionConditionally {
+    direction = { if (counter % 2 == 0) targetState(even) else targetState(odd) }
+}
+```
+
+Internally, the library wires an `onEntry` listener on the source state that emits an internal `AutoEvent`; the regular
+event-dispatch loop picks it up through a dedicated matcher and runs the transition just like any other. This is the
+same building block `joinTransition` uses, so chained eventless transitions, guards, and the `QueuePendingEventHandler`
+all behave exactly as for normal events.
+
+{: .note }
+Watch out for cycles: a chain of always-true guarded eventless transitions that returns to the same state will produce
+an unbounded event loop. Guards must eventually reject (or the chain must terminate in a state with no eventless
+transition out).
+
+### Eventless transition into a DataState
+
+`automaticDataTransition()` is the type-safe variant that targets a [`DataState`](../states/states.md#data-states). The
+`dataProducer` lambda runs once at fire time and its return value is delivered to the target as its entry data — no
+custom `DataEvent` subclass is needed.
+
+```kotlin
+val session: DataState<LoginResult> = dataState<LoginResult>("session")
+initialState("authenticating") {
+    automaticDataTransition(targetState = session) {
+        LoginResult(userId = "u-42", sessionToken = "abc123")
+    }
+}
+```
+
+See full runnable examples in
+[`AutomaticTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)
+and
+[`AutomaticDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt).
+
 ## Transition interruption
 
 Typically, to calculate whether transition processing should be performed or not, you can use a guard function,

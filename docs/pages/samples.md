@@ -53,6 +53,8 @@ in the repository.
 | [TargetlessTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TargetlessTransitionSample.kt)           | Internal transitions without a state change |
 | [LocalVsExternalTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/LocalVsExternalTransitionSample.kt) | LOCAL vs EXTERNAL transition semantics      |
 | [JoinTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/JoinTransitionSample.kt)                       | Synchronise parallel regions with a join pseudo-state |
+| [AutomaticTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)             | UML eventless ("always") transitions that fire on entry |
+| [AutomaticDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt)     | Type-safe eventless transition into a `DataState`     |
 
 ### States
 

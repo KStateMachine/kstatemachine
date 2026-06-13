@@ -312,9 +312,14 @@ internal class ExportPlantUmlVisitor(
     private fun line(text: String) = builder.appendLine(SINGLE_INDENT.repeat(indent) + text)
 
     private fun transitionLabel(transition: Transition<*>, description: String?): String {
+        val eventLabel: String? = when (transition.eventMatcher.eventClass) {
+            // UML convention: eventless ("always") transitions have no trigger label.
+            AutoEvent::class -> null
+            else -> transition.eventMatcher.eventClass.simpleName
+        }
         val text = listOfNotNull(
             transition.metaInfo?.umlLabel ?: transition.name,
-            transition.eventMatcher.eventClass.simpleName.takeIf { showEventLabels },
+            eventLabel.takeIf { showEventLabels },
             description,
         ).joinToString()
         return transitionLabel(text)

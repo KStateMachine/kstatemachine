@@ -17,6 +17,12 @@ kotlin {
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "AsyncEventProcessingSample") {
                 mainClass.set("ru.nsk.samples.AsyncEventProcessingSampleKt")
             }
+            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "AutomaticTransitionSample") {
+                mainClass.set("ru.nsk.samples.AutomaticTransitionSampleKt")
+            }
+            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "AutomaticDataTransitionSample") {
+                mainClass.set("ru.nsk.samples.AutomaticDataTransitionSampleKt")
+            }
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "ChoiceStateSample") {
                 mainClass.set("ru.nsk.samples.ChoiceStateSampleKt")
             }
