@@ -1,3 +1,10 @@
+public final class ru/nsk/kstatemachine/state/DelayedTransitionKt {
+	public static final fun delayedDataTransition-NcHsxvU (Lru/nsk/kstatemachine/state/IState;JLjava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun delayedDataTransition-NcHsxvU$default (Lru/nsk/kstatemachine/state/IState;JLjava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun delayedTransition-WPwdCS8 (Lru/nsk/kstatemachine/state/IState;JLjava/lang/String;Lru/nsk/kstatemachine/state/State;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun delayedTransition-WPwdCS8$default (Lru/nsk/kstatemachine/state/IState;JLjava/lang/String;Lru/nsk/kstatemachine/state/State;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+}
+
 public final class ru/nsk/kstatemachine/state/StateCoroutinesKt {
 	public static final fun asyncScopedAction (Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function2;)V
 }

@@ -176,6 +176,23 @@ private suspend fun EventAndArgument<*>.recursiveResolveTargetStates(targetState
 internal fun unresolvedTargetState(targetState: IState): TransitionDirection = TargetState(setOf(targetState))
 
 /**
+ * Helper for building [TransitionDirectionProducer]s outside the core module (e.g. from
+ * `kstatemachine-coroutines`) where the sealed [TransitionDirectionProducerPolicy] subtypes are
+ * not visible. Same behavior as the guarded path in [TransitionBuilder] subclasses: the [guard] is
+ * evaluated only under [TransitionDirectionProducerPolicy.DefaultPolicy] (the normal dispatch
+ * path); under export/collect policies the guard is skipped and the (unresolved) target is returned.
+ */
+suspend fun <E : Event> TransitionDirectionProducerPolicy<E>.guardedTarget(
+    targetState: IState?,
+    guard: suspend () -> Boolean,
+): TransitionDirection = when (this) {
+    is DefaultPolicy ->
+        if (guard()) targetStateOrStay(targetState) else noTransition()
+    is TransitionDirectionProducerPolicy.CollectTargetStatesPolicy,
+    is TransitionDirectionProducerPolicy.UnsafeCollectTargetStatesPolicy -> targetStateOrStay(targetState)
+}
+
+/**
  * Transition that matches event and has a meaningful direction (except [NoTransition])
  */
 typealias ResolvedTransition<E> = Pair<InternalTransition<E>, TransitionDirection>

@@ -86,3 +86,5 @@ in the repository.
 |---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
 | [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)           | Observe state changes via Kotlin `Flow`   |
 | [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt) | Fire-and-forget / deferred event dispatch |
+| [DelayedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)       | UML time-event ("after Xms") transitions  |
+| [DelayedDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt) | Type-safe delayed transition into a `DataState` |

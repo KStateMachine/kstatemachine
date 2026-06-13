@@ -79,3 +79,12 @@ internal data class JoinTransitionMetaInfo(
     val joinPoints: Set<IState>,
     val joinName: String,
 ) : MetaInfo
+
+/**
+ * Attached to a delayed transition so the exporter can render the `after Xms` label.
+ * Public only because `kstatemachine-coroutines` constructs the delayed-transition DSL
+ * (Kotlin `internal` is per-module). Do not construct from user code.
+ */
+data class DelayedTransitionMetaInfo(
+    val delay: kotlin.time.Duration,
+) : MetaInfo

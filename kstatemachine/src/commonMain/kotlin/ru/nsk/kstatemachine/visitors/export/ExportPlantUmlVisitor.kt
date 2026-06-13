@@ -7,8 +7,11 @@
 
 package ru.nsk.kstatemachine.visitors.export
 
+import ru.nsk.kstatemachine.event.AutoEvent
+import ru.nsk.kstatemachine.event.DelayedTransitionEvent
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.isNeighbor
+import ru.nsk.kstatemachine.metainfo.DelayedTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.EventAndArgumentResolutionHint
 import ru.nsk.kstatemachine.metainfo.ExportMetaInfo
 import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
@@ -315,6 +318,9 @@ internal class ExportPlantUmlVisitor(
         val eventLabel: String? = when (transition.eventMatcher.eventClass) {
             // UML convention: eventless ("always") transitions have no trigger label.
             AutoEvent::class -> null
+            // UML convention: time-event transitions are rendered as "after Xms".
+            DelayedTransitionEvent::class ->
+                transition.metaInfo.findMetaInfo<DelayedTransitionMetaInfo>()?.let { "after ${it.delay}" }
             else -> transition.eventMatcher.eventClass.simpleName
         }
         val text = listOfNotNull(

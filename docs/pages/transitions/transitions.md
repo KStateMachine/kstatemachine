@@ -462,6 +462,50 @@ See full runnable examples in
 and
 [`AutomaticDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt).
 
+## Delayed transitions
+
+`delayedTransition()` is a **UML time-event ("after Xms") transition**. The timer starts when the source state is
+entered, fires after the configured delay, and is automatically cancelled when the state is exited or when the machine
+is stopped or destroyed. On re-entry the timer restarts from zero.
+
+```kotlin
+val home = state("home")
+initialState("splash") {
+    delayedTransition(delay = 2.seconds, targetState = home)
+}
+```
+
+A `guard` lambda may be supplied; it runs at fire time, and if it returns `false` the state stays put — the timer does
+**not** auto-restart (it will fire again only on the next entry).
+
+```kotlin
+delayedTransition(delay = 30.seconds, targetState = screensaver, guard = { !inputBlocked })
+```
+
+Lives in `kstatemachine-coroutines` because it needs a `CoroutineScope` to host the timer. Calling it on a machine
+created with `createStdLibStateMachine` throws — use `createStateMachine(scope) { ... }` instead. The job lifecycle
+mirrors [`asyncScopedAction`](../states/states.md): launch on entry, cancel on exit, cancel on machine stop/destroy.
+
+### Delayed transition into a DataState
+
+`delayedDataTransition()` is the type-safe variant. The `dataProducer` lambda runs once when the timer fires (not at
+registration time); its return value is delivered to the target [`DataState`](../states/states.md#data-states) as its
+entry data.
+
+```kotlin
+val timedOut: DataState<String> = dataState<String>("timedOut")
+initialState("waiting") {
+    delayedDataTransition(delay = 5.seconds, targetState = timedOut) {
+        "no user response within 5s"
+    }
+}
+```
+
+See full runnable examples in
+[`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
+and
+[`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
+
 ## Transition interruption
 
 Typically, to calculate whether transition processing should be performed or not, you can use a guard function,

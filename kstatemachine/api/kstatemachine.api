@@ -16,6 +16,10 @@ public final class ru/nsk/kstatemachine/coroutines/CoroutineAbstractionKt {
 	public static synthetic fun createStateMachine$default (Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;Ljava/lang/String;Lru/nsk/kstatemachine/state/ChildMode;ZLru/nsk/kstatemachine/statemachine/CreationArguments;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public abstract interface class ru/nsk/kstatemachine/event/AutoEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public abstract fun getTransitionId ()Ljava/lang/Object;
+}
+
 public abstract interface class ru/nsk/kstatemachine/event/DataEvent : ru/nsk/kstatemachine/event/Event {
 	public abstract fun getData ()Ljava/lang/Object;
 }
@@ -24,6 +28,34 @@ public abstract interface class ru/nsk/kstatemachine/event/DataExtractor {
 	public abstract fun extract (Lru/nsk/kstatemachine/transition/TransitionParams;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun extractFinishedEvent (Lru/nsk/kstatemachine/transition/TransitionParams;Lru/nsk/kstatemachine/event/FinishedEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getDataClass ()Lkotlin/reflect/KClass;
+}
+
+public final class ru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl : ru/nsk/kstatemachine/event/DataEvent, ru/nsk/kstatemachine/event/DelayedTransitionEvent {
+	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;
+	public static synthetic fun copy$default (Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getData ()Ljava/lang/Object;
+	public fun getTransitionId ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class ru/nsk/kstatemachine/event/DelayedTransitionEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
+	public abstract fun getTransitionId ()Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/event/DelayedTransitionEventImpl : ru/nsk/kstatemachine/event/DelayedTransitionEvent {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;
+	public static synthetic fun copy$default (Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getTransitionId ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class ru/nsk/kstatemachine/event/Event {
@@ -39,6 +71,7 @@ public final class ru/nsk/kstatemachine/event/EventMatcher$Companion {
 }
 
 public final class ru/nsk/kstatemachine/event/EventMatcherKt {
+	public static final fun delayedEventMatcher (Ljava/lang/Object;)Lru/nsk/kstatemachine/event/EventMatcher;
 	public static final fun finishedEventMatcher (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/event/EventMatcher;
 }
 
@@ -102,6 +135,17 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfo 
 public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/CompositeMetaInfo {
 	public abstract fun getMetaInfoSet ()Ljava/util/Set;
 	public abstract fun setMetaInfoSet (Ljava/util/Set;)V
+}
+
+public final class ru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-UwyO8pc ()J
+	public final fun copy-LRDsOJo (J)Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;
+	public static synthetic fun copy-LRDsOJo$default (Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;JILjava/lang/Object;)Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDelay-UwyO8pc ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
@@ -241,6 +285,17 @@ public final class ru/nsk/kstatemachine/persistence/WarningType : java/lang/Enum
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lru/nsk/kstatemachine/persistence/WarningType;
 	public static fun values ()[Lru/nsk/kstatemachine/persistence/WarningType;
+}
+
+public final class ru/nsk/kstatemachine/state/AutomaticTransitionKt {
+	public static final fun automaticDataTransition (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun automaticDataTransition$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun automaticTransition (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun automaticTransition$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun automaticTransitionConditionally (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun automaticTransitionConditionally$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun automaticTransitionOn (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun automaticTransitionOn$default (Lru/nsk/kstatemachine/state/IState;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 }
 
 public class ru/nsk/kstatemachine/state/BaseStateImpl : ru/nsk/kstatemachine/state/InternalState {
@@ -987,6 +1042,7 @@ public final class ru/nsk/kstatemachine/transition/TransitionDirection$DefaultIm
 }
 
 public final class ru/nsk/kstatemachine/transition/TransitionDirectionKt {
+	public static final fun guardedTarget (Lru/nsk/kstatemachine/transition/TransitionDirectionProducerPolicy;Lru/nsk/kstatemachine/state/IState;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun noTransition ()Lru/nsk/kstatemachine/transition/TransitionDirection;
 	public static final fun stay ()Lru/nsk/kstatemachine/transition/TransitionDirection;
 	public static final fun targetParallelStates (Lru/nsk/kstatemachine/transition/EventAndArgument;Ljava/util/Set;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
