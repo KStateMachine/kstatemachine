@@ -9,8 +9,8 @@ package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.state.State
-import ru.nsk.kstatemachine.state.automaticTransition
-import ru.nsk.kstatemachine.state.automaticTransitionOn
+import ru.nsk.kstatemachine.state.autoTransition
+import ru.nsk.kstatemachine.state.autoTransitionOn
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -18,7 +18,7 @@ import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.statemachine.restart
 
 /**
- * Demonstrates UML eventless ("always") transitions using [automaticTransition].
+ * Demonstrates UML eventless ("always") transitions using [autoTransition].
  *
  * The machine walks A → B → C purely from entry hooks — no external events. The last sample also
  * shows a guarded eventless transition that holds in place until the guard returns true on the
@@ -30,23 +30,23 @@ fun main() = runBlocking {
     lateinit var guarded: State
     var ready = false
 
-    val machine = createStateMachine(this, name = "AutomaticSample") {
+    val machine = createStateMachine(this, name = "AutoTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         guarded = state("guarded")
         c = state("c") {
             // Guarded eventless transition — stays put on first entry (ready=false).
             // On restart with ready=true the transition fires.
-            automaticTransitionOn(name = "c->guarded") {
+            autoTransitionOn(name = "c->guarded") {
                 guard = { ready }
                 targetState = { guarded }
             }
         }
         b = state("b") {
-            automaticTransition("b->c", targetState = c)
+            autoTransition("b->c", targetState = c)
         }
         initialState("a") {
-            automaticTransition("a->b", targetState = b)
+            autoTransition("a->b", targetState = b)
         }
     }
 

@@ -15,6 +15,7 @@ import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.statemachine.processEventByAsync
 import ru.nsk.kstatemachine.statemachine.processEventByLaunch
+import ru.nsk.samples.AsyncEventProcessingSample.SwitchEvent
 
 private object AsyncEventProcessingSample {
     object SwitchEvent : Event
@@ -34,11 +35,11 @@ fun main() = runBlocking {
         logger = StateMachine.Logger { println(it()) }
         val state2 = finalState("state2")
         initialState("state1") {
-            transition<AsyncEventProcessingSample.SwitchEvent> { targetState = state2 }
+            transition<SwitchEvent> { targetState = state2 }
         }
     }
 
-    val deferred = asyncMachine.processEventByAsync(AsyncEventProcessingSample.SwitchEvent)
+    val deferred = asyncMachine.processEventByAsync(SwitchEvent)
     println("Event dispatched via processEventByAsync — result not yet available")
     val result = deferred.await()
     check(result == ProcessingResult.PROCESSED)
@@ -51,11 +52,11 @@ fun main() = runBlocking {
             onEntry { println("state2 entered — event was processed") }
         }
         initialState("state1") {
-            transition<AsyncEventProcessingSample.SwitchEvent> { targetState = state2 }
+            transition<SwitchEvent> { targetState = state2 }
         }
     }
 
-    launchMachine.processEventByLaunch(AsyncEventProcessingSample.SwitchEvent)
+    launchMachine.processEventByLaunch(SwitchEvent)
     println("Event dispatched via processEventByLaunch — continuing without waiting")
     // runBlocking will wait for the launched coroutine to complete before returning
 }

@@ -12,6 +12,8 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.samples.ParallelRegionListenersSample.FinishRegion1Event
+import ru.nsk.samples.ParallelRegionListenersSample.FinishRegion2Event
 
 private object ParallelRegionListenersSample {
     object FinishRegion1Event : Event
@@ -37,7 +39,7 @@ fun main() = runBlocking {
             val done = finalState("region1Done")
             region1Done = done
             initialState("region1Active") {
-                transition<ParallelRegionListenersSample.FinishRegion1Event> { targetState = done }
+                transition<FinishRegion1Event> { targetState = done }
             }
         }
 
@@ -45,7 +47,7 @@ fun main() = runBlocking {
             val done = finalState("region2Done")
             region2Done = done
             initialState("region2Active") {
-                transition<ParallelRegionListenersSample.FinishRegion2Event> { targetState = done }
+                transition<FinishRegion2Event> { targetState = done }
             }
         }
 
@@ -67,11 +69,11 @@ fun main() = runBlocking {
     check(!anyOfActive)
     check(!allOfActive)
 
-    machine.processEvent(ParallelRegionListenersSample.FinishRegion1Event)
+    machine.processEvent(FinishRegion1Event)
     check(anyOfActive)
     check(!allOfActive)
 
-    machine.processEvent(ParallelRegionListenersSample.FinishRegion2Event)
+    machine.processEvent(FinishRegion2Event)
     check(anyOfActive)
     check(allOfActive)
     check(machine.isFinished)

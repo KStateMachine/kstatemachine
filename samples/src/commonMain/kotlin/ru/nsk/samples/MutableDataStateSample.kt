@@ -13,6 +13,9 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.*
+import ru.nsk.samples.MutableDataStateSample.IncrementEvent
+import ru.nsk.samples.MutableDataStateSample.ResetEvent
+import ru.nsk.samples.MutableDataStateSample.SwitchEvent
 
 private object MutableDataStateSample {
     object IncrementEvent : Event
@@ -37,29 +40,29 @@ fun main() = runBlocking {
             onEntry { println("Counter entered with value: $data") }
 
             // target-less: updates data in place without a state change
-            transition<MutableDataStateSample.IncrementEvent> {
+            transition<IncrementEvent> {
                 onTriggered { counterState.setData(counterState.data + 1) }
             }
-            transition<MutableDataStateSample.ResetEvent> {
+            transition<ResetEvent> {
                 onTriggered { counterState.setData(0) }
             }
-            transition<MutableDataStateSample.SwitchEvent> { targetState = done }
+            transition<SwitchEvent> { targetState = done }
         }
     }
 
     check(counterState.data == 0)
 
-    machine.processEvent(MutableDataStateSample.IncrementEvent)
-    machine.processEvent(MutableDataStateSample.IncrementEvent)
-    machine.processEvent(MutableDataStateSample.IncrementEvent)
+    machine.processEvent(IncrementEvent)
+    machine.processEvent(IncrementEvent)
+    machine.processEvent(IncrementEvent)
     check(counterState.data == 3)
     println("After 3 increments: ${counterState.data}")
 
-    machine.processEvent(MutableDataStateSample.ResetEvent)
+    machine.processEvent(ResetEvent)
     check(counterState.data == 0)
     println("After reset: ${counterState.data}")
 
-    machine.processEvent(MutableDataStateSample.SwitchEvent)
+    machine.processEvent(SwitchEvent)
     // lastData retains the value after the state becomes inactive
     check(counterState.lastData == 0)
 }

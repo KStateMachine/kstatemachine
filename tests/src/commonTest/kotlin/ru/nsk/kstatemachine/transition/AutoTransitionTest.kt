@@ -7,21 +7,24 @@ import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
+import ru.nsk.kstatemachine.event.Event
+import ru.nsk.kstatemachine.metainfo.buildExportMetaInfo
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.State
-import ru.nsk.kstatemachine.state.automaticDataTransition
-import ru.nsk.kstatemachine.state.automaticTransition
-import ru.nsk.kstatemachine.state.automaticTransitionConditionally
-import ru.nsk.kstatemachine.state.automaticTransitionOn
+import ru.nsk.kstatemachine.state.autoDataTransition
+import ru.nsk.kstatemachine.state.autoDataTransitionOn
+import ru.nsk.kstatemachine.state.autoTransition
+import ru.nsk.kstatemachine.state.autoTransitionConditionally
+import ru.nsk.kstatemachine.state.autoTransitionOn
 import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transition
+import ru.nsk.kstatemachine.state.transitionOn
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.statemachine.restart
-import ru.nsk.kstatemachine.transition.targetState
 
-class AutomaticTransitionTest : FreeSpec({
+class AutoTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
 
@@ -30,7 +33,7 @@ class AutomaticTransitionTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     target = state("target")
                     initialState("source") {
-                        automaticTransition(targetState = target)
+                        autoTransition(targetState = target)
                     }
                 }
                 target.isActive.shouldBeTrue()
@@ -42,10 +45,10 @@ class AutomaticTransitionTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     c = state("c")
                     b = state("b") {
-                        automaticTransition("b->c", targetState = c)
+                        autoTransition("b->c", targetState = c)
                     }
                     initialState("a") {
-                        automaticTransition("a->b", targetState = b)
+                        autoTransition("a->b", targetState = b)
                     }
                 }
                 c.isActive.shouldBeTrue()
@@ -59,7 +62,7 @@ class AutomaticTransitionTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     target = state("target")
                     source = initialState("source") {
-                        automaticTransitionOn {
+                        autoTransitionOn {
                             guard = { allowed }
                             targetState = { target }
                         }
@@ -81,7 +84,7 @@ class AutomaticTransitionTest : FreeSpec({
                     even = state("even")
                     odd = state("odd")
                     initialState("source") {
-                        automaticTransitionConditionally {
+                        autoTransitionConditionally {
                             direction = {
                                 if (counter % 2 == 0) targetState(even) else targetState(odd)
                             }
@@ -92,12 +95,42 @@ class AutomaticTransitionTest : FreeSpec({
                 odd.isActive.shouldBeFalse()
             }
 
-            "eventless data transition carries producer value into DataState" {
+            "eventless autoDataTransition carries producer value into DataState" {
                 lateinit var produced: DataState<Int>
                 val machine = createTestStateMachine(coroutineStarterType) {
                     produced = dataState<Int>("produced")
                     initialState("source") {
-                        automaticDataTransition(targetState = produced) { 42 }
+                        autoDataTransition(targetState = produced) { 42 }
+                    }
+                }
+                produced.isActive.shouldBeTrue()
+                produced.data shouldBe 42
+            }
+
+            "eventless scoped autoDataTransition carries producer value into DataState" {
+                lateinit var produced: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    produced = dataState<Int>("produced")
+                    initialState("source") {
+                        autoDataTransition {
+                            targetState = produced
+                            dataProducer = { 42 }
+                        }
+                    }
+                }
+                produced.isActive.shouldBeTrue()
+                produced.data shouldBe 42
+            }
+
+            "eventless autoDataTransitionOn carries producer value into DataState" {
+                lateinit var produced: DataState<Int>
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    produced = dataState<Int>("produced")
+                    initialState("source") {
+                        autoDataTransitionOn {
+                            targetState = { produced }
+                            dataProducer = { 42 }
+                        }
                     }
                 }
                 produced.isActive.shouldBeTrue()
@@ -112,7 +145,7 @@ class AutomaticTransitionTest : FreeSpec({
                     auto = state("auto")
                     manual = state("manual")
                     source = initialState("source") {
-                        automaticTransitionOn {
+                        autoTransitionOn {
                             guard = { false }
                             targetState = { auto }
                         }

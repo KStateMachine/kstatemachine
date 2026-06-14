@@ -69,6 +69,14 @@ If you need to attach more than one `MetaInfo` to a state or transition you have
     * `CompositeMetaInfo` cannot be nested. Only one layer is supported.
     * Each `MetaInfo` subtype may appear at most once — an exception is thrown otherwise.
 
+   For ad-hoc combinations, the `+` operator is a shorthand that returns a flat `CompositeMetaInfo`.
+   Either or both operands may be `null` or already-composite; nested composites are unwrapped
+   so the result stays one layer deep. The result is `null` only when both operands are `null`.
+
+   ```kotlin
+   metaInfo = analyticsTag("screen_checkout") + buildUmlMetaInfo { umlLabel = "Checkout flow" }
+   ```
+
 2. Manually implement all required `MetaInfo` interfaces in a single object. Useful when you control all
    the interfaces involved and want to avoid the composite wrapper.
 

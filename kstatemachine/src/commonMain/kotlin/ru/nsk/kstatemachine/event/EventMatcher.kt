@@ -43,11 +43,19 @@ fun finishedEventMatcher(state: IState) = object : EventMatcher<FinishedEvent> {
     override suspend fun match(value: Event) = value is FinishedEvent && value.state === state
 }
 
-internal fun joinEventMatcher(joinId: Any): EventMatcher<JoinCompleteEvent> =
+internal fun joinEventMatcher(transitionId: Any): EventMatcher<JoinCompleteEvent> =
     object : EventMatcher<JoinCompleteEvent> {
         override val eventClass = JoinCompleteEvent::class
         override suspend fun match(value: Event) =
-            value is JoinCompleteEvent && value.joinId === joinId
+            value is JoinCompleteEvent && value.transitionId === transitionId
+    }
+
+internal fun <D: Any> joinDataEventMatcher(transitionId: Any): EventMatcher<JoinCompleteDataEvent<D>> =
+    object : EventMatcher<JoinCompleteDataEvent<D>> {
+        @Suppress("UNCHECKED_CAST")
+        override val eventClass = JoinCompleteEvent::class as KClass<JoinCompleteDataEvent<D>>
+        override suspend fun match(value: Event) =
+            value is JoinCompleteDataEvent<*> && value.transitionId === transitionId
     }
 
 internal fun autoEventMatcher(transitionId: Any): EventMatcher<AutoEvent> =
@@ -55,6 +63,14 @@ internal fun autoEventMatcher(transitionId: Any): EventMatcher<AutoEvent> =
         override val eventClass = AutoEvent::class
         override suspend fun match(value: Event) =
             value is AutoEvent && value.transitionId === transitionId
+    }
+
+internal fun <D: Any> autoDataEventMatcher(transitionId: Any): EventMatcher<AutoDataEvent<D>> =
+    object : EventMatcher<AutoDataEvent<D>> {
+        @Suppress("UNCHECKED_CAST")
+        override val eventClass = AutoDataEvent::class as KClass<AutoDataEvent<D>>
+        override suspend fun match(value: Event) =
+            value is AutoDataEvent<*> && value.transitionId === transitionId
     }
 
 /**

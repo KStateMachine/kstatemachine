@@ -81,7 +81,7 @@ abstract class GuardedTransitionOnBuilder<E : Event, S : IState>(name: String?, 
     }
 }
 
-class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
+open class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     TransitionBuilder<E>(name, sourceState) {
     lateinit var direction: suspend EventAndArgument<E>.() -> TransitionDirection
 
@@ -104,23 +104,23 @@ class ConditionalTransitionBuilder<E : Event>(name: String?, sourceState: IState
 /**
  * Any [Event] (with any data) can lead to [State]
  */
-class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
+open class UnitGuardedTransitionBuilder<E : Event>(name: String?, sourceState: IState) :
     GuardedTransitionBuilder<E, State>(name, sourceState)
 
-class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: IState) :
+open class UnitGuardedTransitionOnBuilder<E : Event>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, State>(name, sourceState)
 
 /**
  * Type safe argument transition builder
  */
-class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
+open class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
     BaseGuardedTransitionBuilder<E>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var targetState: DataState<D>
 
     @PublishedApi
     override fun build(): Transition<E> {
-        require(this::targetState.isInitialized) { "targetState should be set in this transition builder" }
+        require(this::targetState.isInitialized) { "targetState should be initialized in this transition builder" }
         val direction: TransitionDirectionProducer<E> = { policy ->
             when (policy) {
                 is DefaultPolicy ->
@@ -142,7 +142,7 @@ class DataGuardedTransitionBuilder<E : DataEvent<D>, D : Any>(name: String?, sou
 /**
  * Type safe argument transitionOn builder
  */
-class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
+open class DataGuardedTransitionOnBuilder<E : DataEvent<D>, D : Any>(name: String?, sourceState: IState) :
     GuardedTransitionOnBuilder<E, DataState<D>>(name, sourceState)
 
 inline fun <reified E : Event> TransitionBuilder<E>.onTriggered(

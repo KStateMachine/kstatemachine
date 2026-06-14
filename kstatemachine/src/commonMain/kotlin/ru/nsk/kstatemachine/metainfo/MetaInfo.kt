@@ -13,6 +13,7 @@ import kotlin.collections.single
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.time.Duration
 
 /**
  * Additional static (designed to be immutable) info for library primitives like [IState] [Transition] etc.
@@ -32,6 +33,28 @@ interface CompositeMetaInfo : MetaInfo {
      * Default: emptySet()
      */
     val metaInfoSet: Set<MetaInfo>
+}
+
+/**
+ * Combine two [MetaInfo] instances into a single flat [CompositeMetaInfo].
+ *
+ * [CompositeMetaInfo] is not allowed to nest inside another [CompositeMetaInfo], so if either
+ * operand is itself composite, its contents are unwrapped into the resulting set, keeping the
+ * structure flat. Duplicates (by `equals`) are deduplicated by the underlying `Set`.
+ */
+operator fun MetaInfo?.plus(other: MetaInfo?): CompositeMetaInfo? {
+    if (this == null && other == null) return null
+    val leftSet = when {
+        this == null -> emptySet()
+        this is CompositeMetaInfo -> metaInfoSet
+        else -> setOf(this)
+    }
+    val rightSet = when (other) {
+        null -> emptySet()
+        is CompositeMetaInfo -> other.metaInfoSet
+        else -> setOf(other)
+    }
+    return CompositeMetaInfoBuilderImpl(leftSet + rightSet)
 }
 
 /**
@@ -75,16 +98,11 @@ fun buildCompositeMetaInfo(metaInfo1: MetaInfo, metaInfo2: MetaInfo, vararg info
     })
 
 /** Attached to the join transition so the exporter can render `<<join>>` notation. */
-internal data class JoinTransitionMetaInfo(
-    val joinPoints: Set<IState>,
-    val joinName: String,
-) : MetaInfo
+internal data class JoinTransitionMetaInfo(val joinStates: Set<IState>) : MetaInfo
 
 /**
  * Attached to a delayed transition so the exporter can render the `after Xms` label.
  * Public only because `kstatemachine-coroutines` constructs the delayed-transition DSL
  * (Kotlin `internal` is per-module). Do not construct from user code.
  */
-data class DelayedTransitionMetaInfo(
-    val delay: kotlin.time.Duration,
-) : MetaInfo
+data class DelayedTransitionMetaInfo(val delay: Duration) : MetaInfo

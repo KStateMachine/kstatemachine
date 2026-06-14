@@ -12,6 +12,9 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.samples.HistoryStateSample.PauseEvent
+import ru.nsk.samples.HistoryStateSample.ResumeEvent
+import ru.nsk.samples.HistoryStateSample.SwitchEvent
 
 private object HistoryStateSample {
     object SwitchEvent : Event
@@ -35,15 +38,15 @@ fun main() = runBlocking {
         logger = StateMachine.Logger { println(it()) }
 
         state2 = state("state2") {
-            transitionOn<HistoryStateSample.ResumeEvent> { targetState = { history } }
+            transitionOn<ResumeEvent> { targetState = { history } }
         }
 
         initialState("state1") {
             state11 = initialState("state11") {
-                transitionOn<HistoryStateSample.SwitchEvent> { targetState = { state12 } }
+                transitionOn<SwitchEvent> { targetState = { state12 } }
             }
             state12 = state("state12") {
-                transitionOn<HistoryStateSample.PauseEvent> { targetState = { state2 } }
+                transitionOn<PauseEvent> { targetState = { state2 } }
             }
             history = historyState("history", defaultState = state11)
         }
@@ -53,15 +56,15 @@ fun main() = runBlocking {
     check(state11 in machine.activeStates())
 
     // navigate to state12 within state1
-    machine.processEvent(HistoryStateSample.SwitchEvent)
+    machine.processEvent(SwitchEvent)
     check(state12 in machine.activeStates())
 
     // pause: leave state1 entirely
-    machine.processEvent(HistoryStateSample.PauseEvent)
+    machine.processEvent(PauseEvent)
     check(state12 !in machine.activeStates())
 
     // resume via history: restores state12 (not state11)
-    machine.processEvent(HistoryStateSample.ResumeEvent)
+    machine.processEvent(ResumeEvent)
     check(state12 in machine.activeStates())
     println("History restored: ${machine.activeStates().map { it.name }}")
 }

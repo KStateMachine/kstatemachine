@@ -18,17 +18,19 @@ import ru.nsk.kstatemachine.state.activeStates
 import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.joinDataTransition
+import ru.nsk.kstatemachine.state.joinDataTransitionOn
 import ru.nsk.kstatemachine.state.joinTransition
+import ru.nsk.kstatemachine.state.joinTransitionConditionally
+import ru.nsk.kstatemachine.state.joinTransitionOn
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transition
-import ru.nsk.kstatemachine.statemachine.processEventBlocking
-import ru.nsk.kstatemachine.statemachine.restartBlocking
+import ru.nsk.kstatemachine.statemachine.restart
 
 class JoinTransitionTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
 
-            "basic join fires when both regions reach join points" {
+            "basic joinTransition fires when both regions reach join points" {
                 lateinit var afterJoin: State
                 lateinit var parallelState: State
                 lateinit var jp1: IState
@@ -53,11 +55,122 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 parallelState.isActive.shouldBeTrue()
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                parallelState.isActive.shouldBeFalse()
+            }
+
+            "basic scoped joinTransition fires when both regions reach join points" {
+                lateinit var afterJoin: State
+                lateinit var parallelState: State
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = state("afterJoin")
+                    parallelState = initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinTransition {
+                            joinStates = setOf(jp1, jp2)
+                            targetState = afterJoin
+                        }
+                    }
+                }
+
+                machine.processEvent(SwitchEvent)
+                parallelState.isActive.shouldBeTrue()
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEvent(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                parallelState.isActive.shouldBeFalse()
+            }
+
+            "basic joinTransitionOn fires when both regions reach join points" {
+                lateinit var afterJoin: State
+                lateinit var parallelState: State
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = state("afterJoin")
+                    parallelState = initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinTransitionOn {
+                            joinStates = setOf(jp1, jp2)
+                            targetState = { afterJoin }
+                        }
+                    }
+                }
+
+                machine.processEvent(SwitchEvent)
+                parallelState.isActive.shouldBeTrue()
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEvent(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                parallelState.isActive.shouldBeFalse()
+            }
+
+            "basic joinTransitionConditionally fires when both regions reach join points" {
+                lateinit var afterJoin: State
+                lateinit var parallelState: State
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = state("afterJoin")
+                    parallelState = initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinTransitionConditionally {
+                            joinStates = setOf(jp1, jp2)
+                            direction = { targetState(afterJoin) }
+                        }
+                    }
+                }
+
+                machine.processEvent(SwitchEvent)
+                parallelState.isActive.shouldBeTrue()
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeTrue()
                 parallelState.isActive.shouldBeFalse()
             }
@@ -87,10 +200,10 @@ class JoinTransitionTest : FreeSpec({
                 }
 
                 // Region2 joins first this time
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 afterJoin.isActive.shouldBeTrue()
             }
 
@@ -119,7 +232,7 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 jp1.isActive.shouldBeTrue()
                 parallelState.isActive.shouldBeTrue()
                 afterJoin.isActive.shouldBeFalse()
@@ -149,11 +262,11 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 jp1.isActive.shouldBeTrue()
 
                 // A second SwitchEvent arrives; jp1 has no transitions so region1 is blocked
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 jp1.isActive.shouldBeTrue()  // unchanged
                 afterJoin.isActive.shouldBeFalse()
             }
@@ -182,8 +295,8 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEvent)
+                machine.processEvent(SwitchEventL1)
 
                 afterJoin.isActive.shouldBeTrue()
                 machine.activeStates().containsAll(setOf(afterJoin)).shouldBeTrue()
@@ -213,16 +326,16 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEvent)
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeTrue()
 
-                machine.restartBlocking()
+                machine.restart()
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeTrue()
             }
 
@@ -275,23 +388,23 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
-                machine2.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
+                machine2.processEvent(SwitchEvent)
 
                 // Neither join fired yet
                 afterJoinA.isActive.shouldBeFalse()
                 afterJoinB.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
                 afterJoinA.isActive.shouldBeTrue()   // machine A joined
                 afterJoinB.isActive.shouldBeFalse()  // machine B not yet
 
-                machine2.processEventBlocking(SwitchEventL1)
+                machine2.processEvent(SwitchEventL1)
                 afterJoinB.isActive.shouldBeTrue()   // machine B joined
             }
 
             "joinTransition requires ChildMode.PARALLEL" {
-                shouldThrow<IllegalStateException> {
+                shouldThrow<IllegalArgumentException> {
                     createTestStateMachine(coroutineStarterType) {
                         val jp1 = state("jp1")
                         val jp2 = state("jp2")
@@ -308,7 +421,7 @@ class JoinTransitionTest : FreeSpec({
                         val jp1 = state("jp1")
                         initialState("parallel", childMode = ChildMode.PARALLEL) {
                             state("r1") { initialState("s1") }
-                            joinTransition(jp1, targetState = state("target"))
+                            joinTransition(jp1, jp1, targetState = state("target"))
                         }
                     }
                 }
@@ -338,10 +451,82 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                afterJoin.data shouldBe "joined"
+            }
+
+            "scoped joinDataTransition feeds computed data to DataState target" {
+                lateinit var afterJoin: DataState<String>
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = dataState("afterJoin")
+                    initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinDataTransition {
+                            joinStates = setOf(jp1, jp2)
+                            targetState = afterJoin
+                            dataProducer = { "joined" }
+                        }
+                    }
+                }
+
+                machine.processEvent(SwitchEvent)
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEvent(SwitchEventL1)
+                afterJoin.isActive.shouldBeTrue()
+                afterJoin.data shouldBe "joined"
+            }
+
+            "joinDataTransitionOn feeds computed data to DataState target" {
+                lateinit var afterJoin: DataState<String>
+                lateinit var jp1: IState
+                lateinit var jp2: IState
+
+                val machine = createTestStateMachine(coroutineStarterType) {
+                    afterJoin = dataState("afterJoin")
+                    initialState("parallel", childMode = ChildMode.PARALLEL) {
+                        state("region1") {
+                            jp1 = state("jp1")
+                            initialState("s1") {
+                                transition<SwitchEvent> { targetState = jp1 }
+                            }
+                        }
+                        state("region2") {
+                            jp2 = state("jp2")
+                            initialState("s2") {
+                                transition<SwitchEventL1> { targetState = jp2 }
+                            }
+                        }
+                        joinDataTransitionOn {
+                            joinStates = setOf(jp1, jp2)
+                            targetState = { afterJoin }
+                            dataProducer = { "joined" }
+                        }
+                    }
+                }
+
+                machine.processEvent(SwitchEvent)
+                afterJoin.isActive.shouldBeFalse()
+
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeTrue()
                 afterJoin.data shouldBe "joined"
             }
@@ -377,13 +562,13 @@ class JoinTransitionTest : FreeSpec({
                     }
                 }
 
-                machine.processEventBlocking(SwitchEvent)
+                machine.processEvent(SwitchEvent)
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL1)
+                machine.processEvent(SwitchEventL1)
                 afterJoin.isActive.shouldBeFalse()
 
-                machine.processEventBlocking(SwitchEventL2)
+                machine.processEvent(SwitchEventL2)
                 afterJoin.isActive.shouldBeTrue()
             }
         }

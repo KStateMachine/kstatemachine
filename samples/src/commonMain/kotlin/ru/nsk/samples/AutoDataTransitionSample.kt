@@ -9,23 +9,26 @@ package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.state.DataState
-import ru.nsk.kstatemachine.state.automaticDataTransition
+import ru.nsk.kstatemachine.state.autoDataTransition
 import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.onEntry
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.samples.AutoDataTransitionSample.LoginResult
 
-private data class LoginResult(val userId: String, val sessionToken: String)
+private object AutoDataTransitionSample {
+    data class LoginResult(val userId: String, val sessionToken: String)
+}
 
 /**
- * Type-safe variant of [automaticTransition] — the carried payload lands directly in the target
+ * Type-safe auto transition variant [autoDataTransition] — the carried payload lands directly in the target
  * [DataState], with no [DataEvent] subclass to declare.
  */
 fun main() = runBlocking {
     lateinit var session: DataState<LoginResult>
 
-    val machine = createStateMachine(this, name = "AutomaticDataSample") {
+    val machine = createStateMachine(this, name = "AutoDataTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         session = dataState<LoginResult>("session") {
@@ -33,7 +36,7 @@ fun main() = runBlocking {
         }
         initialState("authenticating") {
             // Producer runs once at entry, exactly when the eventless transition fires.
-            automaticDataTransition(targetState = session) {
+            autoDataTransition(targetState = session) {
                 LoginResult(userId = "u-42", sessionToken = "abc123")
             }
         }

@@ -163,9 +163,11 @@ internal class ExportPlantUmlVisitor(
 
         val joinMeta = transition.metaInfo.findMetaInfo<JoinTransitionMetaInfo>()
         if (joinMeta != null) {
-            crossLevelTransitions += "state ${joinMeta.joinName} $JOIN"
-            for (jp in joinMeta.joinPoints) {
-                crossLevelTransitions += "${(jp as InternalState).graphName()} --> ${joinMeta.joinName}"
+            val joinStateName = (transition.name ?: "join_${joinMeta.hashCode().toString(16)}").replace(Regex("[ -]"), "_")
+
+            crossLevelTransitions += "state $joinStateName $JOIN"
+            for (jp in joinMeta.joinStates) {
+                crossLevelTransitions += "${(jp as InternalState).graphName()} --> $joinStateName"
             }
             val targetStateInfoList = executeDirectionProducerPolicy(transition.metaInfo) { policy ->
                 transition.produceTargetStateDirection(policy)
@@ -174,7 +176,7 @@ internal class ExportPlantUmlVisitor(
                 if (info.transitionDirection is TargetState) {
                     @Suppress("UNCHECKED_CAST")
                     for (target in info.transitionDirection.targetStates as Set<InternalState>) {
-                        crossLevelTransitions += "${joinMeta.joinName} --> ${target.graphName()}"
+                        crossLevelTransitions += "$joinStateName --> ${target.graphName()}"
                     }
                 }
             }

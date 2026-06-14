@@ -13,6 +13,7 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.TransitionType
+import ru.nsk.samples.LocalVsExternalTransitionSample.SwitchEvent
 
 private object LocalVsExternalTransitionSample {
     object SwitchEvent : Event
@@ -37,7 +38,7 @@ fun main() = runBlocking {
             onEntry { localParentEntries++ }
             val child2 = state("child2")
             initialState("child1") {
-                transition<LocalVsExternalTransitionSample.SwitchEvent> {
+                transition<SwitchEvent> {
                     targetState = child2
                     type = TransitionType.LOCAL
                 }
@@ -51,7 +52,7 @@ fun main() = runBlocking {
             onEntry { externalParentEntries++ }
             val child2 = state("child2")
             initialState("child1") {
-                transition<LocalVsExternalTransitionSample.SwitchEvent> {
+                transition<SwitchEvent> {
                     targetState = child2
                     type = TransitionType.EXTERNAL
                 }
@@ -62,8 +63,8 @@ fun main() = runBlocking {
     check(localParentEntries == 1)
     check(externalParentEntries == 1)
 
-    localMachine.processEvent(LocalVsExternalTransitionSample.SwitchEvent)
-    externalMachine.processEvent(LocalVsExternalTransitionSample.SwitchEvent)
+    localMachine.processEvent(SwitchEvent)
+    externalMachine.processEvent(SwitchEvent)
 
     // LOCAL: parent was not re-entered
     check(localParentEntries == 1)

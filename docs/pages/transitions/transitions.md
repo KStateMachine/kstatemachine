@@ -6,13 +6,15 @@ has_children: true
 ---
 
 # Transitions
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 In a state setup block we define which events will trigger transitions to another states. The simplest transition is
 created with `transition()` function:
@@ -175,11 +177,11 @@ functions to create guarded transition:
 
 ```kotlin
 state1 {
-  transition<SwitchEvent> {
-    guard = { value > 10 }
-    targetState = state2
-    // ...
-  }
+    transition<SwitchEvent> {
+        guard = { value > 10 }
+        targetState = state2
+        // ...
+    }
 }
 ```
 
@@ -187,11 +189,11 @@ See [guarded transition sample](https://github.com/KStateMachine/kstatemachine/t
 
 ### Guarded vs conditional transitions
 
-|                         | `guard` on `transition()` / `transitionOn()` | `transitionConditionally()`              |
-|-------------------------|----------------------------------------------|------------------------------------------|
-| Target state            | Fixed at definition time                     | Chosen dynamically in `direction` lambda |
-| Blocking the transition | Return `false` from `guard`                  | Return `noTransition()` from `direction` |
-| Syntax                  | Shorter                                      | More flexible                            |
+|                         | `guard` on `transition()` / `transitionOn()`  | `transitionConditionally()`              |
+|-------------------------|-----------------------------------------------|------------------------------------------|
+| Target state            | Fixed at definition time / chosen dynamically | Chosen dynamically in `direction` lambda |
+| Blocking the transition | Return `false` from `guard`                   | Return `noTransition()` from `direction` |
+| Syntax                  | Shorter                                       | More flexible                            |
 
 Use `guard` when the target state is known and you only need to decide whether to fire.
 Use `transitionConditionally` when the target state itself depends on runtime data
@@ -257,7 +259,8 @@ splits control into several concurrent orthogonal regions, activating one target
 
 Use it inside `transitionConditionally()` when you want to enter a parallel state and place each of its orthogonal
 regions into a specific sub-state rather than letting them start from their default initial states.
-Each specified target must be a descendant (not necessarily a direct child) of a [parallel state](../states/states.md#parallel-states).
+Each specified target must be a descendant (not necessarily a direct child) of
+a [parallel state](../states/states.md#parallel-states).
 
 ```kotlin
 initialState("state1") {
@@ -403,7 +406,7 @@ Once the lambda returns, the library fires an internal `DataJoinCompleteEvent` c
 
 ## Eventless (automatic) transitions
 
-`automaticTransition()` is a **UML eventless ("always") transition** — it fires on state entry, without any external
+`autoTransition()` is a **UML eventless ("always") transition** — it fires on state entry, without any external
 event. After it lands in its target state, that state's own eventless transitions (if any) are evaluated in turn,
 producing UML run-to-completion semantics. Guards are evaluated at fire time; if a guard rejects the state simply
 stays put and the transition is re-tried on the next entry.
@@ -411,7 +414,7 @@ stays put and the transition is re-tried on the next entry.
 ```kotlin
 val target = state("target")
 initialState("source") {
-    automaticTransition(targetState = target)            // fires on entry of "source"
+    autoTransition(targetState = target)            // fires on entry of "source"
 }
 ```
 
@@ -458,9 +461,11 @@ initialState("authenticating") {
 ```
 
 See full runnable examples in
-[`AutomaticTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)
+[
+`AutomaticTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)
 and
-[`AutomaticDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt).
+[
+`AutomaticDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt).
 
 ## Delayed transitions
 
@@ -502,9 +507,11 @@ initialState("waiting") {
 ```
 
 See full runnable examples in
-[`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
+[
+`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
 and
-[`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
+[
+`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
 
 ## Transition interruption
 
@@ -577,15 +584,16 @@ transition<SwitchEvent> {
 }
 ```
 
-| Matcher         | Matches                                  |
-|-----------------|------------------------------------------|
-| `isInstanceOf()` | The type and every subtype (default)    |
-| `isEqual()`      | Only the exact type, no subtypes        |
-| Custom           | Any logic you need                      |
+| Matcher          | Matches                              |
+|------------------|--------------------------------------|
+| `isInstanceOf()` | The type and every subtype (default) |
+| `isEqual()`      | Only the exact type, no subtypes     |
+| Custom           | Any logic you need                   |
 
 ## Finding transitions
 
-Use `findTransition()` / `requireTransition()` to look up a transition on any state after the machine is built, for example to attach a listener dynamically.
+Use `findTransition()` / `requireTransition()` to look up a transition on any state after the machine is built, for
+example to attach a listener dynamically.
 
 **By name:**
 
@@ -704,8 +712,8 @@ createStateMachine(scope) {
         transition<ExitEvent> { targetState = finalState }
 
         initialState("state1_1") { /* inherits ExitEvent transition */ }
-        state("state1_2")        { /* inherits ExitEvent transition */ }
-        state("state1_3")        { /* inherits ExitEvent transition */ }
+        state("state1_2") { /* inherits ExitEvent transition */ }
+        state("state1_3") { /* inherits ExitEvent transition */ }
     }
 }
 ```
@@ -793,7 +801,7 @@ val machine = createStateMachine(
 ) {
     state {
         transition<SpecificEvent> { targetState = state1 }   // wins for SpecificEvent
-        transition<Event>         { targetState = fallback }  // wins for everything else
+        transition<Event> { targetState = fallback }  // wins for everything else
     }
 }
 ```

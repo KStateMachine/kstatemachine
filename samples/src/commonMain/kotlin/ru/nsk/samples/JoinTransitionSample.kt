@@ -12,6 +12,8 @@ import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.samples.JoinTransitionSample.DownloadCompleteEvent
+import ru.nsk.samples.JoinTransitionSample.ValidationCompleteEvent
 
 private object JoinTransitionSample {
     object DownloadCompleteEvent : Event
@@ -34,7 +36,7 @@ fun main() = runBlocking {
     lateinit var downloadJoin: IState
     lateinit var validationJoin: IState
 
-    val machine = createStateMachine(this, name = "JoinSample") {
+    val machine = createStateMachine(this, name = "JoinTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         // processing is declared first so joinTransition below can reference it directly
@@ -48,13 +50,13 @@ fun main() = runBlocking {
             state("download") {
                 downloadJoin = state("downloadJoin")   // no outgoing transitions → soft blocking
                 initialState("downloading") {
-                    transition<JoinTransitionSample.DownloadCompleteEvent> { targetState = downloadJoin }
+                    transition<DownloadCompleteEvent> { targetState = downloadJoin }
                 }
             }
             state("validate") {
                 validationJoin = state("validationJoin")
                 initialState("validating") {
-                    transition<JoinTransitionSample.ValidationCompleteEvent> { targetState = validationJoin }
+                    transition<ValidationCompleteEvent> { targetState = validationJoin }
                 }
             }
             // Fires automatically once both join-point states are simultaneously active
@@ -62,11 +64,11 @@ fun main() = runBlocking {
         }
     }
 
-    machine.processEvent(JoinTransitionSample.DownloadCompleteEvent)
+    machine.processEvent(DownloadCompleteEvent)
     // Only download region done — still in parallelWork
     check(parallelWork in machine.activeStates())
 
-    machine.processEvent(JoinTransitionSample.ValidationCompleteEvent)
+    machine.processEvent(ValidationCompleteEvent)
     // Both regions joined — machine transitions to processing
     check(processing in machine.activeStates())
     println("Done")

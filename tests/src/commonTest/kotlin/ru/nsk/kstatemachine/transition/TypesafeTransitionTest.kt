@@ -264,7 +264,7 @@ class TypesafeTransitionTest : FreeSpec({
 
             "[negative] target-less data transition inside nonDataState" {
                 shouldThrowWithMessage<IllegalArgumentException>(
-                    "targetState should be set in this transition builder"
+                    "targetState should be initialized in this transition builder"
                 ) {
                     createTestStateMachine(coroutineStarterType) {
                         initialState("state1") {

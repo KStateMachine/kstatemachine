@@ -13,6 +13,8 @@ import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.kstatemachine.transition.*
+import ru.nsk.samples.TargetlessTransitionSample.IncrementEvent
+import ru.nsk.samples.TargetlessTransitionSample.SwitchEvent
 
 private object TargetlessTransitionSample {
     object IncrementEvent : Event
@@ -38,25 +40,25 @@ fun main() = runBlocking {
             onEntry { entryCount++ }
 
             // target-less: no state change, just executes the action
-            transition<TargetlessTransitionSample.IncrementEvent> {
+            transition<IncrementEvent> {
                 onTriggered { counter++ }
             }
 
-            transition<TargetlessTransitionSample.SwitchEvent> { targetState = finalState }
+            transition<SwitchEvent> { targetState = finalState }
         }
     }
 
     check(entryCount == 1)
 
-    machine.processEvent(TargetlessTransitionSample.IncrementEvent)
-    machine.processEvent(TargetlessTransitionSample.IncrementEvent)
-    machine.processEvent(TargetlessTransitionSample.IncrementEvent)
+    machine.processEvent(IncrementEvent)
+    machine.processEvent(IncrementEvent)
+    machine.processEvent(IncrementEvent)
 
     // state was NOT re-entered; only the action ran
     check(entryCount == 1)
     check(counter == 3)
     println("Counter: $counter, re-entries: ${entryCount - 1}")
 
-    machine.processEvent(TargetlessTransitionSample.SwitchEvent)
+    machine.processEvent(SwitchEvent)
     check(entryCount == 1) // still 1, the final state entry does not count for counterState
 }

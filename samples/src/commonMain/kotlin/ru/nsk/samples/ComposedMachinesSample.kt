@@ -13,6 +13,7 @@ import ru.nsk.kstatemachine.event.FinishedEvent
 import ru.nsk.kstatemachine.state.*
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
+import ru.nsk.samples.ComposedMachinesSample.SwitchEvent
 
 private object ComposedMachinesSample {
     object SwitchEvent : Event
@@ -29,7 +30,7 @@ fun main() = runBlocking {
 
         val innerFinal = finalState("innerFinal")
         initialState("innerState1") {
-            transition<ComposedMachinesSample.SwitchEvent> { targetState = innerFinal }
+            transition<SwitchEvent> { targetState = innerFinal }
         }
     }
 
@@ -49,7 +50,7 @@ fun main() = runBlocking {
     check(innerMachine.isRunning)
     check(!outerMachine.isFinished)
 
-    outerMachine.processEvent(ComposedMachinesSample.SwitchEvent)
+    outerMachine.processEvent(SwitchEvent)
 
     check(innerMachine.isFinished)
     check(outerMachine.isFinished)
