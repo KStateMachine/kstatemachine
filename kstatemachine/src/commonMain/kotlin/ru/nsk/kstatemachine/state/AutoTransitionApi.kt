@@ -92,7 +92,7 @@ fun TransitionStateApi.autoTransition(
  *
  * Example:
  * ```
- * automaticTransitionOn {
+ * autoTransitionOn {
  *     guard = { ready }
  *     targetState = { nextState }
  * }

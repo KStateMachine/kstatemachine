@@ -1,7 +1,7 @@
 /*
  * Author: Mikhail Fedotov
  * Github: https://github.com/KStateMachine
- * Copyright (c) 2026.
+ * Copyright (c) 2024.
  * All rights reserved.
  */
 
@@ -15,21 +15,17 @@ import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifySequence
 import ru.nsk.kstatemachine.*
-import ru.nsk.kstatemachine.state.StateGroupListenerTestData.State1
-import ru.nsk.kstatemachine.state.StateGroupListenerTestData.State2
-import ru.nsk.kstatemachine.state.StateGroupListenerTestData.State3
+import ru.nsk.kstatemachine.state.StateGroupListenerBlockingTestData.State1
+import ru.nsk.kstatemachine.state.StateGroupListenerBlockingTestData.State2
+import ru.nsk.kstatemachine.state.StateGroupListenerBlockingTestData.State3
 
-private object StateGroupListenerTestData {
+private object StateGroupListenerBlockingTestData {
     object State1 : DefaultState()
     object State2 : DefaultState()
     object State3 : DefaultState()
 }
 
-/**
- * Blocking and suspendable versions of [onActiveAllOf] & [onActiveAnyOf] have different implementations,
- * so the test is duplicated.
- */
-class StateGroupListenerTest : FreeSpec({
+class StateGroupListenerBlockingTest : FreeSpec({
     CoroutineStarterType.entries.forEach { coroutineStarterType ->
         "$coroutineStarterType" - {
             "onActiveAllOf()" - {
@@ -45,7 +41,7 @@ class StateGroupListenerTest : FreeSpec({
                         addState(State3)
                     }
 
-                    onActiveAllOf(State1, State2, State3, notifyOnSubscribe = notifyOnSubscribe) { callback(it) }
+                    onActiveAllOfBlocking(State1, State2, State3, notifyOnSubscribe = notifyOnSubscribe) { callback(it) }
 
                     verifySequence(inverse = !notifyOnSubscribe) { callback(false) }
                 }
@@ -59,7 +55,7 @@ class StateGroupListenerTest : FreeSpec({
                         addState(State3)
                     }
 
-                    onActiveAllOf(State1, State2, State3, notifyOnSubscribe = true) { callback(it) }
+                    onActiveAllOfBlocking(State1, State2, State3, notifyOnSubscribe = true) { callback(it) }
 
                     verifySequence { callback(true) }
                 }
@@ -76,7 +72,7 @@ class StateGroupListenerTest : FreeSpec({
                         }
                         addState(State3)
 
-                        onActiveAllOf(machine, State2, notifyOnSubscribe = true) { callback(it) }
+                        onActiveAllOfBlocking(machine, State2, notifyOnSubscribe = true) { callback(it) }
                     }
                     machine.processEvent(SwitchEvent)
                     machine.processEvent(SwitchEvent)
@@ -98,7 +94,7 @@ class StateGroupListenerTest : FreeSpec({
                         addInitialState(State2)
                     }
 
-                    onActiveAllOf(State1, State2, notifyOnSubscribe = true) { callback(it) }
+                    onActiveAllOfBlocking(State1, State2, notifyOnSubscribe = true) { callback(it) }
 
                     verifySequence { callback(true) }
                 }
@@ -113,7 +109,7 @@ class StateGroupListenerTest : FreeSpec({
                         addState(State2)
                     }
 
-                    val listener = onActiveAllOf(machine, State1) { callback(it) }
+                    val listener = onActiveAllOfBlocking(machine, State1) { callback(it) }
                     machine.start()
 
                     verifySequenceAndClear(callback) { callback(true) }
@@ -138,7 +134,7 @@ class StateGroupListenerTest : FreeSpec({
                         addState(State3)
                     }
 
-                    onActiveAnyOf(State1, State2, State3, notifyOnSubscribe = notifyOnSubscribe) { callback(it) }
+                    onActiveAnyOfBlocking(State1, State2, State3, notifyOnSubscribe = notifyOnSubscribe) { callback(it) }
 
                     verifySequence(inverse = !notifyOnSubscribe) { callback(true) }
                 }
@@ -155,7 +151,7 @@ class StateGroupListenerTest : FreeSpec({
                         }
                         addState(State3)
 
-                        onActiveAnyOf(State1, State3) { callback(it) }
+                        onActiveAnyOfBlocking(State1, State3) { callback(it) }
                     }
                     machine.processEvent(SwitchEvent)
                     machine.processEvent(SwitchEvent)
@@ -176,7 +172,7 @@ class StateGroupListenerTest : FreeSpec({
                         }
                         addState(State2)
 
-                        onActiveAnyOf(State1, State2) { callback(it) }
+                        onActiveAnyOfBlocking(State1, State2) { callback(it) }
                     }
                     machine.processEvent(SwitchEvent)
 
@@ -197,7 +193,7 @@ class StateGroupListenerTest : FreeSpec({
                         addInitialState(State2)
                     }
 
-                    onActiveAnyOf(State1, State2, notifyOnSubscribe = true) { callback(it) }
+                    onActiveAnyOfBlocking(State1, State2, notifyOnSubscribe = true) { callback(it) }
 
                     verifySequence { callback(true) }
                 }
@@ -213,7 +209,7 @@ class StateGroupListenerTest : FreeSpec({
                         addState(State3)
                     }
 
-                    val listener = onActiveAnyOf(State1, State3) { callback(it) }
+                    val listener = onActiveAnyOfBlocking(State1, State3) { callback(it) }
                     machine.start()
 
                     verifySequenceAndClear(callback) { callback(true) }
@@ -233,10 +229,10 @@ class StateGroupListenerTest : FreeSpec({
 
                 shouldThrowWithMessage<IllegalArgumentException>(
                     "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
-                ) { onActiveAllOf(State1, State1, State1) { /*nothing*/ } }
+                ) { onActiveAllOfBlocking(State1, State1, State1) { /*nothing*/ } }
                 shouldThrowWithMessage<IllegalArgumentException>(
                     "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
-                ) { onActiveAnyOf(State1, State1, State1) { /*nothing*/ } }
+                ) { onActiveAnyOfBlocking(State1, State1, State1) { /*nothing*/ } }
             }
         }
     }

@@ -9,7 +9,6 @@
 
 package ru.nsk.kstatemachine.state
 
-import ru.nsk.kstatemachine.event.AutoDataEvent
 import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.JoinCompleteDataEvent
 import ru.nsk.kstatemachine.event.JoinCompleteDataEventImpl
@@ -20,8 +19,6 @@ import ru.nsk.kstatemachine.event.joinEventMatcher
 import ru.nsk.kstatemachine.metainfo.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.metainfo.plus
-import ru.nsk.kstatemachine.transition.AutoDataGuardedTransitionBuilder
-import ru.nsk.kstatemachine.transition.AutoDataGuardedTransitionOnBuilder
 import ru.nsk.kstatemachine.transition.DefaultTransition
 import ru.nsk.kstatemachine.transition.JoinConditionalTransitionBuilder
 import ru.nsk.kstatemachine.transition.JoinDataGuardedTransitionBuilder
@@ -29,7 +26,6 @@ import ru.nsk.kstatemachine.transition.JoinDataGuardedTransitionOnBuilder
 import ru.nsk.kstatemachine.transition.JoinUnitGuardedTransitionBuilder
 import ru.nsk.kstatemachine.transition.JoinUnitGuardedTransitionOnBuilder
 import ru.nsk.kstatemachine.transition.Transition
-import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.TransitionType
 import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
 import kotlin.contracts.ExperimentalContracts
@@ -39,7 +35,7 @@ import kotlin.contracts.contract
 /**
  * vararg [joinTransition] overload, protects from compilation of less than two join points.
  */
-fun TransitionStateApi.joinTransition(
+suspend fun TransitionStateApi.joinTransition(
     joinState1: IState,
     joinState2: IState,
     vararg joinStates: IState,
@@ -68,7 +64,7 @@ fun TransitionStateApi.joinTransition(
  * @param targetState the non-data state to enter after all regions have joined.
  *   Use [joinDataTransition] to target a [DataState].
  */
-fun TransitionStateApi.joinTransition(
+suspend fun TransitionStateApi.joinTransition(
     joinStates: Set<IState>,
     name: String? = null,
     targetState: State,
@@ -90,7 +86,7 @@ fun TransitionStateApi.joinTransition(
     )
 }
 
-fun TransitionStateApi.joinTransition(
+suspend fun TransitionStateApi.joinTransition(
     name: String? = null,
     block: JoinUnitGuardedTransitionBuilder.() -> Unit
 ): Transition<JoinCompleteEvent> {
@@ -106,7 +102,7 @@ fun TransitionStateApi.joinTransition(
     return addTransition(builder.build())
 }
 
-fun TransitionStateApi.joinTransitionOn(
+suspend fun TransitionStateApi.joinTransitionOn(
     name: String? = null,
     block: JoinUnitGuardedTransitionOnBuilder.() -> Unit,
 ): Transition<JoinCompleteEvent> {
@@ -122,7 +118,7 @@ fun TransitionStateApi.joinTransitionOn(
     return addTransition(builder.build())
 }
 
-fun TransitionStateApi.joinTransitionConditionally(
+suspend fun TransitionStateApi.joinTransitionConditionally(
     name: String? = null,
     block: JoinConditionalTransitionBuilder.() -> Unit
 ): Transition<JoinCompleteEvent> {
@@ -140,7 +136,7 @@ fun TransitionStateApi.joinTransitionConditionally(
 /**
  * vararg [joinDataTransition] overload, protects from compilation of less than two join points.
  */
-fun <D : Any> TransitionStateApi.joinDataTransition(
+suspend fun <D : Any> TransitionStateApi.joinDataTransition(
     joinState1: IState,
     joinState2: IState,
     vararg joinStates: IState,
@@ -164,7 +160,7 @@ fun <D : Any> TransitionStateApi.joinDataTransition(
  * @param targetState the [DataState] to enter after all regions have joined.
  * @param dataProducer lambda invoked at join time to produce the data for [targetState].
  */
-fun <D : Any> TransitionStateApi.joinDataTransition(
+suspend fun <D : Any> TransitionStateApi.joinDataTransition(
     joinStates: Set<IState>,
     name: String? = null,
     targetState: DataState<D>,
@@ -187,7 +183,7 @@ fun <D : Any> TransitionStateApi.joinDataTransition(
     )
 }
 
-fun <D : Any> TransitionStateApi.joinDataTransition(
+suspend fun <D : Any> TransitionStateApi.joinDataTransition(
     name: String? = null,
     block: JoinDataGuardedTransitionBuilder<D>.() -> Unit
 ): Transition<JoinCompleteDataEvent<D>> {
@@ -203,7 +199,7 @@ fun <D : Any> TransitionStateApi.joinDataTransition(
     return addTransition(builder.build())
 }
 
-fun <D : Any> TransitionStateApi.joinDataTransitionOn(
+suspend fun <D : Any> TransitionStateApi.joinDataTransitionOn(
     name: String? = null,
     block: JoinDataGuardedTransitionOnBuilder<D>.() -> Unit
 ): Transition<JoinCompleteDataEvent<D>> {
@@ -231,6 +227,7 @@ private fun TransitionStateApi.requireJoinPrerequisites(joinStates: Collection<I
     requireStateIsParallel()
     requireMinimumJoinStates(joinStates)
 }
+
 internal fun requireMinimumJoinStates(joinStates: Collection<IState>) {
     require(joinStates.size >= 2) {
         "joinTransition requires at least 2 unique join states (points), got ${joinStates.size}"
@@ -240,35 +237,21 @@ internal fun requireMinimumJoinStates(joinStates: Collection<IState>) {
 /**
  * Installs the `onEntry` listener that fires the [JoinCompleteEventImpl] for the non-data variants.
  */
-private fun TransitionStateApi.installJoinCompleteEventTrigger(transitionId: Any, joinStates: Set<IState>) {
-    val parallelState = asState()
-    for (joinState in joinStates) { // not using allOf as it does not suspend
-        joinState.addListener(object : IState.Listener {
-            override suspend fun onEntry(transitionParams: TransitionParams<*>) {
-                if (joinStates.all { it.isActive }) {
-                    parallelState.machine.processEvent(JoinCompleteEventImpl(transitionId))
-                }
-            }
-        })
+private suspend fun TransitionStateApi.installJoinCompleteEventTrigger(transitionId: Any, joinStates: Set<IState>) {
+    onActiveAllOf(joinStates) {
+        asState().machine.processEvent(JoinCompleteEventImpl(transitionId))
     }
 }
 
 /**
  * Installs the `onEntry` listener that fires the [JoinCompleteDataEventImpl].
  */
-private fun <D : Any> TransitionStateApi.installJoinCompleteDataEventTrigger(
+private suspend fun <D : Any> TransitionStateApi.installJoinCompleteDataEventTrigger(
     transitionId: Any,
     joinStates: Set<IState>,
     dataProducer: suspend () -> D
 ) {
-    val parallelState = asState()
-    for (joinState in joinStates) { // not using allOf as it does not suspend
-        joinState.addListener(object : IState.Listener {
-            override suspend fun onEntry(transitionParams: TransitionParams<*>) {
-                if (joinStates.all { it.isActive }) { // fixme how many times is it triggered really?
-                    parallelState.machine.processEvent(JoinCompleteDataEventImpl(transitionId, dataProducer()))
-                }
-            }
-        })
+    onActiveAllOf(joinStates) {
+        asState().machine.processEvent(JoinCompleteDataEventImpl(transitionId, dataProducer()))
     }
 }

@@ -4,13 +4,15 @@ title: Samples
 ---
 
 # Samples
+
 {: .no_toc }
 
 ## Page contents
+
 {: .no_toc .text-delta }
 
 - TOC
-{:toc}
+  {:toc}
 
 ## Full app samples
 
@@ -43,18 +45,18 @@ in the repository.
 
 ### Transitions
 
-| Sample                                                                                                                                                                        | What it shows                               |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
-| [TypesafeTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)               | Pass typed data from event to target state  |
-| [GuardedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)                 | Conditional / guarded transitions           |
-| [CrossLevelTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)           | Transitions across nested state levels      |
-| [InheritTransitionsSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)               | Share transitions by grouping states        |
-| [UndoTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)                       | Navigate backwards (undo)                   |
-| [TargetlessTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TargetlessTransitionSample.kt)           | Internal transitions without a state change |
-| [LocalVsExternalTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/LocalVsExternalTransitionSample.kt) | LOCAL vs EXTERNAL transition semantics      |
-| [JoinTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/JoinTransitionSample.kt)                       | Synchronise parallel regions with a join pseudo-state |
-| [AutomaticTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)             | UML eventless ("always") transitions that fire on entry |
-| [AutomaticDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt)     | Type-safe eventless transition into a `DataState`     |
+| Sample                                                                                                                                                                        | What it shows                                           |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| [TypesafeTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TypesafeTransitionSample.kt)               | Pass typed data from event to target state              |
+| [GuardedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)                 | Conditional / guarded transitions                       |
+| [CrossLevelTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/CrossLevelTransitionSample.kt)           | Transitions across nested state levels                  |
+| [InheritTransitionsSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/InheritTransitionsSample.kt)               | Share transitions by grouping states                    |
+| [UndoTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/UndoTransitionSample.kt)                       | Navigate backwards (undo)                               |
+| [TargetlessTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/TargetlessTransitionSample.kt)           | Internal transitions without a state change             |
+| [LocalVsExternalTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/LocalVsExternalTransitionSample.kt) | LOCAL vs EXTERNAL transition semantics                  |
+| [JoinTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/JoinTransitionSample.kt)                       | Synchronise parallel regions with a join pseudo-state   |
+| [AutoTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoTransitionSample.kt)                       | UML eventless ("always") transitions that fire on entry |
+| [AutoDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoDataTransitionSample.kt)               | Type-safe eventless transition into a `DataState`       |
 
 ### States
 
@@ -82,9 +84,9 @@ in the repository.
 
 ### Coroutines & observation
 
-| Sample                                                                                                                                                              | What it shows                             |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)           | Observe state changes via Kotlin `Flow`   |
-| [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt) | Fire-and-forget / deferred event dispatch |
-| [DelayedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)       | UML time-event ("after Xms") transitions  |
+| Sample                                                                                                                                                                | What it shows                                   |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)             | Observe state changes via Kotlin `Flow`         |
+| [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt)   | Fire-and-forget / deferred event dispatch       |
+| [DelayedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)         | UML time-event ("after Xms") transitions        |
 | [DelayedDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt) | Type-safe delayed transition into a `DataState` |

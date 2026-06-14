@@ -121,7 +121,7 @@ interface AutoDataEvent<D : Any> : AutoEvent, DataEvent<D>
 
 internal data class AutoEventImpl(override val transitionId: Any) : AutoEvent
 
-/** Internal data-carrying variant of [AutoEvent], used by `automaticDataTransition`. */
+/** Internal data-carrying variant of [AutoEvent], used by [autoDataTransition]. */
 internal data class AutoDataEventImpl<D : Any>(
     override val transitionId: Any,
     override val data: D,

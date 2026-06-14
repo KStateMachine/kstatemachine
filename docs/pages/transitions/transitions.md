@@ -310,7 +310,7 @@ its effective destination before activation.
 
 ## Synchronising parallel regions (join)
 
-`joinTransition()` is the programmatic equivalent of a **UML join pseudo-state**: multiple orthogonal regions each
+`joinTransition()` & `joinTransitionOn()` are the programmatic equivalent of a **UML join pseudo-state**: multiple orthogonal regions each
 transition to a dedicated join-point state inside that region, and when **all** join-point states are simultaneously
 active the single outgoing transition fires automatically.
 
@@ -371,8 +371,8 @@ notification paths for the same condition.
 
 ### Joining into a DataState
 
-`joinTransition()` does not accept a [`DataState`](../states/states.md#data-states) as its target — there is no
-event carrying the data for it. Use `joinDataTransition()` instead, which takes an additional `dataProducer` lambda
+`joinTransition()` same as all other transition APIs does not accept a [`DataState`](../states/states.md#data-states) as its target — there is no
+event carrying the data for it. Use `joinDataTransition()`/`joinDataTransitionOn()` instead, which takes an additional `dataProducer` lambda
 that is called once, at join time, to compute the value the target `DataState` receives on entry.
 
 ```kotlin
@@ -418,19 +418,19 @@ initialState("source") {
 }
 ```
 
-For guarded behaviour or for choosing the target dynamically use `automaticTransitionOn()`:
+For guarded behavior or for choosing the target dynamically use `autoTransitionOn()`:
 
 ```kotlin
-automaticTransitionOn {
+autoTransitionOn {
     guard = { isReady }
     targetState = { computeNext() }
 }
 ```
 
-For full conditional control (e.g. picking among several targets) use `automaticTransitionConditionally()`:
+For full conditional control (e.g. picking among several targets) use `autoTransitionConditionally()`:
 
 ```kotlin
-automaticTransitionConditionally {
+autoTransitionConditionally {
     direction = { if (counter % 2 == 0) targetState(even) else targetState(odd) }
 }
 ```
@@ -447,14 +447,14 @@ transition out).
 
 ### Eventless transition into a DataState
 
-`automaticDataTransition()` is the type-safe variant that targets a [`DataState`](../states/states.md#data-states). The
+`autoDataTransition()` and `autoDataTransitionOn()` are the type-safe variant that targets a [`DataState`](../states/states.md#data-states). The
 `dataProducer` lambda runs once at fire time and its return value is delivered to the target as its entry data — no
 custom `DataEvent` subclass is needed.
 
 ```kotlin
 val session: DataState<LoginResult> = dataState<LoginResult>("session")
 initialState("authenticating") {
-    automaticDataTransition(targetState = session) {
+    autoDataTransition(targetState = session) {
         LoginResult(userId = "u-42", sessionToken = "abc123")
     }
 }
@@ -462,10 +462,10 @@ initialState("authenticating") {
 
 See full runnable examples in
 [
-`AutomaticTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticTransitionSample.kt)
+`AutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoTransitionSample.kt)
 and
 [
-`AutomaticDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutomaticDataTransitionSample.kt).
+`AutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoDataTransitionSample.kt).
 
 ## Delayed transitions
 
@@ -507,11 +507,9 @@ initialState("waiting") {
 ```
 
 See full runnable examples in
-[
-`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
+[`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
 and
-[
-`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
+[`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
 
 ## Transition interruption
 

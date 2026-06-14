@@ -1,0 +1,130 @@
+/*
+ * Author: Mikhail Fedotov
+ * Github: https://github.com/KStateMachine
+ * Copyright (c) 2024.
+ * All rights reserved.
+ */
+
+package ru.nsk.kstatemachine.state
+
+import ru.nsk.kstatemachine.transition.TransitionParams
+import kotlin.properties.Delegates.observable
+
+interface GroupListener {
+    fun unsubscribe()
+}
+
+internal interface StateGroupListener : IState.Listener, GroupListener
+
+/**
+ * Triggers [onChanged] callback when condition "all passed states are active" changes
+ * Prefer using suspendable [onActiveAllOf] version.
+ */
+fun onActiveAllOfBlocking(
+    mandatoryState1: IState,
+    mandatoryState2: IState,
+    vararg otherStates: IState,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener =
+    onActiveAllOfBlocking(setOf(mandatoryState1, mandatoryState2, *otherStates), notifyOnSubscribe, onChanged)
+
+/**
+ * Prefer using suspendable [onActiveAllOf] version.
+ */
+fun onActiveAllOfBlocking(
+    states: Set<IState>,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener {
+    require(states.size >= 2) {
+        "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
+    }
+    val initialActiveCount = states.countActive()
+
+    val listener = object : StateGroupListener {
+        private var status by observable(initialActiveCount == states.size) { _, oldValue, newValue ->
+            if (oldValue != newValue) onChanged(newValue)
+        }
+
+        private var activeCount = initialActiveCount
+            set(value) {
+                field = value
+                status = states.countActive() == states.size
+            }
+
+        init {
+            if (notifyOnSubscribe) onChanged(status)
+        }
+
+        override suspend fun onEntry(transitionParams: TransitionParams<*>) {
+            ++activeCount
+        }
+
+        override suspend fun onExit(transitionParams: TransitionParams<*>) {
+            --activeCount
+        }
+
+        override fun unsubscribe() {
+            states.forEach { it.removeListener(this) }
+        }
+    }
+
+    states.forEach { it.addListener(listener) }
+    return listener
+}
+
+internal fun Iterable<IState>.countActive() = count { it.isActive }
+
+/**
+ * Triggers [onChanged] callback when condition "any of passed states is active" changes
+ * Prefer using suspendable [onActiveAnyOf] version.
+ */
+fun onActiveAnyOfBlocking(
+    mandatoryState1: IState,
+    mandatoryState2: IState,
+    vararg otherStates: IState,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener =
+    onActiveAnyOfBlocking(setOf(mandatoryState1, mandatoryState2, *otherStates), notifyOnSubscribe, onChanged)
+
+
+/**
+ * Prefer using suspendable [onActiveAnyOf] version.
+ */
+fun onActiveAnyOfBlocking(
+    states: Set<IState>,
+    notifyOnSubscribe: Boolean = false,
+    onChanged: (Boolean) -> Unit
+): GroupListener {
+    require(states.size >= 2) {
+        "There is no sense to use this API with less than 2 unique states, did you passed same state more then once?"
+    }
+
+    val listener = object : StateGroupListener {
+        private var status by observable(calculateStatus()) { _, oldValue, newValue ->
+            if (oldValue != newValue) onChanged(newValue)
+        }
+
+        init {
+            if (notifyOnSubscribe) onChanged(status)
+        }
+
+        private fun updateStatus() {
+            status = calculateStatus()
+        }
+
+        private fun calculateStatus() = states.firstOrNull { it.isActive } != null
+
+        override suspend fun onEntry(transitionParams: TransitionParams<*>) = updateStatus()
+        override suspend fun onExit(transitionParams: TransitionParams<*>) = updateStatus()
+
+        override fun unsubscribe() {
+            states.forEach { it.removeListener(this) }
+        }
+    }
+
+    states.forEach { it.addListener(listener) }
+    return listener
+}

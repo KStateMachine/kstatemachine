@@ -16,7 +16,7 @@ import ru.nsk.kstatemachine.metainfo.plus
 import ru.nsk.kstatemachine.state.IState
 import ru.nsk.kstatemachine.state.requireMinimumJoinStates
 
-class JoinConditionalTransitionBuilder(name: String?, sourceState: IState, val transitionId: Any) :
+class JoinConditionalTransitionBuilder(name: String?, sourceState: IState, private val transitionId: Any) :
     ConditionalTransitionBuilder<JoinCompleteEvent>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var joinStates: Set<IState>
@@ -31,7 +31,7 @@ class JoinConditionalTransitionBuilder(name: String?, sourceState: IState, val t
     }
 }
 
-class JoinUnitGuardedTransitionBuilder(name: String?, sourceState: IState, val transitionId: Any) :
+class JoinUnitGuardedTransitionBuilder(name: String?, sourceState: IState, private val transitionId: Any) :
     UnitGuardedTransitionBuilder<JoinCompleteEvent>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var joinStates: Set<IState>
@@ -46,7 +46,7 @@ class JoinUnitGuardedTransitionBuilder(name: String?, sourceState: IState, val t
     }
 }
 
-class JoinUnitGuardedTransitionOnBuilder(name: String?, sourceState: IState, val transitionId: Any) :
+class JoinUnitGuardedTransitionOnBuilder(name: String?, sourceState: IState, private val transitionId: Any) :
     UnitGuardedTransitionOnBuilder<JoinCompleteEvent>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var joinStates: Set<IState>
@@ -62,7 +62,7 @@ class JoinUnitGuardedTransitionOnBuilder(name: String?, sourceState: IState, val
 }
 
 /** Extends [DataGuardedTransitionBuilder] DSL adding [dataProducer] field */
-class JoinDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: IState, val transitionId: Any) :
+class JoinDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: IState, private val transitionId: Any) :
     DataGuardedTransitionBuilder<JoinCompleteDataEvent<D>, D>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var joinStates: Set<IState>
@@ -81,7 +81,7 @@ class JoinDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: ISta
 }
 
 /** Extends [DataGuardedTransitionOnBuilder] DSL adding [dataProducer] field */
-class JoinDataGuardedTransitionOnBuilder<D : Any>(name: String?, sourceState: IState, val transitionId: Any) :
+class JoinDataGuardedTransitionOnBuilder<D : Any>(name: String?, sourceState: IState, private val transitionId: Any) :
     DataGuardedTransitionOnBuilder<JoinCompleteDataEvent<D>, D>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var joinStates: Set<IState>

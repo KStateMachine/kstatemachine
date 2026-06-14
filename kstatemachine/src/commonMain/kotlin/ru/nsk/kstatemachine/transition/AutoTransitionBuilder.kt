@@ -12,7 +12,7 @@ import ru.nsk.kstatemachine.event.autoDataEventMatcher
 import ru.nsk.kstatemachine.state.IState
 
 /** Extends [DataGuardedTransitionBuilder] DSL adding [dataProducer] field */
-class AutoDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: IState, val transitionId: Any) :
+class AutoDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: IState, private val transitionId: Any) :
     DataGuardedTransitionBuilder<AutoDataEvent<D>, D>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var dataProducer: suspend () -> D
@@ -26,7 +26,7 @@ class AutoDataGuardedTransitionBuilder<D : Any>(name: String?, sourceState: ISta
 }
 
 /** Extends [DataGuardedTransitionOnBuilder] DSL adding [dataProducer] field */
-class AutoDataGuardedTransitionOnBuilder<D : Any>(name: String?, sourceState: IState, val transitionId: Any) :
+class AutoDataGuardedTransitionOnBuilder<D : Any>(name: String?, sourceState: IState, private val transitionId: Any) :
     DataGuardedTransitionOnBuilder<AutoDataEvent<D>, D>(name, sourceState) {
     /** User should initialize this filed */
     lateinit var dataProducer: suspend () -> D

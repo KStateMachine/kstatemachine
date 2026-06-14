@@ -142,6 +142,8 @@ and `onActiveAnyOf()` functions.
 
 * `onActiveAllOf()` — fires when **all** listed states become active simultaneously, and again when the condition breaks
 * `onActiveAnyOf()` — fires when **any** of the listed states becomes active (or none are active)
+* `onActiveAllOfBlocking()` — non-suspendable version of `onActiveAllOf()`
+* `onActiveAnyOfBlocking()` — non-suspendable version of `onActiveAnyOf()`
 
 ```kotlin
 val listener = onActiveAllOf(State1, State2, State3) { allActive ->

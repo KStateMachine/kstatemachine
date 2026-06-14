@@ -21,8 +21,8 @@ private object ParallelRegionListenersSample {
 }
 
 /**
- * [onActiveAllOf] triggers its callback when ALL of the specified states become active simultaneously.
- * [onActiveAnyOf] triggers its callback when ANY of the specified states becomes active.
+ * [onActiveAllOfBlocking] triggers its callback when ALL of the specified states become active simultaneously.
+ * [onActiveAnyOfBlocking] triggers its callback when ANY of the specified states becomes active.
  * Both are useful for reacting to combinations of active states in parallel regions.
  */
 fun main() = runBlocking {
@@ -54,13 +54,13 @@ fun main() = runBlocking {
         onFinished { println("Both regions finished — machine complete") }
 
         // fires when either region1Done OR region2Done becomes active
-        onActiveAnyOf(region1Done, region2Done) { active ->
+        onActiveAnyOfBlocking(region1Done, region2Done) { active ->
             anyOfActive = active
             println("onActiveAnyOf changed: $active")
         }
 
         // fires when both region1Done AND region2Done are active simultaneously
-        onActiveAllOf(region1Done, region2Done) { active ->
+        onActiveAllOfBlocking(region1Done, region2Done) { active ->
             allOfActive = active
             println("onActiveAllOf changed: $active")
         }
