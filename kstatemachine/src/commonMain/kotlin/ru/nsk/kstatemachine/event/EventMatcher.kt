@@ -72,14 +72,3 @@ internal fun <D: Any> autoDataEventMatcher(transitionId: Any): EventMatcher<Auto
         override suspend fun match(value: Event) =
             value is AutoDataEvent<*> && value.transitionId === transitionId
     }
-
-/**
- * Library-internal. Public only because `kstatemachine-coroutines` constructs delayed transitions
- * (Kotlin `internal` is per-module). Do not call from user code.
- */
-fun delayedEventMatcher(transitionId: Any): EventMatcher<DelayedTransitionEvent> =
-    object : EventMatcher<DelayedTransitionEvent> {
-        override val eventClass = DelayedTransitionEvent::class
-        override suspend fun match(value: Event) =
-            value is DelayedTransitionEvent && value.transitionId === transitionId
-    }

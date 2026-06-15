@@ -35,11 +35,11 @@ kotlin {
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "CrossLevelTransitionSample") {
                 mainClass.set("ru.nsk.samples.CrossLevelTransitionSampleKt")
             }
-            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "DelayedTransitionSample") {
-                mainClass.set("ru.nsk.samples.DelayedTransitionSampleKt")
+            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "DelayedAutoTransitionSample") {
+                mainClass.set("ru.nsk.samples.DelayedAutoTransitionSampleKt")
             }
-            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "DelayedDataTransitionSample") {
-                mainClass.set("ru.nsk.samples.DelayedDataTransitionSampleKt")
+            executable(KotlinCompilation.MAIN_COMPILATION_NAME, "DelayedAutoDataTransitionSample") {
+                mainClass.set("ru.nsk.samples.DelayedAutoDataTransitionSampleKt")
             }
             executable(KotlinCompilation.MAIN_COMPILATION_NAME, "FinishedEventDataStateSample") {
                 mainClass.set("ru.nsk.samples.FinishedEventDataStateSampleKt")

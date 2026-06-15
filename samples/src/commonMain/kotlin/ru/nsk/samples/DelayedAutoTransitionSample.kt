@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.state.State
-import ru.nsk.kstatemachine.state.delayedTransition
+import ru.nsk.kstatemachine.state.delayedAutoTransition
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transitionOn
@@ -32,12 +32,12 @@ fun main() = runBlocking {
     lateinit var home: State
     lateinit var screensaver: State
 
-    val machine = createStateMachine(this, name = "DelayedSample") {
+    val machine = createStateMachine(this, name = "DelayedAutoTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         screensaver = state("screensaver")
         home = state("home") {
-            delayedTransition(delay = 80.milliseconds, targetState = screensaver)
+            delayedAutoTransition(delay = 80.milliseconds, targetState = screensaver)
             // Re-enter home on user input — the EXTERNAL self-targeted transition forces
             // exit + entry, restarting the screensaver timer from zero.
             transitionOn<UserInput>("refresh") {
@@ -46,7 +46,7 @@ fun main() = runBlocking {
             }
         }
         splash = initialState("splash") {
-            delayedTransition(delay = 40.milliseconds, targetState = home)
+            delayedAutoTransition(delay = 40.milliseconds, targetState = home)
         }
     }
 

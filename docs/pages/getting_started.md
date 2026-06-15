@@ -26,7 +26,7 @@ dependencies {
 }
 ```
 
-Where `<Tag>` is the library version. See the [Install](install.html) page for the full platform list and Groovy
+Where `<Tag>` is the library version. See the [Install](https://kstatemachine.github.io/kstatemachine/pages/install.html) page for the full platform list and Groovy
 coordinates.
 
 ## Your first state machine
@@ -99,12 +99,12 @@ Green — go
 
 The machine processes events one at a time in the thread of its `CoroutineScope`.
 If an event arrives while another is being processed it is queued automatically by the default
-`PendingEventHandler`. See [Events](events.html) for details.
+`PendingEventHandler`. See [Events](https://kstatemachine.github.io/kstatemachine/pages/events.html) for details.
 
 ## What to read next
 
-- [State machine](statemachine.html) — creation options, lifecycle, and listeners
-- [States](states/states.html) — nested states, parallel states, final states, data states
-- [Transitions](transitions/transitions.html) — guards, conditional transitions, undo, cross-level
-- [Events](events.html) — processing results, pending events, ignored event handling
-- [Install](install.html) — full dependency coordinates for all platforms
+- [State machine](https://kstatemachine.github.io/kstatemachine/pages/statemachine.html) — creation options, lifecycle, and listeners
+- [States](https://kstatemachine.github.io/kstatemachine/pages/states/states.html) — nested states, parallel states, final states, data states
+- [Transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/transitions.html) — guards, conditional transitions, undo, cross-level
+- [Events](https://kstatemachine.github.io/kstatemachine/pages/events.html) — processing results, pending events, ignored event handling
+- [Install](https://kstatemachine.github.io/kstatemachine/pages/install.html) — full dependency coordinates for all platforms

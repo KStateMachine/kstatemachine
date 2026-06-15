@@ -4,15 +4,13 @@ title: Samples
 ---
 
 # Samples
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Full app samples
 
@@ -30,8 +28,7 @@ demonstrates how the library integrates with an Android project.
 ## Code samples
 
 All samples live under
-[
-`samples/src/commonMain/kotlin/ru/nsk/samples/`](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples)
+[`samples/src/commonMain/kotlin/ru/nsk/samples/`](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples)
 in the repository.
 
 ### Getting started
@@ -84,9 +81,9 @@ in the repository.
 
 ### Coroutines & observation
 
-| Sample                                                                                                                                                                | What it shows                                   |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
-| [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)             | Observe state changes via Kotlin `Flow`         |
-| [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt)   | Fire-and-forget / deferred event dispatch       |
-| [DelayedTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)         | UML time-event ("after Xms") transitions        |
-| [DelayedDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt) | Type-safe delayed transition into a `DataState` |
+| Sample                                                                                                                                                                        | What it shows                                   |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|
+| [FlowObservationSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/FlowObservationSample.kt)                     | Observe state changes via Kotlin `Flow`         |
+| [AsyncEventProcessingSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AsyncEventProcessingSample.kt)           | Fire-and-forget / deferred event dispatch       |
+| [DelayedAutoTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoTransitionSample.kt)         | UML time-event ("after Xms") transitions        |
+| [DelayedAutoDataTransitionSample](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoDataTransitionSample.kt) | Type-safe delayed transition into a `DataState` |

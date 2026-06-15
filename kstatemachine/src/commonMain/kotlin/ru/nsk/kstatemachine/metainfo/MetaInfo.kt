@@ -105,4 +105,4 @@ internal data class JoinTransitionMetaInfo(val joinStates: Set<IState>) : MetaIn
  * Public only because `kstatemachine-coroutines` constructs the delayed-transition DSL
  * (Kotlin `internal` is per-module). Do not construct from user code.
  */
-data class DelayedTransitionMetaInfo(val delay: Duration) : MetaInfo
+data class DelayedAutoTransitionMetaInfo(val delay: Duration) : MetaInfo

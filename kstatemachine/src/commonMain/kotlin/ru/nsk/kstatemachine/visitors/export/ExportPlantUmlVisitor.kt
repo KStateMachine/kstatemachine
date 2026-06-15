@@ -8,21 +8,27 @@
 package ru.nsk.kstatemachine.visitors.export
 
 import ru.nsk.kstatemachine.event.AutoEvent
-import ru.nsk.kstatemachine.event.DelayedTransitionEvent
 import ru.nsk.kstatemachine.event.Event
 import ru.nsk.kstatemachine.isNeighbor
-import ru.nsk.kstatemachine.metainfo.DelayedTransitionMetaInfo
+import ru.nsk.kstatemachine.metainfo.DelayedAutoTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.EventAndArgumentResolutionHint
 import ru.nsk.kstatemachine.metainfo.ExportMetaInfo
 import ru.nsk.kstatemachine.metainfo.IgnoreUnsafeCallConditionalLambdasMetaInfo
 import ru.nsk.kstatemachine.metainfo.JoinTransitionMetaInfo
-import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.metainfo.ResolutionHint
 import ru.nsk.kstatemachine.metainfo.StateResolutionHint
+import ru.nsk.kstatemachine.metainfo.UmlMetaInfo
 import ru.nsk.kstatemachine.metainfo.findMetaInfo
-import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.HistoryState
+import ru.nsk.kstatemachine.state.HistoryType
+import ru.nsk.kstatemachine.state.IFinalState
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.InternalState
+import ru.nsk.kstatemachine.state.RedirectPseudoState
 import ru.nsk.kstatemachine.state.pseudo.UndoState
+import ru.nsk.kstatemachine.state.requireInternalParent
 import ru.nsk.kstatemachine.statemachine.START_TRANSITION_NAME
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.UNDO_TRANSITION_NAME
@@ -163,7 +169,8 @@ internal class ExportPlantUmlVisitor(
 
         val joinMeta = transition.metaInfo.findMetaInfo<JoinTransitionMetaInfo>()
         if (joinMeta != null) {
-            val joinStateName = (transition.name ?: "join_${joinMeta.hashCode().toString(16)}").replace(Regex("[ -]"), "_")
+            val joinStateName =
+                (transition.name ?: "join_${joinMeta.hashCode().toString(16)}").replace(Regex("[ -]"), "_")
 
             crossLevelTransitions += "state $joinStateName $JOIN"
             for (jp in joinMeta.joinStates) {
@@ -318,11 +325,9 @@ internal class ExportPlantUmlVisitor(
 
     private fun transitionLabel(transition: Transition<*>, description: String?): String {
         val eventLabel: String? = when (transition.eventMatcher.eventClass) {
-            // UML convention: eventless ("always") transitions have no trigger label.
-            AutoEvent::class -> null
-            // UML convention: time-event transitions are rendered as "after Xms".
-            DelayedTransitionEvent::class ->
-                transition.metaInfo.findMetaInfo<DelayedTransitionMetaInfo>()?.let { "after ${it.delay}" }
+            // auto and delayed transitions
+            AutoEvent::class -> transition.metaInfo
+                .findMetaInfo<DelayedAutoTransitionMetaInfo>()?.let { "after ${it.delay}" }
             else -> transition.eventMatcher.eventClass.simpleName
         }
         val text = listOfNotNull(

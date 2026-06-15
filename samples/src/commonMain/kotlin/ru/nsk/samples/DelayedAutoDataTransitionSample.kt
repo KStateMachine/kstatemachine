@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.dataState
-import ru.nsk.kstatemachine.state.delayedDataTransition
+import ru.nsk.kstatemachine.state.delayedAutoDataTransition
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.onEntry
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -19,20 +19,20 @@ import ru.nsk.kstatemachine.statemachine.createStateMachine
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Type-safe variant of [delayedTransition] — the producer is invoked once when the timer fires,
+ * Type-safe variant [delayedAutoDataTransition] — the producer is invoked once when the timer fires,
  * and its value lands in the target [DataState].
  */
 fun main() = runBlocking {
     lateinit var timedOut: DataState<String>
 
-    val machine = createStateMachine(this, name = "DelayedDataSample") {
+    val machine = createStateMachine(this, name = "DelayedAutoDataTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         timedOut = dataState<String>("timedOut") {
             onEntry { println("Timeout reason: $data") }
         }
         initialState("waiting") {
-            delayedDataTransition(delay = 50.milliseconds, targetState = timedOut) {
+            delayedAutoDataTransition(delay = 50.milliseconds, targetState = timedOut) {
                 "no user response within 50ms"
             }
         }

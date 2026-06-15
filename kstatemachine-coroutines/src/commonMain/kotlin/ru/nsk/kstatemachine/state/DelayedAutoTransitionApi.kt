@@ -11,17 +11,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.nsk.kstatemachine.coroutines.CoroutinesLibCoroutineAbstraction
-import ru.nsk.kstatemachine.event.DelayedTransitionDataEventImpl
-import ru.nsk.kstatemachine.event.DelayedTransitionEvent
-import ru.nsk.kstatemachine.event.DelayedTransitionEventImpl
-import ru.nsk.kstatemachine.event.delayedEventMatcher
-import ru.nsk.kstatemachine.metainfo.DelayedTransitionMetaInfo
+import ru.nsk.kstatemachine.event.AutoDataEvent
+import ru.nsk.kstatemachine.event.AutoEvent
+import ru.nsk.kstatemachine.metainfo.DelayedAutoTransitionMetaInfo
+import ru.nsk.kstatemachine.metainfo.MetaInfo
+import ru.nsk.kstatemachine.metainfo.plus
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.transition.DefaultTransition
 import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.TransitionType
-import ru.nsk.kstatemachine.transition.guardedTarget
+import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
 import kotlin.time.Duration
 
 /**
@@ -39,23 +39,23 @@ import kotlin.time.Duration
  * the timer needs a coroutine scope to live in. The lifecycle (entry/exit/stop/destroy) mirrors
  * the one used by [asyncScopedAction].
  */
-fun IState.delayedTransition(
+fun TransitionStateApi.delayedAutoTransition(
     delay: Duration,
     name: String? = null,
-    targetState: State,
-    guard: suspend () -> Boolean = { true },
-): Transition<DelayedTransitionEvent> {
+    targetState: State? = null,
+    type: TransitionType = LOCAL,
+    metaInfo: MetaInfo? = null,
+): Transition<AutoEvent> {
     val transitionId = Any()
-    val sourceState = this
-    sourceState.installDelayedEventTrigger(transitionId, delay)
-    return sourceState.addTransition(
+    installDelayedAutoDataEventTrigger(transitionId, delay)
+    return addTransition(
         DefaultTransition(
             name = name,
-            eventMatcher = delayedEventMatcher(transitionId),
-            type = TransitionType.LOCAL,
-            metaInfo = DelayedTransitionMetaInfo(delay),
-            sourceState = sourceState,
-            targetStateDirectionProducer = { policy -> policy.guardedTarget(targetState, guard) },
+            eventMatcher = autoEventMatcher(transitionId),
+            type = type,
+            metaInfo = metaInfo + DelayedAutoTransitionMetaInfo(delay),
+            sourceState = asState(),
+            targetState = targetState,
         )
     )
 }
@@ -70,26 +70,24 @@ fun IState.delayedTransition(
  * result is discarded (the timer does not auto-restart). [dataProducer] always runs first because
  * it is required to construct the carrier event.
  */
-fun <D : Any> IState.delayedDataTransition(
+fun <D : Any> TransitionStateApi.delayedAutoDataTransition(
     delay: Duration,
     name: String? = null,
     targetState: DataState<D>,
-    guard: suspend () -> Boolean = { true },
+    type: TransitionType = LOCAL,
+    metaInfo: MetaInfo? = null,
     dataProducer: suspend () -> D,
-): Transition<DelayedTransitionEvent> {
+): Transition<AutoDataEvent<D>> {
     val transitionId = Any()
-    val sourceState = this
-    sourceState.installDelayedEventTrigger(transitionId, delay) {
-        DelayedTransitionDataEventImpl(transitionId, dataProducer())
-    }
-    return sourceState.addTransition(
+    installDelayedAutoDataEventTrigger(transitionId, delay, dataProducer)
+    return addTransition(
         DefaultTransition(
             name = name,
-            eventMatcher = delayedEventMatcher(transitionId),
-            type = TransitionType.LOCAL,
-            metaInfo = DelayedTransitionMetaInfo(delay),
-            sourceState = sourceState,
-            targetStateDirectionProducer = { policy -> policy.guardedTarget(targetState, guard) },
+            eventMatcher = autoDataEventMatcher(transitionId),
+            type = type,
+            metaInfo = metaInfo + DelayedAutoTransitionMetaInfo(delay),
+            sourceState = asState(),
+            targetState = targetState,
         )
     )
 }
@@ -98,19 +96,16 @@ fun <D : Any> IState.delayedDataTransition(
  * Wires the entry/exit/stop/destroy listeners that own the timer [Job]. Same lifecycle as
  * `asyncScopedAction` in `StateCoroutines.kt:38-65`: launch on entry; cancel on exit; cancel on
  * machine stop/destroy (which do NOT trigger `onExit`).
- *
- * The [eventFactory] defaults to a plain [DelayedTransitionEventImpl]; the data variant overrides
- * it to produce a `DataEvent<D>` carrying the data at fire time.
  */
-private fun IState.installDelayedEventTrigger(
+private fun <D> TransitionStateApi.installDelayedAutoDataEventTrigger(
     transitionId: Any,
     delay: Duration,
-    eventFactory: suspend () -> DelayedTransitionEvent = { DelayedTransitionEventImpl(transitionId) },
+    dataProducer: suspend () -> D
 ) {
-    val sourceState = this
+    val sourceState = asState()
     val abstraction = sourceState.machine.coroutineAbstraction
     require(abstraction is CoroutinesLibCoroutineAbstraction) {
-        "delayedTransition requires a StateMachine created with coroutines support (createStateMachine)"
+        "delayedAutoTransition requires a StateMachine created with coroutines support (createStateMachine)"
     }
     var job: Job? = null
     fun cancelAndClearJob() {
@@ -128,7 +123,7 @@ private fun IState.installDelayedEventTrigger(
             check(job == null) { "Job is already running - this is logical error, please report a bug" }
             job = abstraction.scope.launch {
                 delay(delay)
-                sourceState.machine.processEvent(eventFactory())
+                sourceState.machine.processEvent(AutoDataEventImpl(transitionId, dataProducer()))
             }
         }
 

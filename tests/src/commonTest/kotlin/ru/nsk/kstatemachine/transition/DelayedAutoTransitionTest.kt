@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-package ru.nsk.kstatemachine.coroutines
+package ru.nsk.kstatemachine.transition
 
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.core.spec.style.FreeSpec
@@ -22,8 +22,8 @@ import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.state.dataState
-import ru.nsk.kstatemachine.state.delayedDataTransition
-import ru.nsk.kstatemachine.state.delayedTransition
+import ru.nsk.kstatemachine.state.delayedAutoDataTransition
+import ru.nsk.kstatemachine.state.delayedAutoTransition
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transitionOn
@@ -38,13 +38,13 @@ private val WAIT_PAST_FAST = 120.milliseconds
 private val INFINITE = Long.MAX_VALUE.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-class DelayedTransitionTest : FreeSpec({
-    "delayedTransition throws for StdLib machine" {
+class DelayedAutoTransitionTest : FreeSpec({
+    "delayedAutoTransition throws for StdLib machine" {
         createStdLibStateMachine {
             initialState("only") {
                 shouldThrowWithMessage<IllegalArgumentException>(
-                    "delayedTransition requires a StateMachine created with coroutines support (createStateMachine)"
-                ) { delayedTransition(delay = FAST, targetState = this) }
+                    "delayedAutoTransition requires a StateMachine created with coroutines support (createStateMachine)"
+                ) { delayedAutoTransition(delay = FAST, targetState = this) }
             }
         }
     }
@@ -57,7 +57,7 @@ class DelayedTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedTransition(delay = FAST, targetState = target)
+                    delayedAutoTransition(delay = FAST, targetState = target)
                 }
             }
             target.isActive.shouldBeFalse()
@@ -79,7 +79,7 @@ class DelayedTransitionTest : FreeSpec({
                 delayedTarget = state("delayedTarget")
                 unrelatedTarget = state("unrelatedTarget")
                 source = initialState("source") {
-                    delayedTransition(delay = INFINITE, targetState = delayedTarget)
+                    delayedAutoTransition(delay = INFINITE, targetState = delayedTarget)
                     transitionOn<SwitchEvent> { targetState = { unrelatedTarget } }
                 }
             }
@@ -101,7 +101,7 @@ class DelayedTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedTransition(delay = INFINITE, targetState = target)
+                    delayedAutoTransition(delay = INFINITE, targetState = target)
                 }
             }
             machine.stop()
@@ -121,7 +121,7 @@ class DelayedTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedTransition(delay = INFINITE, targetState = target)
+                    delayedAutoTransition(delay = INFINITE, targetState = target)
                 }
             }
             machine.destroy()
@@ -143,10 +143,14 @@ class DelayedTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 source = initialState("source") {
-                    delayedTransition(delay = FAST, targetState = target, guard = {
-                        fireCount++
-                        false
-                    })
+                    delayedAutoTransition {
+                        delay = FAST
+                        targetState = target
+                        guard = {
+                            fireCount++
+                            false
+                        }
+                    }
                 }
             }
             delay(WAIT_PAST_FAST)
@@ -162,7 +166,7 @@ class DelayedTransitionTest : FreeSpec({
         }
     }
 
-    "delayedDataTransition carries producer value into DataState" {
+    "delayedAutoDataTransition carries producer value into DataState" {
         lateinit var produced: DataState<Int>
         var producerCalls = 0
 
@@ -171,7 +175,7 @@ class DelayedTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 produced = dataState<Int>("produced")
                 initialState("source") {
-                    delayedDataTransition(delay = FAST, targetState = produced) {
+                    delayedAutoDataTransition(delay = FAST, targetState = produced) {
                         producerCalls++
                         7
                     }

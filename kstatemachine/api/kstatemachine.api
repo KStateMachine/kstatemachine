@@ -33,34 +33,6 @@ public abstract interface class ru/nsk/kstatemachine/event/DataExtractor {
 	public abstract fun getDataClass ()Lkotlin/reflect/KClass;
 }
 
-public final class ru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl : ru/nsk/kstatemachine/event/DataEvent, ru/nsk/kstatemachine/event/DelayedTransitionEvent {
-	public fun <init> (Ljava/lang/Object;Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun component2 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;Ljava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;
-	public static synthetic fun copy$default (Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;Ljava/lang/Object;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionDataEventImpl;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getData ()Ljava/lang/Object;
-	public fun getTransitionId ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class ru/nsk/kstatemachine/event/DelayedTransitionEvent : ru/nsk/kstatemachine/event/GeneratedEvent {
-	public abstract fun getTransitionId ()Ljava/lang/Object;
-}
-
-public final class ru/nsk/kstatemachine/event/DelayedTransitionEventImpl : ru/nsk/kstatemachine/event/DelayedTransitionEvent {
-	public fun <init> (Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;
-	public static synthetic fun copy$default (Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;Ljava/lang/Object;ILjava/lang/Object;)Lru/nsk/kstatemachine/event/DelayedTransitionEventImpl;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getTransitionId ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract interface class ru/nsk/kstatemachine/event/Event {
 }
 
@@ -74,7 +46,6 @@ public final class ru/nsk/kstatemachine/event/EventMatcher$Companion {
 }
 
 public final class ru/nsk/kstatemachine/event/EventMatcherKt {
-	public static final fun delayedEventMatcher (Ljava/lang/Object;)Lru/nsk/kstatemachine/event/EventMatcher;
 	public static final fun finishedEventMatcher (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/event/EventMatcher;
 }
 
@@ -143,11 +114,11 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/CompositeMetaInfoB
 	public abstract fun setMetaInfoSet (Ljava/util/Set;)V
 }
 
-public final class ru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
+public final class ru/nsk/kstatemachine/metainfo/DelayedAutoTransitionMetaInfo : ru/nsk/kstatemachine/metainfo/MetaInfo {
 	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-UwyO8pc ()J
-	public final fun copy-LRDsOJo (J)Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;
-	public static synthetic fun copy-LRDsOJo$default (Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;JILjava/lang/Object;)Lru/nsk/kstatemachine/metainfo/DelayedTransitionMetaInfo;
+	public final fun copy-LRDsOJo (J)Lru/nsk/kstatemachine/metainfo/DelayedAutoTransitionMetaInfo;
+	public static synthetic fun copy-LRDsOJo$default (Lru/nsk/kstatemachine/metainfo/DelayedAutoTransitionMetaInfo;JILjava/lang/Object;)Lru/nsk/kstatemachine/metainfo/DelayedAutoTransitionMetaInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDelay-UwyO8pc ()J
 	public fun hashCode ()I

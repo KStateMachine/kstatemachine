@@ -6,60 +6,47 @@ has_children: true
 ---
 
 # Transitions
-
 {: .no_toc }
 
 ## Page contents
-
 {: .no_toc .text-delta }
 
 - TOC
-  {:toc}
+{:toc}
 
-In a state setup block we define which events will trigger transitions to another states. The simplest transition is
-created with `transition()` function:
+In a state setup block we define which events trigger transitions. The library offers several
+transition methods that escalate in flexibility — pick the **simplest form that fits your need**,
+and move down the table only when the simpler form cannot express it.
 
-```kotlin
-greenState {
-    // Setup transition which is triggered on YellowEvent
-    transition<YellowEvent> {
-        // Set target state where state machine go when this transition is triggered
-        targetState = yellowState
-    }
-    // The same with shortcut version
-    transition<RedEvent>("My transition", redState)
-}
-```
+## Choosing the right transition API
 
-Same as for states we can listen to transition triggering:
+### By API complexity
 
-```kotlin
-transition<YellowEvent> {
-    targetState = yellowState
-    onTriggered { println("Transition to $targetState is triggered by ${it.event}") }
-}
-```
+Each row is strictly more flexible than the one above it. Start at the top and move down only when
+the simpler form cannot express what you need:
 
-There is an extended version of `transition()` function, it is called `transitionOn()`. It works the same way but takes
-a lambda to calculate target state. This allows to use `lateinit` state variables and to choose target state depending
-on an application business logic like with [conditional transitions](#conditional-transitions) but with shorter syntax
-and less flexibility:
+| When you need…                                                                                                                                                                             | API                                                |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| **Target state already declared, no guard.** Shortest form.                                                                                                                                | `transition<E>("name", targetState)`               |
+| **Guard or side calculations** in a scoped block. Listeners (`onTriggered`, `onComplete`) attached here.                                                                                   | `transition<E> { guard = … ; targetState = … }`    |
+| **Guard and dynamic / lazy target** picked at fire time. Lets you reference `lateinit` states.                                                                                             | `transitionOn<E> { targetState = { … } }`          |
+| **Transition direction** fully controled by one `direction` lambda. Required for multi-target forks. Also the only way to bypass type-safety to target a `DataState` from a plain `Event`. | `transitionConditionally<E> { direction = { … } }` |
 
-```kotlin
-createStateMachine(scope) {
-    lateinit var yellowState: State
+### By trigger family
 
-    greenState {
-        transitionOn<YellowEvent> {
-            targetState = { yellowState }
-        }
-    }
+| Family                   | Trigger / purpose                                                                                                                                                                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `transition*`            | The common API — fires when the matching `Event` arrives. Every other family below inherits the same four-step ladder from [the table above](#by-api-complexity).                                                                                                |
+| `dataTransition*`        | Type-safe analog of `transition*`: enforces at compile time that the `DataEvent` carries data of the type the target `DataState` expects. See [Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html). |
+| `autoTransition*`        | Fires on source-state entry, no explicit event required (UML eventless / "always").                                                                                                                                                                              |
+| `joinTransition*`        | Fires when all join-point states inside a parallel state are simultaneously active (UML join).                                                                                                                                                                   |
+| `delayedAutoTransition*` | Fires after a configured delay while the source state is active (UML time event).                                                                                                                                                                                |
 
-    yellowState = state {
-        // ...
-    }
-}
-```
+Every `*Transition*` family also has a `*DataTransition*` analog (`autoDataTransition*`,
+`joinDataTransition*`, `delayedAutoDataTransition*`) that keeps the same compile-time
+`DataEvent → DataState` type-safety.
+
+Listening to transition firing is uniform across all families — see [Listen to all transitions in one place](#listen-to-all-transitions-in-one-place).
 
 ## Target-less transitions
 
@@ -171,9 +158,8 @@ state (and its children) have completed.
 
 ## Guarded transitions
 
-Guarded transition is triggered only if specified guard function returns `true`. Guarded transition is a special kind
-of [conditional transition](#conditional-transitions) with shorter syntax. Use `transition()` or `transitionOn()`
-functions to create guarded transition:
+A `guard` is a suspending lambda evaluated at fire time; if it returns `false` the transition does
+not fire and the source state stays put.
 
 ```kotlin
 state1 {
@@ -185,19 +171,10 @@ state1 {
 }
 ```
 
+When the target state itself depends on runtime data (routing to one of several states), reach
+for `transitionConditionally` and return `noTransition()` from `direction` to block instead.
+
 See [guarded transition sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/GuardedTransitionSample.kt)
-
-### Guarded vs conditional transitions
-
-|                         | `guard` on `transition()` / `transitionOn()`  | `transitionConditionally()`              |
-|-------------------------|-----------------------------------------------|------------------------------------------|
-| Target state            | Fixed at definition time / chosen dynamically | Chosen dynamically in `direction` lambda |
-| Blocking the transition | Return `false` from `guard`                   | Return `noTransition()` from `direction` |
-| Syntax                  | Shorter                                       | More flexible                            |
-
-Use `guard` when the target state is known and you only need to decide whether to fire.
-Use `transitionConditionally` when the target state itself depends on runtime data
-(e.g. routing to one of several states based on a value).
 
 ```mermaid
 ---
@@ -219,10 +196,10 @@ transition is triggered.
 
 There are following options to choose transition direction:
 
-* `stay()` - transition is triggered but state is not changed;
+* `stay()` - transition is triggered but state is not changed (target-less transition analog);
 * `targetState(nextState)` - transition is triggered and state machine goes to the specified state;
 * `targetParallelStates(nextState1, nextState2)` transition is triggered and state machine goes to the specified
-  paralleled states see [Transition targeting multiple states](#transition-targeting-multiple-states);
+  paralleled states see [Transition targeting multiple states](#transition-targeting-multiple-states-fork);
 * `noTransition()` - transition is not triggered.
 
 Use `transitionConditionally()` function to create conditional transition and specify a function which makes desired
@@ -304,15 +281,17 @@ fork_state --> state212
 fork_state --> state222
 ```
 
-[PseudoState](../states/states.md#pseudo-states) targets (choice, history, etc.) are accepted and resolved
+[PseudoState](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#pseudo-states) targets (choice,
+history, etc.) are accepted and resolved
 transparently at runtime, so you can pass a choice state as one of the fork targets and it will be followed to
 its effective destination before activation.
 
-## Synchronising parallel regions (join)
+## Synchronizing parallel regions (join)
 
-`joinTransition()` & `joinTransitionOn()` are the programmatic equivalent of a **UML join pseudo-state**: multiple orthogonal regions each
-transition to a dedicated join-point state inside that region, and when **all** join-point states are simultaneously
-active the single outgoing transition fires automatically.
+The `joinTransition*` family is the programmatic equivalent of a **UML join pseudo-state**: multiple
+orthogonal regions each transition to a dedicated join-point state inside that region, and when
+**all** join-point states are simultaneously active the single outgoing transition fires
+automatically.
 
 Call `joinTransition()` on the **parallel state** inside its DSL block, passing one join-point state per region and
 the target state to enter after joining.
@@ -371,9 +350,9 @@ notification paths for the same condition.
 
 ### Joining into a DataState
 
-`joinTransition()` same as all other transition APIs does not accept a [`DataState`](../states/states.md#data-states) as its target — there is no
-event carrying the data for it. Use `joinDataTransition()`/`joinDataTransitionOn()` instead, which takes an additional `dataProducer` lambda
-that is called once, at join time, to compute the value the target `DataState` receives on entry.
+There is no event carrying data through a join, so the `DataState` variants take a `dataProducer`
+lambda instead. It is called once, at join time, to compute the value the target
+[`DataState`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#data-states) receives on entry.
 
 ```kotlin
 val result: DataState<String> = dataState("result")
@@ -394,8 +373,10 @@ state("parallelWork", childMode = ChildMode.PARALLEL) {
         }
     }
 
-    joinDataTransition(downloadJoin, validationJoin, targetState = result) {
-        "download + validation complete"   // dataProducer: suspend () -> String
+    joinDataTransition {
+        joinStates = setOf(downloadJoin, validationJoin)
+        targetState = result
+        dataProducer = { "download + validation complete" }
     }
 }
 ```
@@ -406,32 +387,16 @@ Once the lambda returns, the library fires an internal `DataJoinCompleteEvent` c
 
 ## Eventless (automatic) transitions
 
-`autoTransition()` is a **UML eventless ("always") transition** — it fires on state entry, without any external
-event. After it lands in its target state, that state's own eventless transitions (if any) are evaluated in turn,
-producing UML run-to-completion semantics. Guards are evaluated at fire time; if a guard rejects the state simply
-stays put and the transition is re-tried on the next entry.
+The `autoTransition*` family is a **UML eventless ("always") transition** — it fires on state
+entry, without any external event. After it lands in its target state, that state's own eventless
+transitions (if any) are evaluated in turn, producing UML run-to-completion semantics. Guards are
+evaluated at fire time; if a guard rejects the state simply stays put and the transition is
+re-tried on the next entry.
 
 ```kotlin
 val target = state("target")
 initialState("source") {
     autoTransition(targetState = target)            // fires on entry of "source"
-}
-```
-
-For guarded behavior or for choosing the target dynamically use `autoTransitionOn()`:
-
-```kotlin
-autoTransitionOn {
-    guard = { isReady }
-    targetState = { computeNext() }
-}
-```
-
-For full conditional control (e.g. picking among several targets) use `autoTransitionConditionally()`:
-
-```kotlin
-autoTransitionConditionally {
-    direction = { if (counter % 2 == 0) targetState(even) else targetState(odd) }
 }
 ```
 
@@ -447,9 +412,8 @@ transition out).
 
 ### Eventless transition into a DataState
 
-`autoDataTransition()` and `autoDataTransitionOn()` are the type-safe variant that targets a [`DataState`](../states/states.md#data-states). The
-`dataProducer` lambda runs once at fire time and its return value is delivered to the target as its entry data — no
-custom `DataEvent` subclass is needed.
+For `DataState` targets, the `dataProducer` lambda runs once at fire time and its return value is
+delivered to the target as its entry data — no custom `DataEvent` subclass is needed.
 
 ```kotlin
 val session: DataState<LoginResult> = dataState<LoginResult>("session")
@@ -467,71 +431,63 @@ and
 [
 `AutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoDataTransitionSample.kt).
 
-## Delayed transitions
+## Delayed auto transitions
 
-`delayedTransition()` is a **UML time-event ("after Xms") transition**. The timer starts when the source state is
-entered, fires after the configured delay, and is automatically cancelled when the state is exited or when the machine
-is stopped or destroyed. On re-entry the timer restarts from zero.
+A delayed transition is a **UML time-event ("after Xms") transition**. The timer starts when the
+source state is entered, fires after the configured delay, and is automatically cancelled when the
+state is exited or when the machine is stopped or destroyed. On re-entry the timer restarts from
+zero. If a `guard` is supplied and rejects at fire time, the state stays put — the timer does
+**not** auto-restart (it fires again only on the next entry).
 
 ```kotlin
 val home = state("home")
 initialState("splash") {
-    delayedTransition(delay = 2.seconds, targetState = home)
+    delayedAutoTransition(delay = 2.seconds, targetState = home)
 }
 ```
 
-A `guard` lambda may be supplied; it runs at fire time, and if it returns `false` the state stays put — the timer does
-**not** auto-restart (it will fire again only on the next entry).
+Lives in `kstatemachine-coroutines` because it needs a `CoroutineScope` to host the timer. Calling
+it on a machine created with `createStdLibStateMachine` throws — use `createStateMachine(scope) { ... }`
+instead. The job lifecycle mirrors [
+`asyncScopedAction`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity):
+launch on entry,
+cancel on exit, cancel on machine stop/destroy.
 
-```kotlin
-delayedTransition(delay = 30.seconds, targetState = screensaver, guard = { !inputBlocked })
-```
+### Delayed auto transition into a DataState
 
-Lives in `kstatemachine-coroutines` because it needs a `CoroutineScope` to host the timer. Calling it on a machine
-created with `createStdLibStateMachine` throws — use `createStateMachine(scope) { ... }` instead. The job lifecycle
-mirrors [`asyncScopedAction`](../states/states.md): launch on entry, cancel on exit, cancel on machine stop/destroy.
-
-### Delayed transition into a DataState
-
-`delayedDataTransition()` is the type-safe variant. The `dataProducer` lambda runs once when the timer fires (not at
-registration time); its return value is delivered to the target [`DataState`](../states/states.md#data-states) as its
-entry data.
+The `dataProducer` lambda runs once when the timer fires (not at registration time); its return
+value is delivered to the target [
+`DataState`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#data-states) as its entry data.
 
 ```kotlin
 val timedOut: DataState<String> = dataState<String>("timedOut")
 initialState("waiting") {
-    delayedDataTransition(delay = 5.seconds, targetState = timedOut) {
+    delayedAutoDataTransition(delay = 5.seconds, targetState = timedOut) {
         "no user response within 5s"
     }
 }
 ```
 
 See full runnable examples in
-[`DelayedTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedTransitionSample.kt)
+[
+`DelayedAutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoTransitionSample.kt)
 and
-[`DelayedDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedDataTransitionSample.kt).
+[
+`DelayedAutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoDataTransitionSample.kt).
 
 ## Transition interruption
 
-Typically, to calculate whether transition processing should be performed or not, you can use a guard function,
-described in [Guarded transitions](#guarded-transitions). In such APIs guard function is separated from `targetState`
-calculation function, sometimes it might be not convenient. So if your logic requires to mix the selection of a
-`targetState` with the fact of triggering of the transition, it is more convenient to use `transitionConditionally()`
-as it accepts single callback method called `direction`.
+Return `false` from a [`guard`](#guarded-transitions), or `noTransition()` from a
+`transitionConditionally` [`direction`](#conditional-transitions), to block the transition from
+firing. Both lambdas are `suspend`, so they can call coroutines directly.
 
 ```kotlin
 transitionConditionally<SwitchEvent> {
     direction = {
-        if (should)
-            targetState(nextState)
-        else
-            noTransition() // transition will not be triggered at all
+        if (should) targetState(nextState) else noTransition()
     }
 }
 ```
-
-Both `guard` and `direction` callbacks are marked with `suspend` keyword, so you can easily call coroutines in
-synchronous style inside them.
 
 There is no way to interrupt a transition from `onTriggered()` notifications.
 
