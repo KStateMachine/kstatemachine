@@ -23,7 +23,11 @@ import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.delayedAutoDataTransition
+import ru.nsk.kstatemachine.state.delayedAutoDataTransitionOn
 import ru.nsk.kstatemachine.state.delayedAutoTransition
+import ru.nsk.kstatemachine.state.delayedAutoTransitionConditionally
+import ru.nsk.kstatemachine.state.delayedAutoTransitionOn
+import ru.nsk.kstatemachine.state.initialDataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transitionOn
@@ -185,6 +189,143 @@ class DelayedAutoTransitionTest : FreeSpec({
             produced.isActive.shouldBeTrue()
             produced.data shouldBe 7
             producerCalls shouldBe 1
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "delayedAutoTransitionOn resolves the target lazily" {
+        lateinit var target: State
+
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val machine = createStateMachine(scope) {
+                initialState("source") {
+                    delayedAutoTransitionOn {
+                        delay = FAST
+                        targetState = { target }
+                    }
+                }
+                target = state("target")
+            }
+            delay(WAIT_PAST_FAST)
+            target.isActive.shouldBeTrue()
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "delayedAutoTransitionConditionally fires the direction lambda at fire time" {
+        lateinit var even: State
+        lateinit var odd: State
+        var counter = 0
+
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val machine = createStateMachine(scope) {
+                even = state("even")
+                odd = state("odd")
+                initialState("source") {
+                    delayedAutoTransitionConditionally {
+                        delay = FAST
+                        direction = {
+                            if (counter % 2 == 0) targetState(even) else targetState(odd)
+                        }
+                    }
+                }
+            }
+            delay(WAIT_PAST_FAST)
+            even.isActive.shouldBeTrue()
+            odd.isActive.shouldBeFalse()
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "delayedAutoDataTransition scoped builder carries producer value" {
+        lateinit var produced: DataState<String>
+
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val machine = createStateMachine(scope) {
+                produced = dataState<String>("produced")
+                initialState("source") {
+                    delayedAutoDataTransition<String> {
+                        delay = FAST
+                        targetState = produced
+                        dataProducer = { "hello" }
+                    }
+                }
+            }
+            delay(WAIT_PAST_FAST)
+            produced.isActive.shouldBeTrue()
+            produced.data shouldBe "hello"
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "delayedAutoDataTransitionOn resolves the data target lazily" {
+        lateinit var produced: DataState<Int>
+
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val machine = createStateMachine(scope) {
+                initialState("source") {
+                    delayedAutoDataTransitionOn<Int> {
+                        delay = FAST
+                        targetState = { produced }
+                        dataProducer = { 99 }
+                    }
+                }
+                produced = dataState<Int>("produced")
+            }
+            delay(WAIT_PAST_FAST)
+            produced.isActive.shouldBeTrue()
+            produced.data shouldBe 99
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "self-targeted delayedAutoDataTransition refreshes DataState data on the same state" {
+        lateinit var counter: DataState<Int>
+        var producerCalls = 0
+
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            val machine = createStateMachine(scope) {
+                counter = initialDataState<Int>("counter", defaultData = 0) {
+                    // self-targeted form on DataTransitionStateApi<D> — no targetState
+                    delayedAutoDataTransition(delay = FAST) {
+                        producerCalls++
+                        1
+                    }
+                }
+            }
+            delay(WAIT_PAST_FAST)
+            // Verify the data-producer was invoked (timer-fired transition reached fire time).
+            producerCalls shouldBe 1
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    "missing delay in scoped builder throws on build" {
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        try {
+            shouldThrowWithMessage<IllegalArgumentException>(
+                "delay should be set in this transition builder"
+            ) {
+                createStateMachine(scope) {
+                    initialState("source") {
+                        delayedAutoTransition {
+                            // delay intentionally not set
+                            targetState = this@initialState
+                        }
+                    }
+                }
+            }
         } finally {
             scope.cancel()
         }

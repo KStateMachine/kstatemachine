@@ -119,10 +119,17 @@ interface AutoEvent : GeneratedEvent {
 
 interface AutoDataEvent<D : Any> : AutoEvent, DataEvent<D>
 
-internal data class AutoEventImpl(override val transitionId: Any) : AutoEvent
+/**
+ * Library-internal. Public only because it must be constructable from `kstatemachine-coroutines`
+ * (Kotlin `internal` is per-module). Do not construct directly in user code.
+ */
+data class AutoEventImpl(override val transitionId: Any) : AutoEvent
 
-/** Internal data-carrying variant of [AutoEvent], used by [autoDataTransition] and [delayedAutoDataTransition]. */
-internal data class AutoDataEventImpl<D : Any>(
+/**
+ * Library-internal data-carrying variant of [AutoEvent], used by [autoDataTransition] and
+ * [delayedAutoDataTransition]. Public for the same cross-module reason as [AutoEventImpl].
+ */
+data class AutoDataEventImpl<D : Any>(
     override val transitionId: Any,
     override val data: D,
 ) : AutoDataEvent<D>

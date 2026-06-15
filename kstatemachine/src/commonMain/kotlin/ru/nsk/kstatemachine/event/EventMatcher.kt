@@ -58,14 +58,22 @@ internal fun <D: Any> joinDataEventMatcher(transitionId: Any): EventMatcher<Join
             value is JoinCompleteDataEvent<*> && value.transitionId === transitionId
     }
 
-internal fun autoEventMatcher(transitionId: Any): EventMatcher<AutoEvent> =
+/**
+ * Library-internal. Public only because `kstatemachine-coroutines` constructs delayed auto
+ * transitions (Kotlin `internal` is per-module). Do not call from user code.
+ */
+fun autoEventMatcher(transitionId: Any): EventMatcher<AutoEvent> =
     object : EventMatcher<AutoEvent> {
         override val eventClass = AutoEvent::class
         override suspend fun match(value: Event) =
             value is AutoEvent && value.transitionId === transitionId
     }
 
-internal fun <D: Any> autoDataEventMatcher(transitionId: Any): EventMatcher<AutoDataEvent<D>> =
+/**
+ * Library-internal. Public only because `kstatemachine-coroutines` constructs delayed auto data
+ * transitions (Kotlin `internal` is per-module). Do not call from user code.
+ */
+fun <D: Any> autoDataEventMatcher(transitionId: Any): EventMatcher<AutoDataEvent<D>> =
     object : EventMatcher<AutoDataEvent<D>> {
         @Suppress("UNCHECKED_CAST")
         override val eventClass = AutoDataEvent::class as KClass<AutoDataEvent<D>>

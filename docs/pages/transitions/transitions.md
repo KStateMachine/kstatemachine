@@ -433,47 +433,93 @@ and
 
 ## Delayed auto transitions
 
-A delayed transition is a **UML time-event ("after Xms") transition**. The timer starts when the
-source state is entered, fires after the configured delay, and is automatically cancelled when the
-state is exited or when the machine is stopped or destroyed. On re-entry the timer restarts from
-zero. If a `guard` is supplied and rejects at fire time, the state stays put — the timer does
-**not** auto-restart (it fires again only on the next entry).
+A delayed transition is a **UML time-event ("after Xms") transition**. It reuses [`AutoEvent`](#eventless-automatic-transitions)
+under the hood — semantically just an auto-transition whose firing is postponed by a timer.
+The timer starts when the source state is entered, fires after the configured delay, and is
+automatically cancelled when the state is exited or when the machine is stopped or destroyed.
+On re-entry the timer restarts from zero. If a `guard` is supplied and rejects at fire time, the
+state stays put — the timer does **not** auto-restart (it fires again only on the next entry).
+
+The `delayedAutoTransition*` family offers the same four-step ladder as
+[the selection table](#by-api-complexity). Pick the simplest form that fits:
 
 ```kotlin
-val home = state("home")
+// Shortcut: delay is a function argument
 initialState("splash") {
     delayedAutoTransition(delay = 2.seconds, targetState = home)
 }
+
+// Scoped: delay is a DSL field on the builder, set inside the lambda
+initialState("splash") {
+    delayedAutoTransition {
+        delay = 2.seconds
+        guard = { ready }
+        targetState = home
+    }
+}
+
+// Lazy / dynamic target
+delayedAutoTransitionOn {
+    delay = 30.seconds
+    targetState = { screensaver }
+}
+
+// Full direction control
+delayedAutoTransitionConditionally {
+    delay = 1.seconds
+    direction = { if (busy) noTransition() else targetState(next) }
+}
 ```
+
+{: .note }
+For the scoped, `*On`, and `*Conditionally` variants the delay is **always** set inside the builder
+lambda (`delay = …`), not as a function argument. `delay` is a required field and the builder throws
+at setup time if it is left unset. ([`Duration`](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/)
+is an inline value class, so `lateinit` is not available — the field is nullable and validated on `build()`.)
 
 Lives in `kstatemachine-coroutines` because it needs a `CoroutineScope` to host the timer. Calling
 it on a machine created with `createStdLibStateMachine` throws — use `createStateMachine(scope) { ... }`
-instead. The job lifecycle mirrors [
-`asyncScopedAction`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity):
-launch on entry,
-cancel on exit, cancel on machine stop/destroy.
+instead. The job lifecycle mirrors [`asyncScopedAction`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity):
+launch on entry, cancel on exit, cancel on machine stop/destroy.
 
 ### Delayed auto transition into a DataState
 
-The `dataProducer` lambda runs once when the timer fires (not at registration time); its return
-value is delivered to the target [
-`DataState`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#data-states) as its entry data.
+`delayedAutoDataTransition*` is the type-safe variant — its `dataProducer` lambda runs once when
+the timer fires (not at registration time) and its return value is delivered to the target
+[`DataState`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#data-states)
+as its entry data. The same scoped / `*On` ladder applies:
 
 ```kotlin
-val timedOut: DataState<String> = dataState<String>("timedOut")
+// Shortcut
 initialState("waiting") {
     delayedAutoDataTransition(delay = 5.seconds, targetState = timedOut) {
         "no user response within 5s"
     }
 }
+
+// Scoped — delay and dataProducer both via DSL
+delayedAutoDataTransition<String> {
+    delay = 5.seconds
+    targetState = timedOut
+    dataProducer = { "no user response within 5s" }
+}
+
+// Lazy target
+delayedAutoDataTransitionOn<Int> {
+    delay = 1.seconds
+    targetState = { counter }
+    dataProducer = { computeNext() }
+}
 ```
 
+A self-targeted form is available when the surrounding state is itself a `DataState<D>` (i.e.
+inside a `DataTransitionStateApi<D>` block), in which case `targetState` is omitted and the
+producer refreshes the current state's data.
+
 See full runnable examples in
-[
-`DelayedAutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoTransitionSample.kt)
+[`DelayedAutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoTransitionSample.kt)
 and
-[
-`DelayedAutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoDataTransitionSample.kt).
+[`DelayedAutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoDataTransitionSample.kt).
 
 ## Transition interruption
 
