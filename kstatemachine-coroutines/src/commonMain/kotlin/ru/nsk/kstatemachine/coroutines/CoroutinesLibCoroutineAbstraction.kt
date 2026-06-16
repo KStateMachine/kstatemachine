@@ -9,6 +9,7 @@ package ru.nsk.kstatemachine.coroutines
 
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
 internal class CoroutinesLibCoroutineAbstraction(internal val scope: CoroutineScope) : CoroutineAbstraction {
     override fun <R : Any> runBlocking(block: suspend () -> R): R =
@@ -17,6 +18,14 @@ internal class CoroutinesLibCoroutineAbstraction(internal val scope: CoroutineSc
     /** Switches to context of the [scope] */
     override suspend fun <R : Any> withContext(block: suspend () -> R): R =
         withContext(scope.coroutineContext) { block() }
+
+    override fun scheduleAfterDelay(delay: Duration, block: suspend () -> Unit): Cancellable {
+        val job = scope.launch {
+            kotlinx.coroutines.delay(delay)
+            block()
+        }
+        return Cancellable { job.cancel() }
+    }
 }
 
 /**

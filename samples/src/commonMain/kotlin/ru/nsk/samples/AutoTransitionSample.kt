@@ -1,7 +1,7 @@
 /*
  * Author: Mikhail Fedotov
  * Github: https://github.com/KStateMachine
- * Copyright (c) 2024.
+ * Copyright (c) 2026.
  * All rights reserved.
  */
 
@@ -43,10 +43,10 @@ fun main() = runBlocking {
             }
         }
         b = state("b") {
-            autoTransition("b->c", targetState = c)
+            autoTransition(name = "b->c", targetState = c)
         }
         initialState("a") {
-            autoTransition("a->b", targetState = b)
+            autoTransition(name = "a->b", targetState = b)
         }
     }
 

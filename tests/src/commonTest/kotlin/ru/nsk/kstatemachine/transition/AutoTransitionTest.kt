@@ -45,10 +45,10 @@ class AutoTransitionTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     c = state("c")
                     b = state("b") {
-                        autoTransition("b->c", targetState = c)
+                        autoTransition(name = "b->c", targetState = c)
                     }
                     initialState("a") {
-                        autoTransition("a->b", targetState = b)
+                        autoTransition(name = "a->b", targetState = b)
                     }
                 }
                 c.isActive.shouldBeTrue()

@@ -21,12 +21,12 @@ import kotlinx.coroutines.delay
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.autoDataTransition
+import ru.nsk.kstatemachine.state.autoDataTransitionOn
+import ru.nsk.kstatemachine.state.autoTransition
+import ru.nsk.kstatemachine.state.autoTransitionConditionally
+import ru.nsk.kstatemachine.state.autoTransitionOn
 import ru.nsk.kstatemachine.state.dataState
-import ru.nsk.kstatemachine.state.delayedAutoDataTransition
-import ru.nsk.kstatemachine.state.delayedAutoDataTransitionOn
-import ru.nsk.kstatemachine.state.delayedAutoTransition
-import ru.nsk.kstatemachine.state.delayedAutoTransitionConditionally
-import ru.nsk.kstatemachine.state.delayedAutoTransitionOn
 import ru.nsk.kstatemachine.state.initialDataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
@@ -43,25 +43,29 @@ private val INFINITE = Long.MAX_VALUE.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 class DelayedAutoTransitionTest : FreeSpec({
-    "delayedAutoTransition throws for StdLib machine" {
-        createStdLibStateMachine {
-            initialState("only") {
-                shouldThrowWithMessage<IllegalArgumentException>(
-                    "delayedAutoTransition requires a StateMachine created with coroutines support (createStateMachine)"
-                ) { delayedAutoTransition(delay = FAST, targetState = this) }
+    "autoTransition(delay) throws for StdLib machine" {
+        // The error fires during machine start when onEntry triggers scheduleAfterDelay.
+        shouldThrowWithMessage<IllegalStateException>(
+            "scheduleAfterDelay requires a machine created with coroutines support (createStateMachine)"
+        ) {
+            createStdLibStateMachine {
+                val target = state("target")
+                initialState("source") {
+                    autoTransition(delay = FAST, targetState = target)
+                }
             }
         }
     }
 
-    "fires after the configured delay" {
+    "autoTransition(delay) fires after the configured delay" {
         lateinit var target: State
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedAutoTransition(delay = FAST, targetState = target)
+                    autoTransition(delay = FAST, targetState = target)
                 }
             }
             target.isActive.shouldBeFalse()
@@ -72,7 +76,7 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "does not fire if the source state is exited before the delay elapses" {
+    "autoTransition(delay) does not fire if the source state is exited before the delay elapses" {
         lateinit var source: State
         lateinit var unrelatedTarget: State
         lateinit var delayedTarget: State
@@ -83,21 +87,21 @@ class DelayedAutoTransitionTest : FreeSpec({
                 delayedTarget = state("delayedTarget")
                 unrelatedTarget = state("unrelatedTarget")
                 source = initialState("source") {
-                    delayedAutoTransition(delay = INFINITE, targetState = delayedTarget)
+                    autoTransition(delay = INFINITE, targetState = delayedTarget)
                     transitionOn<SwitchEvent> { targetState = { unrelatedTarget } }
                 }
             }
             machine.processEvent(SwitchEvent)
             unrelatedTarget.isActive.shouldBeTrue()
 
-            delay(50.milliseconds) // give any leaked job a chance to fire
+            delay(50.milliseconds)
             delayedTarget.isActive.shouldBeFalse()
         } finally {
             scope.cancel()
         }
     }
 
-    "cancelled on machine stop" {
+    "autoTransition(delay) cancelled on machine stop" {
         lateinit var target: State
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
@@ -105,7 +109,7 @@ class DelayedAutoTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedAutoTransition(delay = INFINITE, targetState = target)
+                    autoTransition(delay = INFINITE, targetState = target)
                 }
             }
             machine.stop()
@@ -117,7 +121,7 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "cancelled on machine destroy" {
+    "autoTransition(delay) cancelled on machine destroy" {
         lateinit var target: State
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
@@ -125,7 +129,7 @@ class DelayedAutoTransitionTest : FreeSpec({
             val machine = createStateMachine(scope) {
                 target = state("target")
                 initialState("source") {
-                    delayedAutoTransition(delay = INFINITE, targetState = target)
+                    autoTransition(delay = INFINITE, targetState = target)
                 }
             }
             machine.destroy()
@@ -137,17 +141,17 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "guard rejection at fire time keeps the state put and does not auto-restart" {
+    "autoTransition scoped with delay — guard rejection keeps state put and does not auto-restart" {
         lateinit var source: State
         lateinit var target: State
         var fireCount = 0
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 target = state("target")
                 source = initialState("source") {
-                    delayedAutoTransition {
+                    autoTransition {
                         delay = FAST
                         targetState = target
                         guard = {
@@ -162,7 +166,6 @@ class DelayedAutoTransitionTest : FreeSpec({
             target.isActive.shouldBeFalse()
             fireCount shouldBe 1
 
-            // Wait again — confirm the timer did NOT auto-restart.
             delay(WAIT_PAST_FAST)
             fireCount shouldBe 1
         } finally {
@@ -170,16 +173,16 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "delayedAutoDataTransition carries producer value into DataState" {
+    "autoDataTransition(delay) carries producer value into DataState" {
         lateinit var produced: DataState<Int>
         var producerCalls = 0
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 produced = dataState<Int>("produced")
                 initialState("source") {
-                    delayedAutoDataTransition(delay = FAST, targetState = produced) {
+                    autoDataTransition(delay = FAST, targetState = produced) {
                         producerCalls++
                         7
                     }
@@ -194,14 +197,14 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "delayedAutoTransitionOn resolves the target lazily" {
+    "autoTransitionOn scoped with delay resolves the target lazily" {
         lateinit var target: State
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 initialState("source") {
-                    delayedAutoTransitionOn {
+                    autoTransitionOn {
                         delay = FAST
                         targetState = { target }
                     }
@@ -215,18 +218,18 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "delayedAutoTransitionConditionally fires the direction lambda at fire time" {
+    "autoTransitionConditionally scoped with delay fires the direction lambda at fire time" {
         lateinit var even: State
         lateinit var odd: State
         var counter = 0
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 even = state("even")
                 odd = state("odd")
                 initialState("source") {
-                    delayedAutoTransitionConditionally {
+                    autoTransitionConditionally {
                         delay = FAST
                         direction = {
                             if (counter % 2 == 0) targetState(even) else targetState(odd)
@@ -242,15 +245,15 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "delayedAutoDataTransition scoped builder carries producer value" {
+    "autoDataTransition scoped with delay carries producer value" {
         lateinit var produced: DataState<String>
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 produced = dataState<String>("produced")
                 initialState("source") {
-                    delayedAutoDataTransition<String> {
+                    autoDataTransition<String> {
                         delay = FAST
                         targetState = produced
                         dataProducer = { "hello" }
@@ -265,14 +268,14 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "delayedAutoDataTransitionOn resolves the data target lazily" {
+    "autoDataTransitionOn scoped with delay resolves the data target lazily" {
         lateinit var produced: DataState<Int>
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 initialState("source") {
-                    delayedAutoDataTransitionOn<Int> {
+                    autoDataTransitionOn {
                         delay = FAST
                         targetState = { produced }
                         dataProducer = { 99 }
@@ -288,44 +291,43 @@ class DelayedAutoTransitionTest : FreeSpec({
         }
     }
 
-    "self-targeted delayedAutoDataTransition refreshes DataState data on the same state" {
+    "self-targeted autoDataTransition with delay refreshes DataState data" {
         lateinit var counter: DataState<Int>
         var producerCalls = 0
 
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            val machine = createStateMachine(scope) {
+            createStateMachine(scope) {
                 counter = initialDataState<Int>("counter", defaultData = 0) {
-                    // self-targeted form on DataTransitionStateApi<D> — no targetState
-                    delayedAutoDataTransition(delay = FAST) {
+                    autoDataTransition(delay = FAST) {
                         producerCalls++
                         1
                     }
                 }
             }
             delay(WAIT_PAST_FAST)
-            // Verify the data-producer was invoked (timer-fired transition reached fire time).
             producerCalls shouldBe 1
         } finally {
             scope.cancel()
         }
     }
 
-    "missing delay in scoped builder throws on build" {
+    "missing delay in scoped builder fires immediately (delay defaults to null)" {
+        lateinit var target: State
+
         val scope = CoroutineScope(Dispatchers.Unconfined)
         try {
-            shouldThrowWithMessage<IllegalArgumentException>(
-                "delay should be set in this transition builder"
-            ) {
-                createStateMachine(scope) {
-                    initialState("source") {
-                        delayedAutoTransition {
-                            // delay intentionally not set
-                            targetState = this@initialState
-                        }
+            createStateMachine(scope) {
+                target = state("target")
+                initialState("source") {
+                    autoTransition {
+                        // delay not set — should fire immediately on entry
+                        targetState = target
                     }
                 }
             }
+            // no delay() call needed — fires synchronously on entry
+            target.isActive.shouldBeTrue()
         } finally {
             scope.cancel()
         }

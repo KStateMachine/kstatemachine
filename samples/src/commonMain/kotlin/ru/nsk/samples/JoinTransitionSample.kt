@@ -1,7 +1,7 @@
 /*
  * Author: Mikhail Fedotov
  * Github: https://github.com/KStateMachine
- * Copyright (c) 2024.
+ * Copyright (c) 2026.
  * All rights reserved.
  */
 
@@ -9,7 +9,15 @@ package ru.nsk.samples
 
 import kotlinx.coroutines.runBlocking
 import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.state.*
+import ru.nsk.kstatemachine.state.ChildMode
+import ru.nsk.kstatemachine.state.IState
+import ru.nsk.kstatemachine.state.State
+import ru.nsk.kstatemachine.state.activeStates
+import ru.nsk.kstatemachine.state.initialState
+import ru.nsk.kstatemachine.state.joinTransition
+import ru.nsk.kstatemachine.state.onEntry
+import ru.nsk.kstatemachine.state.state
+import ru.nsk.kstatemachine.state.transition
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import ru.nsk.samples.JoinTransitionSample.DownloadCompleteEvent

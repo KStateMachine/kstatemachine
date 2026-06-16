@@ -1,7 +1,7 @@
 /*
  * Author: Mikhail Fedotov
  * Github: https://github.com/KStateMachine
- * Copyright (c) 2024.
+ * Copyright (c) 2026.
  * All rights reserved.
  */
 

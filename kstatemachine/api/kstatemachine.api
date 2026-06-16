@@ -6,9 +6,18 @@ public final class ru/nsk/kstatemachine/LibraryUtilsKt {
 public abstract interface annotation class ru/nsk/kstatemachine/VisibleForTesting : java/lang/annotation/Annotation {
 }
 
+public abstract interface class ru/nsk/kstatemachine/coroutines/Cancellable {
+	public abstract fun cancel ()V
+}
+
 public abstract interface class ru/nsk/kstatemachine/coroutines/CoroutineAbstraction {
 	public abstract fun runBlocking (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public abstract fun scheduleAfterDelay-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/coroutines/Cancellable;
 	public abstract fun withContext (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class ru/nsk/kstatemachine/coroutines/CoroutineAbstraction$DefaultImpls {
+	public static fun scheduleAfterDelay-VtjQ1oo (Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;JLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/coroutines/Cancellable;
 }
 
 public final class ru/nsk/kstatemachine/coroutines/CoroutineAbstractionKt {
@@ -292,18 +301,18 @@ public final class ru/nsk/kstatemachine/persistence/WarningType : java/lang/Enum
 }
 
 public final class ru/nsk/kstatemachine/state/AutoTransitionApiKt {
-	public static final fun autoDataTransition (Lru/nsk/kstatemachine/state/DataTransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
 	public static final fun autoDataTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
-	public static final fun autoDataTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
-	public static synthetic fun autoDataTransition$default (Lru/nsk/kstatemachine/state/DataTransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 	public static synthetic fun autoDataTransition$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
-	public static synthetic fun autoDataTransition$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun autoDataTransition-i8z2VEo (Lru/nsk/kstatemachine/state/DataTransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun autoDataTransition-i8z2VEo$default (Lru/nsk/kstatemachine/state/DataTransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun autoDataTransition-rp2poPw (Lru/nsk/kstatemachine/state/TransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun autoDataTransition-rp2poPw$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/state/DataState;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 	public static final fun autoDataTransitionOn (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
 	public static synthetic fun autoDataTransitionOn$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 	public static final fun autoTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
-	public static final fun autoTransition (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;)Lru/nsk/kstatemachine/transition/Transition;
 	public static synthetic fun autoTransition$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
-	public static synthetic fun autoTransition$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
+	public static final fun autoTransition-i8z2VEo (Lru/nsk/kstatemachine/state/TransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;)Lru/nsk/kstatemachine/transition/Transition;
+	public static synthetic fun autoTransition-i8z2VEo$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Lkotlin/time/Duration;Ljava/lang/String;Lru/nsk/kstatemachine/state/State;Lru/nsk/kstatemachine/transition/TransitionType;Lru/nsk/kstatemachine/metainfo/MetaInfo;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 	public static final fun autoTransitionConditionally (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
 	public static synthetic fun autoTransitionConditionally$default (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lru/nsk/kstatemachine/transition/Transition;
 	public static final fun autoTransitionOn (Lru/nsk/kstatemachine/state/TransitionStateApi;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/transition/Transition;
@@ -937,12 +946,21 @@ public final class ru/nsk/kstatemachine/testing/Testing {
 	public static synthetic fun startFromBlocking$default (Lru/nsk/kstatemachine/testing/Testing;Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/state/IState;[Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;ILjava/lang/Object;)V
 }
 
+public final class ru/nsk/kstatemachine/transition/AutoConditionalTransitionBuilder : ru/nsk/kstatemachine/transition/ConditionalTransitionBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getDelay-FghU774 ()Lkotlin/time/Duration;
+	public final fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
+}
+
 public class ru/nsk/kstatemachine/transition/AutoDataGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/DataGuardedTransitionBuilder {
 	public field dataProducer Lkotlin/jvm/functions/Function1;
 	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
 	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
 	public final fun getDataProducer ()Lkotlin/jvm/functions/Function1;
+	public final fun getDelay-FghU774 ()Lkotlin/time/Duration;
 	public final fun setDataProducer (Lkotlin/jvm/functions/Function1;)V
+	public final fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
 }
 
 public class ru/nsk/kstatemachine/transition/AutoDataGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/DataGuardedTransitionOnBuilder {
@@ -950,7 +968,23 @@ public class ru/nsk/kstatemachine/transition/AutoDataGuardedTransitionOnBuilder 
 	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
 	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
 	public final fun getDataProducer ()Lkotlin/jvm/functions/Function1;
+	public final fun getDelay-FghU774 ()Lkotlin/time/Duration;
 	public final fun setDataProducer (Lkotlin/jvm/functions/Function1;)V
+	public final fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/AutoUnitGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/UnitGuardedTransitionBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getDelay-FghU774 ()Lkotlin/time/Duration;
+	public final fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
+}
+
+public final class ru/nsk/kstatemachine/transition/AutoUnitGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/UnitGuardedTransitionOnBuilder {
+	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
+	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
+	public final fun getDelay-FghU774 ()Lkotlin/time/Duration;
+	public final fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
 }
 
 public abstract class ru/nsk/kstatemachine/transition/BaseGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/TransitionBuilder {
@@ -999,46 +1033,6 @@ public class ru/nsk/kstatemachine/transition/DefaultTransition : ru/nsk/kstatema
 	public fun removeListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)V
 	public fun setArgument (Ljava/lang/Object;)V
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class ru/nsk/kstatemachine/transition/DelayedAutoConditionalTransitionBuilder : ru/nsk/kstatemachine/transition/ConditionalTransitionBuilder, ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
-	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
-	public fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
-}
-
-public final class ru/nsk/kstatemachine/transition/DelayedAutoDataGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/AutoDataGuardedTransitionBuilder, ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
-	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
-	public fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
-}
-
-public final class ru/nsk/kstatemachine/transition/DelayedAutoDataGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/AutoDataGuardedTransitionOnBuilder, ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
-	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
-	public fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
-}
-
-public abstract interface class ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public abstract fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public abstract fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
-}
-
-public final class ru/nsk/kstatemachine/transition/DelayedAutoUnitGuardedTransitionBuilder : ru/nsk/kstatemachine/transition/UnitGuardedTransitionBuilder, ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
-	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
-	public fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
-}
-
-public final class ru/nsk/kstatemachine/transition/DelayedAutoUnitGuardedTransitionOnBuilder : ru/nsk/kstatemachine/transition/UnitGuardedTransitionOnBuilder, ru/nsk/kstatemachine/transition/DelayedAutoTransitionBuilderDsl {
-	public fun <init> (Ljava/lang/String;Lru/nsk/kstatemachine/state/IState;Ljava/lang/Object;)V
-	public fun build ()Lru/nsk/kstatemachine/transition/Transition;
-	public fun getDelay-FghU774 ()Lkotlin/time/Duration;
-	public fun setDelay-BwNAW2A (Lkotlin/time/Duration;)V
 }
 
 public final class ru/nsk/kstatemachine/transition/EventAndArgument {

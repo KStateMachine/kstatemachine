@@ -44,7 +44,7 @@ suspend fun TransitionStateApi.joinTransition(
     type: TransitionType = LOCAL,
     metaInfo: MetaInfo? = null,
 ): Transition<JoinCompleteEvent> =
-    joinTransition(setOf(joinState1, joinState2, *joinStates), name, targetState, type, metaInfo)
+    joinTransition(name, setOf(joinState1, joinState2, *joinStates), targetState, type, metaInfo)
 
 /**
  * Adds a **UML join** transition to this [ChildMode.PARALLEL] state.
@@ -65,8 +65,8 @@ suspend fun TransitionStateApi.joinTransition(
  *   Use [joinDataTransition] to target a [DataState].
  */
 suspend fun TransitionStateApi.joinTransition(
-    joinStates: Set<IState>,
     name: String? = null,
+    joinStates: Set<IState>,
     targetState: State,
     type: TransitionType = LOCAL,
     metaInfo: MetaInfo? = null,
@@ -146,7 +146,7 @@ suspend fun <D : Any> TransitionStateApi.joinDataTransition(
     metaInfo: MetaInfo? = null,
     dataProducer: suspend () -> D
 ): Transition<JoinCompleteDataEvent<D>> =
-    joinDataTransition(setOf(joinState1, joinState2, *joinStates), name, targetState, type, metaInfo, dataProducer)
+    joinDataTransition(name, setOf(joinState1, joinState2, *joinStates), targetState, type, metaInfo, dataProducer)
 
 /**
  * Type-safe variant of [joinTransition] that targets a [DataState].
@@ -161,8 +161,8 @@ suspend fun <D : Any> TransitionStateApi.joinDataTransition(
  * @param dataProducer lambda invoked at join time to produce the data for [targetState].
  */
 suspend fun <D : Any> TransitionStateApi.joinDataTransition(
-    joinStates: Set<IState>,
     name: String? = null,
+    joinStates: Set<IState>,
     targetState: DataState<D>,
     type: TransitionType = LOCAL,
     metaInfo: MetaInfo? = null,

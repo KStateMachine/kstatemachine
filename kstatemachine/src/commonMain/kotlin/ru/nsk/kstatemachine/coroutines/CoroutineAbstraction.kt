@@ -16,6 +16,14 @@ import kotlin.contracts.contract
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
+import kotlin.time.Duration
+
+/**
+ * Represents a cancellable task, typically a scheduled timer.
+ */
+fun interface Cancellable {
+    fun cancel()
+}
 
 /**
  * Starts coroutines in blocking and nonblocking way.
@@ -24,6 +32,14 @@ import kotlin.coroutines.startCoroutine
 interface CoroutineAbstraction {
     fun <R : Any> runBlocking(block: suspend () -> R): R
     suspend fun <R : Any> withContext(block: suspend () -> R): R
+
+    /**
+     * Schedules [block] to run after [delay] elapses. Returns a [Cancellable] that cancels the
+     * scheduled work. The default implementation throws, indicating that a machine created with
+     * `createStateMachine` (coroutines support) is required.
+     */
+    fun scheduleAfterDelay(delay: Duration, block: suspend () -> Unit): Cancellable =
+        error("scheduleAfterDelay requires a machine created with coroutines support (createStateMachine)")
 }
 
 /**

@@ -38,13 +38,11 @@ the simpler form cannot express what you need:
 |--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `transition*`            | The common API — fires when the matching `Event` arrives. Every other family below inherits the same four-step ladder from [the table above](#by-api-complexity).                                                                                                |
 | `dataTransition*`        | Type-safe analog of `transition*`: enforces at compile time that the `DataEvent` carries data of the type the target `DataState` expects. See [Typesafe transitions](https://kstatemachine.github.io/kstatemachine/pages/transitions/typesafe_transitions.html). |
-| `autoTransition*`        | Fires on source-state entry, no explicit event required (UML eventless / "always").                                                                                                                                                                              |
-| `joinTransition*`        | Fires when all join-point states inside a parallel state are simultaneously active (UML join).                                                                                                                                                                   |
-| `delayedAutoTransition*` | Fires after a configured delay while the source state is active (UML time event).                                                                                                                                                                                |
+| `autoTransition*`        | Fires on source-state entry, no explicit event required (UML eventless / "always"). Optionally, a `delay` argument activates UML time-event behaviour — requires `kstatemachine-coroutines`. |
+| `joinTransition*`        | Fires when all join-point states inside a parallel state are simultaneously active (UML join).                                                                                                |
 
 Every `*Transition*` family also has a `*DataTransition*` analog (`autoDataTransition*`,
-`joinDataTransition*`, `delayedAutoDataTransition*`) that keeps the same compile-time
-`DataEvent → DataState` type-safety.
+`joinDataTransition*`) that keeps the same compile-time `DataEvent → DataState` type-safety.
 
 Listening to transition firing is uniform across all families — see [Listen to all transitions in one place](#listen-to-all-transitions-in-one-place).
 
@@ -425,98 +423,70 @@ initialState("authenticating") {
 ```
 
 See full runnable examples in
-[
-`AutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoTransitionSample.kt)
+[`AutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoTransitionSample.kt)
 and
-[
-`AutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoDataTransitionSample.kt).
+[`AutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/AutoDataTransitionSample.kt).
 
-## Delayed auto transitions
+### Time-event (delayed) variant
 
-A delayed transition is a **UML time-event ("after Xms") transition**. It reuses [`AutoEvent`](#eventless-automatic-transitions)
-under the hood — semantically just an auto-transition whose firing is postponed by a timer.
-The timer starts when the source state is entered, fires after the configured delay, and is
-automatically cancelled when the state is exited or when the machine is stopped or destroyed.
-On re-entry the timer restarts from zero. If a `guard` is supplied and rejects at fire time, the
-state stays put — the timer does **not** auto-restart (it fires again only on the next entry).
-
-The `delayedAutoTransition*` family offers the same four-step ladder as
-[the selection table](#by-api-complexity). Pick the simplest form that fits:
+Passing an optional `delay` argument turns any `autoTransition*` into a **UML time-event
+("after Xms") transition**. The timer starts on state entry, fires after the delay, and is
+automatically cancelled on exit or machine stop/destroy. On re-entry the timer restarts from zero.
+If a guard rejects at fire time the state stays put and the timer does **not** auto-restart.
 
 ```kotlin
-// Shortcut: delay is a function argument
+// Shortcut — delay is a function argument
 initialState("splash") {
-    delayedAutoTransition(delay = 2.seconds, targetState = home)
+    autoTransition(delay = 2.seconds, targetState = home)
 }
 
-// Scoped: delay is a DSL field on the builder, set inside the lambda
-initialState("splash") {
-    delayedAutoTransition {
-        delay = 2.seconds
-        guard = { ready }
-        targetState = home
+// Scoped — delay is a DSL field set inside the builder lambda
+initialState("idle") {
+    autoTransition {
+        delay = 30.seconds
+        guard = { !inputBlocked }
+        targetState = screensaver
     }
 }
-
-// Lazy / dynamic target
-delayedAutoTransitionOn {
+autoTransitionOn {
     delay = 30.seconds
     targetState = { screensaver }
 }
-
-// Full direction control
-delayedAutoTransitionConditionally {
+autoTransitionConditionally {
     delay = 1.seconds
     direction = { if (busy) noTransition() else targetState(next) }
 }
 ```
 
-{: .note }
-For the scoped, `*On`, and `*Conditionally` variants the delay is **always** set inside the builder
-lambda (`delay = …`), not as a function argument. `delay` is a required field and the builder throws
-at setup time if it is left unset. ([`Duration`](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/)
-is an inline value class, so `lateinit` is not available — the field is nullable and validated on `build()`.)
-
-Lives in `kstatemachine-coroutines` because it needs a `CoroutineScope` to host the timer. Calling
-it on a machine created with `createStdLibStateMachine` throws — use `createStateMachine(scope) { ... }`
-instead. The job lifecycle mirrors [`asyncScopedAction`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity):
-launch on entry, cancel on exit, cancel on machine stop/destroy.
-
-### Delayed auto transition into a DataState
-
-`delayedAutoDataTransition*` is the type-safe variant — its `dataProducer` lambda runs once when
-the timer fires (not at registration time) and its return value is delivered to the target
-[`DataState`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#data-states)
-as its entry data. The same scoped / `*On` ladder applies:
+For `DataState` targets the `dataProducer` lambda runs once when the timer fires (not at
+registration time):
 
 ```kotlin
 // Shortcut
 initialState("waiting") {
-    delayedAutoDataTransition(delay = 5.seconds, targetState = timedOut) {
+    autoDataTransition(delay = 5.seconds, targetState = timedOut) {
         "no user response within 5s"
     }
 }
 
-// Scoped — delay and dataProducer both via DSL
-delayedAutoDataTransition<String> {
+// Scoped
+autoDataTransition<String> {
     delay = 5.seconds
     targetState = timedOut
     dataProducer = { "no user response within 5s" }
 }
-
-// Lazy target
-delayedAutoDataTransitionOn<Int> {
-    delay = 1.seconds
-    targetState = { counter }
-    dataProducer = { computeNext() }
-}
 ```
 
-A self-targeted form is available when the surrounding state is itself a `DataState<D>` (i.e.
-inside a `DataTransitionStateApi<D>` block), in which case `targetState` is omitted and the
-producer refreshes the current state's data.
+A self-targeted form exists for `DataTransitionStateApi<D>` blocks (omit `targetState` to
+refresh the current state's own data).
 
-See full runnable examples in
+{: .note }
+`delay` requires `kstatemachine-coroutines`. Calling `autoTransition(delay = …, …)` on a machine
+created with `createStdLibStateMachine` throws at runtime. The timer lifecycle mirrors
+[`asyncScopedAction`](https://kstatemachine.github.io/kstatemachine/pages/states/states.html#async-scoped-action-do-activity):
+launch on entry, cancel on exit/stop/destroy.
+
+See delay examples in
 [`DelayedAutoTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoTransitionSample.kt)
 and
 [`DelayedAutoDataTransitionSample.kt`](https://github.com/KStateMachine/kstatemachine/blob/master/samples/src/commonMain/kotlin/ru/nsk/samples/DelayedAutoDataTransitionSample.kt).
