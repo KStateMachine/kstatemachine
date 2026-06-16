@@ -1,5 +1,5 @@
 [versions]
-library = "0.37.0"
+library = "0.38.0"
 
 kotlin = "2.3.21"
 dokka = "2.2.0"
