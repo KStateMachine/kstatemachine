@@ -21,7 +21,7 @@ internal class CoroutinesLibCoroutineAbstraction(internal val scope: CoroutineSc
 
     override fun scheduleAfterDelay(delay: Duration, block: suspend () -> Unit): Cancellable {
         val job = scope.launch {
-            kotlinx.coroutines.delay(delay)
+            delay(delay)
             block()
         }
         return Cancellable { job.cancel() }
