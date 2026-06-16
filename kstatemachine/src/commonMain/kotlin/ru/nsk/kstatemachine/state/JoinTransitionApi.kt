@@ -9,12 +9,10 @@
 
 package ru.nsk.kstatemachine.state
 
-import ru.nsk.kstatemachine.event.DataEvent
 import ru.nsk.kstatemachine.event.JoinCompleteDataEvent
 import ru.nsk.kstatemachine.event.JoinCompleteDataEventImpl
 import ru.nsk.kstatemachine.event.JoinCompleteEvent
 import ru.nsk.kstatemachine.event.JoinCompleteEventImpl
-import ru.nsk.kstatemachine.event.joinDataEventMatcher
 import ru.nsk.kstatemachine.event.joinEventMatcher
 import ru.nsk.kstatemachine.metainfo.JoinTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
@@ -131,56 +129,6 @@ suspend fun TransitionStateApi.joinTransitionConditionally(
 
     installJoinCompleteEventTrigger(transitionId, builder.joinStates)
     return addTransition(builder.build())
-}
-
-/**
- * vararg [joinDataTransition] overload, protects from compilation of less than two join points.
- */
-suspend fun <D : Any> TransitionStateApi.joinDataTransition(
-    joinState1: IState,
-    joinState2: IState,
-    vararg joinStates: IState,
-    name: String? = null,
-    targetState: DataState<D>,
-    type: TransitionType = LOCAL,
-    metaInfo: MetaInfo? = null,
-    dataProducer: suspend () -> D
-): Transition<JoinCompleteDataEvent<D>> =
-    joinDataTransition(name, setOf(joinState1, joinState2, *joinStates), targetState, type, metaInfo, dataProducer)
-
-/**
- * Type-safe variant of [joinTransition] that targets a [DataState].
- *
- * [dataProducer] is called once, synchronously, at the moment all join-point states become
- * simultaneously active. Its return value is fed to [targetState] as its entry data, replacing
- * the need for a matching [DataEvent] on the triggering event.
- *
- * @param joinStates at least 2 states, one per parallel region.
- * @param name optional name for the transition (also used as the `<<join>>` node name in exports).
- * @param targetState the [DataState] to enter after all regions have joined.
- * @param dataProducer lambda invoked at join time to produce the data for [targetState].
- */
-suspend fun <D : Any> TransitionStateApi.joinDataTransition(
-    name: String? = null,
-    joinStates: Set<IState>,
-    targetState: DataState<D>,
-    type: TransitionType = LOCAL,
-    metaInfo: MetaInfo? = null,
-    dataProducer: suspend () -> D
-): Transition<JoinCompleteDataEvent<D>> {
-    requireJoinPrerequisites(joinStates)
-    val transitionId = Any()
-    installJoinCompleteDataEventTrigger(transitionId, joinStates, dataProducer)
-    return addTransition(
-        DefaultTransition(
-            name = name,
-            eventMatcher = joinDataEventMatcher(transitionId),
-            type = type,
-            metaInfo = metaInfo + JoinTransitionMetaInfo(joinStates),
-            sourceState = asState(),
-            targetState = targetState,
-        )
-    )
 }
 
 suspend fun <D : Any> TransitionStateApi.joinDataTransition(

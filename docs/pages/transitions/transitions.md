@@ -416,8 +416,9 @@ delivered to the target as its entry data — no custom `DataEvent` subclass is 
 ```kotlin
 val session: DataState<LoginResult> = dataState<LoginResult>("session")
 initialState("authenticating") {
-    autoDataTransition(targetState = session) {
-        LoginResult(userId = "u-42", sessionToken = "abc123")
+    autoDataTransition {
+        targetState = session
+        dataProducer = { LoginResult(userId = "u-42", sessionToken = "abc123") }
     }
 }
 ```
@@ -462,14 +463,6 @@ For `DataState` targets the `dataProducer` lambda runs once when the timer fires
 registration time):
 
 ```kotlin
-// Shortcut
-initialState("waiting") {
-    autoDataTransition(delay = 5.seconds, targetState = timedOut) {
-        "no user response within 5s"
-    }
-}
-
-// Scoped
 autoDataTransition<String> {
     delay = 5.seconds
     targetState = timedOut

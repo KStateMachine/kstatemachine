@@ -34,8 +34,10 @@ fun main() = runBlocking {
             onEntry { println("Timeout reason: $data") }
         }
         initialState("waiting") {
-            autoDataTransition(delay = 50.milliseconds, targetState = timedOut) {
-                "no user response within 50ms"
+            autoDataTransition<String> {
+                delay = 50.milliseconds
+                targetState = timedOut
+                dataProducer = { "no user response within 50ms" }
             }
         }
     }

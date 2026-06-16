@@ -11,6 +11,8 @@ import ru.nsk.kstatemachine.event.AutoDataEvent
 import ru.nsk.kstatemachine.event.AutoEvent
 import ru.nsk.kstatemachine.event.autoDataEventMatcher
 import ru.nsk.kstatemachine.event.autoEventMatcher
+import ru.nsk.kstatemachine.metainfo.DelayedAutoTransitionMetaInfo
+import ru.nsk.kstatemachine.metainfo.plus
 import ru.nsk.kstatemachine.state.IState
 import kotlin.time.Duration
 
@@ -30,6 +32,7 @@ class AutoUnitGuardedTransitionBuilder(
 
     public override fun build(): Transition<AutoEvent> {
         eventMatcher = autoEventMatcher(transitionId)
+        metaInfo += delayedMetaInfoOrNull(delay)
         return super.build()
     }
 }
@@ -48,6 +51,7 @@ class AutoUnitGuardedTransitionOnBuilder(
 
     public override fun build(): Transition<AutoEvent> {
         eventMatcher = autoEventMatcher(transitionId)
+        metaInfo += delayedMetaInfoOrNull(delay)
         return super.build()
     }
 }
@@ -66,6 +70,7 @@ class AutoConditionalTransitionBuilder(
 
     public override fun build(): Transition<AutoEvent> {
         eventMatcher = autoEventMatcher(transitionId)
+        metaInfo += delayedMetaInfoOrNull(delay)
         return super.build()
     }
 }
@@ -84,6 +89,7 @@ open class AutoDataGuardedTransitionBuilder<D : Any>(
     public override fun build(): Transition<AutoDataEvent<D>> {
         require(this::dataProducer.isInitialized) { "dataProducer should be initialized in this transition builder" }
         eventMatcher = autoDataEventMatcher(transitionId)
+        metaInfo += delayedMetaInfoOrNull(delay)
         return super.build()
     }
 }
@@ -102,6 +108,10 @@ open class AutoDataGuardedTransitionOnBuilder<D : Any>(
     public override fun build(): Transition<AutoDataEvent<D>> {
         require(this::dataProducer.isInitialized) { "dataProducer should be initialized in this transition builder" }
         eventMatcher = autoDataEventMatcher(transitionId)
+        metaInfo += delayedMetaInfoOrNull(delay)
         return super.build()
     }
 }
+
+internal fun delayedMetaInfoOrNull(delay: Duration?): DelayedAutoTransitionMetaInfo? =
+    delay?.let { DelayedAutoTransitionMetaInfo(it) }

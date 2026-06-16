@@ -7,8 +7,6 @@ import io.kotest.matchers.shouldBe
 import ru.nsk.kstatemachine.CoroutineStarterType
 import ru.nsk.kstatemachine.SwitchEvent
 import ru.nsk.kstatemachine.createTestStateMachine
-import ru.nsk.kstatemachine.event.Event
-import ru.nsk.kstatemachine.metainfo.buildExportMetaInfo
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.State
 import ru.nsk.kstatemachine.state.autoDataTransition
@@ -20,7 +18,6 @@ import ru.nsk.kstatemachine.state.dataState
 import ru.nsk.kstatemachine.state.initialState
 import ru.nsk.kstatemachine.state.state
 import ru.nsk.kstatemachine.state.transition
-import ru.nsk.kstatemachine.state.transitionOn
 import ru.nsk.kstatemachine.statemachine.processEventBlocking
 import ru.nsk.kstatemachine.statemachine.restart
 
@@ -100,7 +97,10 @@ class AutoTransitionTest : FreeSpec({
                 val machine = createTestStateMachine(coroutineStarterType) {
                     produced = dataState<Int>("produced")
                     initialState("source") {
-                        autoDataTransition(targetState = produced) { 42 }
+                        autoDataTransition {
+                            targetState = produced
+                            dataProducer = { 42 }
+                        }
                     }
                 }
                 produced.isActive.shouldBeTrue()

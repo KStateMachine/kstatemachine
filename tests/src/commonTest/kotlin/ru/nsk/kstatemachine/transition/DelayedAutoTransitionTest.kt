@@ -182,9 +182,13 @@ class DelayedAutoTransitionTest : FreeSpec({
             createStateMachine(scope) {
                 produced = dataState<Int>("produced")
                 initialState("source") {
-                    autoDataTransition(delay = FAST, targetState = produced) {
-                        producerCalls++
-                        7
+                    autoDataTransition {
+                        delay = FAST
+                        targetState = produced
+                        dataProducer = {
+                            producerCalls++
+                            7
+                        }
                     }
                 }
             }
@@ -299,9 +303,13 @@ class DelayedAutoTransitionTest : FreeSpec({
         try {
             createStateMachine(scope) {
                 counter = initialDataState<Int>("counter", defaultData = 0) {
-                    autoDataTransition(delay = FAST) {
-                        producerCalls++
-                        1
+                    autoDataTransitionOn {
+                        delay = FAST
+                        targetState = { counter }
+                        dataProducer = {
+                            producerCalls++
+                            1
+                        }
                     }
                 }
             }

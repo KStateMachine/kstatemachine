@@ -14,9 +14,7 @@ import ru.nsk.kstatemachine.event.AutoDataEvent
 import ru.nsk.kstatemachine.event.AutoDataEventImpl
 import ru.nsk.kstatemachine.event.AutoEvent
 import ru.nsk.kstatemachine.event.AutoEventImpl
-import ru.nsk.kstatemachine.event.autoDataEventMatcher
 import ru.nsk.kstatemachine.event.autoEventMatcher
-import ru.nsk.kstatemachine.metainfo.DelayedAutoTransitionMetaInfo
 import ru.nsk.kstatemachine.metainfo.MetaInfo
 import ru.nsk.kstatemachine.metainfo.plus
 import ru.nsk.kstatemachine.statemachine.StateMachine
@@ -30,6 +28,7 @@ import ru.nsk.kstatemachine.transition.Transition
 import ru.nsk.kstatemachine.transition.TransitionParams
 import ru.nsk.kstatemachine.transition.TransitionType
 import ru.nsk.kstatemachine.transition.TransitionType.LOCAL
+import ru.nsk.kstatemachine.transition.delayedMetaInfoOrNull
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -55,15 +54,14 @@ fun TransitionStateApi.autoTransition(
     metaInfo: MetaInfo? = null,
 ): Transition<AutoEvent> {
     val transitionId = Any()
-    val sourceState = asState()
-    installAutoTrigger(sourceState, delay) { AutoEventImpl(transitionId) }
+    installAutoTrigger(delay) { AutoEventImpl(transitionId) }
     return addTransition(
         DefaultTransition(
             name = name,
             eventMatcher = autoEventMatcher(transitionId),
             type = type,
             metaInfo = metaInfo + delayedMetaInfoOrNull(delay),
-            sourceState = sourceState,
+            sourceState = asState(),
             targetState = targetState,
         )
     )
@@ -88,13 +86,11 @@ fun TransitionStateApi.autoTransition(
 ): Transition<AutoEvent> {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     val transitionId = Any()
-    val sourceState = asState()
-    val builder = AutoUnitGuardedTransitionBuilder(name, sourceState, transitionId)
+    val builder = AutoUnitGuardedTransitionBuilder(name, asState(), transitionId)
     builder.block()
-    builder.metaInfo += delayedMetaInfoOrNull(builder.delay)
-    val transition = builder.build()
-    installAutoTrigger(sourceState, builder.delay) { AutoEventImpl(transitionId) }
-    return addTransition(transition)
+
+    installAutoTrigger(builder.delay) { AutoEventImpl(transitionId) }
+    return addTransition(builder.build())
 }
 
 /**
@@ -107,13 +103,11 @@ fun TransitionStateApi.autoTransitionOn(
 ): Transition<AutoEvent> {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     val transitionId = Any()
-    val sourceState = asState()
-    val builder = AutoUnitGuardedTransitionOnBuilder(name, sourceState, transitionId)
+    val builder = AutoUnitGuardedTransitionOnBuilder(name, asState(), transitionId)
     builder.block()
-    builder.metaInfo += delayedMetaInfoOrNull(builder.delay)
-    val transition = builder.build()
-    installAutoTrigger(sourceState, builder.delay) { AutoEventImpl(transitionId) }
-    return addTransition(transition)
+
+    installAutoTrigger(builder.delay) { AutoEventImpl(transitionId) }
+    return addTransition(builder.build())
 }
 
 /**
@@ -126,67 +120,11 @@ fun TransitionStateApi.autoTransitionConditionally(
 ): Transition<AutoEvent> {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     val transitionId = Any()
-    val sourceState = asState()
-    val builder = AutoConditionalTransitionBuilder(name, sourceState, transitionId)
+    val builder = AutoConditionalTransitionBuilder(name, asState(), transitionId)
     builder.block()
-    builder.metaInfo += delayedMetaInfoOrNull(builder.delay)
-    val transition = builder.build()
-    installAutoTrigger(sourceState, builder.delay) { AutoEventImpl(transitionId) }
-    return addTransition(transition)
-}
 
-/**
- * Type-safe variant targeting a [DataState]. The [dataProducer] lambda runs once at fire time
- * (after [delay] if non-null) and its return value is delivered as the target's entry data.
- */
-fun <D : Any> TransitionStateApi.autoDataTransition(
-    name: String? = null,
-    delay: Duration? = null,
-    targetState: DataState<D>,
-    type: TransitionType = LOCAL,
-    metaInfo: MetaInfo? = null,
-    dataProducer: suspend () -> D,
-): Transition<AutoDataEvent<D>> {
-    val transitionId = Any()
-    val sourceState = asState()
-    installAutoTrigger(sourceState, delay) { AutoDataEventImpl(transitionId, dataProducer()) }
-    return addTransition(
-        DefaultTransition(
-            name = name,
-            eventMatcher = autoDataEventMatcher<D>(transitionId),
-            type = type,
-            metaInfo = metaInfo + delayedMetaInfoOrNull(delay),
-            sourceState = sourceState,
-            targetState = targetState,
-        )
-    )
-}
-
-/**
- * Self-targeted data transition — available only inside a [DataTransitionStateApi] block so that
- * the produced data type matches the state's own type. Useful for refreshing [DataState] data
- * without a state change.
- */
-fun <D : Any> DataTransitionStateApi<D>.autoDataTransition(
-    name: String? = null,
-    delay: Duration? = null,
-    type: TransitionType = LOCAL,
-    metaInfo: MetaInfo? = null,
-    dataProducer: suspend () -> D,
-): Transition<AutoDataEvent<D>> {
-    val transitionId = Any()
-    val sourceState = asState()
-    installAutoTrigger(sourceState, delay) { AutoDataEventImpl(transitionId, dataProducer()) }
-    return addTransition(
-        DefaultTransition(
-            name = name,
-            eventMatcher = autoDataEventMatcher<D>(transitionId),
-            type = type,
-            metaInfo = metaInfo + delayedMetaInfoOrNull(delay),
-            sourceState = sourceState,
-            targetState = null,
-        )
-    )
+    installAutoTrigger(builder.delay) { AutoEventImpl(transitionId) }
+    return addTransition(builder.build())
 }
 
 /** Scoped data transition with [delay], [dataProducer], `targetState`, and optional `guard`. */
@@ -196,15 +134,13 @@ fun <D : Any> TransitionStateApi.autoDataTransition(
 ): Transition<AutoDataEvent<D>> {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     val transitionId = Any()
-    val sourceState = asState()
-    val builder = AutoDataGuardedTransitionBuilder<D>(name, sourceState, transitionId)
+    val builder = AutoDataGuardedTransitionBuilder<D>(name, asState(), transitionId)
     builder.block()
-    builder.metaInfo += delayedMetaInfoOrNull(builder.delay)
-    val transition = builder.build()
-    installAutoTrigger(sourceState, builder.delay) {
+
+    installAutoTrigger(builder.delay) {
         AutoDataEventImpl(transitionId, builder.dataProducer())
     }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
 
 /** Scoped data transition with lazy [targetState] lambda, [delay], and [dataProducer]. */
@@ -214,21 +150,14 @@ fun <D : Any> TransitionStateApi.autoDataTransitionOn(
 ): Transition<AutoDataEvent<D>> {
     contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
     val transitionId = Any()
-    val sourceState = asState()
-    val builder = AutoDataGuardedTransitionOnBuilder<D>(name, sourceState, transitionId)
+    val builder = AutoDataGuardedTransitionOnBuilder<D>(name, asState(), transitionId)
     builder.block()
-    builder.metaInfo += delayedMetaInfoOrNull(builder.delay)
-    val transition = builder.build()
-    installAutoTrigger(sourceState, builder.delay) {
+
+    installAutoTrigger(builder.delay) {
         AutoDataEventImpl(transitionId, builder.dataProducer())
     }
-    return addTransition(transition)
+    return addTransition(builder.build())
 }
-
-// ─── Private helpers ───────────────────────────────────────────────────────────
-
-private fun delayedMetaInfoOrNull(delay: Duration?): DelayedAutoTransitionMetaInfo? =
-    delay?.let { DelayedAutoTransitionMetaInfo(it) }
 
 /**
  * Installs the `onEntry`/`onExit` listener that fires [eventFactory] for the given [transitionId].
@@ -237,10 +166,10 @@ private fun delayedMetaInfoOrNull(delay: Duration?): DelayedAutoTransitionMetaIn
  * which throws if the machine was not created with coroutines support.
  */
 private fun TransitionStateApi.installAutoTrigger(
-    sourceState: IState,
     delay: Duration?,
     eventFactory: suspend () -> AutoEvent,
 ) {
+    val sourceState = asState()
     if (delay == null) {
         sourceState.addListener(object : IState.Listener {
             override suspend fun onEntry(transitionParams: TransitionParams<*>) {

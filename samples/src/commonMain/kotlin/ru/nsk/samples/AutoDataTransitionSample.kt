@@ -36,8 +36,9 @@ fun main() = runBlocking {
         }
         initialState("authenticating") {
             // Producer runs once at entry, exactly when the eventless transition fires.
-            autoDataTransition(targetState = session) {
-                LoginResult(userId = "u-42", sessionToken = "abc123")
+            autoDataTransition<LoginResult> {
+                targetState = session
+                dataProducer = { LoginResult(userId = "u-42", sessionToken = "abc123") }
             }
         }
     }

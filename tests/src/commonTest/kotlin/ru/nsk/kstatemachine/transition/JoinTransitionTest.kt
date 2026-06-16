@@ -447,7 +447,11 @@ class JoinTransitionTest : FreeSpec({
                                 transition<SwitchEventL1> { targetState = jp2 }
                             }
                         }
-                        joinDataTransition(jp1, jp2, targetState = afterJoin) { "joined" }
+                        joinDataTransition {
+                            joinStates = setOf(jp1, jp2)
+                            targetState = afterJoin
+                            dataProducer = { "joined" }
+                        }
                     }
                 }
 
