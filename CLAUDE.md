@@ -19,7 +19,7 @@ Five Gradle subprojects:
 
 - **`kstatemachine`** — core library. Zero dependencies: no Kotlin Coroutines, no Android SDK. Uses stdlib coroutine primitives only via `StdLibCoroutineAbstraction`. Entry point: `createStdLibStateMachine { }`.
 - **`kstatemachine-coroutines`** — adds full Kotlin Coroutines support. Entry point: `createStateMachine(scope) { }` (suspend). Provides `processEventByLaunch` / `processEventByAsync` and `StateMachineFlow` for `Flow`-based observation.
-- **`kstatemachine-serialization`** — adds `kotlinx.serialization` support for persisting `RecordedEvents` via `RecordedEventsSerializer`.
+- **`kstatemachine-serialization`** — adds `kotlinx.serialization` support for persisting `RecordedEvents` via `RecordedEventsSerializer` and `SavedStateConfig` via `SavedStateConfigSerializer`.
 - **`tests`** — all integration/unit tests. Depends on all three library modules. Uses Kotest + MockK. Only JVM target is run locally (other targets require platform toolchains).
 - **`samples`** — standalone usage examples, excluded from API validation.
 

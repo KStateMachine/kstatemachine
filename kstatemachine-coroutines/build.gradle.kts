@@ -46,5 +46,14 @@ kotlin {
             }
         }
 
+        val blockingMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jvmMain {
+            dependsOn(blockingMain)
+        }
+        nativeMain {
+            dependsOn(blockingMain)
+        }
     }
 }
