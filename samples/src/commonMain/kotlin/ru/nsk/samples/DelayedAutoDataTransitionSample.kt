@@ -7,8 +7,9 @@
 
 package ru.nsk.samples
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import ru.nsk.kstatemachine.state.DataState
 import ru.nsk.kstatemachine.state.autoDataTransition
 import ru.nsk.kstatemachine.state.dataState
@@ -17,6 +18,7 @@ import ru.nsk.kstatemachine.state.onEntry
 import ru.nsk.kstatemachine.statemachine.StateMachine
 import ru.nsk.kstatemachine.statemachine.createStateMachine
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Type-safe variant of [autoDataTransition] with `delay` — the producer is invoked once when the
@@ -26,15 +28,19 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 fun main() = runBlocking {
     lateinit var timedOut: DataState<String>
+    val timedOutEntered = CompletableDeferred<Unit>()
 
-    val machine = createStateMachine(this, name = "DelayedAutoDataTransitionSample") {
+    createStateMachine(this, name = "DelayedAutoDataTransitionSample") {
         logger = StateMachine.Logger { println(it()) }
 
         timedOut = dataState<String>("timedOut") {
-            onEntry { println("Timeout reason: $data") }
+            onEntry {
+                println("Timeout reason: $data")
+                timedOutEntered.complete(Unit)
+            }
         }
         initialState("waiting") {
-            autoDataTransition<String> {
+            autoDataTransition {
                 delay = 50.milliseconds
                 targetState = timedOut
                 dataProducer = { "no user response within 50ms" }
@@ -42,7 +48,7 @@ fun main() = runBlocking {
         }
     }
 
-    delay(100.milliseconds)
+    withTimeout(5.seconds) { timedOutEntered.await() }
     check(timedOut.isActive)
     check(timedOut.data == "no user response within 50ms")
     println("Done")
