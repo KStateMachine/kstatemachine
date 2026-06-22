@@ -30,7 +30,7 @@ Feature list changes over time — check the official repository of each library
 | Feature                                  | KStateMachine | FlowRedux  | Tinder StateMachine |  Spring State Machine  |
 |------------------------------------------|:-------------:|:----------:|:-------------------:|:----------------------:|
 | **Language**                             |    Kotlin     |   Kotlin   |       Kotlin        |          Java          |
-| **Active maintenance**                   |       ✅       |     ✅      |          ✅          |           ✅            |
+| **Active maintenance**                   |       ✅       |     ✅      |          ❌          |           ✅            |
 | **Kotlin Multiplatform**                 |       ✅       |     ✅      |          ❌          |           ❌            |
 | **Kotlin Coroutines**                    |       ✅       |     ✅      |          ❌          |           ❌            |
 | **Zero mandatory dependencies**          |       ✅       |     ❌      |          ❌          |           ❌            |
