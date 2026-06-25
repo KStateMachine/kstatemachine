@@ -180,7 +180,7 @@ machine2.restoreBySavedStateConfigBlocking(snapshot)
 The following conditions are verified at capture time (an `IllegalStateException` is thrown if any fail):
 
 * The machine must be running.
-* `isUndoEnabled` must be `false` — the undo stack cannot be snapshotted and would be empty after restore.
+* By default `isUndoEnabled` should be `false` — the undo stack cannot be snapshotted and would be empty after restore.
   Pass `disableUndoEnabledCheck = true` to opt in: the restored machine starts with an empty undo stack
   but can record and undo events processed after restoration.
 * All states must have non-blank names.
@@ -213,18 +213,17 @@ machine2.restoreBySavedStateConfig(restoredSnapshot)
 
 ### Configuring restoration
 
-`restoreBySavedStateConfig()` accepts one optional parameter:
+`restoreBySavedStateConfig()` accepts two optional parameters:
 
+* `muteListeners` (default: `true`) - to disable notifications during resoration.
 * `disableStructureHashCodeCheck` (default: `false`) — skip the machine structure integrity check.
   Useful when intentionally restoring on a structurally different machine, though results may differ.
 
 ### Limitations
 
-| Limitation                        | Details                                                                                                                                |
-|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| **History states not restored**   | `HistoryState` recorded history is not part of the snapshot; after restore it defaults to `defaultState` or the parent's initial state |
-| **All states must have names**    | Identification relies on state names; capture throws if any state has a null or blank name                                             |
-| **`isUndoEnabled` must be false** | The undo stack cannot be captured; capture throws if undo is enabled unless `disableUndoEnabledCheck = true` is passed                 |
-| **Listeners fire during restore** | Unlike `restoreByRecordedEvents`, there is no `muteListeners` option — state entry is genuine                                          |
+| Limitation                        | Details                                                                                                                                  |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| **History states not restored**   | `HistoryState` recorded history is not part of the snapshot; after restore it defaults to `defaultState` or the parent's initial state   |
+| **All states must have names**    | Identification relies on state names; `captureSavedStateConfig` throws if any state has a null or blank name                             |
 
 See [Saved state config sample](https://github.com/KStateMachine/kstatemachine/tree/master/samples/src/commonMain/kotlin/ru/nsk/samples/SavedStateConfigSample.kt)
