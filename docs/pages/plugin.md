@@ -1,7 +1,7 @@
 ---
 layout: page
 title: IntelliJ IDEA Plugin
-nav_order: 1
+nav_order: 5
 ---
 
 # KStateMachine Visual — IntelliJ Plugin
@@ -89,13 +89,14 @@ because they are not reachable without running the code.
 
 ## Comparison with runtime export
 
-|                           | IntelliJ Plugin           | Runtime export (`exportToPlantUml`) |
-|---------------------------|---------------------------|-------------------------------------|
-| Requires running the app  | No                        | Yes                                 |
-| Sees conditional branches | Yes                       | No                                  |
-| Real-time diagram updates | Yes                       | No                                  |
-| IDE navigation            | Yes                       | No                                  |
-| Output format             | PNG, SVG, PlantUML source | PlantUML / Mermaid text             |
+|                                                 | IntelliJ Plugin              | Runtime export (`exportToPlantUml/Mermaid`)        |
+|-------------------------------------------------|------------------------------|----------------------------------------------------|
+| Requires running the app                        | No                           | Yes                                                |
+| Sees conditional branches                       | Yes                          | Limited (with `unsafeCallConditionalLambdas` flag) |
+| Real-time diagram updates                       | Yes                          | No (Brawser is required)                           |
+| IDE navigation                                  | Yes                          | No                                                 |
+| Immune to the syntax changes, and code location | No                           | Yes                                                |
+| Output format                                   | SVG, PlantUML / Mermaid text | PlantUML / Mermaid text                            |
 
 Both approaches complement each other: use the plugin for development-time exploration
 and navigation; use runtime export when you need diagrams embedded in documentation or CI artefacts.
