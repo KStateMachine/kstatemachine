@@ -93,7 +93,7 @@ because they are not reachable without running the code.
 |-------------------------------------------------|------------------------------|----------------------------------------------------|
 | Requires running the app                        | No                           | Yes                                                |
 | Sees conditional branches                       | Yes                          | Limited (with `unsafeCallConditionalLambdas` flag) |
-| Real-time diagram updates                       | Yes                          | No (Brawser is required)                           |
+| Real-time diagram updates                       | Yes                          | No (Browser is required)                           |
 | IDE navigation                                  | Yes                          | No                                                 |
 | Immune to the syntax changes, and code location | No                           | Yes                                                |
 | Output format                                   | SVG, PlantUML / Mermaid text | PlantUML / Mermaid text                            |
