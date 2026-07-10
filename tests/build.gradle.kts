@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotest)
     id("org.jetbrains.kotlinx.kover")
 }
 
@@ -22,6 +23,7 @@ kotlin {
                 implementation(project(":kstatemachine-serialization"))
 
                 implementation(libs.kotest.assertions.core)
+                implementation(libs.kotest.framework.engine)
             }
         }
         jvmTest {

@@ -13,12 +13,13 @@ coroutines = "1.11.0"
 serialization = "1.11.0"
 
 mockk = "1.14.11"
-kotest = "6.1.11"
+kotest = "6.2.1"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-framework-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
@@ -29,3 +30,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
