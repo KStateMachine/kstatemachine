@@ -13,7 +13,7 @@ coroutines = "1.11.0"
 serialization = "1.11.0"
 
 mockk = "1.14.11"
-kotest = "6.2.1"
+kotest = "6.2.2"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
