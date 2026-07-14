@@ -1,7 +1,7 @@
 [versions]
 library = "0.38.1"
 
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 dokka = "2.2.0"
 binary-compatibility-validator = "0.18.1"
 kover = "0.9.8"
