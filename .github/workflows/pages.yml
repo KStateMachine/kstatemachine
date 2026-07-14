@@ -53,7 +53,7 @@ jobs:
         id: pages
         uses: actions/configure-pages@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
       - name: Run Dokka
         run: ./gradlew dokkaGenerate
         working-directory: '${{ github.workspace }}'
