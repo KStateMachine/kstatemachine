@@ -4,7 +4,7 @@ library = "0.38.1"
 kotlin = "2.4.10"
 dokka = "2.2.0"
 binary-compatibility-validator = "0.18.1"
-kover = "0.9.8"
+kover = "0.9.9"
 
 jdk = "17"
 kotlin-language = "2.0"
