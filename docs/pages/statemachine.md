@@ -108,3 +108,4 @@ machine.addListener(object : StateMachine.Listener {
 All methods have default empty implementations — override only the ones you need.
 `machine.removeListener(listener)` removes a previously added listener.
 
+_For `Flow` style listener notifications see [Flow notifications](https://kstatemachine.github.io/kstatemachine/pages/coroutines_artifact.html#flow-notifications)_

@@ -98,8 +98,10 @@ state {
 }
 ```
 
+_For `Flow` style listener notifications see [Flow notifications](https://kstatemachine.github.io/kstatemachine/pages/coroutines_artifact.html#flow-notifications)_
+
 {: .note }
-It is safe to add and remove listeners from any machine callbacks, library protects its internal loops from such
+It is safe to add and remove listeners from any machine callbacks, the library protects its internal loops from such
 modifications.
 
 ## Async scoped action (do activity)
