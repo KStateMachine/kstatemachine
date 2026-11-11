@@ -12,7 +12,7 @@ kotlin-language = "2.0"
 coroutines = "1.11.0"
 serialization = "1.12.0"
 
-mockk = "1.14.11"
+mockk = "1.14.12"
 kotest = "6.2.6"
 
 [libraries]
