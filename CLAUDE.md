@@ -23,7 +23,7 @@ Five Gradle subprojects:
 - **`tests`** — all integration/unit tests. Depends on all three library modules. Uses Kotest + MockK. Only JVM target is run locally (other targets require platform toolchains).
 - **`samples`** — standalone usage examples, excluded from API validation.
 
-All library versions live in `buildSrc/src/main/kotlin/Versions.kt`.
+All library versions live in the version catalog `gradle/libs.versions.toml`.
 
 ## Architecture
 

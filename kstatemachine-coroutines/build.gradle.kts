@@ -46,7 +46,7 @@ kotlin {
             }
         }
 
-        val blockingMain by creating {
+        val blockingMain = create("blockingMain") {
             dependsOn(commonMain.get())
         }
         jvmMain {

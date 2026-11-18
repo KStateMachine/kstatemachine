@@ -82,8 +82,8 @@ publishing {
         repositories {
             maven {
                 credentials {
-                    val mavenUsername: String? by project
-                    val mavenPassword: String? by project
+                    val mavenUsername = project.findProperty("mavenUsername") as String?
+                    val mavenPassword = project.findProperty("mavenPassword") as String?
                     username = localProperties.getProperty("mavenUsername", mavenUsername)
                     password = localProperties.getProperty("mavenPassword", mavenPassword)
                 }
@@ -110,8 +110,8 @@ if (executable != null) {
         }
     }
 } else { // try getting from environment (GitHub flow)
-    val signingKey: String? by project
-    val signingPassword: String? by project
+    val signingKey = project.findProperty("signingKey") as String?
+    val signingPassword = project.findProperty("signingPassword") as String?
 
     if (signingKey != null && signingPassword != null) {
         signing {

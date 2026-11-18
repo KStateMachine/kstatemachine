@@ -246,6 +246,8 @@ interface BuildingStateMachine : StateMachine {
  * Suspendable code will be called via Kotlin Standard library (without Kotlin Coroutines library support).
  */
 @OptIn(ExperimentalContracts::class)
+// StdLibCoroutineAbstraction.runBlocking executes its block synchronously, so the contract holds
+@Suppress("LEAKED_IN_PLACE_LAMBDA", "WRONG_INVOCATION_KIND")
 fun createStdLibStateMachine(
     name: String? = null,
     childMode: ChildMode = ChildMode.EXCLUSIVE,

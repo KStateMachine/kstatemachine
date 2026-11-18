@@ -12,7 +12,7 @@ public abstract interface class ru/nsk/kstatemachine/coroutines/Cancellable {
 
 public abstract interface class ru/nsk/kstatemachine/coroutines/CoroutineAbstraction {
 	public abstract fun runBlocking (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public abstract fun scheduleAfterDelay-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/coroutines/Cancellable;
+	public fun scheduleAfterDelay-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lru/nsk/kstatemachine/coroutines/Cancellable;
 	public abstract fun withContext (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -166,6 +166,7 @@ public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfo : r
 
 public abstract interface class ru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder : ru/nsk/kstatemachine/metainfo/ExportMetaInfo {
 	public abstract fun addEventAndArgumentResolutionHint (Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;)V
+	public static synthetic fun addEventAndArgumentResolutionHint$default (Lru/nsk/kstatemachine/metainfo/ExportMetaInfoBuilder;Ljava/lang/String;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;ILjava/lang/Object;)V
 	public abstract fun addLazyParallelStatesResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
 	public abstract fun addLazyStateResolutionHint (Ljava/lang/String;Lkotlin/Lazy;)V
 	public abstract fun addParallelStatesResolutionHint (Ljava/lang/String;Ljava/util/Set;)V
@@ -481,8 +482,8 @@ public final class ru/nsk/kstatemachine/state/IFinalState$DefaultImpls {
 }
 
 public abstract interface class ru/nsk/kstatemachine/state/IState : ru/nsk/kstatemachine/state/TransitionStateApi, ru/nsk/kstatemachine/visitors/VisitorAcceptor {
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
 	public abstract fun addListener (Lru/nsk/kstatemachine/state/IState$Listener;)Lru/nsk/kstatemachine/state/IState$Listener;
 	public abstract fun addState (Lru/nsk/kstatemachine/state/IState;)Lru/nsk/kstatemachine/state/IState;
 	public abstract fun getChildMode ()Lru/nsk/kstatemachine/state/ChildMode;
@@ -496,8 +497,8 @@ public abstract interface class ru/nsk/kstatemachine/state/IState : ru/nsk/kstat
 	public abstract fun getStates ()Ljava/util/Set;
 	public abstract fun isActive ()Z
 	public abstract fun isFinished ()Z
-	public abstract fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onCleanup (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun removeListener (Lru/nsk/kstatemachine/state/IState$Listener;)V
 	public abstract fun setInitialState (Lru/nsk/kstatemachine/state/IState;)V
 	public abstract fun setMetaInfo (Lru/nsk/kstatemachine/metainfo/MetaInfo;)V
@@ -512,9 +513,9 @@ public final class ru/nsk/kstatemachine/state/IState$DefaultImpls {
 }
 
 public abstract interface class ru/nsk/kstatemachine/state/IState$Listener {
-	public abstract fun onEntry (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onExit (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onFinished (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onEntry (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onExit (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onFinished (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class ru/nsk/kstatemachine/state/IState$Listener$DefaultImpls {
@@ -811,8 +812,8 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/QueuePendingEv
 }
 
 public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine : ru/nsk/kstatemachine/state/State {
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
 	public abstract fun addListener (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;)Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;
 	public abstract fun getCoroutineAbstraction ()Lru/nsk/kstatemachine/coroutines/CoroutineAbstraction;
 	public abstract fun getCreationArguments ()Lru/nsk/kstatemachine/statemachine/CreationArguments;
@@ -826,8 +827,10 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine :
 	public abstract fun isDestroyed ()Z
 	public abstract fun isRunning ()Z
 	public abstract fun processEvent (Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun processEvent$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Lru/nsk/kstatemachine/event/Event;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun removeListener (Lru/nsk/kstatemachine/statemachine/StateMachine$Listener;)V
 	public abstract fun start (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun start$default (Lru/nsk/kstatemachine/statemachine/StateMachine;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class ru/nsk/kstatemachine/statemachine/StateMachine$DefaultImpls {
@@ -844,14 +847,14 @@ public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$I
 }
 
 public abstract interface class ru/nsk/kstatemachine/statemachine/StateMachine$Listener {
-	public abstract fun onDestroyed (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStarted (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStateEntry (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStateExit (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStateFinished (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onTransitionComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onTransitionTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onDestroyed (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStarted (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStateEntry (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStateExit (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStateFinished (Lru/nsk/kstatemachine/state/IState;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onStopped (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onTransitionComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onTransitionTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class ru/nsk/kstatemachine/statemachine/StateMachine$Listener$DefaultImpls {
@@ -1112,8 +1115,8 @@ public final class ru/nsk/kstatemachine/transition/JoinUnitGuardedTransitionOnBu
 }
 
 public abstract interface class ru/nsk/kstatemachine/transition/Transition : ru/nsk/kstatemachine/visitors/VisitorAcceptor {
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
+	public fun accept (Lru/nsk/kstatemachine/visitors/CoVisitor;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun accept (Lru/nsk/kstatemachine/visitors/Visitor;)V
 	public abstract fun addListener (Lru/nsk/kstatemachine/transition/Transition$Listener;)Lru/nsk/kstatemachine/transition/Transition$Listener;
 	public abstract fun getArgument ()Ljava/lang/Object;
 	public abstract fun getEventMatcher ()Lru/nsk/kstatemachine/event/EventMatcher;
@@ -1133,8 +1136,8 @@ public final class ru/nsk/kstatemachine/transition/Transition$DefaultImpls {
 }
 
 public abstract interface class ru/nsk/kstatemachine/transition/Transition$Listener {
-	public abstract fun onComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onComplete (Ljava/util/Set;Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun onTriggered (Lru/nsk/kstatemachine/transition/TransitionParams;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class ru/nsk/kstatemachine/transition/Transition$Listener$DefaultImpls {
@@ -1158,7 +1161,7 @@ public abstract class ru/nsk/kstatemachine/transition/TransitionBuilder {
 }
 
 public abstract interface class ru/nsk/kstatemachine/transition/TransitionDirection {
-	public abstract fun getTargetState ()Lru/nsk/kstatemachine/state/IState;
+	public fun getTargetState ()Lru/nsk/kstatemachine/state/IState;
 	public abstract fun getTargetStates ()Ljava/util/Set;
 }
 
