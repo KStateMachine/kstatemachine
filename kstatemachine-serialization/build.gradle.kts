@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    ru.nsk.`maven-publish`
     id("org.jetbrains.dokka")
+    alias(libs.plugins.maven.publish) // must be applied after dokka
     alias(libs.plugins.kotlin.serialization)
     id("org.jetbrains.kotlinx.kover")
 }

@@ -1,15 +1,48 @@
 # Publishing to maven central
-The process of publishing to maven central is absolutely non-intuitive, not visualizable and confusing.
-I faced unexpectable behavior when my publications had a random count of components in the UI
-https://central.sonatype.com/publishing/deployments
-Publishing such a library version causes error on client's side, when he tries to resolve all required dependencies.
-There are absolutely no errors nor in publishing logs nor in web UI.
 
-## APIs
-[Official docs](https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#post-to-manualuploadrepositoryrepository-key)
+## Current process (fully automated)
+Publishing is done by [vanniktech gradle-maven-publish-plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/central/)
+via the [Central Portal Publisher API](https://central.sonatype.org/publish/publish-portal-api/).
 
-Calling the fallowing api's helped at least close all the repositories in open status (open status is not visible in UI)
-Beware that APIs response with a timeout error very often.
+1. Bump `library` version in `gradle/libs.versions.toml`.
+2. Push a `v*` tag. `Gradle Publish` GitHub workflow runs `./gradlew publishAndReleaseToMavenCentral`.
+3. The plugin collects publications of all modules into a **single bundle** (zip), uploads it with **one** request as
+   one deployment, waits until the Portal validates it and releases it automatically.
+   If validation fails the workflow fails, nothing is released.
+4. After successful publishing the workflow creates GitHub release `KStateMachine v*` with auto-generated notes
+   (they can be edited later in GitHub UI).
+
+No manual steps in https://central.sonatype.com/publishing/deployments are required.
+A deployment contains 66 components in the Portal UI (3 modules × 12 publications: root + 11 KMP targets,
+the Portal additionally counts type variants like `klib` separately).
+
+Workflow secrets: `MAVEN_USERNAME` / `MAVEN_PASSWORD` (Central Portal user token),
+`SIGNING_KEY` (armored private key) / `SIGNING_PASSWORD`.
+
+### Publishing from a local machine
+Signing uses gpg configured in `local.properties` (see comment in root `build.gradle.kts`).
+Portal user token is passed as gradle properties, for example in `~/.gradle/gradle.properties`:
+```properties
+mavenCentralUsername=...
+mavenCentralPassword=...
+```
+* `./gradlew publishToMavenCentral` uploads a deployment without releasing it (release or drop it in the UI).
+* `./gradlew publishAndReleaseToMavenCentral` uploads and releases.
+
+## History: why the old process was manual
+Previously the library was published by plain `maven-publish` to the
+[OSSRH Staging API compatibility service](https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/)
+followed by `POST /manual/upload/defaultRepository/io.github.nsk90`.
+Publications had a random count of components in the UI, and publishing such a version caused dependency resolution
+errors on client side, without any errors in logs or UI.
+
+The likely cause: that service differentiates staging repositories **by client IP**, and the upload call must be done
+from the same IP that uploaded the files. Gradle uploads every file with a separate request, so when the GitHub runner's
+outgoing IP changed, files were split into several repositories. Only one of them was promoted, others stayed in
+`open` state (not visible in UI) and had to be found and promoted manually.
+
+### Staging API commands (cleanup of leftover open repositories)
+Beware that APIs respond with a timeout error very often.
 
 list open repos (open means uploaded and not visible in ui)
 ```bash
@@ -25,11 +58,3 @@ drops the repository
 ```bash
 curl -X DELETE -u "{MAVEN_USER}:{MAVEN_PASSWORD}" "https://ossrh-staging-api.central.sonatype.com/manual/drop/repository/{MAVEN_USER}/{IP}/io.github.nsk90--default-repository"
 ```
-
-So when the library is published from GitHub action
-* I have to go to https://central.sonatype.com/publishing/deployments
-* publish (some count of artifacts) the whole amount seems to be 66 currently.
-* Then check if there are open repos
-* manually trigger processing for it
-* then go to UI again and publish the rest of artefacts.
-* (Checking and triggering open repos is also possible before publishing visible artifacts)

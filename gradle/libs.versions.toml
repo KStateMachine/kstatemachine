@@ -5,6 +5,7 @@ kotlin = "2.4.21"
 dokka = "2.3.0"
 binary-compatibility-validator = "0.18.2"
 kover = "0.9.11"
+maven-publish = "0.37.0"
 
 jdk = "17"
 kotlin-language = "2.2"
@@ -31,3 +32,4 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
